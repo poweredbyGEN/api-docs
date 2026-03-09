@@ -1,4 +1,4 @@
-/* GEN purple accent only */
+/* GEN brand accent */
 :root {
 	--sl-color-accent-low: #e8e6ff;
 	--sl-color-accent: #524caf;
@@ -9,4 +9,86 @@
 	--sl-color-accent-low: #352f7e;
 	--sl-color-accent: #524caf;
 	--sl-color-accent-high: #a29cff;
+}
+
+/* ── Hero overrides for splash page ── */
+
+[data-has-hero] .hero > img {
+	display: none;
+}
+
+/* Gradient hero title */
+[data-has-hero] .hero h1 {
+	background: linear-gradient(135deg, #ffffff 30%, #a29cff 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+}
+
+:root:not([data-theme='dark']) [data-has-hero] .hero h1 {
+	background: linear-gradient(135deg, #17181c 30%, #524caf 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* Tagline styling */
+[data-has-hero] .hero .tagline {
+	font-size: 1.15rem;
+	max-width: 42ch;
+}
+
+/* Primary CTA button — gradient border with fill */
+[data-has-hero] .hero .action.primary a {
+	background: linear-gradient(135deg, #524caf, #a29cff);
+	border: none;
+	color: #fff !important;
+	font-weight: 600;
+	padding: 0.75rem 1.75rem;
+	border-radius: 999px;
+	transition: opacity 0.2s, transform 0.2s;
+}
+[data-has-hero] .hero .action.primary a:hover {
+	opacity: 0.9;
+	transform: translateY(-1px);
+}
+
+/* Minimal CTA */
+[data-has-hero] .hero .action.minimal a {
+	border-radius: 999px;
+	padding: 0.75rem 1.75rem;
+	font-weight: 600;
+}
+
+/* ── Card grid on splash ── */
+
+.sl-markdown-content .card {
+	border-radius: 12px;
+	transition: border-color 0.2s, transform 0.2s;
+}
+.sl-markdown-content .card:hover {
+	transform: translateY(-2px);
+}
+
+:root[data-theme='dark'] .sl-markdown-content .card {
+	border-color: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme='dark'] .sl-markdown-content .card:hover {
+	border-color: rgba(162, 156, 255, 0.3);
+}
+
+/* ── Subtle top glow on dark hero ── */
+
+:root[data-theme='dark'] [data-has-hero] .page {
+	background:
+		radial-gradient(ellipse 60% 40% at 50% -5%, rgba(82, 76, 175, 0.15) 0%, transparent 70%),
+		var(--sl-color-bg);
+}
+
+/* ── Code block accent ── */
+
+:root[data-theme='dark'] .expressive-code .frame {
+	border-color: rgba(255, 255, 255, 0.06);
 }

@@ -3,7 +3,7 @@ title: Auto Content Engine API
 description: Programmatically create AI-powered videos, manage content sheets, and automate social media publishing with GEN.
 template: splash
 hero:
-  tagline: Build automations, integrations, and workflows on top of GEN's content creation engine.
+  tagline: Programmatic access to GEN's AI video creation pipeline. Create sheets, generate content, and automate publishing — all from code.
   actions:
     - text: Get Started
       link: /guides/introduction/
@@ -14,19 +14,30 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-<CardGrid stagger>
-	<Card title="Create an API key" icon="setting">
-		Generate a Personal Access Token in Settings and start making requests in seconds.
+## What you can build
+
+<CardGrid>
+	<Card title="Content Automation">
+		Generate scripts, voiceovers, images, and videos for dozens of rows at once — triggered by a cron job, webhook, or API call.
 	</Card>
-	<Card title="Manage sheets" icon="document">
-		Create, read, and update content sheets — the spreadsheet-like interface where each row is a video and each column is a content layer.
+	<Card title="Workflow Integrations">
+		Connect GEN to n8n, Make, Zapier, or any HTTP client. Use webhooks to react to generation events in real time.
 	</Card>
-	<Card title="Generate content" icon="rocket">
-		Trigger AI generations (scripts, images, voices, videos) on any cell or layer using 20+ AI models.
+	<Card title="Custom Pipelines">
+		Build end-to-end content pipelines: trending topic → script → voice → video → publish. All via REST.
 	</Card>
-	<Card title="Automate everything" icon="puzzle">
-		Connect to n8n, Make, Zapier, or your own code. Configure webhooks for real-time event notifications.
+	<Card title="MCP for AI Agents">
+		Give Claude, GPT, or any AI agent direct access to your content engine via the MCP server.
 	</Card>
+</CardGrid>
+
+## Quick links
+
+<CardGrid>
+	<LinkCard title="Authentication" description="Create your API key and make your first request." href="/guides/authentication/" />
+	<LinkCard title="Quick Start" description="Five steps from zero to your first API call." href="/guides/quickstart/" />
+	<LinkCard title="Sheets API" description="Create and manage content sheets programmatically." href="/reference/sheets/" />
+	<LinkCard title="Generations API" description="Trigger AI content generation on cells and layers." href="/reference/generations/" />
 </CardGrid>

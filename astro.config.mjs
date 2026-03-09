@@ -8,6 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'GEN API',
+			favicon: '/favicon.png',
 			logo: {
 				src: './src/assets/logo.svg',
 				replacesTitle: true,
