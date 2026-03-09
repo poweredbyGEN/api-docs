@@ -23,6 +23,7 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Getting Started',
+					collapsed: false,
 					items: [
 						{ label: 'Introduction', slug: 'guides/introduction' },
 						{ label: 'Authentication', slug: 'guides/authentication' },
@@ -31,6 +32,7 @@ export default defineConfig({
 				},
 				{
 					label: 'API Reference',
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'reference/overview' },
 						{ label: 'Discovery', slug: 'reference/discovery' },
@@ -48,6 +50,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Guides',
+					collapsed: false,
 					items: [
 						{ label: 'Using with n8n', slug: 'guides/n8n' },
 						{ label: 'Using with Claude Code', slug: 'guides/claude-code' },
