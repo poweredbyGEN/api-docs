@@ -13,6 +13,9 @@ export default defineConfig({
 				src: './src/assets/logo.svg',
 				replacesTitle: true,
 			},
+			components: {
+				Icon: './src/components/overrides/Icon.astro',
+			},
 			head: [
 				{
 					tag: 'script',
