@@ -18,27 +18,10 @@
 	display: none;
 }
 
-/* Hero title — light mode (dark text → purple) */
+/* Hero title */
 [data-has-hero] .hero h1 {
-	background: linear-gradient(135deg, #17181c 30%, #524caf 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
 	font-weight: 800;
 	letter-spacing: -0.03em;
-}
-
-/* Hero title — dark mode (white → light purple) */
-:root[data-theme='dark'] [data-has-hero] .hero h1 {
-	background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #a29cff 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-
-/* Section headings — ensure visible in both modes */
-.sl-markdown-content h2 {
-	color: var(--sl-color-white);
 }
 
 /* Tagline styling */
