@@ -1,10 +1,11 @@
-/* GEN brand accent */
+/* GEN brand accent — light mode */
 :root {
 	--sl-color-accent-low: #e8e6ff;
 	--sl-color-accent: #524caf;
 	--sl-color-accent-high: #2e2971;
 }
 
+/* GEN brand accent — dark mode */
 :root[data-theme='dark'] {
 	--sl-color-accent-low: #352f7e;
 	--sl-color-accent: #524caf;
@@ -17,9 +18,9 @@
 	display: none;
 }
 
-/* Gradient hero title */
+/* Hero title — light mode (dark text → purple) */
 [data-has-hero] .hero h1 {
-	background: linear-gradient(135deg, #ffffff 30%, #a29cff 100%);
+	background: linear-gradient(135deg, #17181c 30%, #524caf 100%);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -27,11 +28,17 @@
 	letter-spacing: -0.03em;
 }
 
-:root:not([data-theme='dark']) [data-has-hero] .hero h1 {
-	background: linear-gradient(135deg, #17181c 30%, #524caf 100%);
+/* Hero title — dark mode (white → purple) */
+:root[data-theme='dark'] [data-has-hero] .hero h1 {
+	background: linear-gradient(135deg, #ffffff 30%, #a29cff 100%);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
+}
+
+/* Section headings — ensure visible in both modes */
+.sl-markdown-content h2 {
+	color: var(--sl-color-white);
 }
 
 /* Tagline styling */
@@ -40,7 +47,7 @@
 	max-width: 42ch;
 }
 
-/* Primary CTA button — gradient border with fill */
+/* Primary CTA button — gradient pill */
 [data-has-hero] .hero .action.primary a {
 	background: linear-gradient(135deg, #524caf, #a29cff);
 	border: none;
