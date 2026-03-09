@@ -5,14 +5,14 @@ description: Make your first API call in under 5 minutes.
 
 import { Steps, Aside, LinkCard } from '@astrojs/starlight/components';
 
-This guide walks you through your first API calls — from verifying your key to updating content in a sheet.
+This guide walks you through your first API calls — from verifying your key to updating content in a content engine.
 
 ## Prerequisites
 
 - A GEN account at [gen.pro](https://gen.pro)
 - An API key ([create one here](/guides/authentication/))
 - Active GEN credits on your account
-- At least one agent with a content sheet
+- At least one agent with a content engine
 
 Set your API key as an environment variable to follow along:
 
@@ -93,9 +93,9 @@ export GEN_API_KEY="gen_pat_your_key_here"
    export AGENT_ID="agent_xyz789"
    ```
 
-4. **Get a content sheet**
+4. **Get a content engine**
 
-   Fetch one of the agent's sheets to see its structure — rows, columns, and cells:
+   Fetch one of the agent's content engines to see its structure — rows, columns, and cells:
 
    ```bash
    curl -s "https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id=$AGENT_ID" \
@@ -128,7 +128,7 @@ export GEN_API_KEY="gen_pat_your_key_here"
    ```
 
    <Aside>
-     Replace `{sheet_id}` with an actual sheet ID from your agent. You can find sheet IDs in the GEN web app URL or by listing the agent's sheets.
+     Replace `{sheet_id}` with an actual content engine ID from your agent. You can find content engine IDs in the GEN web app URL or by listing the agent's content engines.
    </Aside>
 
 5. **Update a cell**
@@ -154,7 +154,7 @@ export GEN_API_KEY="gen_pat_your_key_here"
    }
    ```
 
-   The cell is updated immediately. If you open the sheet in the GEN web app, you will see the new value.
+   The cell is updated immediately. If you open the content engine in the GEN web app, you will see the new value.
 
 </Steps>
 
@@ -162,7 +162,7 @@ export GEN_API_KEY="gen_pat_your_key_here"
 
 You have the basics down. Here is where to go from here:
 
-<LinkCard title="API Reference" href="/reference/overview/" description="Full endpoint documentation for sheets, rows, columns, cells, layers, and generations." />
+<LinkCard title="API Reference" href="/reference/overview/" description="Full endpoint documentation for content engines, rows, columns, cells, layers, and generations." />
 
 <LinkCard title="Using with n8n" href="/guides/n8n/" description="Connect GEN to n8n workflows for event-driven content automation." />
 

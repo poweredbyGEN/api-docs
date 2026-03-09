@@ -1,23 +1,29 @@
 ---
-title: Sheets
-description: Create, read, and clone Auto Content Engine sheets.
+title: Auto Content Engine
+description: Create, read, and clone Auto Content Engines — the top-level workspace for video content.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Sheets are the top-level container in the Auto Content Engine. Each sheet is a spreadsheet-like structure with columns (content types), rows (videos), and cells (content values).
+An Auto Content Engine is the top-level workspace that contains everything needed to produce videos:
+
+- **Sheet** — the data grid (columns, rows, cells) where you write scripts, assign voices, etc.
+- **Video composition** — layers (text, sound, clip overlays) that make up each video
+- **Automations** — pipelines with triggers and actions
+- **Global variables** — template values for dynamic substitution
+- **Final video** — the rendered output
 
 <Aside>
-  All sheet endpoints require the `agent_id` query parameter.
+  All endpoints require the `agent_id` query parameter.
 </Aside>
 
-## Sheet schema
+## Response schema
 
 ```json
 {
   "id": 100,
-  "slug": "my-first-sheet",
-  "title": "My First Sheet",
+  "slug": "my-first-engine",
+  "title": "March Campaign",
   "project_type": "autocontentengine",
   "is_default": false,
   "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -31,13 +37,13 @@ Sheets are the top-level container in the Auto Content Engine. Each sheet is a s
 }
 ```
 
-The `spreadsheet_columns` and `spreadsheet_rows` arrays are populated when fetching a single sheet. The `global_variables_sheet` is `null` unless variables have been imported.
+The `spreadsheet_columns` and `spreadsheet_rows` arrays are populated when fetching a single engine. The `global_variables_sheet` is `null` unless variables have been imported.
 
 ---
 
-## Create sheet
+## Create
 
-Creates a new sheet for the specified agent.
+Creates a new Auto Content Engine for the specified agent.
 
 ```
 POST /v1/autocontentengine?agent_id={agent_id}
@@ -47,12 +53,12 @@ POST /v1/autocontentengine?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `spreadsheet.title` | string | Yes | The sheet title. |
-| `spreadsheet.is_default` | boolean | No | Set as the agent's default sheet. Defaults to `false`. |
+| `spreadsheet.title` | string | Yes | Name for the engine. |
+| `spreadsheet.is_default` | boolean | No | Set as the agent's default engine. Defaults to `false`. |
 
 ### Response (201)
 
-Returns the created sheet object.
+Returns the created engine object.
 
 ### Example
 
@@ -90,9 +96,9 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
 
 ---
 
-## Get sheet
+## Get
 
-Returns a single sheet with all its columns, rows, cells, and layers.
+Returns a single Auto Content Engine with all its columns, rows, cells, and layers.
 
 ```
 GET /v1/autocontentengine/{id}?agent_id={agent_id}
@@ -102,18 +108,18 @@ GET /v1/autocontentengine/{id}?agent_id={agent_id}
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | integer | The sheet ID. |
+| `id` | integer | The engine ID. |
 
 ### Query parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `agent_id` | integer | Yes | The agent that owns this sheet. |
+| `agent_id` | integer | Yes | The agent that owns this engine. |
 | `with_execution_cost` | boolean | No | Include credit cost breakdowns on cells and layers. |
 
 ### Response
 
-Returns the full sheet object including nested `spreadsheet_columns`, `spreadsheet_rows` (each containing `spreadsheet_cells`), and `global_variables_sheet`.
+Returns the full engine object including nested `spreadsheet_columns`, `spreadsheet_rows` (each containing `spreadsheet_cells`), and `global_variables_sheet`.
 
 ### Example
 
@@ -124,9 +130,9 @@ curl "https://api.gen.pro/v1/autocontentengine/101?agent_id=42&with_execution_co
 
 ---
 
-## Clone sheet
+## Clone
 
-Creates a copy of an existing sheet. Optionally clone into a different agent.
+Creates a copy of an existing Auto Content Engine. Optionally clone into a different agent.
 
 ```
 POST /v1/autocontentengine/{id}/clone?agent_id={agent_id}
@@ -136,7 +142,7 @@ POST /v1/autocontentengine/{id}/clone?agent_id={agent_id}
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | integer | The sheet ID to clone. |
+| `id` | integer | The engine ID to clone. |
 
 ### Request body
 
@@ -146,7 +152,7 @@ POST /v1/autocontentengine/{id}/clone?agent_id={agent_id}
 
 ### Response (201)
 
-Returns the newly created sheet object.
+Returns the newly created engine object.
 
 ### Example
 
@@ -166,5 +172,5 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/clone?agent_id=42" \
 
 | Status | Error code | Description |
 |--------|------------|-------------|
-| `404` | `not_found` | Sheet not found or agent does not have access. |
+| `404` | `not_found` | Engine not found or agent does not have access. |
 | `422` | `validation_error` | Target agent not accessible or insufficient credits. |

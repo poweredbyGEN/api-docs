@@ -22,7 +22,7 @@ In the GEN web app, this is the "Vidsheets" interface. The API gives you full pr
 
 ## What can you build?
 
-The Auto Content Engine API lets you read, create, and update content sheets — and trigger AI generations — without touching the GEN UI.
+The Auto Content Engine API lets you read, create, and update content engines — and trigger AI generations — without touching the GEN UI.
 
 <CardGrid>
   <Card title="Workflow automation">
@@ -32,7 +32,7 @@ The Auto Content Engine API lets you read, create, and update content sheets —
     Use the official MCP server with Claude Code or any MCP-compatible AI assistant to manage content through natural language.
   </Card>
   <Card title="Batch operations">
-    Script bulk updates — populate 50 rows with scripts, swap voiceover styles across an entire sheet, or update variables in one call.
+    Script bulk updates — populate 50 rows with scripts, swap voiceover styles across an entire content engine, or update variables in one call.
   </Card>
   <Card title="Custom dashboards">
     Build internal tools that pull content status, track generation progress, and give your team visibility into the pipeline.
@@ -46,8 +46,8 @@ Before diving in, here are the core objects you will work with:
 | Concept | Description |
 |---------|-------------|
 | **Agent** | An AI persona/character with its own identity, voice, and content style. Every API request is scoped to an agent via `agent_id`. |
-| **Sheet** | A content spreadsheet. Each agent can have multiple sheets. |
-| **Row** | A single video within a sheet. Rows contain cells for each column. |
+| **Content Engine** | A content spreadsheet. Each agent can have multiple content engines. |
+| **Row** | A single video within a content engine. Rows contain cells for each column. |
 | **Column** | A content type definition (e.g., "Script", "Voiceover", "B-Roll"). Columns define what kind of content each cell holds. |
 | **Cell** | The intersection of a row and column. Holds the actual content value for that video's content layer. |
 | **Layer** | A composable piece within a cell. A single cell can have multiple layers that get merged into the final output. |

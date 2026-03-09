@@ -34,7 +34,7 @@ When you add an HTTP Request node, select this credential under **Authentication
 
 ## Example workflow: Auto-generate video scripts
 
-This workflow checks a sheet for empty script cells every hour and triggers AI generation to fill them.
+This workflow checks a content engine for empty script cells every hour and triggers AI generation to fill them.
 
 <Steps>
 
@@ -42,9 +42,9 @@ This workflow checks a sheet for empty script cells every hour and triggers AI g
 
    Set the trigger to run every hour (or whatever interval suits your pipeline).
 
-2. **HTTP Request — Get sheet**
+2. **HTTP Request — Get content engine**
 
-   Fetch the sheet to find rows that need scripts.
+   Fetch the content engine to find rows that need scripts.
 
    ```
    GET https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id={agent_id}

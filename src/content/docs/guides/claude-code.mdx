@@ -5,7 +5,7 @@ description: Use the Auto Content Engine MCP server with Claude Code for AI-assi
 
 import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's CLI for Claude. It supports **MCP (Model Context Protocol)** servers, which let Claude interact with external APIs through natural language. The Auto Content Engine MCP server gives Claude direct access to your GEN sheets, rows, cells, and generations.
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's CLI for Claude. It supports **MCP (Model Context Protocol)** servers, which let Claude interact with external APIs through natural language. The Auto Content Engine MCP server gives Claude direct access to your GEN content engines, rows, cells, and generations.
 
 <Aside type="caution">
   The MCP server package is coming soon. In the meantime, you can use Claude Code's built-in HTTP tools (curl, fetch) to call the API directly.
@@ -47,18 +47,18 @@ Once configured, you can manage your content engine through natural language:
 | Ask Claude... | What happens |
 |--------------|--------------|
 | "Show me my agents" | Lists all your GEN agents |
-| "Create a new sheet for my fitness agent" | Creates a sheet under the specified agent |
+| "Create a new content engine for my fitness agent" | Creates a content engine under the specified agent |
 | "Add a row with a script about morning routines" | Creates a row and populates the script cell |
 | "Generate a voiceover for row 3" | Triggers AI voiceover generation on the specified row |
 | "What's the status of my latest generation?" | Checks the generation status |
-| "List all rows in my sheet" | Fetches and displays sheet contents |
+| "List all rows in my content engine" | Fetches and displays content engine contents |
 
 ## Example conversation
 
 ```
-You: Show me the sheets for my agent
+You: Show me the content engines for my agent
 
-Claude: I found 2 sheets for agent "FitnessCoach":
+Claude: I found 2 content engines for agent "FitnessCoach":
 
   1. "March Content" (12 rows, 8 columns)
   2. "Viral Hooks" (5 rows, 4 columns)
