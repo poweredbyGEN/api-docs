@@ -10,7 +10,7 @@ export default defineConfig({
 			title: 'GEN API',
 			favicon: '/favicon.png',
 			logo: {
-				src: './src/assets/logo.png',
+				src: './src/assets/logo.svg',
 				replacesTitle: true,
 			},
 			head: [
