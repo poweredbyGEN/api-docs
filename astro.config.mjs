@@ -10,9 +10,15 @@ export default defineConfig({
 			title: 'GEN API',
 			favicon: '/favicon.png',
 			logo: {
-				src: './src/assets/logo.svg',
+				src: './src/assets/logo.png',
 				replacesTitle: true,
 			},
+			head: [
+				{
+					tag: 'script',
+					content: `if (!localStorage.getItem('starlight-theme')) { localStorage.setItem('starlight-theme', 'dark'); }`,
+				},
+			],
 			customCss: ['./src/styles/custom.css'],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/poweredbyGEN' },
