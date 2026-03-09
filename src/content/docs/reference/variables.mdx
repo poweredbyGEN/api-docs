@@ -1,0 +1,119 @@
+---
+title: Variables
+description: Global variables for template substitution across sheets.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Global variables are reusable values — brand name, tone, CTA, target audience — that can be referenced in generation prompts and cell content. Variables are managed per-sheet via an XLSX upload.
+
+<Aside>
+  All variable endpoints require the `agent_id` query parameter.
+</Aside>
+
+---
+
+## Get variables
+
+Returns the global variables sheet for a given sheet.
+
+```
+GET /v1/autocontentengine/{id}/global_variables?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Response
+
+Returns the variables sheet object, or `null` if no variables have been imported.
+
+```json
+{
+  "id": 600,
+  "variables": [
+    { "key": "brand_name", "value": "Acme Corp" },
+    { "key": "tone", "value": "casual and friendly" },
+    { "key": "cta", "value": "Link in bio!" }
+  ]
+}
+```
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/global_variables?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Import variables
+
+Uploads an XLSX file to set (or replace) the global variables for a sheet. Use `multipart/form-data` with the file in the `file` field.
+
+```
+POST /v1/autocontentengine/{id}/import_global_variables?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Request body (multipart/form-data)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `file` | file | Yes | An XLSX file matching the variables template format. |
+
+<Aside type="caution">
+  Importing variables replaces the entire existing variables sheet. There is no merge — any variables not in the new file are removed.
+</Aside>
+
+### Response
+
+Returns the updated variables sheet.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/import_global_variables?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -F "file=@variables.xlsx"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `422` | `validation_error` | Invalid file format or missing required columns. |
+
+---
+
+## Download variables template
+
+Returns a blank XLSX template with the expected column headers. Use this as a starting point for your variables file.
+
+```
+GET /v1/autocontentengine/global_variables_template
+```
+
+<Aside type="tip">
+  This endpoint does not require `agent_id`. It returns the same template regardless of sheet or agent.
+</Aside>
+
+### Response
+
+Returns the XLSX file as a binary download (`Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`).
+
+### Example
+
+```bash
+curl -o template.xlsx "https://api.gen.pro/v1/autocontentengine/global_variables_template" \
+  -H "X-API-Key: your-api-key"
+```

@@ -1,0 +1,183 @@
+---
+title: Error Handling
+description: Common errors and how to handle them.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Error response format
+
+All errors return a consistent JSON structure:
+
+```json
+{
+  "error": "Human-readable description of what went wrong",
+  "error_code": "machine_readable_code"
+}
+```
+
+The HTTP status code indicates the error category. The `error_code` field gives you a stable string to match against in your code.
+
+## Common errors
+
+| Status | `error_code` | Meaning | Fix |
+|--------|-------------|---------|-----|
+| 401 | `unauthorized` | Missing or invalid API key | Check the `X-API-Key` header is present and the key is valid |
+| 403 | `permission_denied` | No access to this resource | Verify your account has access to the workspace or agent |
+| 404 | `not_found` | Resource does not exist | Verify the ID in your request path |
+| 404 | `spreadsheet_not_found` | Sheet does not exist or you lack access | Check the `sheet_id` and `agent_id` parameters |
+| 422 | `agent_not_found` | Invalid `agent_id` parameter | List your agents via `GET /v1/me` and use a valid ID |
+| 422 | `usable_gen_credit_required` | No active GEN credits on your account | Purchase GEN credits at [gen.pro](https://gen.pro) |
+| 422 | `insufficient_credits_for_job` | Not enough credits to run this generation | Top up your credit balance |
+| 422 | `job_cannot_be_stopped` | Generation already completed or failed | Check the generation status before attempting to stop |
+
+## Retry strategy
+
+Not all errors should be retried.
+
+**Do not retry:**
+- `401 Unauthorized` — your key is wrong; fix it.
+- `403 Forbidden` — you lack permission; retrying won't help.
+- `404 Not Found` — the resource doesn't exist.
+- `422 Unprocessable Entity` — the request is invalid; fix the input.
+
+**Retry with backoff:**
+- `429 Too Many Requests` — you hit a rate limit. Wait and retry with exponential backoff.
+- `500` / `502` / `503` — server-side issue. Retry with exponential backoff, up to a reasonable limit.
+
+<Aside>
+  Rate limiting (429) is not yet enforced but will be added in a future release. Build your retry logic now so you are ready.
+</Aside>
+
+## Example error handling
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```typescript
+    const BASE_URL = "https://api.gen.pro/v1";
+
+    async function genRequest(path: string, options: RequestInit = {}) {
+      const url = `${BASE_URL}${path}`;
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          "X-API-Key": process.env.GEN_API_KEY!,
+          "Content-Type": "application/json",
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        const errorCode = body.error_code || "unknown";
+        const message = body.error || response.statusText;
+
+        // Don't retry client errors
+        if (response.status >= 400 && response.status < 500) {
+          throw new Error(`[${errorCode}] ${message}`);
+        }
+
+        // Server errors — caller can retry
+        throw new RetryableError(`[${errorCode}] ${message}`, response.status);
+      }
+
+      return response.json();
+    }
+
+    class RetryableError extends Error {
+      constructor(message: string, public status: number) {
+        super(message);
+        this.name = "RetryableError";
+      }
+    }
+
+    // Usage with retry
+    async function withRetry<T>(
+      fn: () => Promise<T>,
+      maxRetries = 3
+    ): Promise<T> {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await fn();
+        } catch (err) {
+          if (!(err instanceof RetryableError) || attempt === maxRetries) {
+            throw err;
+          }
+          const delay = Math.min(1000 * 2 ** attempt, 30000);
+          await new Promise((r) => setTimeout(r, delay));
+        }
+      }
+      throw new Error("Unreachable");
+    }
+
+    // Example
+    const sheet = await withRetry(() =>
+      genRequest(`/autocontentengine/sheet_123?agent_id=agent_456`)
+    );
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    import os
+    import time
+    import requests
+
+    BASE_URL = "https://api.gen.pro/v1"
+    API_KEY = os.environ["GEN_API_KEY"]
+
+
+    class GenAPIError(Exception):
+        def __init__(self, status: int, error_code: str, message: str):
+            self.status = status
+            self.error_code = error_code
+            super().__init__(f"[{error_code}] {message}")
+
+        @property
+        def retryable(self) -> bool:
+            return self.status >= 500 or self.status == 429
+
+
+    def gen_request(method: str, path: str, **kwargs) -> dict:
+        response = requests.request(
+            method,
+            f"{BASE_URL}{path}",
+            headers={
+                "X-API-Key": API_KEY,
+                "Content-Type": "application/json",
+            },
+            **kwargs,
+        )
+
+        if not response.ok:
+            body = response.json() if response.content else {}
+            raise GenAPIError(
+                status=response.status_code,
+                error_code=body.get("error_code", "unknown"),
+                message=body.get("error", response.reason),
+            )
+
+        return response.json()
+
+
+    def with_retry(fn, max_retries=3):
+        for attempt in range(max_retries + 1):
+            try:
+                return fn()
+            except GenAPIError as e:
+                if not e.retryable or attempt == max_retries:
+                    raise
+                delay = min(2**attempt, 30)
+                time.sleep(delay)
+
+
+    # Example
+    sheet = with_retry(
+        lambda: gen_request(
+            "GET",
+            "/autocontentengine/sheet_123",
+            params={"agent_id": "agent_456"},
+        )
+    )
+    ```
+  </TabItem>
+</Tabs>

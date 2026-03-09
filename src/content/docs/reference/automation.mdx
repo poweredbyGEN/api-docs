@@ -1,0 +1,208 @@
+---
+title: Automation
+description: Configure webhooks and callbacks for agent-level automation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Automation config lets you set up webhooks and callbacks at the agent level. When generations complete, rows change, or other events occur, GEN sends a POST request to your configured URL.
+
+## Config schema
+
+```json
+{
+  "webhook_url": "https://example.com/webhooks/gen",
+  "callback_url": "https://example.com/callbacks/gen",
+  "polling_enabled": true
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `webhook_url` | URL that receives event notifications (generation complete, status changes, etc.). |
+| `callback_url` | URL called when specific automation actions complete. |
+| `polling_enabled` | Whether the agent can be polled for status updates. |
+
+---
+
+## Get automation config
+
+Returns the current automation configuration for an agent.
+
+```
+GET /v1/agents/{agent_id}/automation_config
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+### Response
+
+```json
+{
+  "webhook_url": "https://example.com/webhooks/gen",
+  "callback_url": null,
+  "polling_enabled": false
+}
+```
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/agents/42/automation_config" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update automation config
+
+Updates the automation configuration for an agent. Only the provided fields are changed.
+
+```
+PATCH /v1/agents/{agent_id}/automation_config
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `automation_config.webhook_url` | string | No | Webhook URL. Set to `null` to disable. |
+| `automation_config.callback_url` | string | No | Callback URL. Set to `null` to disable. |
+| `automation_config.polling_enabled` | boolean | No | Enable or disable polling. |
+
+### Response
+
+Returns the updated config.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/agents/42/automation_config" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"automation_config": {"webhook_url": "https://example.com/webhooks/gen", "polling_enabled": true}}'
+```
+
+```typescript
+await fetch("https://api.gen.pro/v1/agents/42/automation_config", {
+  method: "PATCH",
+  headers: {
+    "X-API-Key": "your-api-key",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    automation_config: {
+      webhook_url: "https://example.com/webhooks/gen",
+      polling_enabled: true,
+    },
+  }),
+});
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Agent not found or not accessible. |
+| `422` | `validation_error` | Invalid URL format. |
+
+---
+
+## Test webhook
+
+Sends a test payload to the configured webhook URL. Use this to verify your endpoint receives and processes events correctly.
+
+```
+POST /v1/agents/{agent_id}/automation_config/test_webhook
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+If the webhook endpoint is unreachable or returns an error:
+
+```json
+{
+  "success": false,
+  "error": "Connection refused"
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/agents/42/automation_config/test_webhook" \
+  -H "X-API-Key: your-api-key"
+```
+
+<Aside type="tip">
+  The test payload matches the same format as real event payloads, so you can use it to verify your webhook handler end-to-end.
+</Aside>
+
+---
+
+## Test callback
+
+Sends a test payload to the configured callback URL.
+
+```
+POST /v1/agents/{agent_id}/automation_config/test_callback
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+If the callback endpoint is unreachable or returns an error:
+
+```json
+{
+  "success": false,
+  "error": "Timeout after 10s"
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/agents/42/automation_config/test_callback" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Agent not found or not accessible. |
+| `422` | `validation_error` | No webhook/callback URL configured. |

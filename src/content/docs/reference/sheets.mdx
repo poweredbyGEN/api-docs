@@ -1,0 +1,170 @@
+---
+title: Sheets
+description: Create, read, and clone Auto Content Engine sheets.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Sheets are the top-level container in the Auto Content Engine. Each sheet is a spreadsheet-like structure with columns (content types), rows (videos), and cells (content values).
+
+<Aside>
+  All sheet endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Sheet schema
+
+```json
+{
+  "id": 100,
+  "slug": "my-first-sheet",
+  "title": "My First Sheet",
+  "project_type": "autocontentengine",
+  "is_default": false,
+  "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "active",
+  "created_at": "2026-03-01T12:00:00.000Z",
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000,
+  "spreadsheet_columns": [],
+  "spreadsheet_rows": [],
+  "global_variables_sheet": null
+}
+```
+
+The `spreadsheet_columns` and `spreadsheet_rows` arrays are populated when fetching a single sheet. The `global_variables_sheet` is `null` unless variables have been imported.
+
+---
+
+## Create sheet
+
+Creates a new sheet for the specified agent.
+
+```
+POST /v1/autocontentengine?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet.title` | string | Yes | The sheet title. |
+| `spreadsheet.is_default` | boolean | No | Set as the agent's default sheet. Defaults to `false`. |
+
+### Response (201)
+
+Returns the created sheet object.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"spreadsheet": {"title": "March Campaign"}}'
+```
+
+```json
+{
+  "id": 101,
+  "slug": "march-campaign",
+  "title": "March Campaign",
+  "project_type": "autocontentengine",
+  "is_default": false,
+  "uuid": "f1e2d3c4-b5a6-7890-fedc-ba0987654321",
+  "status": "active",
+  "created_at": "2026-03-09T10:00:00.000Z",
+  "created_at_ts": 1741510800000,
+  "updated_at_ts": 1741510800000,
+  "spreadsheet_columns": [],
+  "spreadsheet_rows": [],
+  "global_variables_sheet": null
+}
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Invalid API key. |
+| `422` | `validation_error` | Missing title or invalid parameters. |
+
+---
+
+## Get sheet
+
+Returns a single sheet with all its columns, rows, cells, and layers.
+
+```
+GET /v1/autocontentengine/{id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Query parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns this sheet. |
+| `with_execution_cost` | boolean | No | Include credit cost breakdowns on cells and layers. |
+
+### Response
+
+Returns the full sheet object including nested `spreadsheet_columns`, `spreadsheet_rows` (each containing `spreadsheet_cells`), and `global_variables_sheet`.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101?agent_id=42&with_execution_cost=true" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Clone sheet
+
+Creates a copy of an existing sheet. Optionally clone into a different agent.
+
+```
+POST /v1/autocontentengine/{id}/clone?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID to clone. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `target_agent_id` | integer | No | Clone into a different agent. Defaults to the same agent. |
+
+### Response (201)
+
+Returns the newly created sheet object.
+
+### Example
+
+```bash
+# Clone within the same agent
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/clone?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+
+# Clone into a different agent
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/clone?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"target_agent_id": 87}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet not found or agent does not have access. |
+| `422` | `validation_error` | Target agent not accessible or insufficient credits. |

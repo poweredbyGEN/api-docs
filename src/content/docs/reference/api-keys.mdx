@@ -1,0 +1,212 @@
+---
+title: API Keys
+description: Create and manage Personal Access Tokens for API authentication.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Personal Access Tokens (PATs) are long-lived API keys for programmatic access. You can create them via the GEN dashboard or through these endpoints.
+
+## Token schema
+
+```json
+{
+  "id": 5,
+  "name": "CI Pipeline",
+  "token_type": "personal_access_token",
+  "created_at": "2026-03-01T12:00:00.000Z",
+  "expires_at": "2026-06-01T12:00:00.000Z",
+  "last_used_at": "2026-03-09T08:15:00.000Z",
+  "revoked_at": null,
+  "status": "active"
+}
+```
+
+The `status` field is one of: `active`, `expired`, `revoked`.
+
+---
+
+## List API keys
+
+Returns all PATs for the authenticated user.
+
+```
+GET /v1/persisted_tokens
+```
+
+### Parameters
+
+None.
+
+### Response
+
+```json
+[
+  {
+    "id": 5,
+    "name": "CI Pipeline",
+    "token_type": "personal_access_token",
+    "created_at": "2026-03-01T12:00:00.000Z",
+    "expires_at": "2026-06-01T12:00:00.000Z",
+    "last_used_at": "2026-03-09T08:15:00.000Z",
+    "revoked_at": null,
+    "status": "active"
+  }
+]
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/persisted_tokens \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Create API key
+
+Creates a new PAT. The response includes a `token` field with the plain-text key.
+
+```
+POST /v1/persisted_tokens
+```
+
+<Aside type="caution">
+  The `token` field is only returned once at creation time. Store it securely — you cannot retrieve it again.
+</Aside>
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | No | A label for the key (e.g., `"n8n production"`). |
+| `expires_in` | string | No | Duration until expiry (e.g., `"30d"`, `"90d"`). Omit for no expiration. |
+
+### Response (201)
+
+```json
+{
+  "id": 6,
+  "name": "n8n production",
+  "token": "gen_pat_abc123def456...",
+  "token_type": "personal_access_token",
+  "created_at": "2026-03-09T10:00:00.000Z",
+  "expires_at": "2026-06-07T10:00:00.000Z",
+  "last_used_at": null,
+  "revoked_at": null,
+  "status": "active"
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://api.gen.pro/v1/persisted_tokens \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "n8n production", "expires_in": "90d"}'
+```
+
+---
+
+## Rename API key
+
+Updates the name of an existing PAT.
+
+```
+PATCH /v1/persisted_tokens/{id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The token ID. |
+
+### Request body
+
+```json
+{
+  "persisted_token": {
+    "name": "Updated name"
+  }
+}
+```
+
+### Response
+
+Returns the updated token object (without the plain-text `token` field).
+
+### Example
+
+```bash
+curl -X PATCH https://api.gen.pro/v1/persisted_tokens/6 \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"persisted_token": {"name": "Updated name"}}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Token not found or not owned by you. |
+
+---
+
+## Revoke API key
+
+Immediately invalidates a single PAT.
+
+```
+DELETE /v1/persisted_tokens/{id}/revoke
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The token ID to revoke. |
+
+### Response (204)
+
+No content.
+
+### Example
+
+```bash
+curl -X DELETE https://api.gen.pro/v1/persisted_tokens/6/revoke \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Token not found or not owned by you. |
+
+---
+
+## Revoke all API keys
+
+Immediately invalidates all PATs for the authenticated user.
+
+```
+DELETE /v1/persisted_tokens/revoke_all
+```
+
+<Aside type="caution">
+  This revokes every PAT, including the one making this request. You will need to create a new key (via the GEN dashboard) to regain API access.
+</Aside>
+
+### Response (204)
+
+No content.
+
+### Example
+
+```bash
+curl -X DELETE https://api.gen.pro/v1/persisted_tokens/revoke_all \
+  -H "X-API-Key: your-api-key"
+```

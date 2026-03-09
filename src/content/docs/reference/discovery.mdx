@@ -1,0 +1,142 @@
+---
+title: Discovery
+description: Identify the authenticated user, their workspaces, and agents.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Use the discovery endpoints to identify who is authenticated, which workspaces they belong to, and which agents they can access. These are typically the first calls you make after obtaining an API key.
+
+## Get current user
+
+Returns the authenticated user's profile.
+
+```
+GET /v1/me
+```
+
+### Parameters
+
+None.
+
+### Response
+
+```json
+{
+  "id": 1234,
+  "email": "user@example.com",
+  "name": "Jane Smith",
+  "username": "janesmith",
+  "created_at": "2025-06-15T10:30:00.000Z"
+}
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/me \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+
+---
+
+## List workspaces
+
+Returns the organizations (workspaces) where the authenticated user is an owner or manager.
+
+```
+GET /v1/workspaces
+```
+
+### Parameters
+
+None.
+
+### Response
+
+```json
+[
+  {
+    "id": 10,
+    "name": "My Company"
+  },
+  {
+    "id": 25,
+    "name": "Side Project"
+  }
+]
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/workspaces \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+
+---
+
+## List agents
+
+Returns the agents accessible to the authenticated user. Use the optional `workspace_id` filter to scope results to a single workspace.
+
+```
+GET /v1/agents
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | integer | No | Filter agents to a specific workspace. |
+
+### Response
+
+```json
+[
+  {
+    "id": 42,
+    "name": "TrendBot",
+    "workspace_id": 10
+  },
+  {
+    "id": 87,
+    "name": "ProductReviewer",
+    "workspace_id": 10
+  }
+]
+```
+
+### Example
+
+```bash
+# All agents
+curl https://api.gen.pro/v1/agents \
+  -H "X-API-Key: your-api-key"
+
+# Filtered by workspace
+curl "https://api.gen.pro/v1/agents?workspace_id=10" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+
+<Aside type="tip">
+  Use the `id` from an agent in this response as the `agent_id` query parameter for all `/autocontentengine/` endpoints.
+</Aside>

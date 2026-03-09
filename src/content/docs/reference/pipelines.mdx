@@ -1,0 +1,115 @@
+---
+title: Pipelines
+description: Sheet-level automation pipelines with triggers, actions, and runs.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Coming Soon">
+Pipeline endpoints are defined but not yet available for public use. This page documents the planned API surface. Endpoints may change before release.
+</Aside>
+
+Pipelines let you automate workflows at the **sheet level** — define triggers (schedule, webhook) and actions (generate content, post to social) that run automatically.
+
+While [Automation Config](/reference/automation/) is configured per-agent (connection settings), Pipelines are configured per-sheet (what to do and when).
+
+## Create a pipeline
+
+```
+POST /v1/autocontentengine/{sheet_id}/pipelines
+```
+
+| Parameter | In | Type | Required | Description |
+|-----------|------|------|----------|-------------|
+| `agent_id` | query | string | Yes | Agent ID |
+| `sheet_id` | path | string | Yes | Sheet ID |
+
+## List pipelines
+
+```
+GET /v1/autocontentengine/{sheet_id}/pipelines
+```
+
+## Get a pipeline
+
+```
+GET /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+```
+
+## Update a pipeline
+
+```
+PATCH /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+```
+
+## Delete a pipeline
+
+```
+DELETE /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+```
+
+## Run test prompt
+
+Test a pipeline's prompt without executing the full workflow.
+
+```
+POST /v1/autocontentengine/{sheet_id}/pipelines/run_test_prompt
+```
+
+---
+
+## Pipeline actions
+
+Actions are the individual steps within a pipeline.
+
+### Create an action
+
+```
+POST /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions
+```
+
+### Get an action
+
+```
+GET /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+```
+
+### Update an action
+
+```
+PATCH /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+```
+
+### Delete an action
+
+```
+DELETE /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+```
+
+---
+
+## Pipeline runs
+
+Trigger a pipeline execution manually.
+
+### Create a run
+
+```
+POST /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/runs
+```
+
+---
+
+## Trigger types
+
+Pipelines support these trigger types (configured on create/update):
+
+| Type | Description |
+|------|-------------|
+| `webhook` | Fires when a POST is received at the pipeline's webhook URL |
+| `schedule_minutely` | Runs every N minutes |
+| `schedule_hourly` | Runs every N hours |
+| `schedule_daily` | Runs once per day at a specified time |
+| `schedule_weekly` | Runs once per week |
+| `schedule_monthly` | Runs once per month |
+| `schedule_once` | Runs once at a specified time |

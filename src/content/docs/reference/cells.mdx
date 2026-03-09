@@ -1,0 +1,182 @@
+---
+title: Cells
+description: Read and update individual cells within a sheet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Cells are the intersection of a row and a column. Each cell holds the actual content value — a script, a voiceover URL, a video clip, etc. Cells can also contain multiple **layers** and **user jobs** (generation history).
+
+<Aside>
+  All cell endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Cell schema
+
+```json
+{
+  "id": 3000,
+  "value": "Welcome back to another episode...",
+  "additional_attributes": {},
+  "cell_role": "content",
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000,
+  "default_user_job": null,
+  "user_jobs": [],
+  "video_layers": [],
+  "execution_cost": null
+}
+```
+
+The `default_user_job` is the currently selected generation output. The `user_jobs` array contains the full generation history. The `video_layers` array holds composable layers for video cells. The `execution_cost` field is only present when requested.
+
+---
+
+## Get cell
+
+Returns a single cell with its layers and generation history.
+
+```
+GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Response
+
+Returns the full cell object.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update cell
+
+Updates the value of a single cell.
+
+```
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet_cell.value` | string | Yes | The new cell content. |
+
+### Response
+
+Returns the updated cell.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"spreadsheet_cell": {"value": "Updated script text goes here..."}}'
+```
+
+```typescript
+const response = await fetch(
+  "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42",
+  {
+    method: "PATCH",
+    headers: {
+      "X-API-Key": "your-api-key",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      spreadsheet_cell: { value: "Updated script text goes here..." },
+    }),
+  }
+);
+const cell = await response.json();
+```
+
+---
+
+## Bulk update cells
+
+Updates multiple cells in a single request.
+
+```
+PUT /v1/autocontentengine/{id}/cells/mass_update?agent_id={agent_id}
+```
+
+### Request body
+
+Accepts an array of cell objects with `id` and the fields to update.
+
+### Example
+
+```bash
+curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/cells/mass_update?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"cells": [{"id": 3000, "value": "Script for video 1"}, {"id": 3001, "value": "Script for video 2"}]}'
+```
+
+---
+
+## Set default generation
+
+Sets the default (active) generation output for a cell.
+
+```
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `user_job_id` | integer | Yes | The ID of the generation to set as default. Must be from this cell's `user_jobs`. |
+
+<Aside type="tip">
+  When a cell has multiple generation results (e.g., three voiceover takes), use this endpoint to select which one is "active" and will be used in the final video.
+</Aside>
+
+### Response
+
+Returns the updated cell.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/set_default_user_job?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"user_job_id": 789}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Cell or user job not found. |
+| `422` | `validation_error` | User job does not belong to this cell. |

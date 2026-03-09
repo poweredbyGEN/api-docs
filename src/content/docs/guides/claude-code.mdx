@@ -1,0 +1,92 @@
+---
+title: Using with Claude Code
+description: Use the Auto Content Engine MCP server with Claude Code for AI-assisted content creation.
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's CLI for Claude. It supports **MCP (Model Context Protocol)** servers, which let Claude interact with external APIs through natural language. The Auto Content Engine MCP server gives Claude direct access to your GEN sheets, rows, cells, and generations.
+
+<Aside type="caution">
+  The MCP server package is coming soon. In the meantime, you can use Claude Code's built-in HTTP tools (curl, fetch) to call the API directly.
+</Aside>
+
+## Installation
+
+```bash
+npm install -g @poweredbygen/autocontentengine-mcp-server
+```
+
+## Configuration
+
+Set your API key as an environment variable:
+
+```bash
+export GEN_API_KEY="gen_pat_a1b2c3d4e5f6..."
+```
+
+Then add the server to your Claude Code MCP config (`.mcp.json` in your project root or `~/.claude/mcp.json` globally):
+
+```json
+{
+  "mcpServers": {
+    "gen-autocontentengine": {
+      "command": "autocontentengine-mcp-server",
+      "env": {
+        "GEN_API_KEY": "gen_pat_a1b2c3d4e5f6..."
+      }
+    }
+  }
+}
+```
+
+## What you can do
+
+Once configured, you can manage your content engine through natural language:
+
+| Ask Claude... | What happens |
+|--------------|--------------|
+| "Show me my agents" | Lists all your GEN agents |
+| "Create a new sheet for my fitness agent" | Creates a sheet under the specified agent |
+| "Add a row with a script about morning routines" | Creates a row and populates the script cell |
+| "Generate a voiceover for row 3" | Triggers AI voiceover generation on the specified row |
+| "What's the status of my latest generation?" | Checks the generation status |
+| "List all rows in my sheet" | Fetches and displays sheet contents |
+
+## Example conversation
+
+```
+You: Show me the sheets for my agent
+
+Claude: I found 2 sheets for agent "FitnessCoach":
+
+  1. "March Content" (12 rows, 8 columns)
+  2. "Viral Hooks" (5 rows, 4 columns)
+
+You: Add a new row to "March Content" with a script about 5-minute
+     ab workouts for beginners
+
+Claude: Done. I created row 13 in "March Content" and set the Script
+        cell to your text. Would you like me to generate a voiceover
+        for it?
+
+You: Yes, generate a voiceover
+
+Claude: Generation started (id: gen_abc123). I'll check back in a
+        moment... Generation complete. The voiceover is ready in
+        row 13, column "Voiceover".
+```
+
+## Using the API directly (without MCP)
+
+If the MCP server is not yet available, you can still use Claude Code with the API via curl:
+
+```bash
+# Ask Claude to run API calls for you
+# Claude Code can execute shell commands, so just ask:
+
+"Fetch my sheets from the GEN API using curl. My API key is in $GEN_API_KEY
+ and my agent ID is agent_abc123."
+```
+
+Claude will construct and execute the appropriate curl commands, parse the JSON responses, and present the results in a readable format.

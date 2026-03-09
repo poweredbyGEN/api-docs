@@ -1,0 +1,210 @@
+---
+title: Rows
+description: Manage rows (videos) within a sheet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Each row in a sheet represents a single video. Rows contain cells — one per column — that hold the content for each content type.
+
+<Aside>
+  All row endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Row schema
+
+```json
+{
+  "id": 500,
+  "position": 1,
+  "additional_attributes": {},
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000,
+  "spreadsheet_cells": [],
+  "execution_cost": null
+}
+```
+
+The `execution_cost` field is only present when `with_execution_cost=true` is passed on the parent sheet request.
+
+---
+
+## List rows
+
+Returns all rows in a sheet.
+
+```
+GET /v1/autocontentengine/{id}/rows?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Response
+
+```json
+[
+  {
+    "id": 500,
+    "position": 1,
+    "additional_attributes": {},
+    "created_at_ts": 1709294400000,
+    "updated_at_ts": 1709380800000,
+    "spreadsheet_cells": []
+  }
+]
+```
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Create row
+
+Adds a new row to the sheet. A cell is automatically created for each existing column.
+
+```
+POST /v1/autocontentengine/{id}/rows?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet_row.position` | integer | No | Insert at a specific position. Appended to the end if omitted. |
+
+### Response (201)
+
+Returns the created row with its cells.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"spreadsheet_row": {"position": 1}}'
+```
+
+---
+
+## Get row
+
+Returns a single row with its cells.
+
+```
+GET /v1/autocontentengine/{id}/rows/{row_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `row_id` | integer | The row ID. |
+
+### Response
+
+Returns the row object with `spreadsheet_cells`.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/rows/500?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Duplicate row
+
+Creates a copy of a row, including all cell values.
+
+```
+POST /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `row_id` | integer | The row ID to duplicate. |
+
+### Response (201)
+
+Returns the newly created row.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows/500/duplicate?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update row positions
+
+Reorders rows within a sheet.
+
+```
+PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `rows` | array | Yes | Array of `{id, position}` objects. |
+
+### Example
+
+```bash
+curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/rows/update_positions?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"rows": [{"id": 500, "position": 2}, {"id": 501, "position": 1}]}'
+```
+
+### Response
+
+Returns the updated rows.
+
+---
+
+## Bulk update rows
+
+Updates multiple rows in a single request.
+
+```
+PUT /v1/autocontentengine/{id}/rows/mass_update?agent_id={agent_id}
+```
+
+### Request body
+
+Accepts an array of row objects with the fields to update.
+
+### Example
+
+```bash
+curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/rows/mass_update?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"rows": [{"id": 500, "additional_attributes": {"label": "hero"}}, {"id": 501, "additional_attributes": {"label": "intro"}}]}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet or row not found. |
+| `422` | `validation_error` | Invalid row data. |

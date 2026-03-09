@@ -1,0 +1,32 @@
+---
+title: Auto Content Engine API
+description: Programmatically create AI-powered videos, manage content sheets, and automate social media publishing with GEN.
+template: splash
+hero:
+  tagline: Build automations, integrations, and workflows on top of GEN's content creation engine.
+  actions:
+    - text: Get Started
+      link: /guides/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: API Reference
+      link: /reference/overview/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<Card title="Create an API key" icon="setting">
+		Generate a Personal Access Token in Settings and start making requests in seconds.
+	</Card>
+	<Card title="Manage sheets" icon="document">
+		Create, read, and update content sheets — the spreadsheet-like interface where each row is a video and each column is a content layer.
+	</Card>
+	<Card title="Generate content" icon="rocket">
+		Trigger AI generations (scripts, images, voices, videos) on any cell or layer using 20+ AI models.
+	</Card>
+	<Card title="Automate everything" icon="puzzle">
+		Connect to n8n, Make, Zapier, or your own code. Configure webhooks for real-time event notifications.
+	</Card>
+</CardGrid>

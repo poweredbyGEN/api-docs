@@ -1,0 +1,259 @@
+---
+title: Generations
+description: Trigger AI content generation on cells and layers.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generations are AI jobs that produce content for cells and layers. Trigger a generation, poll for completion, and retrieve the output — scripts, voiceovers, images, video clips, and more.
+
+<Aside>
+  Generation endpoints under `/autocontentengine/` require the `agent_id` query parameter. The standalone `/generations/` endpoints do not.
+</Aside>
+
+## Generation schema
+
+```json
+{
+  "id": 9000,
+  "status": "completed",
+  "user_job_type": "text_generation",
+  "result": "Here is the generated script text...",
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1500,
+      "url": "https://cdn.gen.pro/outputs/abc123.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/abc123.jpg",
+      "object_type": "video",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 2.5
+}
+```
+
+### Status values
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Job queued, waiting to be picked up. |
+| `processing` | AI model is actively generating content. |
+| `completed` | Generation finished successfully. Check `result` and `output_resources`. |
+| `failed` | Generation failed. Check `failed_reason`. |
+| `stopped` | Manually cancelled. Credits have been refunded. |
+
+---
+
+## Generate on cell
+
+Triggers an AI generation on a cell.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | The type of content to generate. |
+| `data` | object | Yes | Generation parameters (model-specific). |
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+### Response (201)
+
+```json
+{
+  "generation_id": 9000,
+  "status": "pending"
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"generation_type": "text_generation", "data": {}}'
+```
+
+```typescript
+const response = await fetch(
+  "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42",
+  {
+    method: "POST",
+    headers: {
+      "X-API-Key": "your-api-key",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      generation_type: "text_generation",
+      data: {},
+    }),
+  }
+);
+const { generation_id, status } = await response.json();
+```
+
+---
+
+## Generate on layer
+
+Triggers an AI generation on a specific layer within a cell.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID. |
+
+### Request body
+
+Same as [Generate on cell](#generate-on-cell).
+
+### Response (201)
+
+```json
+{
+  "generation_id": 9001,
+  "status": "pending"
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"generation_type": "audio_generation", "data": {}}'
+```
+
+---
+
+## Check generation status
+
+Polls the current status of a generation.
+
+```
+GET /v1/generations/{id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The generation ID. |
+
+### Response
+
+Returns the full generation object (see [schema](#generation-schema) above).
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/generations/9000" \
+  -H "X-API-Key: your-api-key"
+```
+
+```typescript
+// Poll until complete
+async function waitForGeneration(generationId: string, apiKey: string) {
+  while (true) {
+    const res = await fetch(
+      `https://api.gen.pro/v1/generations/${generationId}`,
+      { headers: { "X-API-Key": apiKey } }
+    );
+    const gen = await res.json();
+
+    if (gen.status === "completed" || gen.status === "failed" || gen.status === "stopped") {
+      return gen;
+    }
+
+    await new Promise((r) => setTimeout(r, 3000)); // poll every 3s
+  }
+}
+```
+
+<Aside type="tip">
+  For production use, configure a [webhook](/reference/automation/) instead of polling. The webhook sends a notification when the generation completes.
+</Aside>
+
+---
+
+## Stop generation
+
+Cancels a running generation. Credits are refunded.
+
+```
+POST /v1/generations/{id}/stop
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The generation ID. |
+
+### Response
+
+Returns the updated generation with `status: "stopped"`.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/generations/9000/stop" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Continue generation
+
+Resumes a previously stopped generation. Credits are re-charged.
+
+```
+POST /v1/generations/{id}/continue
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The generation ID. |
+
+### Response
+
+Returns the updated generation with `status: "pending"`.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/generations/9000/continue" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Generation not found. |
+| `422` | `validation_error` | Generation cannot be stopped/continued in its current state. |

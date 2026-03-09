@@ -1,0 +1,98 @@
+---
+title: API Overview
+description: Base URL, authentication, error format, and conventions for the Auto Content Engine API.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Base URL
+
+All API requests are made to:
+
+```
+https://api.gen.pro/v1
+```
+
+All paths in this reference are relative to the base URL. For example, `GET /v1/me` means `GET https://api.gen.pro/v1/me`.
+
+## Authentication
+
+The API supports two authentication methods, sent via HTTP headers:
+
+| Header | Description |
+|--------|-------------|
+| `X-API-Key` | A Personal Access Token (PAT) created in the GEN dashboard or via the [API Keys](/reference/api-keys/) endpoints. |
+| `Authorization` | A `Bearer` JWT issued by Clerk or Dynamic XYZ (used by the GEN web app). |
+
+For programmatic integrations, use `X-API-Key`. For browser-based apps that already authenticate through GEN's login flow, use `Authorization: Bearer <jwt>`.
+
+```bash
+curl https://api.gen.pro/v1/me \
+  -H "X-API-Key: your-api-key"
+```
+
+<Aside type="tip">
+  PATs are the recommended method for automation. Create one in Settings or via `POST /v1/persisted_tokens`.
+</Aside>
+
+## Agent scoping
+
+All `/autocontentengine/` endpoints require an `agent_id` query parameter. This scopes every request to a specific GEN agent. The authenticated user must have access to the agent, and the agent's workspace must have active GEN credits.
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+## Error format
+
+Errors return a JSON object with `error` (human-readable message) and `error_code` (machine-readable identifier):
+
+```json
+{
+  "error": "Agent not found",
+  "error_code": "not_found"
+}
+```
+
+## Common status codes
+
+| Code | Meaning |
+|------|---------|
+| `200` | Success. |
+| `201` | Resource created. |
+| `204` | Success, no content (used for deletes). |
+| `401` | Unauthorized. Missing or invalid API key / JWT. |
+| `404` | Resource not found, or you don't have access. |
+| `422` | Validation error. Check the `error` field for details. |
+
+## Rate limiting
+
+<Aside>
+  Rate limiting is not currently enforced. We reserve the right to add limits in the future. Build your integrations to handle `429 Too Many Requests` responses gracefully.
+</Aside>
+
+## Pagination
+
+The API currently returns full result sets. There is no cursor or offset-based pagination yet. For large datasets, use filtering parameters where available.
+
+## Timestamps
+
+Timestamp fields follow two conventions:
+
+| Field pattern | Format |
+|---------------|--------|
+| `created_at`, `updated_at` | ISO 8601 string (`"2026-03-01T12:00:00.000Z"`) |
+| `created_at_ts`, `updated_at_ts` | Unix epoch in **milliseconds** (`1709294400000`) |
+
+Most resource responses include both forms. Use the `_ts` variants for numeric comparisons and sorting.
+
+## OpenAPI spec
+
+A machine-readable OpenAPI specification is available at:
+
+```
+https://api.gen.pro/openapi.yaml
+```
+
+Use it to generate client libraries, import into Postman, or validate requests.

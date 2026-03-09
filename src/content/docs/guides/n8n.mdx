@@ -1,0 +1,119 @@
+---
+title: Using with n8n
+description: Connect the Auto Content Engine API to n8n workflows.
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[n8n](https://n8n.io) is an open-source workflow automation tool. You can call the Auto Content Engine API from n8n using **HTTP Request** nodes — no custom integration required.
+
+## Setting up credentials
+
+<Steps>
+
+1. **Open n8n credentials**
+
+   Go to **Settings > Credentials > Add Credential** and select **Header Auth**.
+
+2. **Configure the header**
+
+   Set the following values:
+
+   | Field | Value |
+   |-------|-------|
+   | **Name** | `X-API-Key` |
+   | **Value** | Your API key (e.g., `gen_pat_a1b2c3d4e5f6...`) |
+
+3. **Save**
+
+   Name the credential something descriptive like `GEN API Key` and save it.
+
+</Steps>
+
+When you add an HTTP Request node, select this credential under **Authentication > Header Auth**.
+
+## Example workflow: Auto-generate video scripts
+
+This workflow checks a sheet for empty script cells every hour and triggers AI generation to fill them.
+
+<Steps>
+
+1. **Schedule Trigger**
+
+   Set the trigger to run every hour (or whatever interval suits your pipeline).
+
+2. **HTTP Request — Get sheet**
+
+   Fetch the sheet to find rows that need scripts.
+
+   ```
+   GET https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id={agent_id}
+   ```
+
+   Use the Header Auth credential you created above.
+
+3. **Code node — Find empty cells**
+
+   Filter the response to find rows where the script cell is empty:
+
+   ```javascript
+   const rows = $input.first().json.rows;
+   const scriptColumn = $input.first().json.columns.find(
+     c => c.name === "Script"
+   );
+
+   const emptyCells = [];
+   for (const row of rows) {
+     const cell = row.cells.find(c => c.column_id === scriptColumn.id);
+     if (cell && !cell.value) {
+       emptyCells.push({ cell_id: cell.id, row_name: row.name });
+     }
+   }
+
+   return emptyCells.map(c => ({ json: c }));
+   ```
+
+4. **HTTP Request — Trigger generation**
+
+   For each empty cell, trigger AI generation:
+
+   ```
+   POST https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{{ $json.cell_id }}/generate
+   ```
+
+   Body (JSON):
+   ```json
+   {
+     "generation_type": "script",
+     "data": {
+       "agent_id": "your_agent_id"
+     }
+   }
+   ```
+
+5. **Wait node**
+
+   Wait 30 seconds to give the generation time to complete.
+
+6. **HTTP Request — Check generation status**
+
+   Poll the generation endpoint:
+
+   ```
+   GET https://api.gen.pro/v1/generations/{{ $json.id }}
+   ```
+
+7. **IF node — Check completion**
+
+   - If `status` is `completed`, continue to the next cell.
+   - If `status` is `processing`, loop back to the Wait node.
+   - If `status` is `failed`, send an alert (Slack, email, etc.).
+
+</Steps>
+
+## Tips
+
+- **Store `agent_id` as a workflow variable.** In n8n, go to **Settings > Variables** and create a `GEN_AGENT_ID` variable. Reference it in nodes with `{{ $vars.GEN_AGENT_ID }}`.
+- **Handle rate limits.** Add retry logic to your HTTP Request nodes: under **Settings > Retry on Fail**, enable retries with a backoff interval.
+- **Batch carefully.** If you have many empty cells, process them in batches using a **Split In Batches** node to avoid overwhelming the API.
+- **Use Error Trigger.** Add a global Error Trigger workflow that notifies you (via Slack or email) when any generation fails.

@@ -1,0 +1,189 @@
+---
+title: Columns
+description: Manage columns (content types) within a sheet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Columns define the content types in a sheet. Each column represents a type of content — script, voiceover, video clip, music, etc. When you add a column, a new cell is created in every existing row.
+
+<Aside>
+  All column endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Column schema
+
+```json
+{
+  "id": 200,
+  "title": "Script",
+  "temp_title": null,
+  "type": "text",
+  "column_role": "script",
+  "description": "The video script for this scene",
+  "position": 1,
+  "additional_attributes": {},
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000
+}
+```
+
+---
+
+## List columns
+
+Returns all columns in a sheet.
+
+```
+GET /v1/autocontentengine/{id}/columns?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Response
+
+```json
+[
+  {
+    "id": 200,
+    "title": "Script",
+    "temp_title": null,
+    "type": "text",
+    "column_role": "script",
+    "description": "The video script for this scene",
+    "position": 1,
+    "additional_attributes": {},
+    "created_at_ts": 1709294400000,
+    "updated_at_ts": 1709380800000
+  }
+]
+```
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Create column
+
+Adds a new column to the sheet. A new cell is automatically created in every existing row.
+
+```
+POST /v1/autocontentengine/{id}/columns?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet_column.title` | string | Yes | The column name (e.g., `"Voiceover"`). |
+| `spreadsheet_column.type` | string | Yes | The content type. |
+| `spreadsheet_column.position` | integer | No | Insert at a specific position. Appended to the end if omitted. |
+
+### Response (201)
+
+Returns the created column.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"spreadsheet_column": {"title": "Voiceover", "type": "audio"}}'
+```
+
+---
+
+## Duplicate column
+
+Creates a copy of a column and all its cell values.
+
+```
+POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `col_id` | integer | The column ID to duplicate. |
+
+### Response (201)
+
+Returns the newly created column.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns/200/duplicate?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update column positions
+
+Reorders columns within a sheet.
+
+```
+PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `columns` | array | Yes | Array of `{id, position}` objects. |
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/columns/update_positions?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"columns": [{"id": 200, "position": 2}, {"id": 201, "position": 1}]}'
+```
+
+### Response
+
+Returns the updated columns.
+
+---
+
+## Bulk update columns
+
+Updates multiple columns in a single request.
+
+```
+PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={agent_id}
+```
+
+### Request body
+
+Accepts an array of column objects with the fields to update.
+
+### Example
+
+```bash
+curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/columns/mass_update?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"columns": [{"id": 200, "title": "Main Script"}, {"id": 201, "description": "Background music track"}]}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet or column not found. |
+| `422` | `validation_error` | Invalid column data or missing required fields. |

@@ -1,0 +1,233 @@
+---
+title: Layers
+description: Manage video layers (text, sound, clip overlays) within cells.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Layers are composable building blocks within a cell. A single video cell can have multiple layers — text overlays, sound effects, B-roll clips — that get composed into the final video output.
+
+<Aside>
+  All layer endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Layer schema
+
+```json
+{
+  "id": 4000,
+  "name": "Background Music",
+  "position": 1,
+  "type": "audio",
+  "additional_attributes": {},
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000,
+  "default_user_job": null,
+  "user_jobs": [],
+  "execution_cost": null
+}
+```
+
+---
+
+## Create layer
+
+Adds a new layer to a cell.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `video_layer.name` | string | Yes | Layer name (e.g., `"Sound Effect"`). |
+| `video_layer.type` | string | Yes | Layer type. |
+| `video_layer.position` | integer | No | Insert at a specific position. Appended to the end if omitted. |
+
+### Response (201)
+
+Returns the created layer.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"name": "Background Music", "type": "audio"}}'
+```
+
+---
+
+## Get layer
+
+Returns a single layer with its generation history.
+
+```
+GET /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID. |
+
+### Response
+
+Returns the full layer object.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update layer
+
+Updates a layer's name, type, or attributes.
+
+```
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID. |
+
+### Request body
+
+Pass the fields to update inside `video_layer`:
+
+```json
+{
+  "video_layer": {
+    "name": "Renamed Layer"
+  }
+}
+```
+
+### Response
+
+Returns the updated layer.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"name": "Intro Music"}}'
+```
+
+---
+
+## Delete layer
+
+Removes a layer from a cell.
+
+```
+DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID. |
+
+### Response (204)
+
+No content.
+
+### Example
+
+```bash
+curl -X DELETE "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Duplicate layer
+
+Creates a copy of a layer.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/duplicate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID to duplicate. |
+
+### Response (201)
+
+Returns the newly created layer.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/duplicate?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Update layer positions
+
+Reorders layers within a cell.
+
+```
+PUT /v1/autocontentengine/{id}/cells/{cell_id}/layers/update_positions?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `layers` | array | Yes | Array of `{id, position}` objects. |
+
+### Example
+
+```bash
+curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/update_positions?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"layers": [{"id": 4000, "position": 2}, {"id": 4001, "position": 1}]}'
+```
+
+### Response
+
+Returns the updated layers.
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet, cell, or layer not found. |
+| `422` | `validation_error` | Invalid layer data. |

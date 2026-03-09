@@ -1,0 +1,12 @@
+/* GEN purple accent only */
+:root {
+	--sl-color-accent-low: #e8e6ff;
+	--sl-color-accent: #524caf;
+	--sl-color-accent-high: #2e2971;
+}
+
+:root[data-theme='dark'] {
+	--sl-color-accent-low: #352f7e;
+	--sl-color-accent: #524caf;
+	--sl-color-accent-high: #a29cff;
+}

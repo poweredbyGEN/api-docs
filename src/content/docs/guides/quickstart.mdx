@@ -1,0 +1,171 @@
+---
+title: Quick Start
+description: Make your first API call in under 5 minutes.
+---
+
+import { Steps, Aside, LinkCard } from '@astrojs/starlight/components';
+
+This guide walks you through your first API calls — from verifying your key to updating content in a sheet.
+
+## Prerequisites
+
+- A GEN account at [gen.pro](https://gen.pro)
+- An API key ([create one here](/guides/authentication/))
+- Active GEN credits on your account
+- At least one agent with a content sheet
+
+Set your API key as an environment variable to follow along:
+
+```bash
+export GEN_API_KEY="gen_pat_your_key_here"
+```
+
+<Steps>
+
+1. **Verify your API key**
+
+   Confirm your key is working by hitting the `/v1/me` endpoint:
+
+   ```bash
+   curl -s https://api.gen.pro/v1/me \
+     -H "X-API-Key: $GEN_API_KEY" | jq
+   ```
+
+   ```json
+   {
+     "id": "user_abc123",
+     "email": "you@example.com",
+     "name": "Your Name"
+   }
+   ```
+
+   If you get a `401` response, double-check your key.
+
+2. **List your workspaces**
+
+   Workspaces organize your agents and content. List them to orient yourself:
+
+   ```bash
+   curl -s https://api.gen.pro/v1/workspaces \
+     -H "X-API-Key: $GEN_API_KEY" | jq
+   ```
+
+   ```json
+   {
+     "workspaces": [
+       {
+         "id": "ws_abc123",
+         "name": "My Workspace",
+         "agents_count": 3
+       }
+     ]
+   }
+   ```
+
+   <Aside>
+     You don't need a workspace ID for most requests — it's scoped through your agent. This is just useful for discovery.
+   </Aside>
+
+3. **Find your agent**
+
+   Every content operation is scoped to an agent. List your agents to find the one you want to work with:
+
+   ```bash
+   curl -s https://api.gen.pro/v1/agents \
+     -H "X-API-Key: $GEN_API_KEY" | jq
+   ```
+
+   ```json
+   {
+     "agents": [
+       {
+         "id": "agent_xyz789",
+         "name": "Alex",
+         "niche": "Tech Reviews"
+       }
+     ]
+   }
+   ```
+
+   Save the agent ID — you will need it for all content engine requests:
+
+   ```bash
+   export AGENT_ID="agent_xyz789"
+   ```
+
+4. **Get a content sheet**
+
+   Fetch one of the agent's sheets to see its structure — rows, columns, and cells:
+
+   ```bash
+   curl -s "https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id=$AGENT_ID" \
+     -H "X-API-Key: $GEN_API_KEY" | jq
+   ```
+
+   ```json
+   {
+     "id": "sheet_001",
+     "name": "Week 12 Content",
+     "columns": [
+       { "id": "col_script", "name": "Script", "position": 0 },
+       { "id": "col_voice", "name": "Voiceover", "position": 1 },
+       { "id": "col_broll", "name": "B-Roll", "position": 2 }
+     ],
+     "rows": [
+       {
+         "id": "row_001",
+         "position": 0,
+         "cells": [
+           {
+             "id": "cell_abc",
+             "column_id": "col_script",
+             "value": "Top 5 phones of 2026..."
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
+   <Aside>
+     Replace `{sheet_id}` with an actual sheet ID from your agent. You can find sheet IDs in the GEN web app URL or by listing the agent's sheets.
+   </Aside>
+
+5. **Update a cell**
+
+   Now modify a cell value — for example, updating a script:
+
+   ```bash
+   curl -s -X PATCH \
+     "https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{cell_id}?agent_id=$AGENT_ID" \
+     -H "X-API-Key: $GEN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "value": "The top 5 phones of 2026 will surprise you. Number one..."
+     }' | jq
+   ```
+
+   ```json
+   {
+     "id": "cell_abc",
+     "column_id": "col_script",
+     "value": "The top 5 phones of 2026 will surprise you. Number one...",
+     "updated_at": "2026-03-09T12:00:00Z"
+   }
+   ```
+
+   The cell is updated immediately. If you open the sheet in the GEN web app, you will see the new value.
+
+</Steps>
+
+## What's next?
+
+You have the basics down. Here is where to go from here:
+
+<LinkCard title="API Reference" href="/reference/overview/" description="Full endpoint documentation for sheets, rows, columns, cells, layers, and generations." />
+
+<LinkCard title="Using with n8n" href="/guides/n8n/" description="Connect GEN to n8n workflows for event-driven content automation." />
+
+<LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Use the MCP server to manage content through natural language with Claude." />
+
+<LinkCard title="Error Handling" href="/guides/errors/" description="Understand error codes, rate limits, and how to handle failures gracefully." />
