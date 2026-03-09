@@ -22,16 +22,16 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 GEN is built as a layered system. Three layers. One autonomous engine.
 
 <CardGrid>
-	<Card title="Workspace">
+	<Card title="Workspace" icon="seti:folder">
 		The top-level container for a company, brand, or client. Each workspace organizes the agents and content engines that operate for that brand.
 	</Card>
-	<Card title="Agent">
+	<Card title="Agent" icon="star">
 		A single brand identity. It owns the voice, personality, goals, and strategy of that brand. The agent thinks and acts like the brand — making decisions about how content should look, sound, and evolve.
 	</Card>
-	<Card title="Auto Content Engine">
+	<Card title="Auto Content Engine" icon="rocket">
 		A self-running content system inside an agent. Each engine is focused on a specific objective or format — niche content, ads, shoppable posts, day-in-the-life. Multiple engines run simultaneously.
 	</Card>
-	<Card title="The Content Loop">
+	<Card title="The Content Loop" icon="random">
 		Every engine runs the same cycle: **Spot** trends → **Generate** content → **Deploy** to platforms → **Measure** performance → **Adapt** strategy → **Repeat**. Every day. Automatically.
 	</Card>
 </CardGrid>
@@ -41,22 +41,22 @@ GEN is built as a layered system. Three layers. One autonomous engine.
 The Auto Content Engine API gives you programmatic access to every layer of this system.
 
 <CardGrid>
-	<Card title="Discovery">
+	<Card title="Discovery" icon="magnifier">
 		Identify your user, list workspaces, and find agents. The starting point for any integration.
 	</Card>
-	<Card title="Content Engines">
+	<Card title="Content Engines" icon="rocket">
 		Create, read, clone, and manage Auto Content Engines — the self-running systems that produce your content.
 	</Card>
-	<Card title="Sheet, Rows, Columns, Cells">
+	<Card title="Sheet, Rows, Columns, Cells" icon="document">
 		The data grid inside each engine. Each row is a video. Each column is a content type (script, voice, clip). Each cell holds one piece of content.
 	</Card>
-	<Card title="Generations">
+	<Card title="Generations" icon="star">
 		Trigger AI content generation on any cell or layer. Scripts, voiceovers, images, videos — 20+ AI models at your disposal.
 	</Card>
-	<Card title="Layers">
+	<Card title="Layers" icon="laptop">
 		Video composition. Text overlays, sound tracks, video clips — the building blocks that become the final video.
 	</Card>
-	<Card title="Automation">
+	<Card title="Automation" icon="setting">
 		Webhooks, callbacks, and pipelines. Get notified when content is ready, trigger workflows, and connect to external systems.
 	</Card>
 </CardGrid>
