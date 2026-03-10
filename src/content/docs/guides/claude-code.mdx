@@ -130,6 +130,24 @@ Claude: Generation started (id: 9001). Checking status...
         URL: https://cdn.gen.pro/outputs/voice_abc123.mp3
 ```
 
+## TypeScript SDK
+
+For programmatic access from TypeScript/JavaScript applications:
+
+```bash
+npm install @poweredbygen/autocontentengine-sdk
+```
+
+```typescript
+import { GenClient } from '@poweredbygen/autocontentengine-sdk';
+
+const client = new GenClient({ apiKey: process.env.GEN_API_KEY });
+const agents = await client.listAgents();
+const engine = await client.getEngine(agents[0].id, engineId);
+```
+
+Full documentation: [github.com/poweredbyGEN/autocontentengine-typescript-sdk](https://github.com/poweredbyGEN/autocontentengine-typescript-sdk)
+
 ## Using the API directly (without MCP)
 
 You can also use Claude Code with the API directly via curl — just ask:
