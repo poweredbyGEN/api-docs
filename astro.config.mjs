@@ -32,6 +32,7 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Introduction', slug: 'guides/introduction' },
+						{ label: 'Using with Claude Code', slug: 'guides/claude-code' },
 						{ label: 'Authentication', slug: 'guides/authentication' },
 						{ label: 'Quick Start', slug: 'guides/quickstart' },
 					],
@@ -78,7 +79,6 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Using with n8n', slug: 'guides/n8n' },
-						{ label: 'Using with Claude Code', slug: 'guides/claude-code' },
 						{ label: 'Error Handling', slug: 'guides/errors' },
 					],
 				},
