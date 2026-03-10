@@ -1,0 +1,465 @@
+---
+title: Agents
+description: Create, read, update, and delete agents and their avatars.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Agents are the core AI personalities in your workspace. Each agent has a name, description, time zone, optional voice provider keys, and one or more avatars. Use these endpoints to manage agents and their avatar images.
+
+<Aside type="note">
+  All agent endpoints require authentication via the `X-API-Key` header. Agents are scoped by workspace membership — you can only access agents that belong to your workspaces or that have been shared with you.
+</Aside>
+
+## List agents
+
+Returns the agents accessible to the authenticated user. Use the optional `workspace_id` filter to scope results to a single workspace.
+
+```
+GET /v1/agents
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | integer | No | Filter agents to a specific workspace. |
+
+### Response
+
+```json
+[
+  {
+    "id": 42,
+    "name": "TrendBot",
+    "description": "Trend analysis agent",
+    "primary_avatar_url": "https://cdn.gen.pro/avatars/42/thumbnail.webp",
+    "role": "owner",
+    "organization": "My Company",
+    "time_zone": "America/New_York",
+    "tiktok_integration": false,
+    "tiktok_social_account": false,
+    "degods": false,
+    "shared_users": [],
+    "default_user_voice": null
+  }
+]
+```
+
+### Example
+
+```bash
+# All agents
+curl https://api.gen.pro/v1/agents \
+  -H "X-API-Key: your-api-key"
+
+# Filtered by workspace
+curl "https://api.gen.pro/v1/agents?workspace_id=10" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+
+---
+
+## Create agent
+
+Creates a new agent. If `organization_id` is provided, the agent is created within that workspace (requires `manage_agents` permission). Otherwise, it is created as a personal agent.
+
+```
+POST /v1/agents
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent[name]` | string | Yes | Agent name. Must be unique within the workspace. |
+| `agent[description]` | string | No | A short description of the agent's purpose. |
+| `agent[time_zone]` | string | No | IANA time zone identifier (e.g. `America/New_York`). |
+| `agent[eleven_lab_api_key]` | string | No | ElevenLabs API key for voice synthesis. Validated on submission. |
+| `agent[hume_ai_api_key]` | string | No | Hume AI API key for emotional voice. Validated on submission. |
+| `agent[agent_avatars_attributes]` | array | No | Array of avatar objects with `file` (image upload) or `degod_avatar_id`. |
+| `organization_id` | integer | No | Workspace to create the agent in. |
+
+### Response
+
+```json
+{
+  "agent": {
+    "id": 43,
+    "name": "ProductReviewer",
+    "description": "Reviews trending products",
+    "organization_id": 10,
+    "time_zone": "America/Los_Angeles",
+    "primary_avatar_id": null,
+    "primary_avatar_url": null,
+    "role": "owner",
+    "default_user_voice": null
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X POST https://api.gen.pro/v1/agents \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": 10,
+    "agent": {
+      "name": "ProductReviewer",
+      "description": "Reviews trending products",
+      "time_zone": "America/Los_Angeles"
+    }
+  }'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `422` | `agent_creation_failed` | Validation failed (e.g. duplicate name in workspace). |
+| `422` | `organization_not_found` | The specified `organization_id` does not exist or you lack access. |
+| `422` | `invalid_api_key` | The provided ElevenLabs or Hume AI API key is invalid. |
+
+---
+
+## Get agent
+
+Returns a single agent by ID. Includes full detail such as organization ID, primary avatar, and voice configuration.
+
+```
+GET /v1/agents/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The agent ID (path parameter). |
+| `with_organization_uuid` | boolean | No | If `true`, includes the workspace UUID in the response. |
+
+### Response
+
+```json
+{
+  "id": 42,
+  "name": "TrendBot",
+  "description": "Trend analysis agent",
+  "organization_id": 10,
+  "time_zone": "America/New_York",
+  "primary_avatar_id": 101,
+  "primary_avatar_url": "https://cdn.gen.pro/avatars/42/thumbnail.webp",
+  "agent_setup_project_id": 500,
+  "role": "owner",
+  "default_user_voice": {
+    "id": "voice_abc123",
+    "name": "Sarah",
+    "gender": "female",
+    "language": "English",
+    "provider": "eleven_labs",
+    "url": "https://api.elevenlabs.io/v1/previews/voice_abc123.mp3"
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/agents/42 \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+
+---
+
+## Update agent
+
+Updates an existing agent's name, description, time zone, voice keys, avatar, or default voice. Requires `editor` role or higher in the workspace.
+
+```
+PATCH /v1/agents/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The agent ID (path parameter). |
+| `agent[name]` | string | No | Updated agent name. |
+| `agent[description]` | string | No | Updated description. |
+| `agent[time_zone]` | string | No | IANA time zone identifier. |
+| `agent[eleven_lab_api_key]` | string | No | ElevenLabs API key. Validated on submission. |
+| `agent[hume_ai_api_key]` | string | No | Hume AI API key. Validated on submission. |
+| `agent[agent_avatars_attributes]` | array | No | Array of avatar objects. Providing this resets the primary avatar. Each object accepts `degod_avatar_id`, `file` (image upload), and `is_primary` (boolean). |
+| `agent[default_user_voice_attributes]` | object | No | Set the default voice. Requires `source` (`eleven_labs`, `hume_ai`, or `user_voice_resource`) and `voice_id`. |
+
+### Response
+
+```json
+{
+  "agent": {
+    "id": 42,
+    "name": "TrendBot v2",
+    "description": "Updated trend agent",
+    "organization_id": 10,
+    "time_zone": "Europe/London",
+    "primary_avatar_id": 101,
+    "primary_avatar_url": "https://cdn.gen.pro/avatars/42/thumbnail.webp",
+    "role": "owner",
+    "default_user_voice": {
+      "source": "eleven_labs",
+      "voice_id": "voice_abc123"
+    }
+  }
+}
+```
+
+### Example
+
+```bash
+curl -X PATCH https://api.gen.pro/v1/agents/42 \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent": {
+      "name": "TrendBot v2",
+      "description": "Updated trend agent",
+      "time_zone": "Europe/London"
+    }
+  }'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `404` | `user_voice_resource_not_found` | The specified `voice_id` for a `user_voice_resource` source does not exist on this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+| `422` | `validation_error` | One or more fields failed validation. |
+| `422` | `agent_update_failed` | An unexpected error occurred during update. |
+| `422` | `invalid_api_key` | The provided ElevenLabs or Hume AI API key is invalid. |
+| `422` | `voice_id_required` | `voice_id` is required when `source` is present in `default_user_voice_attributes`. |
+
+---
+
+## Delete agent
+
+Soft-deletes an agent. Requires `owner` or `manager` role, or being the agent's creator.
+
+```
+DELETE /v1/agents/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | The agent ID (path parameter). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X DELETE https://api.gen.pro/v1/agents/42 \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to delete this agent. |
+
+---
+
+## List agent avatars
+
+Returns the avatar images for an agent, ordered with the primary avatar first. Supports cursor-based pagination (20 per page).
+
+```
+GET /v1/agents/:agent_id/avatars
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent ID (path parameter). |
+| `cursor` | integer | No | Return avatars with an ID greater than this value (for pagination). |
+
+### Response
+
+```json
+[
+  {
+    "id": 101,
+    "is_primary": true,
+    "url": "https://cdn.gen.pro/avatars/101/original.webp",
+    "thumbnail_url": "https://cdn.gen.pro/avatars/101/thumbnail.webp",
+    "degod_avatar_id": null
+  },
+  {
+    "id": 102,
+    "is_primary": false,
+    "url": "https://cdn.gen.pro/avatars/102/original.webp",
+    "thumbnail_url": "https://cdn.gen.pro/avatars/102/thumbnail.webp",
+    "degod_avatar_id": 7
+  }
+]
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/agents/42/avatars \
+  -H "X-API-Key: your-api-key"
+
+# Paginate
+curl "https://api.gen.pro/v1/agents/42/avatars?cursor=101" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `agent_not_found` | The specified agent does not exist. |
+
+---
+
+## Create avatar
+
+Uploads one or more avatar images for an agent. Accepts image files (JPEG, PNG, or WebP) or DeGod avatar IDs.
+
+```
+POST /v1/agents/:agent_id/avatars
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent ID (path parameter). |
+| `agent_avatars_attributes` | array | Yes | Array of avatar objects. Each object accepts `file` (multipart image upload) or `degod_avatar_id` (integer). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X POST https://api.gen.pro/v1/agents/42/avatars \
+  -H "X-API-Key: your-api-key" \
+  -F "agent_avatars_attributes[][file]=@avatar.png"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `agent_not_found` | The specified agent does not exist. |
+| `422` | `avatar_creation_failed` | Image validation failed (wrong format or missing file). |
+
+---
+
+## Update avatar
+
+Sets an avatar as the agent's primary avatar. All other avatars for the agent are marked as non-primary.
+
+```
+PATCH /v1/agents/:agent_id/avatars/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent ID (path parameter). |
+| `id` | integer | Yes | The avatar ID (path parameter). |
+
+<Aside type="tip">
+  The update endpoint only toggles primary status. To replace an avatar image, delete the old avatar and create a new one.
+</Aside>
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X PATCH https://api.gen.pro/v1/agents/42/avatars/101 \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `agent_not_found` | The specified agent does not exist. |
+| `422` | `avatar_update_failed` | The avatar could not be found or updated. |
+
+---
+
+## Delete avatar
+
+Removes one or more avatars from an agent. If the deleted avatar was primary, the next available avatar is automatically promoted to primary.
+
+```
+DELETE /v1/agents/:agent_id/avatars/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent ID (path parameter). |
+| `id` | string | Yes | The DeGod avatar ID to delete. To delete multiple, pass IDs separated by underscores (e.g. `7_8_9`). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+# Delete a single avatar
+curl -X DELETE https://api.gen.pro/v1/agents/42/avatars/7 \
+  -H "X-API-Key: your-api-key"
+
+# Delete multiple avatars
+curl -X DELETE https://api.gen.pro/v1/agents/42/avatars/7_8_9 \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `agent_not_found` | The specified agent does not exist. |

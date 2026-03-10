@@ -1,0 +1,558 @@
+---
+title: Content Resources & Assets
+description: Upload, organize, and manage files — images, videos, audio, and folders in the asset library.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Content resources represent files in your agent's workspace — generated outputs (images, videos, audio) and manually uploaded assets. The asset library provides a unified view with folder organization, and direct upload lets you send files straight to S3 for maximum performance.
+
+<Aside type="note">
+  All endpoints in this section require an `agent_id` query parameter to scope operations to a specific agent. See the [Discovery](/reference/discovery) page to list your agents.
+</Aside>
+
+## List content resources
+
+Returns a paginated list of content resources belonging to the agent. Results are ordered by most recent first.
+
+```
+GET /v1/content_resources
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent whose resources to list. |
+| `type` | string | No | Filter by file type: `image`, `video`, `audio`, `zip`, or `safe_tensors`. |
+| `project_id` | integer | No | Filter to resources attached to a specific project. |
+| `ids` | array | No | Return only resources matching these IDs. |
+| `page` | integer | No | Page number for pagination (default `0`, 20 items per page). |
+
+### Response
+
+```json
+[
+  {
+    "id": 5012,
+    "url": "https://cdn.gen.pro/uploads/abc123.png",
+    "thumbnail_url": "https://cdn.gen.pro/uploads/abc123_thumb.png",
+    "file_name": "product-hero.png",
+    "content_type": "image/png"
+  },
+  {
+    "id": 5008,
+    "url": "https://cdn.gen.pro/uploads/def456.mp4",
+    "thumbnail_url": null,
+    "file_name": "intro-clip.mp4",
+    "content_type": "video/mp4"
+  }
+]
+```
+
+### Example
+
+```bash
+# All resources for an agent
+curl "https://api.gen.pro/v1/content_resources?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+
+# Only images, page 2
+curl "https://api.gen.pro/v1/content_resources?agent_id=42&type=image&page=2" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `not_found` | Agent not found or not accessible. |
+
+---
+
+## Create content resource
+
+Uploads a new file as a content resource. The file must be sent as a multipart form upload. Optionally attach the resource to a project or place it in an asset folder.
+
+```
+POST /v1/content_resources
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent to create the resource under. |
+| `content_resource[file]` | file | Yes | The file to upload (multipart). Accepted types: images, videos, audio, zip, safetensors. |
+| `project_node[project_id]` | integer | No | Attach the resource to this project. |
+| `asset_folder[id]` | integer | No | Place the resource inside this asset folder. |
+
+### Response
+
+```json
+{
+  "content_resource": {
+    "id": 5013,
+    "url": "https://cdn.gen.pro/uploads/ghi789.png",
+    "thumbnail_url": "https://cdn.gen.pro/uploads/ghi789_thumb.png",
+    "file_name": "banner.png",
+    "content_type": "image/png"
+  },
+  "project_node": {
+    "id": null
+  },
+  "generator": null
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -F "content_resource[file]=@/path/to/banner.png"
+
+# With project and folder attachment
+curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -F "content_resource[file]=@/path/to/banner.png" \
+  -F "project_node[project_id]=100" \
+  -F "asset_folder[id]=15"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to create resources for this agent. |
+| `422` | `content_resource_creation_failed` | Validation failed (e.g., unsupported file type, missing file). |
+
+---
+
+## Get content resource
+
+Returns a single content resource with full details, including the generating job if the resource was produced by an AI generation task.
+
+```
+GET /v1/content_resources/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns the resource. |
+| `id` | integer | Yes | The content resource ID (path parameter). |
+
+### Response
+
+```json
+{
+  "content_resource": {
+    "id": 5012,
+    "url": "https://cdn.gen.pro/uploads/abc123.png",
+    "thumbnail_url": "https://cdn.gen.pro/uploads/abc123_thumb.png",
+    "file_name": "product-hero.png",
+    "content_type": "image/png"
+  },
+  "project_node": {
+    "id": 830
+  },
+  "generator": {
+    "id": 2001,
+    "status": "completed",
+    "type": "gemini_image_generation"
+  }
+}
+```
+
+<Aside type="tip">
+  The `generator` field is `null` for manually uploaded resources. For AI-generated resources, it contains the job that produced the file.
+</Aside>
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/content_resources/5012?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `content_resource_not_found` | Resource does not exist or does not belong to this agent. |
+
+---
+
+## Update content resource
+
+Renames the file associated with a content resource.
+
+```
+PATCH /v1/content_resources/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns the resource. |
+| `id` | integer | Yes | The content resource ID (path parameter). |
+| `content_resource[filename]` | string | Yes | The new filename for the resource. |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/content_resources/5012?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"content_resource": {"filename": "hero-banner-v2.png"}}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to update resources for this agent. |
+| `404` | `not_found` | Resource not found. |
+| `422` | `validation_error` | Invalid filename or other validation failure. |
+
+---
+
+## Delete content resource
+
+Permanently deletes a content resource and its associated file.
+
+```
+DELETE /v1/content_resources/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns the resource. |
+| `id` | integer | Yes | The content resource ID (path parameter). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X DELETE "https://api.gen.pro/v1/content_resources/5012?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to delete resources for this agent. |
+| `404` | `not_found` | Resource not found. |
+| `422` | `validation_error` | Resource could not be deleted. |
+
+---
+
+## List asset library
+
+Returns a paginated, unified view of the agent's asset library. This combines content resources (files) and asset folders into a single list, with support for filtering by type, folder, and search.
+
+```
+GET /v1/asset_libraries
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent whose asset library to list. |
+| `folder_id` | integer | No | Show contents of a specific folder. Omit to show root-level items. |
+| `asset_type` | string | No | Comma-separated filter: `image`, `video`, `audio`, `folder`. Example: `image,video`. |
+| `search` | string | No | Search assets by name. |
+| `order` | string | No | Sort order. Use `recent` for newest first (default: folders first, then newest). |
+| `page` | integer | No | Page number (default `1`). |
+| `page_size` | integer | No | Items per page (default `20`). |
+
+### Response
+
+Items are polymorphic. Content resources include file details; folders include a name.
+
+```json
+[
+  {
+    "id": 15,
+    "type": "AssetFolder",
+    "name": "Brand Assets"
+  },
+  {
+    "id": 5012,
+    "type": "ContentResource",
+    "url": "https://cdn.gen.pro/uploads/abc123.png",
+    "thumbnail_url": "https://cdn.gen.pro/uploads/abc123_thumb.png",
+    "file_name": "product-hero.png",
+    "content_type": "image/png"
+  },
+  {
+    "id": 5008,
+    "type": "ContentResource",
+    "url": "https://cdn.gen.pro/uploads/def456.mp4",
+    "thumbnail_url": null,
+    "file_name": "intro-clip.mp4",
+    "content_type": "video/mp4"
+  }
+]
+```
+
+### Example
+
+```bash
+# Root-level assets
+curl "https://api.gen.pro/v1/asset_libraries?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+
+# Inside a folder, images only
+curl "https://api.gen.pro/v1/asset_libraries?agent_id=42&folder_id=15&asset_type=image" \
+  -H "X-API-Key: your-api-key"
+
+# Search
+curl "https://api.gen.pro/v1/asset_libraries?agent_id=42&search=banner" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `404` | `not_found` | Agent or folder not found. |
+
+---
+
+## Create asset folder
+
+Creates a new folder in the agent's asset library. Folders can be nested by specifying a `parent_id`.
+
+```
+POST /v1/asset_folders
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent to create the folder under. |
+| `asset_folder[name]` | string | Yes | Name of the folder. |
+| `asset_folder[parent_id]` | integer | No | ID of the parent folder for nesting. Omit to create at root level. |
+
+### Response
+
+```json
+{
+  "asset_folder_id": 16
+}
+```
+
+### Example
+
+```bash
+# Root-level folder
+curl -X POST "https://api.gen.pro/v1/asset_folders?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"asset_folder": {"name": "Campaign Q3"}}'
+
+# Nested folder
+curl -X POST "https://api.gen.pro/v1/asset_folders?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"asset_folder": {"name": "Thumbnails", "parent_id": 15}}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to modify this agent's assets. |
+| `422` | `validation_error` | Invalid folder name or parent. |
+
+---
+
+## Update asset folder
+
+Renames an existing asset folder.
+
+```
+PATCH /v1/asset_folders/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns the folder. |
+| `id` | integer | Yes | The asset folder ID (path parameter). |
+| `asset_folder[name]` | string | Yes | The new folder name. |
+
+### Response
+
+```json
+{
+  "asset_folder_id": 15
+}
+```
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/asset_folders/15?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"asset_folder": {"name": "Brand Assets 2026"}}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to modify this agent's assets. |
+| `404` | `not_found` | Folder not found or does not belong to this agent. |
+| `422` | `validation_error` | Invalid folder name. |
+
+---
+
+## Delete asset folder
+
+Permanently deletes an asset folder and all of its contents (subfolders and files).
+
+```
+DELETE /v1/asset_folders/:id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent that owns the folder. |
+| `id` | integer | Yes | The asset folder ID (path parameter). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X DELETE "https://api.gen.pro/v1/asset_folders/16?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | You do not have permission to delete this agent's assets. |
+| `404` | `not_found` | Folder not found or does not belong to this agent. |
+| `422` | `folder_removal_failed` | Folder could not be deleted. |
+
+---
+
+## Create direct upload
+
+Returns a pre-signed S3 URL for uploading a file directly from the client. This is the recommended approach for large files — the upload goes straight to S3 without passing through the API server.
+
+**Workflow:**
+1. Call this endpoint with file metadata to get a signed upload URL.
+2. `PUT` the file bytes to the returned `direct_upload.url` with the provided headers.
+3. Use the returned `signed_id` as the `content_resource[file]` value when creating a content resource.
+
+```
+POST /v1/direct_upload
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `blob[filename]` | string | Yes | Original filename including extension. |
+| `blob[byte_size]` | integer | Yes | File size in bytes. Maximum 1 GB. |
+| `blob[checksum]` | string | Yes | Base64-encoded MD5 checksum of the file. |
+| `blob[content_type]` | string | Yes | MIME type (e.g., `image/png`, `video/mp4`). |
+| `blob[metadata]` | object | No | Arbitrary key-value metadata to attach to the blob. |
+
+### Response
+
+```json
+{
+  "id": 98765,
+  "key": "abcdef123456",
+  "filename": "hero-video.mp4",
+  "content_type": "video/mp4",
+  "byte_size": 52428800,
+  "checksum": "x8F1TrG7p+mAWjK7Yv3QZA==",
+  "signed_id": "eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaH...",
+  "direct_upload": {
+    "url": "https://s3.amazonaws.com/gen-uploads/abcdef123456?X-Amz-Signature=...",
+    "headers": {
+      "Content-Type": "video/mp4",
+      "Content-MD5": "x8F1TrG7p+mAWjK7Yv3QZA=="
+    }
+  }
+}
+```
+
+### Example
+
+```bash
+# Step 1: Get the signed upload URL
+curl -X POST https://api.gen.pro/v1/direct_upload \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "blob": {
+      "filename": "hero-video.mp4",
+      "byte_size": 52428800,
+      "checksum": "x8F1TrG7p+mAWjK7Yv3QZA==",
+      "content_type": "video/mp4"
+    }
+  }'
+
+# Step 2: Upload the file directly to S3
+curl -X PUT "https://s3.amazonaws.com/gen-uploads/abcdef123456?X-Amz-Signature=..." \
+  -H "Content-Type: video/mp4" \
+  -H "Content-MD5: x8F1TrG7p+mAWjK7Yv3QZA==" \
+  --data-binary @hero-video.mp4
+
+# Step 3: Create the content resource using the signed_id
+curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"content_resource": {"file": "eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaH..."}}'
+```
+
+<Aside type="tip">
+  To compute the MD5 checksum for the `checksum` parameter: `openssl md5 -binary hero-video.mp4 | base64`
+</Aside>
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `422` | `invalid_content_type` | The MIME type is not in the accepted list. |
+| `422` | `file_size_exceeded` | File exceeds the 1 GB maximum. |
+| `422` | `direct_upload_failed` | Unexpected error creating the upload. |

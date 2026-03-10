@@ -1,0 +1,246 @@
+---
+title: Organizations
+description: Create and manage workspaces (organizations) that group agents, credits, and members.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Organizations are the top-level workspace container in GEN. Every agent, project, credit balance, and team member belongs to an organization. When you create a new organization, you automatically become its **owner** and a system agent is provisioned for it.
+
+## List organizations
+
+Returns all organizations where the authenticated user is a member, along with their role in each.
+
+```
+GET /v1/organizations
+```
+
+### Parameters
+
+None.
+
+### Response
+
+```json
+[
+  {
+    "id": 10,
+    "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "organization_id": 10,
+    "name": "My Workspace",
+    "avatar": {
+      "url": "https://cdn.gen.pro/avatars/org-10.png",
+      "thumbnail_url": "https://cdn.gen.pro/avatars/org-10-thumb.png"
+    },
+    "user_role": "owner",
+    "credit": "250.0",
+    "available_credit": {
+      "generic": "200.0",
+      "aura": "50.0"
+    },
+    "total_members": 3,
+    "credit_plan": {
+      "id": 1,
+      "name": "Pro",
+      "cycle": "MONTHLY"
+    }
+  }
+]
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/organizations \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+
+---
+
+## Create organization
+
+Creates a new organization. The authenticated user is assigned the **owner** role automatically.
+
+```
+POST /v1/organizations
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `organization[name]` | string | Yes | Display name for the organization. |
+| `organization[avatar]` | file | No | Avatar image (JPEG, PNG, WebP, GIF). |
+
+### Response
+
+```json
+{
+  "organization_id": 42
+}
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/organizations \
+  -H "X-API-Key: your-api-key" \
+  -X POST \
+  -d '{"organization":{"name":"New Workspace"}}'  \
+  -H "Content-Type: application/json"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `422` | `validation_error` | Validation failed (e.g. missing name). |
+
+---
+
+## Get organization
+
+Returns a single organization by ID, including the authenticated user's role.
+
+```
+GET /v1/organizations/:organization_id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `organization_id` | integer | Yes | The organization ID (path parameter). |
+
+### Response
+
+```json
+{
+  "id": 10,
+  "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "organization_id": 10,
+  "name": "My Workspace",
+  "avatar": {
+    "url": "https://cdn.gen.pro/avatars/org-10.png",
+    "thumbnail_url": "https://cdn.gen.pro/avatars/org-10-thumb.png"
+  },
+  "user_role": "owner",
+  "credit": "250.0",
+  "available_credit": {
+    "generic": "200.0",
+    "aura": "50.0"
+  },
+  "total_members": 3,
+  "credit_plan": {
+    "id": 1,
+    "name": "Pro",
+    "cycle": "MONTHLY"
+  }
+}
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/organizations/10 \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `422` | `organization_not_found` | Organization ID is missing or does not exist. |
+
+---
+
+## Update organization
+
+Updates an organization's name or avatar. Requires **owner** or **manager** role.
+
+```
+PATCH /v1/organizations/:organization_id
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `organization_id` | integer | Yes | The organization ID (path parameter). |
+| `organization[name]` | string | No | New display name. |
+| `organization[avatar]` | file | No | New avatar image (JPEG, PNG, WebP, GIF). |
+
+### Response
+
+```json
+{
+  "organization_id": 10
+}
+```
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/organizations/10 \
+  -H "X-API-Key: your-api-key" \
+  -X PATCH \
+  -d '{"organization":{"name":"Renamed Workspace"}}' \
+  -H "Content-Type: application/json"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | User does not have owner or manager role. |
+| `422` | `organization_not_found` | Organization ID is missing or does not exist. |
+| `422` | `validation_error` | Validation failed (e.g. blank name). |
+
+---
+
+## Delete organization
+
+Permanently deletes an organization and all associated data (agents, projects, jobs, credit history). Requires **owner** role.
+
+```
+DELETE /v1/organizations/:organization_id
+```
+
+<Aside type="caution">
+  This action is irreversible. All agents, projects, and credit data within the organization will be permanently destroyed.
+</Aside>
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `organization_id` | integer | Yes | The organization ID (path parameter). |
+
+### Response
+
+Returns HTTP `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/organizations/10 \
+  -H "X-API-Key: your-api-key" \
+  -X DELETE
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `forbidden` | User does not have owner role. |
+| `422` | `organization_not_found` | Organization ID is missing or does not exist. |

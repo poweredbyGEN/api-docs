@@ -183,6 +183,119 @@ Body: {automation_config: {webhook_url?, callback_url?, polling_enabled?}}
 POST /v1/agents/{agent_id}/automation_config/test_webhook
 POST /v1/agents/{agent_id}/automation_config/test_callback
 
+## Agents
+
+POST /v1/agents
+Body: {organization_id?, agent: {name, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes?}}
+→ {agent: {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, role, default_user_voice}}
+Errors: 422 agent_creation_failed, 422 organization_not_found, 422 invalid_api_key
+
+GET /v1/agents/{id}?with_organization_uuid=true
+→ {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, agent_setup_project_id, role, default_user_voice: {id, name, gender, language, provider, url}}
+Errors: 403 permission_denied, 422 agent_not_found
+
+PATCH /v1/agents/{id}
+Body: {agent: {name?, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes?, default_user_voice_attributes?: {source, voice_id}}}
+→ {agent: {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, role, default_user_voice}}
+Errors: 403 permission_denied, 404 user_voice_resource_not_found, 422 agent_not_found, 422 validation_error, 422 invalid_api_key, 422 voice_id_required
+
+DELETE /v1/agents/{id}
+→ 200 (empty body)
+Errors: 403 forbidden
+
+GET /v1/agents/{agent_id}/avatars?cursor={cursor}
+→ [{id, is_primary, url, thumbnail_url, degod_avatar_id}]
+Cursor-based pagination (20 per page). Primary avatar listed first.
+
+POST /v1/agents/{agent_id}/avatars
+Body (multipart): agent_avatars_attributes[]: {file (JPEG/PNG/WebP) or degod_avatar_id}
+→ 200 (empty body)
+Errors: 422 avatar_creation_failed
+
+PATCH /v1/agents/{agent_id}/avatars/{id}
+Sets avatar as primary. All other avatars marked non-primary.
+→ 200 (empty body)
+Errors: 422 avatar_update_failed
+
+DELETE /v1/agents/{agent_id}/avatars/{id}
+id can be multiple IDs separated by underscores (e.g. 7_8_9).
+→ 200 (empty body)
+
+## Organizations
+
+GET /v1/organizations
+→ [{id, uuid, organization_id, name, avatar: {url, thumbnail_url}, user_role, credit, available_credit: {generic, aura}, total_members, credit_plan: {id, name, cycle}}]
+
+POST /v1/organizations
+Body: {organization: {name, avatar? (file)}}
+→ {organization_id}
+Errors: 422 validation_error
+
+GET /v1/organizations/{organization_id}
+→ {id, uuid, organization_id, name, avatar, user_role, credit, available_credit, total_members, credit_plan}
+Errors: 422 organization_not_found
+
+PATCH /v1/organizations/{organization_id}
+Body: {organization: {name?, avatar? (file)}}
+→ {organization_id}
+Errors: 403 forbidden (not owner/manager), 422 organization_not_found, 422 validation_error
+
+DELETE /v1/organizations/{organization_id}
+Permanently deletes organization and all associated data. Requires owner role. Irreversible.
+→ 200 (empty body)
+Errors: 403 forbidden (not owner), 422 organization_not_found
+
+## Content Resources & Assets
+
+GET /v1/content_resources?agent_id={id}&type={image|video|audio|zip|safe_tensors}&project_id={id}&ids[]={id}&page={page}
+→ [{id, url, thumbnail_url, file_name, content_type}]
+20 items per page (page starts at 0).
+
+POST /v1/content_resources?agent_id={id}
+Body (multipart): content_resource[file] (required), project_node[project_id]?, asset_folder[id]?
+→ {content_resource: {id, url, thumbnail_url, file_name, content_type}, project_node: {id}, generator: null}
+Errors: 403 forbidden, 422 content_resource_creation_failed
+
+GET /v1/content_resources/{id}?agent_id={id}
+→ {content_resource: {id, url, thumbnail_url, file_name, content_type}, project_node: {id}, generator: {id, status, type} | null}
+generator is null for manual uploads, contains job info for AI-generated resources.
+Errors: 404 content_resource_not_found
+
+PATCH /v1/content_resources/{id}?agent_id={id}
+Body: {content_resource: {filename}}
+→ 200 (empty body)
+Errors: 403 forbidden, 404 not_found, 422 validation_error
+
+DELETE /v1/content_resources/{id}?agent_id={id}
+→ 200 (empty body)
+Errors: 403 forbidden, 404 not_found, 422 validation_error
+
+GET /v1/asset_libraries?agent_id={id}&folder_id={id}&asset_type={image,video,audio,folder}&search={query}&order={recent}&page={page}&page_size={size}
+Unified view of files and folders. Polymorphic response — items have "type": "AssetFolder" or "ContentResource".
+→ [{id, type: "AssetFolder", name} | {id, type: "ContentResource", url, thumbnail_url, file_name, content_type}]
+
+POST /v1/asset_folders?agent_id={id}
+Body: {asset_folder: {name, parent_id?}}
+→ {asset_folder_id}
+Errors: 403 forbidden, 422 validation_error
+
+PATCH /v1/asset_folders/{id}?agent_id={id}
+Body: {asset_folder: {name}}
+→ {asset_folder_id}
+Errors: 403 forbidden, 404 not_found, 422 validation_error
+
+DELETE /v1/asset_folders/{id}?agent_id={id}
+Deletes folder and all contents (subfolders and files).
+→ 200 (empty body)
+Errors: 403 forbidden, 404 not_found, 422 folder_removal_failed
+
+POST /v1/direct_upload
+Get a pre-signed S3 URL for large file uploads. Workflow: (1) call this, (2) PUT file to returned URL with headers, (3) use signed_id as content_resource[file].
+Body: {blob: {filename, byte_size (max 1GB), checksum (base64 MD5), content_type, metadata?}}
+→ {id, key, filename, content_type, byte_size, checksum, signed_id, direct_upload: {url, headers: {Content-Type, Content-MD5}}}
+Compute checksum: openssl md5 -binary file | base64
+Errors: 422 invalid_content_type, 422 file_size_exceeded, 422 direct_upload_failed
+
 ## Error Format
 
 {error: "Human-readable message", error_code: "machine_code"}

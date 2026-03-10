@@ -68,6 +68,9 @@ export default defineConfig({
 						{ label: 'Variables', slug: 'reference/variables' },
 						{ label: 'Automation', slug: 'reference/automation' },
 						{ label: 'Pipelines', slug: 'reference/pipelines' },
+						{ label: 'Agents', slug: 'reference/agents' },
+						{ label: 'Organizations', slug: 'reference/organizations' },
+						{ label: 'Content Resources', slug: 'reference/content-resources' },
 					],
 				},
 				{

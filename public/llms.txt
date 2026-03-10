@@ -40,6 +40,29 @@ Auth: X-API-Key header with Personal Access Token
 - GET /v1/autocontentengine/{id}/global_variables — get variables
 - GET /v1/agents/{agent_id}/automation_config — get webhook config
 - PATCH /v1/agents/{agent_id}/automation_config — update webhook config
+- POST /v1/agents — create agent
+- GET /v1/agents/{id} — get agent details
+- PATCH /v1/agents/{id} — update agent
+- DELETE /v1/agents/{id} — delete agent
+- GET /v1/agents/{agent_id}/avatars — list agent avatars
+- POST /v1/agents/{agent_id}/avatars — create avatar
+- PATCH /v1/agents/{agent_id}/avatars/{id} — set avatar as primary
+- DELETE /v1/agents/{agent_id}/avatars/{id} — delete avatar
+- GET /v1/organizations — list organizations
+- POST /v1/organizations — create organization
+- GET /v1/organizations/{organization_id} — get organization
+- PATCH /v1/organizations/{organization_id} — update organization
+- DELETE /v1/organizations/{organization_id} — delete organization
+- GET /v1/content_resources — list content resources
+- POST /v1/content_resources — create content resource (upload file)
+- GET /v1/content_resources/{id} — get content resource
+- PATCH /v1/content_resources/{id} — update content resource (rename)
+- DELETE /v1/content_resources/{id} — delete content resource
+- GET /v1/asset_libraries — list asset library (files + folders)
+- POST /v1/asset_folders — create asset folder
+- PATCH /v1/asset_folders/{id} — update asset folder (rename)
+- DELETE /v1/asset_folders/{id} — delete asset folder
+- POST /v1/direct_upload — create direct upload (pre-signed S3 URL)
 
 ## Optional
 
