@@ -1,0 +1,195 @@
+# GEN — Auto Content Engine API (Full Reference)
+
+> GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically — every single day.
+
+## Overview
+
+GEN is structured as: Workspace → Agent → Auto Content Engine → Content Loop
+
+- **Workspace**: Top-level container for a company or brand
+- **Agent**: A brand identity with voice, personality, and strategy
+- **Auto Content Engine**: Self-running content system with sheet (rows/columns/cells), video layers, automations, and global variables
+- **Content Loop**: Spot → Generate → Deploy → Measure → Adapt → Repeat
+
+## Authentication
+
+Base URL: https://api.gen.pro/v1
+Auth: `X-API-Key: <your-api-key>` header
+
+Create an API key: POST /v1/persisted_tokens
+The plain-text key is returned once in the `token` field. Store it securely.
+
+All /v1/autocontentengine/ endpoints require:
+- `agent_id` query parameter
+- Active GEN credit balance
+
+## OpenAPI Spec
+
+Full OpenAPI 3.1 specification: https://api.gen.pro/openapi.yaml
+
+## Discovery
+
+GET /v1/me
+→ {id, email, name, username, created_at}
+
+GET /v1/workspaces
+→ [{id, name}]
+
+GET /v1/agents?workspace_id={id}
+→ [{id, name}]
+
+## API Keys
+
+POST /v1/persisted_tokens
+Body: {name?, expires_in?}
+→ {id, name, token_type, status, token} (token shown once)
+
+GET /v1/persisted_tokens
+→ [{id, name, token_type, created_at, expires_at, last_used_at, revoked_at, status}]
+
+PATCH /v1/persisted_tokens/{id}
+Body: {persisted_token: {name}}
+
+DELETE /v1/persisted_tokens/{id}/revoke
+
+DELETE /v1/persisted_tokens/revoke_all
+
+## Auto Content Engine
+
+POST /v1/autocontentengine?agent_id={id}
+Body: {spreadsheet: {title, is_default?}}
+→ Full engine object with columns, rows, cells
+
+GET /v1/autocontentengine/{id}?agent_id={id}&with_execution_cost=true
+→ Full engine with nested data
+
+POST /v1/autocontentengine/{id}/clone?agent_id={id}
+Body: {target_agent_id?}
+
+## Rows
+
+GET /v1/autocontentengine/{id}/rows?agent_id={id}
+POST /v1/autocontentengine/{id}/rows?agent_id={id}
+Body: {spreadsheet_row: {position?}}
+
+GET /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id}
+POST /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id}
+PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={id}
+Body: {rows: [{id, position}]}
+
+PUT /v1/autocontentengine/{id}/rows/mass_update?agent_id={id}
+
+## Columns
+
+GET /v1/autocontentengine/{id}/columns?agent_id={id}
+POST /v1/autocontentengine/{id}/columns?agent_id={id}
+Body: {spreadsheet_column: {title, type, position?}}
+
+POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
+PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
+PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
+
+## Cells
+
+GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
+Body: {spreadsheet_cell: {value}}
+
+PUT /v1/autocontentengine/{id}/cells/mass_update?agent_id={id}
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}
+Body: {user_job_id}
+
+## Layers
+
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id}
+Body: {video_layer: {name, type, position?}}
+
+GET /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+POST .../layers/{layer_id}/duplicate?agent_id={id}
+PUT .../layers/update_positions?agent_id={id}
+
+## Generations
+
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
+Body: {generation_type, data: {prompt, model, ...}}
+→ {generation_id, status: "pending"}
+
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
+Body: {generation_type, data: {...}}
+→ {generation_id, status: "pending"}
+
+GET /v1/generations/{id}
+→ {id, status, user_job_type, result, output_resources: [{id, url, thumbnail_url, object_type}]}
+
+POST /v1/generations/{id}/stop → credits refunded
+POST /v1/generations/{id}/continue → credits re-charged
+
+## Creation Card Types
+
+Each cell in a content engine has a creation card type that determines what kind of content it generates:
+
+### Text
+Models: Gemini, OpenAI
+Inputs: text (supports AI generation), variables
+
+### Image from text
+Models: Gemini, Gemini Pro, Midjourney
+Inputs: prompt (AI text + variables), aspect ratio (1:1, 9:16, 16:9)
+
+### Video from text
+Models: Veo 3, Veo 3 Fast, Veo 3.1, Veo 3.1 Fast, Sora 2, Kling 1.6, Seedance Pro, Seedance Pro 1.5
+Inputs: prompt, negative prompt, ratio, duration, variables
+
+### Video from image
+Models: Kling 2.1, Kling 2.6, Veo 3, Veo 3 Fast, Veo 3.1, Veo 3.1 Fast, Sora 2, Seedance Lite, Seedance Pro, Seedance Pro 1.5
+Inputs: image, image tail (optional), prompt, negative prompt, ratio, duration
+
+### Video from ingredients
+Models: Pika, Kling 1.6, Seedance Lite, Veo 3.1, Veo 3.1 Fast
+Inputs: prompt (with asset selector), ratio, duration
+
+### Speech from text
+Voice methods: My Voices, Design Voice, Clone Voice
+Inputs: voice selection, script, enhance voice, language, gender
+
+### Lipsync
+Models: sync.so, gen
+Inputs: video, audio, lipsync model
+
+### Captions
+Models: Gemini
+Inputs: audio/video
+
+### Media
+Upload: image or video file
+
+## Global Variables
+
+GET /v1/autocontentengine/{id}/global_variables?agent_id={id}
+POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}
+(multipart/form-data with XLSX file)
+
+GET /v1/autocontentengine/global_variables_template
+→ XLSX template download
+
+## Automation
+
+GET /v1/agents/{agent_id}/automation_config
+PATCH /v1/agents/{agent_id}/automation_config
+Body: {automation_config: {webhook_url?, callback_url?, polling_enabled?}}
+
+POST /v1/agents/{agent_id}/automation_config/test_webhook
+POST /v1/agents/{agent_id}/automation_config/test_callback
+
+## Error Format
+
+{error: "Human-readable message", error_code: "machine_code"}
+
+Common codes:
+- 401 unauthorized — invalid API key
+- 404 not_found — resource doesn't exist
+- 422 usable_gen_credit_required — no active credits
+- 422 agent_not_found — invalid agent_id
+- 422 insufficient_credits_for_job — not enough credits

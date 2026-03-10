@@ -1,0 +1,48 @@
+# GEN — Auto Content Engine API
+
+> GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically.
+
+The Auto Content Engine API provides programmatic access to GEN's content creation system.
+
+## Docs
+
+- [API Documentation](https://api.gen.pro)
+- [OpenAPI 3.1 Spec](https://api.gen.pro/openapi.yaml)
+- [Getting Started](https://api.gen.pro/guides/introduction/)
+- [Authentication](https://api.gen.pro/guides/authentication/)
+- [Quick Start](https://api.gen.pro/guides/quickstart/)
+
+## API
+
+Base URL: https://api.gen.pro/v1
+Auth: X-API-Key header with Personal Access Token
+
+### Endpoints
+
+- GET /v1/me — current user
+- GET /v1/workspaces — list workspaces
+- GET /v1/agents — list agents
+- POST /v1/persisted_tokens — create API key
+- GET /v1/persisted_tokens — list API keys
+- POST /v1/autocontentengine — create content engine
+- GET /v1/autocontentengine/{id} — get content engine
+- POST /v1/autocontentengine/{id}/clone — clone content engine
+- GET /v1/autocontentengine/{id}/rows — list rows
+- POST /v1/autocontentengine/{id}/rows — create row
+- GET /v1/autocontentengine/{id}/columns — list columns
+- POST /v1/autocontentengine/{id}/columns — create column
+- GET /v1/autocontentengine/{id}/cells/{cell_id} — get cell
+- PATCH /v1/autocontentengine/{id}/cells/{cell_id} — update cell
+- POST /v1/autocontentengine/{id}/cells/{cell_id}/generate — generate content
+- POST /v1/autocontentengine/{id}/cells/{cell_id}/layers — create layer
+- GET /v1/generations/{id} — check generation status
+- POST /v1/generations/{id}/stop — stop generation
+- GET /v1/autocontentengine/{id}/global_variables — get variables
+- GET /v1/agents/{agent_id}/automation_config — get webhook config
+- PATCH /v1/agents/{agent_id}/automation_config — update webhook config
+
+## Optional
+
+- [llms-full.txt](https://api.gen.pro/llms-full.txt)
+- [Help Center](https://docs.gen.pro)
+- [GEN Homepage](https://www.gen.pro)

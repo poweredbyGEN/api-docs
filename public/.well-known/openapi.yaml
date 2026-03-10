@@ -1,0 +1,1548 @@
+openapi: 3.1.0
+info:
+  title: Auto Content Engine API
+  description: |
+    The Auto Content Engine API lets you programmatically manage vidsheets (content spreadsheets),
+    generate AI content, and automate video creation workflows.
+
+    ## Authentication
+
+    All endpoints require authentication via one of:
+
+    - **API Key** (recommended): Pass your API key in the `X-API-Key` header. Create keys in Settings > API Keys.
+    - **JWT**: Pass a Clerk/Dynamic XYZ JWT in the `Authorization: Bearer <token>` header.
+
+    ## Base URL
+
+    ```
+    https://api.gen.pro/v1
+    ```
+
+    ## Credits
+
+    All `/v1/autocontentengine/` endpoints require an active GEN credit balance.
+    If your organization has no usable credits, requests return `422` with error code `usable_gen_credit_required`.
+
+  version: 1.0.0
+  contact:
+    name: GEN Support
+    url: https://gen.pro
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.gen.pro/v1
+    description: Production
+  - url: https://stagingapi.gen.pro/v1
+    description: Staging
+
+security:
+  - apiKey: []
+  - bearerAuth: []
+
+tags:
+  - name: Discovery
+    description: Identify the authenticated user, their workspaces, and agents.
+  - name: API Keys
+    description: Create and manage Personal Access Tokens (PATs) for API authentication.
+  - name: Sheets
+    description: Create and retrieve Auto Content Engine sheets (vidsheets).
+  - name: Rows
+    description: Manage rows within a sheet.
+  - name: Columns
+    description: Manage columns within a sheet.
+  - name: Cells
+    description: Read and update individual cells.
+  - name: Layers
+    description: Manage video layers within cells.
+  - name: Generations
+    description: Trigger AI content generation on cells and layers.
+  - name: Variables
+    description: Global variables for template substitution.
+  - name: Automation
+    description: Agent-level webhook and callback configuration.
+
+paths:
+  # ── Discovery ──────────────────────────────────────────────
+  /me:
+    get:
+      operationId: getMe
+      summary: Get current user
+      description: Returns the authenticated user's profile. Use this to verify your API key works.
+      tags: [Discovery]
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: "abc123"
+                email: "user@example.com"
+                name: "Jane Doe"
+                username: "janedoe"
+                created_at: "2025-01-15T10:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      summary: List workspaces
+      description: Returns organizations where the authenticated user is an owner or manager.
+      tags: [Discovery]
+      responses:
+        '200':
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agents:
+    get:
+      operationId: listAgents
+      summary: List agents
+      description: Returns all agents the authenticated user has access to across their workspaces.
+      tags: [Discovery]
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Filter by workspace (organization) ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── API Keys ───────────────────────────────────────────────
+  /persisted_tokens:
+    get:
+      operationId: listApiKeys
+      summary: List API keys
+      description: Returns all API keys for the authenticated user, including revoked and expired ones.
+      tags: [API Keys]
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createApiKey
+      summary: Create API key
+      description: |
+        Creates a new API key. The plain-text key is returned **only once** in the response.
+        Store it securely — it cannot be retrieved again.
+      tags: [API Keys]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Human-readable label. Auto-generated if omitted.
+                  example: "My n8n workflow"
+                expires_in:
+                  type: integer
+                  description: Seconds until expiration. Omit for non-expiring keys.
+                  example: 2592000
+      responses:
+        '201':
+          description: API key created. The `token` field contains the plain-text key.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiKey'
+                  - type: object
+                    properties:
+                      token:
+                        type: string
+                        description: The plain-text API key. Store it now — it won't be shown again.
+                        example: "gen_abc123def456..."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /persisted_tokens/{id}:
+    patch:
+      operationId: updateApiKey
+      summary: Rename API key
+      tags: [API Keys]
+      parameters:
+        - $ref: '#/components/parameters/TokenId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [persisted_token]
+              properties:
+                persisted_token:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Renamed key"
+      responses:
+        '200':
+          description: Updated API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /persisted_tokens/{id}/revoke:
+    delete:
+      operationId: revokeApiKey
+      summary: Revoke API key
+      description: Permanently revokes a single API key. This cannot be undone.
+      tags: [API Keys]
+      parameters:
+        - $ref: '#/components/parameters/TokenId'
+      responses:
+        '200':
+          description: Key revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /persisted_tokens/revoke_all:
+    delete:
+      operationId: revokeAllApiKeys
+      summary: Revoke all API keys
+      description: Revokes every active API key for the authenticated user.
+      tags: [API Keys]
+      responses:
+        '200':
+          description: All keys revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully revoked 3 tokens"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── Sheets ─────────────────────────────────────────────────
+  /autocontentengine:
+    post:
+      operationId: createSheet
+      summary: Create a sheet
+      description: Creates a new Auto Content Engine sheet for the specified agent.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [spreadsheet]
+              properties:
+                spreadsheet:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: "Q1 TikTok Campaign"
+                    is_default:
+                      type: boolean
+                      default: false
+      responses:
+        '201':
+          description: Sheet created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/CreditRequired'
+
+  /autocontentengine/{sheet_id}:
+    get:
+      operationId: getSheet
+      summary: Get a sheet
+      description: |
+        Returns a sheet with all columns, rows, cells, layers, and global variables.
+        Pass `with_execution_cost=true` to include credit cost per cell/row.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - name: with_execution_cost
+          in: query
+          schema:
+            type: boolean
+          description: Include execution cost for each cell and row.
+      responses:
+        '200':
+          description: Sheet with full data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/CreditRequired'
+
+  /autocontentengine/{sheet_id}/clone:
+    post:
+      operationId: cloneSheet
+      summary: Clone a sheet
+      description: Creates a deep copy of the sheet, optionally into a different agent.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target_agent_id:
+                  type: string
+                  description: Agent to clone into. Defaults to the same agent.
+      responses:
+        '201':
+          description: Cloned sheet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/CreditRequired'
+
+  # ── Rows ───────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/rows:
+    get:
+      operationId: listRows
+      summary: List rows
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      responses:
+        '200':
+          description: List of rows with cells
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Row'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createRow
+      summary: Create a row
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spreadsheet_row:
+                  type: object
+                  properties:
+                    position:
+                      type: integer
+                      description: Position index for ordering.
+      responses:
+        '201':
+          description: Row created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /autocontentengine/{sheet_id}/rows/{row_id}:
+    get:
+      operationId: getRow
+      summary: Get a row
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/RowId'
+      responses:
+        '200':
+          description: Row with cells
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /autocontentengine/{sheet_id}/rows/{row_id}/duplicate:
+    post:
+      operationId: duplicateRow
+      summary: Duplicate a row
+      description: Creates a deep copy of the row including all cells and layers.
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/RowId'
+      responses:
+        '201':
+          description: Duplicated row
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /autocontentengine/{sheet_id}/rows/update_positions:
+    put:
+      operationId: updateRowPositions
+      summary: Reorder rows
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rows]
+              properties:
+                rows:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, position]
+                    properties:
+                      id:
+                        type: string
+                      position:
+                        type: integer
+      responses:
+        '200':
+          description: Updated rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Row'
+
+  /autocontentengine/{sheet_id}/rows/mass_update:
+    put:
+      operationId: massUpdateRows
+      summary: Bulk update rows
+      tags: [Rows]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Bulk row update payload
+      responses:
+        '200':
+          description: Updated rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Row'
+
+  # ── Columns ────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/columns:
+    get:
+      operationId: listColumns
+      summary: List columns
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      responses:
+        '200':
+          description: List of columns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Column'
+
+    post:
+      operationId: createColumn
+      summary: Create a column
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spreadsheet_column:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: "Video Script"
+                    type:
+                      type: string
+                      example: "text"
+                    position:
+                      type: integer
+      responses:
+        '201':
+          description: Column created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+
+  /autocontentengine/{sheet_id}/columns/{column_id}/duplicate:
+    post:
+      operationId: duplicateColumn
+      summary: Duplicate a column
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - name: column_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Duplicated column
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+
+  /autocontentengine/{sheet_id}/columns/update_positions:
+    patch:
+      operationId: updateColumnPositions
+      summary: Reorder columns
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [columns]
+              properties:
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, position]
+                    properties:
+                      id:
+                        type: string
+                      position:
+                        type: integer
+      responses:
+        '200':
+          description: Updated columns
+
+  /autocontentengine/{sheet_id}/columns/mass_update:
+    put:
+      operationId: massUpdateColumns
+      summary: Bulk update columns
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated columns
+
+  # ── Cells ──────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/cells/{cell_id}:
+    get:
+      operationId: getCell
+      summary: Get a cell
+      tags: [Cells]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      responses:
+        '200':
+          description: Cell with layers and job history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cell'
+
+    patch:
+      operationId: updateCell
+      summary: Update a cell
+      description: Update the value or attributes of a cell.
+      tags: [Cells]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spreadsheet_cell:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                      description: The cell's text content.
+                      example: "A day in the life of a content creator..."
+      responses:
+        '200':
+          description: Updated cell
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cell'
+
+  /autocontentengine/{sheet_id}/cells/mass_update:
+    put:
+      operationId: massUpdateCells
+      summary: Bulk update cells
+      tags: [Cells]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated cells
+
+  /autocontentengine/{sheet_id}/cells/{cell_id}/set_default_user_job:
+    patch:
+      operationId: setDefaultUserJob
+      summary: Set default generation for a cell
+      description: Pin a specific generation result as the active/visible one for this cell.
+      tags: [Cells]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_job_id]
+              properties:
+                user_job_id:
+                  type: string
+                  description: The generation (UserJob) ID to set as default.
+      responses:
+        '200':
+          description: Updated cell
+
+  # ── Layers ─────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/cells/{cell_id}/layers:
+    post:
+      operationId: createLayer
+      summary: Create a layer
+      description: Add a new video layer (text, sound, clip, etc.) to a cell.
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_layer:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Background Music"
+                    type:
+                      type: string
+                      example: "sound"
+                    position:
+                      type: integer
+      responses:
+        '201':
+          description: Layer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layer'
+
+  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
+    get:
+      operationId: getLayer
+      summary: Get a layer
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+        - $ref: '#/components/parameters/LayerId'
+      responses:
+        '200':
+          description: Layer detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layer'
+
+    patch:
+      operationId: updateLayer
+      summary: Update a layer
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+        - $ref: '#/components/parameters/LayerId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_layer:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    additional_attributes:
+                      type: object
+      responses:
+        '200':
+          description: Updated layer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layer'
+
+    delete:
+      operationId: deleteLayer
+      summary: Delete a layer
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+        - $ref: '#/components/parameters/LayerId'
+      responses:
+        '204':
+          description: Layer deleted
+
+  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
+    post:
+      operationId: duplicateLayer
+      summary: Duplicate a layer
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+        - $ref: '#/components/parameters/LayerId'
+      responses:
+        '201':
+          description: Duplicated layer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layer'
+
+  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/update_positions:
+    put:
+      operationId: updateLayerPositions
+      summary: Reorder layers
+      tags: [Layers]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [layers]
+              properties:
+                layers:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, position]
+                    properties:
+                      id:
+                        type: string
+                      position:
+                        type: integer
+      responses:
+        '200':
+          description: Updated layers
+
+  # ── Generations ────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/cells/{cell_id}/generate:
+    post:
+      operationId: generateCellContent
+      summary: Generate content for a cell
+      description: |
+        Triggers AI content generation for a cell. Credits are pre-charged.
+        Poll the generation status via `GET /v1/generations/{id}`.
+      tags: [Generations]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [generation_type, data]
+              properties:
+                generation_type:
+                  type: string
+                  description: The type of AI generation to run.
+                  example: "gemini_content_generation"
+                data:
+                  type: object
+                  description: Generation parameters (varies by type).
+                  example:
+                    prompt: "Write a TikTok script about morning routines"
+      responses:
+        '201':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "pending"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Insufficient credits or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
+    post:
+      operationId: generateLayerContent
+      summary: Generate content for a layer
+      description: |
+        Triggers AI generation for a video layer (voice, music, clip, etc.).
+        Credits are pre-charged. Poll status via `GET /v1/generations/{id}`.
+      tags: [Generations]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+        - $ref: '#/components/parameters/LayerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [generation_type, data]
+              properties:
+                generation_type:
+                  type: string
+                  example: "eleven_labs_voice"
+                data:
+                  type: object
+      responses:
+        '201':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "pending"
+
+  /generations/{generation_id}:
+    get:
+      operationId: getGeneration
+      summary: Get generation status
+      description: Check the status and result of an AI generation job.
+      tags: [Generations]
+      parameters:
+        - name: generation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Generation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+
+  /generations/{generation_id}/stop:
+    post:
+      operationId: stopGeneration
+      summary: Stop a generation
+      description: Cancels a running generation. Credits are refunded.
+      tags: [Generations]
+      parameters:
+        - name: generation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Generation stopped
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "stopped"
+
+  /generations/{generation_id}/continue:
+    post:
+      operationId: continueGeneration
+      summary: Continue a stopped generation
+      description: Resumes a previously stopped generation. Credits are re-charged.
+      tags: [Generations]
+      parameters:
+        - name: generation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Generation resumed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "pending"
+
+  # ── Variables ──────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/global_variables:
+    get:
+      operationId: getGlobalVariables
+      summary: Get global variables
+      description: Returns the global variables sheet associated with this sheet.
+      tags: [Variables]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      responses:
+        '200':
+          description: Global variables sheet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+
+  /autocontentengine/{sheet_id}/import_global_variables:
+    post:
+      operationId: importGlobalVariables
+      summary: Import global variables from XLSX
+      description: Upload an XLSX file to populate the global variables sheet.
+      tags: [Variables]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: XLSX file with global variables
+      responses:
+        '200':
+          description: Variables imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+
+  /autocontentengine/global_variables_template:
+    get:
+      operationId: downloadVariablesTemplate
+      summary: Download variables template
+      description: Downloads a blank XLSX template for global variables.
+      tags: [Variables]
+      responses:
+        '200':
+          description: XLSX file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  # ── Automation ─────────────────────────────────────────────
+  /agents/{agent_id}/automation_config:
+    get:
+      operationId: getAutomationConfig
+      summary: Get automation config
+      description: Returns the agent's webhook and callback configuration.
+      tags: [Automation]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      responses:
+        '200':
+          description: Automation configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationConfig'
+
+    patch:
+      operationId: updateAutomationConfig
+      summary: Update automation config
+      description: Configure webhooks and callbacks for the agent.
+      tags: [Automation]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [automation_config]
+              properties:
+                automation_config:
+                  type: object
+                  properties:
+                    webhook_url:
+                      type: string
+                      format: uri
+                      description: URL to receive event notifications.
+                      example: "https://hooks.example.com/gen"
+                    callback_url:
+                      type: string
+                      format: uri
+                      description: URL to receive generation completion callbacks.
+                      example: "https://api.example.com/callbacks/gen"
+                    polling_enabled:
+                      type: boolean
+                      description: Enable polling-based status checks.
+      responses:
+        '200':
+          description: Updated config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationConfig'
+
+  /agents/{agent_id}/automation_config/test_webhook:
+    post:
+      operationId: testWebhook
+      summary: Test webhook
+      description: Sends a test payload to the configured webhook URL.
+      tags: [Automation]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+
+  /agents/{agent_id}/automation_config/test_callback:
+    post:
+      operationId: testCallback
+      summary: Test callback
+      description: Sends a test payload to the configured callback URL.
+      tags: [Automation]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Personal Access Token (PAT). Create one in Settings > API Keys.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk/Dynamic XYZ JWT token.
+
+  parameters:
+    AgentId:
+      name: agent_id
+      in: query
+      required: true
+      description: The agent ID. Find via `GET /v1/agents`.
+      schema:
+        type: string
+    AgentIdPath:
+      name: agent_id
+      in: path
+      required: true
+      schema:
+        type: string
+    SheetId:
+      name: sheet_id
+      in: path
+      required: true
+      schema:
+        type: string
+    RowId:
+      name: row_id
+      in: path
+      required: true
+      schema:
+        type: string
+    CellId:
+      name: cell_id
+      in: path
+      required: true
+      schema:
+        type: string
+    LayerId:
+      name: layer_id
+      in: path
+      required: true
+      schema:
+        type: string
+    TokenId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        created_at:
+          type: string
+
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        token_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [active, expired, revoked]
+
+    Sheet:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        project_type:
+          type: string
+        is_default:
+          type: boolean
+        uuid:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: integer
+          description: Unix timestamp (seconds)
+        created_at_ts:
+          type: integer
+          description: Unix timestamp (milliseconds)
+        updated_at_ts:
+          type: integer
+          description: Unix timestamp (milliseconds)
+        spreadsheet_columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+        spreadsheet_rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+        global_variables_sheet:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Sheet'
+
+    Row:
+      type: object
+      properties:
+        id:
+          type: string
+        position:
+          type: integer
+        additional_attributes:
+          type: object
+        created_at_ts:
+          type: integer
+        updated_at_ts:
+          type: integer
+        spreadsheet_cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cell'
+        execution_cost:
+          type: string
+          nullable: true
+          description: Total credit cost (only when `with_execution_cost=true`).
+
+    Column:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        temp_title:
+          type: string
+          nullable: true
+        type:
+          type: string
+        column_role:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        position:
+          type: integer
+        additional_attributes:
+          type: object
+        created_at_ts:
+          type: integer
+        updated_at_ts:
+          type: integer
+
+    Cell:
+      type: object
+      properties:
+        id:
+          type: string
+        value:
+          type: string
+          nullable: true
+        additional_attributes:
+          type: object
+        cell_role:
+          type: string
+          nullable: true
+        created_at_ts:
+          type: integer
+        updated_at_ts:
+          type: integer
+        default_user_job:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Generation'
+        user_jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Generation'
+        video_layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Layer'
+        execution_cost:
+          type: string
+          nullable: true
+
+    Layer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        position:
+          type: integer
+        type:
+          type: string
+        additional_attributes:
+          type: object
+        created_at_ts:
+          type: integer
+        updated_at_ts:
+          type: integer
+        default_user_job:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Generation'
+        user_jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Generation'
+        execution_cost:
+          type: string
+          nullable: true
+
+    Generation:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, stopped]
+        user_job_type:
+          type: string
+        result:
+          type: object
+          nullable: true
+        failed_reason:
+          type: string
+          nullable: true
+        output_resources:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              url:
+                type: string
+                format: uri
+              thumbnail_url:
+                type: string
+                format: uri
+                nullable: true
+              object_type:
+                type: string
+                description: '"Video", "Image", etc.'
+              type:
+                type: string
+        execution_cost:
+          type: string
+          nullable: true
+
+    AutomationConfig:
+      type: object
+      properties:
+        webhook_url:
+          type: string
+          format: uri
+          nullable: true
+        callback_url:
+          type: string
+          format: uri
+          nullable: true
+        polling_enabled:
+          type: boolean
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+        error_code:
+          type: string
+          description: Machine-readable error code.
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+            error_code: "unauthorized"
+
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Not found"
+            error_code: "not_found"
+
+    CreditRequired:
+      description: Active GEN credits required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "GEN credits are required to use the API."
+            error_code: "usable_gen_credit_required"
