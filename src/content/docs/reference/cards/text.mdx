@@ -1,0 +1,103 @@
+---
+title: "Text"
+description: AI-generated text content using Gemini or OpenAI.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate text content — scripts, captions, descriptions, and more — using Gemini or OpenAI models. The prompt can include template variables that are substituted from your sheet's global variables.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Generation types
+
+| Model | `generation_type` value |
+|-------|------------------------|
+| Gemini | `gemini_content_generation` |
+| OpenAI | `openai_content_generation` |
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `gemini_content_generation` or `openai_content_generation`. |
+| `data.prompt` | string | Yes | The text prompt. Supports `{{variable_name}}` template syntax. |
+| `data.model` | string | No | `"gemini"` or `"openai"`. Defaults to match `generation_type`. |
+| `data.temperature` | float | No | Controls randomness. Default `0.2`. Range `0.0` - `1.0`. |
+| `data.max_length` | integer | No | Maximum output length in tokens. |
+| `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
+
+<Aside type="tip">
+  Use `{{variable_name}}` in your prompt to reference global variables. For example, `"Write a script about {{product_name}}"` will substitute the value of `product_name` from your sheet's variables.
+</Aside>
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9000,
+  "status": "pending"
+}
+```
+
+Once complete, the generation result contains the generated text in the `result` field. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_content_generation",
+    "data": {
+      "prompt": "Write a 60-second video script about {{product_name}}. Keep it energetic and include a call to action.",
+      "model": "gemini",
+      "temperature": 0.3,
+      "max_length": 500
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9000,
+  "status": "completed",
+  "user_job_type": "text_generation",
+  "result": "Hey everyone! Let me tell you about...",
+  "failed_reason": null,
+  "output_resources": [],
+  "execution_cost": 0.5
+}
+```

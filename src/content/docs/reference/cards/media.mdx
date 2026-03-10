@@ -1,0 +1,97 @@
+---
+title: "Media"
+description: Upload images or videos directly to a cell — no AI generation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Media card holds static images or videos. Unlike other card types, media does **not** use the generate endpoint. Instead, you set the cell value directly to a media URL.
+
+<Aside>
+  All cell endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Update a cell with media
+
+Set the cell value to the URL of your image or video.
+
+```
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet_cell.value` | string | Yes | URL to the image or video file. |
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "spreadsheet_cell": {
+      "value": "https://your-cdn.com/assets/hero-image.png"
+    }
+  }'
+```
+
+### Response
+
+Returns the updated cell object with the new value.
+
+```json
+{
+  "id": 3000,
+  "value": "https://your-cdn.com/assets/hero-image.png",
+  "cell_role": "content",
+  "additional_attributes": {},
+  "created_at_ts": 1709294400000,
+  "updated_at_ts": 1709380800000
+}
+```
+
+---
+
+## Adding media to layers
+
+You can also add media to a layer within a video cell. This is useful for adding B-roll footage, background images, or overlay graphics to a video composition.
+
+Update the layer value the same way:
+
+```
+PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+```
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"name": "B-Roll", "type": "video"}}'
+```
+
+---
+
+## Media variables for batch operations
+
+When building templates for batch video creation, use [variables](/reference/variables/) to swap media across rows. Define a media variable in a column, then each row can reference a different image or video URL.
+
+<Aside type="tip">
+  Media cells are instant — there is no generation step to poll. The cell value updates immediately with the provided URL.
+</Aside>
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet or cell not found. |
+| `422` | `validation_error` | Invalid cell data. |

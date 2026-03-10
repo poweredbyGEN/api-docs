@@ -1,0 +1,129 @@
+---
+title: "Video from Image"
+description: Generate video from a reference image using Kling, Veo 3, Sora 2, or Seedance.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate video clips from a reference image. Provide a starting frame (and optionally an end frame) along with a motion prompt, and the model will animate the scene.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Models
+
+| Model | `generation_type` | `data.model` |
+|-------|--------------------|--------------|
+| Kling 2.1 | `kling_img2video` | `"kling-v2-1"` |
+| Kling 2.6 | `kling_img2video` | `"kling-v2-6"` |
+| Veo 3 | `gemini_video_generation` | `"veo3"` |
+| Veo 3 Fast | `gemini_video_generation` | `"veo3-fast"` |
+| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
+| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
+| Sora 2 | `sora2_video_generation` | -- |
+| Seedance Lite | `seedance_video_generation` | `"seedance-1.0-lite"` |
+| Seedance Pro | `seedance_video_generation` | `"seedance-1.0-pro"` |
+| Seedance Pro 1.5 | `seedance_video_generation` | `"seedance-1.5-pro"` |
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | See [Models](#models) table above. |
+| `data.image` | object | Yes | Starting frame image. Object with `"value"` key containing the image URL. |
+| `data.image_tail` | object | No | End frame image. Same format as `image`. The model will animate between the two frames. |
+| `data.prompt` | string | No | Text description of the desired motion or scene. Supports `{{variable_name}}` syntax. |
+| `data.negative_prompt` | string | No | What to avoid in the generated video. |
+| `data.model` | string | No | Model variant. See [Models](#models) table. |
+| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.duration` | integer | No | Video duration in seconds. |
+| `data.image_var` | string | No | Variable name to map the image value from a column. |
+| `data.image_tail_var` | string | No | Variable name to map the end frame image from a column. |
+| `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
+| `data.negative_prompt_var` | string | No | Variable name to map the negative prompt from a column. |
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9030,
+  "status": "pending"
+}
+```
+
+Once complete, the generated video is available in `output_resources`. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3200/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "kling_img2video",
+    "data": {
+      "image": {
+        "value": "https://cdn.gen.pro/uploads/product_hero.jpg"
+      },
+      "prompt": "Camera slowly zooms in while the product rotates, soft studio lighting",
+      "negative_prompt": "blurry, distorted, text overlay",
+      "model": "kling-v2-6",
+      "aspect_ratio": "576:1024",
+      "duration": 5
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9030,
+  "status": "completed",
+  "user_job_type": "video_generation",
+  "result": null,
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1800,
+      "url": "https://cdn.gen.pro/outputs/vid_img2v_001.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/vid_img2v_001.jpg",
+      "object_type": "video",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 4.0
+}
+```
+
+<Aside type="tip">
+  Use `image_tail` to create smooth transitions between two keyframes. This is useful for product reveals or before/after sequences.
+</Aside>

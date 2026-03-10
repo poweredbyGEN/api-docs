@@ -1,0 +1,120 @@
+---
+title: "Image from Text"
+description: Generate images from text prompts using Gemini, Gemini Pro, or Midjourney.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate images from text prompts using Gemini, Gemini Pro, or Midjourney. Optionally provide reference images to guide the output style or composition.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Models
+
+| Model | `generation_type` | `data.model` |
+|-------|--------------------|--------------|
+| Gemini | `gemini_image_generation` | `"gemini"` |
+| Gemini Pro | `gemini_image_generation` | `"gemini_pro"` |
+| Midjourney | `midjourney` | -- |
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `gemini_image_generation` or `midjourney`. |
+| `data.prompt` | string | Yes | Text description of the image to generate. Supports `{{variable_name}}` syntax. |
+| `data.model` | string | No | `"gemini"` or `"gemini_pro"`. Only for `gemini_image_generation`. |
+| `data.aspect_ratio` | string | No | Image dimensions. `"1024:1024"` (1:1), `"576:1024"` (9:16), or `"1024:576"` (16:9). |
+| `data.number_of_images` | integer | No | Number of images to generate. Default `1`. |
+| `data.content_resource_ids` | array | No | Array of content resource IDs to use as reference images. |
+| `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
+
+<Aside type="tip">
+  Enable **AI text generation on prompt** by configuring `prompt_var` to dynamically build prompts from your sheet data before image generation runs.
+</Aside>
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9010,
+  "status": "pending"
+}
+```
+
+Once complete, the generated images are available in `output_resources`. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3050/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_image_generation",
+    "data": {
+      "prompt": "A futuristic cityscape at sunset with neon lights reflecting off glass buildings, cinematic style",
+      "model": "gemini_pro",
+      "aspect_ratio": "1024:576",
+      "number_of_images": 2
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9010,
+  "status": "completed",
+  "user_job_type": "image_generation",
+  "result": null,
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1600,
+      "url": "https://cdn.gen.pro/outputs/img_001.png",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/img_001.jpg",
+      "object_type": "image",
+      "type": "output"
+    },
+    {
+      "id": 1601,
+      "url": "https://cdn.gen.pro/outputs/img_002.png",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/img_002.jpg",
+      "object_type": "image",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 1.0
+}
+```

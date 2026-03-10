@@ -1,0 +1,116 @@
+---
+title: "Video from Ingredients"
+description: Generate video from a prompt combined with uploaded assets using Pika, Kling, Seedance, or Veo.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate video by combining a text prompt with uploaded assets (images, clips, logos). Reference your assets in the prompt and pass their IDs via `content_resource_ids` — the model will incorporate them into the generated video.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Models
+
+| Model | `generation_type` | `data.model` |
+|-------|--------------------|--------------|
+| Pika | `pika` | -- |
+| Kling 1.6 | `kling` | `"kling-v1-6"` |
+| Seedance Lite | `seedance_video_generation` | `"seedance-1.0-lite"` |
+| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
+| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | See [Models](#models) table above. |
+| `data.prompt` | string | Yes | Text description that references the uploaded assets. Supports `{{variable_name}}` syntax. |
+| `data.content_resource_ids` | array | No | Array of content resource IDs (uploaded assets) to include in the generation. |
+| `data.model` | string | No | Model variant. See [Models](#models) table. |
+| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.duration` | integer | No | Video duration in seconds. |
+| `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
+| `data.content_resource_vars` | array | No | Variable names to map content resource IDs from columns. |
+
+<Aside type="tip">
+  Upload assets first using the content resources endpoints, then pass their IDs in `content_resource_ids`. The model will blend these assets into the generated video based on your prompt.
+</Aside>
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9040,
+  "status": "pending"
+}
+```
+
+Once complete, the generated video is available in `output_resources`. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "pika",
+    "data": {
+      "prompt": "A dynamic product showcase video featuring the uploaded product image, camera orbiting around it with particle effects and dramatic lighting",
+      "content_resource_ids": [501, 502],
+      "aspect_ratio": "1024:576",
+      "duration": 5
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9040,
+  "status": "completed",
+  "user_job_type": "video_generation",
+  "result": null,
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1900,
+      "url": "https://cdn.gen.pro/outputs/vid_ingredients_001.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/vid_ingredients_001.jpg",
+      "object_type": "video",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 3.5
+}
+```

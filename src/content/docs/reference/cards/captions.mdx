@@ -1,0 +1,117 @@
+---
+title: "Captions"
+description: Generate timestamped captions from audio or video using Gemini.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Captions card transcribes audio or video into timestamped captions using Gemini. The output includes word-level timing data that can be used for subtitle overlays in the final video.
+
+<Aside>
+  All generation endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Generate captions
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"gemini_caption_generation"` |
+| `data.audio` | object | No | Audio source. Object with a `value` key containing the audio URL. |
+| `data.video` | object | No | Video source. Object with a `value` key containing the video URL. |
+| `data.content_resource_id` | string | No | ID of a previously uploaded audio or video content resource. |
+
+<Aside type="caution">
+  You must provide at least one of `audio`, `video`, or `content_resource_id`. If none are provided, the generation will fail.
+</Aside>
+
+### Example
+
+Using an audio URL:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_caption_generation",
+    "data": {
+      "audio": {"value": "https://cdn.gen.pro/outputs/voiceover-abc123.mp3"}
+    }
+  }'
+```
+
+Using a video URL:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_caption_generation",
+    "data": {
+      "video": {"value": "https://cdn.gen.pro/outputs/final-video.mp4"}
+    }
+  }'
+```
+
+Using a content resource ID:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_caption_generation",
+    "data": {
+      "content_resource_id": "res_abc123"
+    }
+  }'
+```
+
+You can also generate captions on a layer:
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+```
+
+---
+
+## Response
+
+Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation includes the captions object with timestamps in the `result` field.
+
+```json
+{
+  "id": 9003,
+  "status": "completed",
+  "result": {
+    "captions": [
+      {"word": "Welcome", "start": 0.0, "end": 0.45},
+      {"word": "back", "start": 0.45, "end": 0.72},
+      {"word": "to", "start": 0.72, "end": 0.85},
+      {"word": "another", "start": 0.85, "end": 1.20},
+      {"word": "episode", "start": 1.20, "end": 1.65}
+    ]
+  }
+}
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `422` | `validation_error` | No audio, video, or content_resource_id provided. |
+| `404` | `not_found` | Sheet or cell not found. |

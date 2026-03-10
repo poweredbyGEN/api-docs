@@ -1,0 +1,174 @@
+---
+title: "Speech from Text"
+description: Convert text to speech using ElevenLabs with custom or cloned voices.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Speech from Text card converts written text into spoken audio using ElevenLabs. You can use an existing voice, design a new one from a description, or clone a voice from an audio sample.
+
+<Aside>
+  All generation endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Voice methods
+
+There are three ways to generate speech, each using a different `generation_type`:
+
+| Method | `generation_type` | Description |
+|--------|-------------------|-------------|
+| My Voices | `eleven_labs` | Use an existing ElevenLabs voice by ID. |
+| Design Voice | `design_voice` | Create a new voice from a text description. |
+| Clone Voice | `clone_voice` | Clone a voice from an audio sample. |
+
+---
+
+## My Voices
+
+Use an existing ElevenLabs voice to generate speech.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"eleven_labs"` |
+| `data.text` | string | Yes | The text to convert to speech. |
+| `data.voice_id` | string | Yes | The ElevenLabs voice ID. |
+| `data.model_id` | string | No | ElevenLabs model to use. Defaults to the standard model. |
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "eleven_labs",
+    "data": {
+      "text": "Welcome back to another episode of our series.",
+      "voice_id": "pNInz6obpgDQGcFmaJgB"
+    }
+  }'
+```
+
+---
+
+## Design Voice
+
+Create a brand-new voice from a text description and use it to generate speech.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"design_voice"` |
+| `data.text` | string | Yes | The text to convert to speech. |
+| `data.name` | string | Yes | A name for the new voice. |
+| `data.language` | string | Yes | Language code (e.g., `"en"`). |
+| `data.gender` | string | Yes | `"male"` or `"female"`. |
+| `data.voice_prompt` | string | Yes | A description of the voice characteristics (e.g., `"warm, friendly narrator with a slight British accent"`). |
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "design_voice",
+    "data": {
+      "text": "Welcome back to another episode of our series.",
+      "name": "Friendly Narrator",
+      "language": "en",
+      "gender": "male",
+      "voice_prompt": "warm, friendly narrator with a slight British accent"
+    }
+  }'
+```
+
+---
+
+## Clone Voice
+
+Clone a voice from an audio sample and use the clone to generate speech.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"clone_voice"` |
+| `data.text` | string | Yes | The text to convert to speech. |
+| `data.name` | string | Yes | A name for the cloned voice. |
+| `data.voice_sample` | string | Yes | URL to an audio file of the voice to clone. |
+| `data.language` | string | Yes | Language code (e.g., `"en"`). |
+| `data.gender` | string | Yes | `"male"` or `"female"`. |
+
+<Aside type="caution">
+  The voice sample must be at least 30 seconds long for reliable cloning results.
+</Aside>
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "clone_voice",
+    "data": {
+      "text": "Welcome back to another episode of our series.",
+      "name": "My Custom Voice",
+      "voice_sample": "https://cdn.example.com/voice-sample.mp3",
+      "language": "en",
+      "gender": "male"
+    }
+  }'
+```
+
+---
+
+## Additional options
+
+These options can be added to the `data` object for any voice method:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enhance_voice` | boolean | `false` | Apply post-processing to enhance audio clarity. |
+
+---
+
+## Response
+
+All voice methods return a generation ID. Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation includes the audio URL in `output_resources`.
+
+```json
+{
+  "id": 9000,
+  "status": "completed",
+  "output_resources": [
+    {
+      "id": 1500,
+      "url": "https://cdn.gen.pro/outputs/voiceover-abc123.mp3",
+      "object_type": "audio",
+      "type": "output"
+    }
+  ]
+}
+```
+
+<Aside type="tip">
+  You can also run speech generation on a layer within a cell by using the layer endpoint:
+  `POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}`
+</Aside>

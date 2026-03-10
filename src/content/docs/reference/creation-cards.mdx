@@ -1,0 +1,147 @@
+---
+title: Creation Cards
+description: Every content type you can generate — text, images, video, speech, captions, and lipsync.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Each column in an Auto Content Engine sheet has a **creation card type** that determines what kind of content its cells generate. When you call the [generate endpoint](/reference/generations/#generate-on-cell), the `generation_type` and `data` parameters you pass depend on the card type assigned to that column.
+
+<Aside>
+  A column's card type is set when the column is created and cannot be changed afterward. To use a different card type, create a new column.
+</Aside>
+
+## Card types
+
+| Card Type | What it does | Models | Detail page |
+|-----------|-------------|--------|-------------|
+| **Text** | AI-generated text content (scripts, prompts, descriptions) | Gemini, OpenAI | [Text](/reference/creation-cards/text) |
+| **Media** | Upload an image or video file directly | — | [Media](/reference/creation-cards/media) |
+| **Image from Text** | Generate images from text prompts | Gemini, Gemini Pro, Midjourney | [Image from Text](/reference/creation-cards/image-from-text) |
+| **Video from Text** | Generate video from a text prompt | Veo 3/3.1, Sora 2, Kling 1.6, Seedance | [Video from Text](/reference/creation-cards/video-from-text) |
+| **Video from Image** | Generate video using a reference image | Kling 2.1/2.6, Veo 3/3.1, Sora 2, Seedance | [Video from Image](/reference/creation-cards/video-from-image) |
+| **Video from Ingredients** | Generate video from a prompt combined with assets | Pika, Kling 1.6, Seedance, Veo 3.1 | [Video from Ingredients](/reference/creation-cards/video-from-ingredients) |
+| **Speech from Text** | Convert text to speech with voice selection | ElevenLabs | [Speech from Text](/reference/creation-cards/speech-from-text) |
+| **Lipsync** | Sync an audio track to a video | sync.so, gen | [Lipsync](/reference/creation-cards/lipsync) |
+| **Captions** | Generate captions from audio or video | Gemini | [Captions](/reference/creation-cards/captions) |
+
+---
+
+## Shared concepts
+
+These concepts apply across multiple card types.
+
+### AI Text
+
+Any text field — prompt, script, negative prompt — can itself be AI-generated. Pass a `model` and `prompt` within the text field's configuration:
+
+```json
+{
+  "model": "gemini",
+  "prompt": "Write a 30-second script about sustainable fashion"
+}
+```
+
+Supported models: `"gemini"` and `"openai"`.
+
+### Variables
+
+Text fields support `{{variable_name}}` template substitution. Variables are defined at the sheet level (see [Variables](/reference/variables/)) and replaced at generation time.
+
+```json
+{
+  "prompt": "Create a {{product_type}} ad for {{brand_name}}"
+}
+```
+
+Media fields can also reference variables via `prompt_var`, `image_var`, and similar fields — pulling values from other cells or global variables.
+
+### Aspect ratio
+
+Available ratios vary by model. Common options:
+
+- `1:1` — square
+- `9:16` — vertical / portrait (TikTok, Reels, Shorts)
+- `16:9` — horizontal / landscape (YouTube)
+
+Check the individual card type page for model-specific ratio support.
+
+### Duration
+
+For video card types, duration is specified in seconds. Available values depend on the model — for example, Kling 1.6 supports 5s and 10s, while Veo 3 supports up to 8s. See each card type page for details.
+
+---
+
+## How generation works
+
+### 1. Trigger
+
+Send a POST request with the `generation_type` and `data` for the card type:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "text_generation",
+    "data": {
+      "model": "gemini",
+      "prompt": "Write a hook for a cooking video"
+    }
+  }'
+```
+
+The response returns a `generation_id` with `status: "pending"`.
+
+### 2. Poll for completion
+
+Poll the generation status endpoint until the job finishes:
+
+```
+GET /v1/generations/{generation_id}
+```
+
+### 3. Status flow
+
+```
+pending → processing → completed
+                     → failed
+                     → stopped
+```
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Queued, waiting to be picked up. |
+| `processing` | Model is actively generating. |
+| `completed` | Done. Check `result` and `output_resources`. |
+| `failed` | Something went wrong. Check `failed_reason`. |
+| `stopped` | Manually cancelled via the [stop endpoint](/reference/generations/#stop-generation). |
+
+### 4. Retrieve output
+
+On completion, the generation object contains the output:
+
+- **Text cards**: the generated text is in the `result` field.
+- **Media cards** (image, video, audio): URLs are in the `output_resources` array.
+
+```json
+{
+  "id": 9000,
+  "status": "completed",
+  "output_resources": [
+    {
+      "url": "https://cdn.gen.pro/outputs/abc123.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/abc123.jpg",
+      "object_type": "video"
+    }
+  ]
+}
+```
+
+### Credits
+
+Credits are **pre-charged** when a generation is created. If the generation fails or is [stopped](/reference/generations/#stop-generation), credits are automatically refunded.
+
+<Aside type="tip">
+  For production workflows, set up a [webhook](/reference/automation/) to receive notifications when generations complete instead of polling.
+</Aside>

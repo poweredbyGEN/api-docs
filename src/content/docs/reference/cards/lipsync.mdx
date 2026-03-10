@@ -1,0 +1,102 @@
+---
+title: "Lipsync"
+description: Synchronize audio to a video — the lips in the video match the speech.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Lipsync card takes a video and an audio track, then re-renders the video so the speaker's lip movements match the audio. Two models are available with different quality/speed tradeoffs.
+
+<Aside>
+  All generation endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Models
+
+| Model | `generation_type` | `model` value | Notes |
+|-------|-------------------|---------------|-------|
+| sync.so | `sync_so_lip_sync` | `"lipsync-v1"` | Higher quality, slower processing. |
+| gen | `latent_sync` | `"lipsync-v2"` | Faster, good quality. |
+
+---
+
+## Generate lipsync
+
+Lipsync is typically applied to a **layer** within a cell, not the cell itself, since it composites audio onto an existing video layer.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+| `layer_id` | integer | The layer ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"sync_so_lip_sync"` or `"latent_sync"` |
+| `data.video` | object | Yes | Video source. Must contain a `value` key with the video URL. |
+| `data.audio` | object | Yes | Audio source. Must contain a `value` key with the audio URL. |
+| `data.model` | string | Yes | `"lipsync-v1"` (sync.so) or `"lipsync-v2"` (gen). |
+
+<Aside type="tip">
+  The audio URL is usually the output from a [Speech from Text](/reference/cards/speech-from-text/) generation. Chain them together: generate speech first, then pass the audio URL into the lipsync step.
+</Aside>
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "sync_so_lip_sync",
+    "data": {
+      "video": {"value": "https://cdn.gen.pro/outputs/talking-head.mp4"},
+      "audio": {"value": "https://cdn.gen.pro/outputs/voiceover-abc123.mp3"},
+      "model": "lipsync-v1"
+    }
+  }'
+```
+
+You can also generate on the cell directly if it holds the video:
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+The request body is identical.
+
+---
+
+## Response
+
+Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation returns the lip-synced video in `output_resources`.
+
+```json
+{
+  "id": 9002,
+  "status": "completed",
+  "output_resources": [
+    {
+      "id": 1502,
+      "url": "https://cdn.gen.pro/outputs/lipsynced-def456.mp4",
+      "object_type": "video",
+      "type": "output"
+    }
+  ]
+}
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `422` | `validation_error` | Missing or invalid video/audio URL. |
+| `404` | `not_found` | Sheet, cell, or layer not found. |

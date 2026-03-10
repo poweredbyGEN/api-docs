@@ -1,0 +1,116 @@
+---
+title: "Video from Text"
+description: Generate video from text prompts using Veo 3, Sora 2, Kling, or Seedance.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate video clips from text prompts. Choose from multiple models depending on your quality, speed, and style requirements.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Models
+
+| Model | `generation_type` | `data.model` |
+|-------|--------------------|--------------|
+| Veo 3 | `gemini_video_generation` | `"veo3"` |
+| Veo 3 Fast | `gemini_video_generation` | `"veo3-fast"` |
+| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
+| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
+| Sora 2 | `sora2_video_generation` | -- |
+| Kling 1.6 | `kling` | `"kling-v1-6"` |
+| Seedance Pro | `seedance_video_generation` | `"seedance-1.0-pro"` |
+| Seedance Pro 1.5 | `seedance_video_generation` | `"seedance-1.5-pro"` |
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | See [Models](#models) table above. |
+| `data.prompt` | string | Yes | Text description of the video to generate. Supports `{{variable_name}}` syntax. |
+| `data.negative_prompt` | string | No | What to avoid in the generated video. |
+| `data.model` | string | No | Model variant. See [Models](#models) table. |
+| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.duration` | integer | No | Video duration in seconds. |
+| `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
+| `data.negative_prompt_var` | string | No | Variable name to map the negative prompt from a column. |
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9020,
+  "status": "pending"
+}
+```
+
+Once complete, the generated video is available in `output_resources`. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3100/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "gemini_video_generation",
+    "data": {
+      "prompt": "A drone shot flying over a tropical beach at golden hour, waves gently crashing on white sand, cinematic 4K",
+      "negative_prompt": "text, watermark, blurry, low quality",
+      "model": "veo3",
+      "aspect_ratio": "1024:576",
+      "duration": 8
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9020,
+  "status": "completed",
+  "user_job_type": "video_generation",
+  "result": null,
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1700,
+      "url": "https://cdn.gen.pro/outputs/vid_001.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/vid_001.jpg",
+      "object_type": "video",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 5.0
+}
+```
