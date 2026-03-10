@@ -6,11 +6,11 @@ The Auto Content Engine API provides programmatic access to GEN's content creati
 
 ## Docs
 
-- [API Documentation](https://dev.gen.pro)
-- [OpenAPI 3.1 Spec](https://dev.gen.pro/openapi.yaml)
-- [Getting Started](https://dev.gen.pro/guides/introduction/)
-- [Authentication](https://dev.gen.pro/guides/authentication/)
-- [Quick Start](https://dev.gen.pro/guides/quickstart/)
+- [API Documentation](https://api.gen.pro)
+- [OpenAPI 3.1 Spec](https://api.gen.pro/openapi.yaml)
+- [Getting Started](https://api.gen.pro/guides/introduction/)
+- [Authentication](https://api.gen.pro/guides/authentication/)
+- [Quick Start](https://api.gen.pro/guides/quickstart/)
 
 ## API
 
@@ -66,6 +66,6 @@ Auth: X-API-Key header with Personal Access Token
 
 ## Optional
 
-- [llms-full.txt](https://dev.gen.pro/llms-full.txt)
+- [llms-full.txt](https://api.gen.pro/llms-full.txt)
 - [Help Center](https://docs.gen.pro)
 - [GEN Homepage](https://www.gen.pro)

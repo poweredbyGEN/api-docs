@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://dev.gen.pro',
+	site: 'https://api.gen.pro',
 	integrations: [
 		starlight({
 			title: 'GEN API',
