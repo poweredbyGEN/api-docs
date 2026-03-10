@@ -25,7 +25,7 @@ All /v1/autocontentengine/ endpoints require:
 
 ## OpenAPI Spec
 
-Full OpenAPI 3.1 specification: https://api.gen.pro/openapi.yaml
+Full OpenAPI 3.1 specification: https://dev.gen.pro/openapi.yaml
 
 ## Discovery
 
