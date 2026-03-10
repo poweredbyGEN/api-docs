@@ -77,6 +77,15 @@
 		var(--sl-color-bg);
 }
 
+/* ── Card icons — remove colored box, just show the icon ── */
+
+.card .icon {
+	border: none !important;
+	background: none !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+}
+
 /* ── Code block accent ── */
 
 :root[data-theme='dark'] .expressive-code .frame {
