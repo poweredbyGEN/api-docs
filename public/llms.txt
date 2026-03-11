@@ -8,7 +8,7 @@ The Auto Content Engine API provides programmatic access to GEN's content creati
 
 - [API Documentation](https://api.gen.pro)
 - [OpenAPI 3.1 Spec](https://api.gen.pro/openapi.yaml)
-- [Getting Started](https://api.gen.pro/guides/introduction/)
+- [Getting Started](https://api.gen.pro/)
 - [Authentication](https://api.gen.pro/guides/authentication/)
 - [Quick Start](https://api.gen.pro/guides/quickstart/)
 

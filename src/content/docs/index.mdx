@@ -1,11 +1,66 @@
 ---
-title: GEN API
-description: Programmatic access to GEN's autonomous content creation system.
-head:
-  - tag: meta
-    attrs:
-      http-equiv: refresh
-      content: "0;url=/guides/introduction/"
+title: Introduction
+description: What is the Auto Content Engine API and what can you build with it.
 ---
 
-Redirecting to [Introduction](/guides/introduction/)...
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## What is GEN?
+
+GEN is an autonomous social media agent platform. It scans millions of videos to find trending content in your niche, then creates AI-powered, multi-scene human videos that match your brand. Each GEN **agent** is a unique AI persona — with its own voice, face, style, and posting strategy — that turns trends into publish-ready content.
+
+## What is the Auto Content Engine?
+
+The Auto Content Engine is the spreadsheet-like system at the core of GEN's content creation workflow. Think of it as a specialized spreadsheet where:
+
+- Each **row** is a video
+- Each **column** is a content type (script, voiceover, video clip, music, etc.)
+- Each **cell** holds the actual content for that intersection
+- Each cell can have multiple **layers** — the building blocks that get composed into the final video
+
+In the GEN web app, this is the "Vidsheets" interface. The API gives you full programmatic access to it.
+
+## What can you build?
+
+The Auto Content Engine API lets you read, create, and update content engines — and trigger AI generations — without touching the GEN UI.
+
+<CardGrid>
+  <Card title="Claude Code / MCP">
+    Use the official MCP server to manage agents, content engines, and AI generations through natural language. Just talk to Claude — it handles the API calls.
+  </Card>
+  <Card title="Workflow automation">
+    Connect GEN to n8n, Make, or Zapier. Trigger video creation from RSS feeds, CRM events, or Slack messages.
+  </Card>
+  <Card title="Batch operations">
+    Script bulk updates — populate 50 rows with scripts, swap voiceover styles across an entire content engine, or update variables in one call.
+  </Card>
+  <Card title="Custom dashboards">
+    Build internal tools that pull content status, track generation progress, and give your team visibility into the pipeline.
+  </Card>
+  <Card title="TypeScript SDK">
+    Import the SDK into your Node.js or TypeScript project for type-safe access to agents, content engines, generations, and assets.
+  </Card>
+</CardGrid>
+
+## Key concepts
+
+Before diving in, here are the core objects you will work with:
+
+| Concept | Description |
+|---------|-------------|
+| **Agent** | An AI persona/character with its own identity, voice, and content style. Every API request is scoped to an agent via `agent_id`. |
+| **Content Engine** | A content spreadsheet. Each agent can have multiple content engines. |
+| **Row** | A single video within a content engine. Rows contain cells for each column. |
+| **Column** | A content type definition (e.g., "Script", "Voiceover", "B-Roll"). Columns define what kind of content each cell holds. |
+| **Cell** | The intersection of a row and column. Holds the actual content value for that video's content layer. |
+| **Layer** | A composable piece within a cell. A single cell can have multiple layers that get merged into the final output. |
+| **Generation** | An AI job that produces content for a cell or layer. You trigger a generation, and GEN's AI fills in the content. |
+| **Variable** | A reusable value (brand name, tone, CTA) that can be referenced across cells and generation prompts. |
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the MCP server and start managing content through natural language." />
+  <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
+  <LinkCard title="Quick Start" href="/guides/quickstart/" description="Make your first API call in under 5 minutes." />
+</CardGrid>

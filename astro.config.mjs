@@ -31,7 +31,7 @@ export default defineConfig({
 					label: 'Getting Started',
 					collapsed: false,
 					items: [
-						{ label: 'Introduction', slug: 'guides/introduction' },
+						{ label: 'Introduction', slug: '' },
 						{ label: 'Get API Key', slug: 'guides/authentication' },
 						{ label: 'Quick Start', slug: 'guides/quickstart' },
 						{ label: 'MCP Server (Claude Code)', slug: 'guides/claude-code' },
