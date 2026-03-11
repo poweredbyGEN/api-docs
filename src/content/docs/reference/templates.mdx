@@ -1,0 +1,107 @@
+---
+title: Templates
+description: Pre-configured engines for instant content creation
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Templates are pre-configured Auto Content Engines with the right columns already set up for common workflows. **Cloning a template is the fastest way to get started** — no need to manually create columns and configure generation types.
+
+<Aside type="tip">
+Always check available templates before creating an engine from scratch. Templates come with optimized column layouts for specific content types.
+</Aside>
+
+## List Templates
+
+```http
+GET /v1/templates/projects
+```
+
+### Parameters
+
+| Name | Type | In | Description |
+|------|------|-----|-------------|
+| `page` | integer | query | Page number (default 1, 20 per page) |
+
+### Request
+
+```bash
+curl https://api.gen.pro/v1/templates/projects \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "slug": "tiktok-video-creator",
+    "title": "TikTok Video Creator",
+    "name": "TikTok Video Creator",
+    "description": "Create engaging TikTok videos with AI-generated scripts, voiceover, and lipsync",
+    "cover": "https://cdn.gen.pro/templates/tiktok-creator.jpg",
+    "tutorial_url": "https://docs.gen.pro/tutorials/tiktok",
+    "tags": ["tiktok", "video", "social"],
+    "recent_generated_contents": [
+      {"id": 101, "type": "video", "thumbnail_url": "https://cdn.gen.pro/thumb/101.jpg"}
+    ]
+  }
+]
+```
+
+## Get Template
+
+```http
+GET /v1/templates/projects/{slug}
+```
+
+The `slug` parameter accepts a URL slug, UUID, or numeric ID.
+
+### Request
+
+```bash
+curl https://api.gen.pro/v1/templates/projects/tiktok-video-creator \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+## Clone Template
+
+```http
+POST /v1/templates/spreadsheets/{slug}/clone
+```
+
+Clones a template into your agent's workspace. Returns a fully configured engine ready to use.
+
+### Parameters
+
+| Name | Type | In | Description |
+|------|------|-----|-------------|
+| `slug` | string | path | Template slug to clone |
+| `agent_id` | string | body | Agent ID to clone into |
+
+### Request
+
+```bash
+curl -X POST https://api.gen.pro/v1/templates/spreadsheets/tiktok-video-creator/clone \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id": "123"}'
+```
+
+### Response
+
+Returns the full engine object with all columns, rows, and cells pre-configured.
+
+## Default Template Columns
+
+Most templates include these default columns:
+
+| Column | Type | Role | Description |
+|--------|------|------|-------------|
+| TEXT 1 | text | ingredient | First text input (e.g., topic) |
+| TEXT 2 | text | ingredient | Second text input (e.g., style) |
+| PROMPT | text | ingredient | Generation prompt |
+| VIDEO | video | video | Generated video layer |
+| FINAL VIDEO | video | final_video | Final composed output |
+| STATS | stats | stats | Performance metrics |

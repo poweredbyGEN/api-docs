@@ -11,6 +11,26 @@ Columns define the content types in a sheet. Each column represents a type of co
   All column endpoints require the `agent_id` query parameter.
 </Aside>
 
+## Column Types
+
+| Type | Description |
+|------|-------------|
+| `text` | Text content — scripts, prompts, notes |
+| `image` | Image content |
+| `video` | Video content |
+| `audio` | Audio content |
+
+## Column Roles
+
+| Role | Description | User-Creatable? |
+|------|-------------|-----------------|
+| `ingredient` | User-editable input columns | Yes |
+| `video` | Generated video layer | No (system) |
+| `final_video` | Final composite video | No (system) |
+| `stats` | Statistics/metadata | No (system) |
+
+Only columns with the `ingredient` role can be created, updated, or deleted by API users. System columns (video, final_video, stats) are created automatically when you clone a template or use the GEN UI.
+
 ## Column schema
 
 ```json

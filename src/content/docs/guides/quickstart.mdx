@@ -7,6 +7,34 @@ import { Steps, Aside, LinkCard } from '@astrojs/starlight/components';
 
 This guide walks you through your first API calls — from verifying your key to updating content in a content engine.
 
+## The Fast Path: Clone a Template
+
+The quickest way to start creating content is to clone a template:
+
+```bash
+# 1. List available templates
+curl https://api.gen.pro/v1/templates/projects \
+  -H "X-API-Key: YOUR_API_KEY"
+
+# 2. Clone a template into your agent
+curl -X POST https://api.gen.pro/v1/templates/spreadsheets/TEMPLATE_SLUG/clone \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id": "YOUR_AGENT_ID"}'
+
+# 3. Generate content in a cell
+curl -X POST https://api.gen.pro/v1/autocontentengine/ENGINE_ID/cells/CELL_ID/generate?agent_id=AGENT_ID \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"generation_type": "text_generation", "data": {"model": "gemini", "prompt": "Write a 30-second TikTok script about morning routines"}}'
+
+# 4. Poll until complete
+curl https://api.gen.pro/v1/generations/GENERATION_ID \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+If you want to understand each step in detail, continue with the full walkthrough below.
+
 ## Prerequisites
 
 - A GEN account at [gen.pro](https://gen.pro)

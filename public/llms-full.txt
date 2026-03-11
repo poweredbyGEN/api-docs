@@ -54,6 +54,23 @@ DELETE /v1/persisted_tokens/{id}/revoke
 
 DELETE /v1/persisted_tokens/revoke_all
 
+## Templates
+
+Templates are pre-configured engines synced from a curated library. Cloning a template is the fastest way to create a production-ready engine with the right columns.
+
+GET /v1/templates/projects?page={page}
+→ [{id, slug, title, name, description, cover, tutorial_url, tags: [], recent_generated_contents: [{id, type, thumbnail_url}]}]
+20 per page.
+
+GET /v1/templates/projects/{slug}
+slug can be a URL slug, UUID, or numeric ID.
+→ {id, slug, title, name, description, cover, tutorial_url, tags: [], ...}
+
+POST /v1/templates/spreadsheets/{slug}/clone
+Body: {agent_id}
+Clones the template into the specified agent's workspace. Returns the new engine.
+→ Full engine object with columns, rows, cells
+
 ## Auto Content Engine
 
 POST /v1/autocontentengine?agent_id={id}
@@ -89,6 +106,20 @@ POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
 PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
 PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
 
+## Column Types & Roles
+
+Types: text, image, video, audio
+
+Roles:
+- ingredient — User-editable input columns (ONLY these can be created/updated/deleted by users)
+- video — Generated video layer column (system)
+- final_video — Final composite video column (system)
+- stats — Statistics/metadata column (system)
+- global_variable_name — Variable name (system)
+- global_variable_value — Variable value (system)
+
+Default template columns: TEXT 1 (text/ingredient), TEXT 2 (text/ingredient), PROMPT (text/ingredient), VIDEO (video/video), FINAL VIDEO (video/final_video), STATS (stats/stats)
+
 ## Cells
 
 GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
@@ -110,6 +141,17 @@ DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id
 POST .../layers/{layer_id}/duplicate?agent_id={id}
 PUT .../layers/update_positions?agent_id={id}
 
+## Global Variables
+
+GET /v1/autocontentengine/{id}/global_variables?agent_id={id}
+→ Key-value pairs used for template substitution in prompts and content
+
+POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}
+(multipart/form-data with XLSX file)
+
+GET /v1/autocontentengine/global_variables_template
+→ XLSX template download
+
 ## Generations
 
 POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
@@ -128,51 +170,86 @@ POST /v1/generations/{id}/continue → credits re-charged
 
 ## Creation Card Types
 
-Each cell in a content engine has a creation card type that determines what kind of content it generates:
+Each cell in a content engine has a creation card type that determines what kind of content it generates.
 
 ### Text
-Models: Gemini, OpenAI
-Inputs: text (supports AI generation), variables
+generation_type: "text"
+Models: gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4
+data: {prompt, model, variables: {key: value}}
+Inputs: prompt text (supports AI generation with {{variable}} substitution), model selection
+Output: text string in cell value
 
-### Image from text
-Models: Gemini, Gemini Pro, Midjourney
-Inputs: prompt (AI text + variables), aspect ratio (1:1, 9:16, 16:9)
+### Image from Text
+generation_type: "image_from_text"
+Models: gemini_image, gemini_pro_image, midjourney
+data: {prompt, model, aspect_ratio, variables: {key: value}}
+Aspect ratios: 1:1, 9:16, 16:9, 4:3, 3:4
+Inputs: prompt (AI text + variable substitution), aspect ratio
+Output: image content resource
 
-### Video from text
-Models: Veo 3, Veo 3 Fast, Veo 3.1, Veo 3.1 Fast, Sora 2, Kling 1.6, Seedance Pro, Seedance Pro 1.5
-Inputs: prompt, negative prompt, ratio, duration, variables
+### Video from Text
+generation_type: "video_from_text"
+Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5
+data: {prompt, negative_prompt?, model, aspect_ratio, duration, variables: {key: value}}
+Aspect ratios: 1:1, 9:16, 16:9
+Durations: 5s, 10s (model-dependent)
+Inputs: prompt, optional negative prompt, ratio, duration, variables
+Output: video content resource
 
-### Video from image
-Models: Kling 2.1, Kling 2.6, Veo 3, Veo 3 Fast, Veo 3.1, Veo 3.1 Fast, Sora 2, Seedance Lite, Seedance Pro, Seedance Pro 1.5
-Inputs: image, image tail (optional), prompt, negative prompt, ratio, duration
+### Video from Image
+generation_type: "video_from_image"
+Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5
+data: {prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, duration}
+Aspect ratios: 1:1, 9:16, 16:9
+Durations: 5s, 10s (model-dependent)
+Inputs: source image (content resource ID), optional tail image, prompt, negative prompt, ratio, duration
+Output: video content resource
 
-### Video from ingredients
-Models: Pika, Kling 1.6, Seedance Lite, Veo 3.1, Veo 3.1 Fast
-Inputs: prompt (with asset selector), ratio, duration
+### Video from Ingredients
+generation_type: "video_from_ingredients"
+Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast
+data: {prompt, model, asset_resource_ids: [], aspect_ratio, duration}
+Aspect ratios: 1:1, 9:16, 16:9
+Durations: 5s, 10s (model-dependent)
+Inputs: prompt with asset selector (multiple content resource IDs), ratio, duration
+Output: video content resource
 
-### Speech from text
-Voice methods: My Voices, Design Voice, Clone Voice
-Inputs: voice selection, script, enhance voice, language, gender
+### Speech from Text
+generation_type: "speech_from_text"
+Voice methods: my_voices (saved voices), design_voice (create from parameters), clone_voice (clone from audio)
+data: {script, voice_method, voice_id?, language?, gender?, enhance_voice?, speed?}
+For my_voices: {script, voice_method: "my_voices", voice_id}
+For design_voice: {script, voice_method: "design_voice", language, gender, enhance_voice: true/false}
+For clone_voice: {script, voice_method: "clone_voice", audio_resource_id}
+Inputs: voice selection, script text, enhancement toggle, language, gender
+Output: audio content resource
 
 ### Lipsync
-Models: sync.so, gen
-Inputs: video, audio, lipsync model
+generation_type: "lipsync"
+Models: sync_so, gen
+data: {model, video_resource_id, audio_resource_id}
+Inputs: source video (content resource ID), source audio (content resource ID), lipsync model
+Output: video content resource with synced lip movements
 
 ### Captions
-Models: Gemini
-Inputs: audio/video
+generation_type: "captions"
+Models: gemini
+data: {model, source_resource_id}
+Inputs: audio or video content resource ID
+Output: caption/subtitle data
 
 ### Media
-Upload: image or video file
+generation_type: "media"
+Upload: image or video file directly to a cell
+data: {content_resource_id}
+Inputs: content resource ID from a prior upload
+Output: media attached to cell
 
-## Global Variables
-
-GET /v1/autocontentengine/{id}/global_variables?agent_id={id}
-POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}
-(multipart/form-data with XLSX file)
-
-GET /v1/autocontentengine/global_variables_template
-→ XLSX template download
+### Render Final Video
+generation_type: "render"
+POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
+Composites all layers (video, audio, captions, lipsync) into a final video.
+Output: final video content resource in the final_video column cell
 
 ## Automation
 
@@ -274,6 +351,8 @@ GET /v1/asset_libraries?agent_id={id}&folder_id={id}&asset_type={image,video,aud
 Unified view of files and folders. Polymorphic response — items have "type": "AssetFolder" or "ContentResource".
 → [{id, type: "AssetFolder", name} | {id, type: "ContentResource", url, thumbnail_url, file_name, content_type}]
 
+## Asset Folders
+
 POST /v1/asset_folders?agent_id={id}
 Body: {asset_folder: {name, parent_id?}}
 → {asset_folder_id}
@@ -289,6 +368,8 @@ Deletes folder and all contents (subfolders and files).
 → 200 (empty body)
 Errors: 403 forbidden, 404 not_found, 422 folder_removal_failed
 
+## Direct Upload
+
 POST /v1/direct_upload
 Get a pre-signed S3 URL for large file uploads. Workflow: (1) call this, (2) PUT file to returned URL with headers, (3) use signed_id as content_resource[file].
 Body: {blob: {filename, byte_size (max 1GB), checksum (base64 MD5), content_type, metadata?}}
@@ -302,7 +383,49 @@ Errors: 422 invalid_content_type, 422 file_size_exceeded, 422 direct_upload_fail
 
 Common codes:
 - 401 unauthorized — invalid API key
+- 403 forbidden — insufficient permissions for this resource
 - 404 not_found — resource doesn't exist
 - 422 usable_gen_credit_required — no active credits
 - 422 agent_not_found — invalid agent_id
 - 422 insufficient_credits_for_job — not enough credits
+- 422 validation_error — invalid request body or parameters
+
+## Common Workflows
+
+### Create a TikTok Video (End to End)
+1. GET /v1/templates/projects → pick a video template
+2. POST /v1/templates/spreadsheets/{slug}/clone → {agent_id} → get engine
+3. GET /v1/autocontentengine/{id}?agent_id={id} → see columns and cells
+4. PATCH /v1/autocontentengine/{id}/cells/{text_cell_id}?agent_id={id} → set script
+5. POST /v1/autocontentengine/{id}/cells/{video_cell_id}/generate?agent_id={id} → generate video
+6. GET /v1/generations/{gen_id} → poll until completed
+7. POST /v1/autocontentengine/{id}/cells/{audio_cell_id}/generate → generate speech
+8. POST /v1/autocontentengine/{id}/cells/{lipsync_cell_id}/generate → lipsync
+9. POST /v1/autocontentengine/{id}/cells/{final_cell_id}/render → render final video
+
+### Generate Batch Images
+1. POST /v1/autocontentengine?agent_id={id} → create engine
+2. POST /v1/autocontentengine/{id}/columns?agent_id={id} → add image column
+3. POST /v1/autocontentengine/{id}/rows?agent_id={id} → add rows
+4. POST .../cells/{cell_id}/generate → generate in each cell
+5. GET /v1/generations/{id} → poll each generation
+
+### Upload and Use a Large Asset
+1. POST /v1/direct_upload → get pre-signed S3 URL
+2. PUT file to the returned URL with Content-Type and Content-MD5 headers
+3. POST /v1/content_resources?agent_id={id} with signed_id as content_resource[file]
+4. Use the returned content_resource.id in generation data (e.g., image_resource_id, audio_resource_id)
+
+### Set Up Automation Webhook
+1. PATCH /v1/agents/{agent_id}/automation_config → set webhook_url and callback_url
+2. POST /v1/agents/{agent_id}/automation_config/test_webhook → verify delivery
+3. POST /v1/agents/{agent_id}/automation_config/test_callback → verify callback
+4. Generations will now POST status updates to your webhook_url
+
+## Integrations
+
+MCP Server: npx @poweredbygen/autocontentengine-mcp-server@latest (env: GEN_API_KEY)
+TypeScript SDK: npm install @poweredbygen/autocontentengine-sdk
+n8n: HTTP Request node with X-API-Key header
+OpenAPI Spec: https://api.gen.pro/openapi.yaml
+Full Docs: https://api.gen.pro

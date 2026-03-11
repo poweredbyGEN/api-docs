@@ -1,71 +1,279 @@
-# GEN — Auto Content Engine API
+# GEN — Auto Content Engine
 
 > GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically.
 
-The Auto Content Engine API provides programmatic access to GEN's content creation system.
+The Auto Content Engine API provides programmatic access to GEN's content creation system — generate text, images, video, speech, lipsync, and captions at scale.
 
-## Docs
+## About GEN
 
-- [API Documentation](https://api.gen.pro)
-- [OpenAPI 3.1 Spec](https://api.gen.pro/openapi.yaml)
-- [Getting Started](https://api.gen.pro/)
-- [Authentication](https://api.gen.pro/guides/authentication/)
-- [Quick Start](https://api.gen.pro/guides/quickstart/)
+GEN is structured as: Workspace → Agent → Auto Content Engine → Content Loop
 
-## API
+- **Workspace**: Top-level container for a company or brand
+- **Agent**: A brand identity with voice, personality, and strategy. All API calls are scoped to an agent.
+- **Auto Content Engine (ACE)**: A spreadsheet-like workspace with columns (content types), rows (one per video), and cells (individual pieces of content). Think of it as a video production line.
+- **Content Loop**: Spot trends → Generate content → Deploy to social → Measure performance → Adapt → Repeat
+
+## Authentication
 
 Base URL: https://api.gen.pro/v1
-Auth: X-API-Key header with Personal Access Token
+Auth: `X-API-Key: <your-api-key>` header
 
-### Endpoints
+Get an API key:
+1. Log in at https://gen.pro
+2. Go to Settings → API Keys
+3. Click "Create API Key" — copy the token immediately (shown once)
 
-- GET /v1/me — current user
+Or create via API: POST /v1/persisted_tokens
+
+## Quick Start
+
+The fastest path to your first generated content:
+
+1. List templates: GET /v1/templates/projects
+2. Clone a template: POST /v1/templates/spreadsheets/{slug}/clone with {agent_id}
+3. Get the engine: GET /v1/autocontentengine/{id}?agent_id={id}
+4. Create a row: POST /v1/autocontentengine/{id}/rows?agent_id={id}
+5. Generate content: POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
+6. Poll status: GET /v1/generations/{generation_id} (until status = "completed")
+
+Or from scratch:
+1. GET /v1/agents?workspace_id={id} → pick an agent
+2. POST /v1/autocontentengine?agent_id={id} → create engine
+3. Add columns, rows, then generate
+
+## Templates
+
+Templates are pre-configured engines with the right columns already set up. Always check templates first.
+
+GET /v1/templates/projects — list all templates
+GET /v1/templates/projects/{slug} — get template details
+POST /v1/templates/spreadsheets/{slug}/clone — clone into your agent
+
+Default template columns: TEXT 1, TEXT 2, PROMPT (ingredient columns), VIDEO, FINAL VIDEO, STATS
+
+## Content Generation Types
+
+### Text
+generation_type: "text_generation"
+data: {model: "gemini" | "openai", prompt: "Write a 30-second TikTok script about..."}
+
+### Image from Text
+generation_type: "gemini_image_generation"
+data: {prompt: "...", model: "gemini" | "gemini_pro", aspect_ratio: "1024:1024" | "576:1024" | "1024:576", number_of_images: 1}
+
+generation_type: "midjourney"
+data: {prompt: "..."}
+
+### Video from Text
+generation_type: "gemini_video_generation"
+data: {prompt: "...", model: "veo3" | "veo3-fast" | "veo3-1" | "veo3-1-fast", aspect_ratio: "1024:576", duration: 8, negative_prompt: "..."}
+
+generation_type: "sora2_video_generation"
+data: {prompt: "...", aspect_ratio: "1024:576", duration: 10}
+
+generation_type: "kling"
+data: {prompt: "...", model: "kling-v1-6", aspect_ratio: "576:1024", duration: 5}
+
+generation_type: "seedance_video_generation"
+data: {prompt: "...", model: "seedance-1.0-pro" | "seedance-1.5-pro", aspect_ratio: "576:1024", duration: 5}
+
+### Video from Image
+generation_type: "kling_image_video"
+data: {prompt: "...", model: "kling-v2-1" | "kling-v2-6", image_content_resource_id: 123, aspect_ratio: "576:1024", duration: 5}
+
+generation_type: "gemini_video_generation" (with image)
+data: {prompt: "...", model: "veo3" | "veo3-1", image_content_resource_id: 123, aspect_ratio: "1024:576", duration: 8}
+
+generation_type: "sora2_video_generation" (with image)
+data: {prompt: "...", image_content_resource_id: 123, aspect_ratio: "1024:576", duration: 10}
+
+generation_type: "seedance_video_generation" (with image)
+data: {prompt: "...", model: "seedance-1.0-lite" | "seedance-1.0-pro" | "seedance-1.5-pro", image_content_resource_id: 123, aspect_ratio: "576:1024", duration: 5}
+
+### Speech from Text (ElevenLabs)
+generation_type: "eleven_labs"
+data: {voice_id: "...", script: "Text to speak", enhance_voice: true}
+
+### Lipsync
+generation_type: "lipsync"
+data: {model: "sync.so" | "gen", video_content_resource_id: 123, audio_content_resource_id: 456}
+
+### Captions
+generation_type: "captions"
+data: {audio_content_resource_id: 123}
+
+## Generation Status Flow
+
+pending → processing → completed | failed | stopped
+
+Poll GET /v1/generations/{id} until status is "completed".
+On completion: text in "result" field, media URLs in "output_resources" array.
+output_resources: [{id, url, thumbnail_url, object_type}]
+Credits are pre-charged; refunded on failure/stop.
+POST /v1/generations/{id}/stop — stop and refund credits
+POST /v1/generations/{id}/continue — resume and re-charge credits
+
+## Common Workflows
+
+### Create a TikTok Video
+1. Clone a video template
+2. Fill ingredient cells (script, prompt)
+3. Generate video in the video column
+4. Generate speech from script
+5. Lipsync speech to video
+6. Render final composed video
+
+### Generate Batch Images
+1. Create engine with an image column
+2. Add rows (one per image)
+3. Generate content in each cell with different prompts
+
+### Add Voiceover to Existing Video
+1. Upload video as content resource
+2. Generate speech (eleven_labs) from script
+3. Lipsync the speech to the video
+
+### Upload Large Files
+1. POST /v1/direct_upload with {blob: {filename, byte_size, checksum, content_type}}
+2. PUT the file to the returned direct_upload.url with the returned headers
+3. Use the signed_id as content_resource[file] in POST /v1/content_resources
+Checksum: base64-encoded MD5 (openssl md5 -binary file | base64)
+Max size: 1 GB
+
+## Column Types
+
+text — Text content (scripts, prompts, notes)
+image — Image content
+video — Video content
+audio — Audio content
+
+Column roles: ingredient (user-creatable), video, final_video, stats (system-managed)
+
+## Endpoints
+
+### Discovery
+- GET /v1/me — current user info
 - GET /v1/workspaces — list workspaces
-- GET /v1/agents — list agents
-- POST /v1/persisted_tokens — create API key
-- GET /v1/persisted_tokens — list API keys
-- POST /v1/autocontentengine — create content engine
-- GET /v1/autocontentengine/{id} — get content engine
-- POST /v1/autocontentengine/{id}/clone — clone content engine
-- GET /v1/autocontentengine/{id}/rows — list rows
-- POST /v1/autocontentengine/{id}/rows — create row
-- GET /v1/autocontentengine/{id}/columns — list columns
-- POST /v1/autocontentengine/{id}/columns — create column
-- GET /v1/autocontentengine/{id}/cells/{cell_id} — get cell
-- PATCH /v1/autocontentengine/{id}/cells/{cell_id} — update cell
-- POST /v1/autocontentengine/{id}/cells/{cell_id}/generate — generate content
-- POST /v1/autocontentengine/{id}/cells/{cell_id}/layers — create layer
+- GET /v1/agents?workspace_id={id} — list agents in workspace
+
+### Templates
+- GET /v1/templates/projects — list all templates
+- GET /v1/templates/projects/{slug} — get template details
+- POST /v1/templates/spreadsheets/{slug}/clone — clone template into agent
+
+### Auto Content Engine
+- POST /v1/autocontentengine?agent_id={id} — create engine
+- GET /v1/autocontentengine/{id}?agent_id={id} — get engine with all data
+- POST /v1/autocontentengine/{id}/clone?agent_id={id} — clone engine
+
+### Rows
+- GET /v1/autocontentengine/{id}/rows?agent_id={id} — list rows
+- POST /v1/autocontentengine/{id}/rows?agent_id={id} — create row
+- GET /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id} — get row
+- POST /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id} — duplicate row
+- PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={id} — reorder rows
+- PUT /v1/autocontentengine/{id}/rows/mass_update?agent_id={id} — bulk update rows
+
+### Columns
+- GET /v1/autocontentengine/{id}/columns?agent_id={id} — list columns
+- POST /v1/autocontentengine/{id}/columns?agent_id={id} — create column
+- POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id} — duplicate column
+- PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={id} — reorder columns
+- PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={id} — bulk update columns
+
+### Cells
+- GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id} — get cell
+- PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id} — update cell value
+- PUT /v1/autocontentengine/{id}/cells/mass_update?agent_id={id} — bulk update cells
+- PATCH /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id} — set default generation config
+
+### Layers
+- POST /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id} — create layer
+- GET /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id} — get layer
+- PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id} — update layer
+- DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id} — delete layer
+- POST .../layers/{layer_id}/duplicate?agent_id={id} — duplicate layer
+- PUT .../layers/update_positions?agent_id={id} — reorder layers
+
+### Generations
+- POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id} — generate content in cell
+- POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id} — generate content in layer
 - GET /v1/generations/{id} — check generation status
-- POST /v1/generations/{id}/stop — stop generation
-- GET /v1/autocontentengine/{id}/global_variables — get variables
-- GET /v1/agents/{agent_id}/automation_config — get webhook config
-- PATCH /v1/agents/{agent_id}/automation_config — update webhook config
+- POST /v1/generations/{id}/stop — stop generation (credits refunded)
+- POST /v1/generations/{id}/continue — resume generation (credits re-charged)
+
+### Variables
+- GET /v1/autocontentengine/{id}/global_variables?agent_id={id} — get global variables
+- POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id} — import from XLSX
+- GET /v1/autocontentengine/global_variables_template — download XLSX template
+
+### Content Resources
+- GET /v1/content_resources?agent_id={id}&type={image|video|audio}&page={page} — list resources (20 per page, page starts at 0)
+- POST /v1/content_resources?agent_id={id} — upload file (multipart)
+- GET /v1/content_resources/{id}?agent_id={id} — get resource details
+- PATCH /v1/content_resources/{id}?agent_id={id} — rename resource
+- DELETE /v1/content_resources/{id}?agent_id={id} — delete resource
+
+### Asset Library
+- GET /v1/asset_libraries?agent_id={id}&folder_id={id}&asset_type={image,video,audio,folder}&search={query} — browse files and folders
+- POST /v1/asset_folders?agent_id={id} — create folder
+- PATCH /v1/asset_folders/{id}?agent_id={id} — rename folder
+- DELETE /v1/asset_folders/{id}?agent_id={id} — delete folder and all contents
+- POST /v1/direct_upload — get pre-signed S3 URL for large uploads
+
+### Agents
 - POST /v1/agents — create agent
 - GET /v1/agents/{id} — get agent details
 - PATCH /v1/agents/{id} — update agent
 - DELETE /v1/agents/{id} — delete agent
-- GET /v1/agents/{agent_id}/avatars — list agent avatars
-- POST /v1/agents/{agent_id}/avatars — create avatar
+- GET /v1/agents/{agent_id}/avatars — list avatars (cursor pagination, 20 per page)
+- POST /v1/agents/{agent_id}/avatars — upload avatar (JPEG/PNG/WebP)
 - PATCH /v1/agents/{agent_id}/avatars/{id} — set avatar as primary
-- DELETE /v1/agents/{agent_id}/avatars/{id} — delete avatar
+- DELETE /v1/agents/{agent_id}/avatars/{id} — delete avatar (multiple IDs: 7_8_9)
+
+### Organizations
 - GET /v1/organizations — list organizations
 - POST /v1/organizations — create organization
-- GET /v1/organizations/{organization_id} — get organization
-- PATCH /v1/organizations/{organization_id} — update organization
-- DELETE /v1/organizations/{organization_id} — delete organization
-- GET /v1/content_resources — list content resources
-- POST /v1/content_resources — create content resource (upload file)
-- GET /v1/content_resources/{id} — get content resource
-- PATCH /v1/content_resources/{id} — update content resource (rename)
-- DELETE /v1/content_resources/{id} — delete content resource
-- GET /v1/asset_libraries — list asset library (files + folders)
-- POST /v1/asset_folders — create asset folder
-- PATCH /v1/asset_folders/{id} — update asset folder (rename)
-- DELETE /v1/asset_folders/{id} — delete asset folder
-- POST /v1/direct_upload — create direct upload (pre-signed S3 URL)
+- GET /v1/organizations/{id} — get organization (includes credit balance)
+- PATCH /v1/organizations/{id} — update organization
+- DELETE /v1/organizations/{id} — delete organization (owner only, irreversible)
+
+### API Keys
+- POST /v1/persisted_tokens — create API key (token shown once)
+- GET /v1/persisted_tokens — list API keys
+- PATCH /v1/persisted_tokens/{id} — rename API key
+- DELETE /v1/persisted_tokens/{id}/revoke — revoke API key
+- DELETE /v1/persisted_tokens/revoke_all — revoke all API keys
+
+### Automation
+- GET /v1/agents/{agent_id}/automation_config — get webhook/callback config
+- PATCH /v1/agents/{agent_id}/automation_config — update webhook/callback config
+- POST /v1/agents/{agent_id}/automation_config/test_webhook — test webhook
+- POST /v1/agents/{agent_id}/automation_config/test_callback — test callback
+
+## Integrations
+
+- MCP Server: npx @poweredbygen/autocontentengine-mcp-server@latest
+- TypeScript SDK: npm install @poweredbygen/autocontentengine-sdk
+- n8n: Use HTTP Request node with X-API-Key header
+- OpenAPI: https://api.gen.pro/openapi.yaml
+
+## Error Format
+
+{error: "Human-readable message", error_code: "machine_code"}
+
+Common codes:
+- 401 unauthorized — invalid or missing API key
+- 403 forbidden — no permission for this resource
+- 404 not_found — resource does not exist
+- 422 usable_gen_credit_required — no active credits
+- 422 agent_not_found — invalid agent_id
+- 422 insufficient_credits_for_job — not enough credits for this generation
+- 422 validation_error — invalid request body
 
 ## Optional
 
-- [llms-full.txt](https://api.gen.pro/llms-full.txt)
+- [Full API Reference](https://api.gen.pro/llms-full.txt)
+- [API Documentation](https://api.gen.pro)
 - [Help Center](https://docs.gen.pro)
 - [GEN Homepage](https://www.gen.pro)

@@ -45,6 +45,7 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'reference/overview' },
 						{ label: 'Discovery', slug: 'reference/discovery' },
 						{ label: 'API Keys', slug: 'reference/api-keys' },
+						{ label: 'Templates', slug: 'reference/templates' },
 						{ label: 'Auto Content Engine', slug: 'reference/sheets' },
 						{ label: 'Rows', slug: 'reference/rows' },
 						{ label: 'Columns', slug: 'reference/columns' },
