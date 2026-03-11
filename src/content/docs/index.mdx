@@ -11,14 +11,19 @@ GEN is an autonomous social media agent platform. It scans millions of videos to
 
 ## What is the Auto Content Engine?
 
-The Auto Content Engine is the spreadsheet-like system at the core of GEN's content creation workflow. Think of it as a specialized spreadsheet where:
+The Auto Content Engine is the system at the core of GEN's content creation workflow. Each engine has two sides:
 
+**The Sheet** (left side) — a data grid where you prepare content inputs:
 - Each **row** is a video
-- Each **column** is a content type (script, voiceover, video clip, music, etc.)
-- Each **cell** holds the actual content for that intersection
-- Each cell can have multiple **layers** — the building blocks that get composed into the final video
+- Each **column** is a content type (script, voiceover, image prompt, etc.)
+- Each **cell** holds one piece of generated or manual content
 
-In the GEN web app, this is the "Vidsheets" interface. The API gives you full programmatic access to it.
+**The Video** (right side) — a timeline editor where layers compose the final video:
+- **Layers** are the building blocks — text overlays, sound tracks, video clips, captions
+- Each layer has its own position, duration, volume, and styling
+- Layers stack and merge into the final rendered video
+
+In the GEN web app, this is the "Vidsheets" interface. The API gives you full programmatic access to both sides — the sheet data and the video composition.
 
 ## What can you build?
 
@@ -52,9 +57,9 @@ Before diving in, here are the core objects you will work with:
 | **Content Engine** | A content spreadsheet. Each agent can have multiple content engines. |
 | **Row** | A single video within a content engine. Rows contain cells for each column. |
 | **Column** | A content type definition (e.g., "Script", "Voiceover", "B-Roll"). Columns define what kind of content each cell holds. |
-| **Cell** | The intersection of a row and column. Holds the actual content value for that video's content layer. |
-| **Layer** | A composable piece within a cell. A single cell can have multiple layers that get merged into the final output. |
-| **Generation** | An AI job that produces content for a cell or layer. You trigger a generation, and GEN's AI fills in the content. |
+| **Cell** | The intersection of a row and column. Holds one piece of content (a script, a voiceover, an image, etc.). |
+| **Layer** | A video composition element — text overlay, sound track, video clip, or captions. Layers live on the video side, not inside cells. |
+| **Generation** | An AI job that produces content for a cell or a layer. You trigger a generation, and GEN's AI fills in the content. |
 | **Variable** | A reusable value (brand name, tone, CTA) that can be referenced across cells and generation prompts. |
 
 ## Next steps
