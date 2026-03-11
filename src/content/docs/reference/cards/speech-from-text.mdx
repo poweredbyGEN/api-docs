@@ -172,3 +172,17 @@ All voice methods return a generation ID. Poll [Check generation status](/refere
   You can also run speech generation on a layer within a cell by using the layer endpoint:
   `POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}`
 </Aside>
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `autoGenerate` | boolean | Auto-trigger generation when the script cell changes. |
+
+Voice method, voice ID, language, and gender are passed in the generation `data` parameter, not stored as cell attributes.

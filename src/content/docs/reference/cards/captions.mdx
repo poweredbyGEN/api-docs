@@ -115,3 +115,17 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 |--------|------------|-------------|
 | `422` | `validation_error` | No audio, video, or content_resource_id provided. |
 | `404` | `not_found` | Sheet or cell not found. |
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `autoGenerate` | boolean | Auto-trigger generation when source audio/video changes. |
+
+Caption source and styling are passed in the generation `data` parameter.

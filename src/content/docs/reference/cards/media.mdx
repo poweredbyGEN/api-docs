@@ -95,3 +95,21 @@ When building templates for batch video creation, use [variables](/reference/var
 |--------|------------|-------------|
 | `404` | `not_found` | Sheet or cell not found. |
 | `422` | `validation_error` | Invalid cell data. |
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `media.key` | string | Media type: `"image"`, `"video"`, or `"audio"`. |
+| `media.value` | string | URL or content resource ID. |
+| `media.name` | string | Display name for the media file. |
+| `media.thumbnailUrl` | string | Thumbnail URL (for video). |
+| `media.duration` | number | Duration in seconds (for video/audio). |
+
+The Media card type does not trigger AI generation -- it stores a direct reference to an uploaded file.

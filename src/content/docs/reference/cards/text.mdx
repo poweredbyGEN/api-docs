@@ -101,3 +101,20 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
   "execution_cost": 0.5
 }
 ```
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+Set these fields on the cell's `additional_attributes` via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `textMode` | string | `"manual"` (user-written text) or `"ai"` (AI-generated). |
+| `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
+
+When `textMode` is `"manual"`, the cell value contains the text directly. When `"ai"`, generation uses the prompt and model from the generation data.

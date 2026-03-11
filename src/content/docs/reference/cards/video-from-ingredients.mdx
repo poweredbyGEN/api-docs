@@ -114,3 +114,18 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?a
   "execution_cost": 3.5
 }
 ```
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model` | string | Default model: `"kling-v1-6"`, `"seedance-1.0-lite"`, `"pika"`, `"veo-3.1"`. |
+| `ratio` | string | Default aspect ratio. |
+| `duration` | number | Default duration in seconds. |
+| `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

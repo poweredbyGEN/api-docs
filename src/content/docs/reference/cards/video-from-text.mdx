@@ -114,3 +114,18 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3100/generate?a
   "execution_cost": 5.0
 }
 ```
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model` | string | Default model: `"veo-3"`, `"veo-3-fast"`, `"veo-3.1"`, `"veo-3.1-fast"`, `"sora2_video_generation"`, `"seedance-1.0-pro"`, `"seedance-1.5-pro"`. |
+| `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. |
+| `duration` | number | Default duration in seconds. |
+| `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
