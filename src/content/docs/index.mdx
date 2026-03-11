@@ -1,88 +1,11 @@
 ---
-title: Auto Content Engine API
-description: Programmatic access to GEN's autonomous content creation system. Build integrations, automate workflows, and extend the content loop.
-template: splash
-hero:
-  tagline: |
-    GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically — every single day. This API gives you programmatic control over every part of that system.
-  actions:
-    - text: Get Started
-      link: /guides/introduction/
-      icon: right-arrow
-      variant: primary
-    - text: API Reference
-      link: /reference/overview/
-      variant: minimal
+title: GEN API
+description: Programmatic access to GEN's autonomous content creation system.
+head:
+  - tag: meta
+    attrs:
+      http-equiv: refresh
+      content: "0;url=/guides/introduction/"
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
-
-## How GEN is structured
-
-GEN is built as a layered system. Three layers. One autonomous engine.
-
-<CardGrid>
-	<Card title="Workspace" icon="laptop">
-		The top-level container for a company, brand, or client. Each workspace organizes the agents and content engines that operate for that brand.
-	</Card>
-	<Card title="Agent" icon="star">
-		A single brand identity. It owns the voice, personality, goals, and strategy of that brand. The agent thinks and acts like the brand — making decisions about how content should look, sound, and evolve.
-	</Card>
-	<Card title="Auto Content Engine" icon="rocket">
-		A self-running content system inside an agent. Each engine is focused on a specific objective or format — niche content, ads, shoppable posts, day-in-the-life. Multiple engines run simultaneously.
-	</Card>
-	<Card title="The Content Loop" icon="random">
-		Every engine runs the same cycle: **Spot** trends → **Generate** content → **Deploy** to platforms → **Measure** performance → **Adapt** strategy → **Repeat**. Every day. Automatically.
-	</Card>
-</CardGrid>
-
-## What the API controls
-
-The Auto Content Engine API gives you programmatic access to every layer of this system.
-
-<CardGrid>
-	<Card title="Discovery" icon="magnifier">
-		Identify your user, list workspaces, and find agents. The starting point for any integration.
-	</Card>
-	<Card title="Content Engines" icon="rocket">
-		Create, read, clone, and manage Auto Content Engines — the self-running systems that produce your content.
-	</Card>
-	<Card title="Sheet, Rows, Columns, Cells" icon="document">
-		The data grid inside each engine. Each row is a video. Each column is a content type (script, voice, clip). Each cell holds one piece of content.
-	</Card>
-	<Card title="Generations" icon="star">
-		Trigger AI content generation on any cell or layer. Scripts, voiceovers, images, videos — 20+ AI models at your disposal.
-	</Card>
-	<Card title="Layers" icon="puzzle">
-		Video composition. Text overlays, sound tracks, video clips — the building blocks that become the final video.
-	</Card>
-	<Card title="Automation" icon="setting">
-		Webhooks, callbacks, and pipelines. Get notified when content is ready, trigger workflows, and connect to external systems.
-	</Card>
-</CardGrid>
-
-## SDKs & Tools
-
-<CardGrid>
-	<LinkCard title="MCP Server (Claude Code)" description="38 tools for managing agents, engines, and generations through natural language." href="/guides/claude-code/" />
-	<LinkCard title="TypeScript SDK" description="Type-safe client library for Node.js and TypeScript projects. Zero dependencies." href="/guides/typescript-sdk/" />
-	<LinkCard title="n8n Integration" description="Connect GEN to n8n workflows for event-driven content automation." href="/guides/n8n/" />
-	<LinkCard title="OpenAPI Spec" description="Download the raw OpenAPI 3.1 specification for code generation." href="/openapi.yaml" />
-</CardGrid>
-
-## Quick links
-
-<CardGrid>
-	<LinkCard title="Authentication" description="Create your API key and make your first request." href="/guides/authentication/" />
-	<LinkCard title="Quick Start" description="Five steps from zero to your first API call." href="/guides/quickstart/" />
-	<LinkCard title="Auto Content Engine" description="Create and manage engines programmatically." href="/reference/sheets/" />
-	<LinkCard title="Generations" description="Trigger AI content generation on cells and layers." href="/reference/generations/" />
-</CardGrid>
-
-## Resources
-
-<CardGrid>
-	<LinkCard title="Help Center & Tutorials" description="Step-by-step guides, video walkthroughs, and how-to articles for using GEN." href="https://docs.gen.pro" />
-	<LinkCard title="GEN Homepage" description="Learn more about GEN — the autonomous social media agent." href="https://www.gen.pro" />
-	<LinkCard title="Error Reference" description="Common error codes, what they mean, and how to fix them." href="/guides/errors/" />
-</CardGrid>
+Redirecting to [Introduction](/guides/introduction/)...
