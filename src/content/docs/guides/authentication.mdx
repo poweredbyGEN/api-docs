@@ -5,14 +5,7 @@ description: How to create and use API keys to authenticate with the Auto Conten
 
 import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
-The Auto Content Engine API supports two authentication methods:
-
-| Method | Header | Use case |
-|--------|--------|----------|
-| **API Key** (recommended) | `X-API-Key: your_key` | Server-side scripts, automation, CI/CD, MCP integrations |
-| **JWT Bearer Token** | `Authorization: Bearer <token>` | Frontend apps using Clerk/Dynamic auth |
-
-For most integrations, use an API key. JWTs are primarily for the GEN web app and authenticated frontends.
+Authenticate with the API using a Personal Access Token (PAT) passed in the `X-API-Key` header.
 
 ## Creating a Personal Access Token
 
