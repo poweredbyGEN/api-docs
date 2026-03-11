@@ -1,0 +1,12 @@
+# GEN Auto Content Engine API Documentation
+# https://api.gen.pro
+
+User-agent: *
+Allow: /
+
+# AI agent discovery
+# llms.txt: https://api.gen.pro/llms.txt
+# llms-full.txt: https://api.gen.pro/llms-full.txt
+# OpenAPI spec: https://api.gen.pro/openapi.yaml
+
+Sitemap: https://api.gen.pro/sitemap-index.xml

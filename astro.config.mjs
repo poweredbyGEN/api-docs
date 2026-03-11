@@ -18,6 +18,18 @@ export default defineConfig({
 					tag: 'script',
 					content: `if (!localStorage.getItem('starlight-theme')) { localStorage.setItem('starlight-theme', 'dark'); }`,
 				},
+				{
+					tag: 'link',
+					attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'LLM-readable API reference' },
+				},
+				{
+					tag: 'link',
+					attrs: { rel: 'alternate', type: 'text/plain', href: '/llms-full.txt', title: 'LLM-readable full API reference' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'ai-content-declaration', content: 'This site provides API documentation for AI agents. See /llms.txt for machine-readable reference.' },
+				},
 			],
 			customCss: ['./src/styles/custom.css'],
 			social: [
