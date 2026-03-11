@@ -5,11 +5,22 @@ description: Manage video layers (text, sound, clip overlays) within cells.
 
 import { Aside } from '@astrojs/starlight/components';
 
-Layers are composable building blocks within a cell. A single video cell can have multiple layers — text overlays, sound effects, B-roll clips — that get composed into the final video output.
+Layers are composable building blocks within a cell. A single video cell can have multiple layers — text overlays, sound tracks, video clips, captions — that get composed into the final rendered video.
 
 <Aside>
   All layer endpoints require the `agent_id` query parameter.
 </Aside>
+
+## Layer types
+
+| Type | Description | Key attributes |
+|------|-------------|----------------|
+| `text` | Text overlay with font, color, position, and animation | `content`, `styles` (fontSize, fontWeight, color, fontFamily, textAlign, animation) |
+| `clip` | Video clip with trim, volume, and visual effects | `src`, `volume`, `videoStartTime`, `styles` (objectFit, filter, borderRadius) |
+| `sound` | Audio track with volume and trim | `src`, `volume`, `startFromSound` |
+| `caption` | Auto-generated captions with word-level timestamps | `captions` (array of timestamped words), `styles`, `template` |
+| `image` | Static image overlay | `src`, `styles` (objectFit, borderRadius, filter) |
+| `shape` | Geometric shape overlay | `styles` (fill, stroke, strokeWidth, borderRadius) |
 
 ## Layer schema
 
@@ -18,8 +29,15 @@ Layers are composable building blocks within a cell. A single video cell can hav
   "id": 4000,
   "name": "Background Music",
   "position": 1,
-  "type": "audio",
-  "additional_attributes": {},
+  "type": "sound",
+  "additional_attributes": {
+    "src": "https://cdn.gen.pro/outputs/audio_001.mp3",
+    "from": 0,
+    "durationInFrames": 300,
+    "totalDuration": 300,
+    "styles": { "volume": 0.8 },
+    "startFromSound": 30
+  },
   "created_at_ts": 1709294400000,
   "updated_at_ts": 1709380800000,
   "default_user_job": null,
@@ -27,6 +45,68 @@ Layers are composable building blocks within a cell. A single video cell can hav
   "execution_cost": null
 }
 ```
+
+## The `additional_attributes` object
+
+This is a freeform JSON field that stores the layer's composition settings. All timing values are in **frames** (30 fps).
+
+### Common fields (all layer types)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `from` | integer | Start frame on the timeline (0 = beginning of video) |
+| `durationInFrames` | integer | How many frames this layer is visible/audible |
+| `totalDuration` | integer | Original duration before any trim |
+| `width` | number | Width in pixels (for visual layers) |
+| `height` | number | Height in pixels (for visual layers) |
+| `left` | number | X position in pixels |
+| `top` | number | Y position in pixels |
+| `rotation` | number | Rotation in degrees |
+
+### Clip (video) fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `src` | string | Video URL |
+| `videoStartTime` | number | Trim start point in the source video (seconds) |
+| `styles.volume` | number | Volume level: `0` (muted) to `1` (full). Default `1`. |
+| `styles.objectFit` | string | `"cover"`, `"contain"`, `"fill"`, `"none"` |
+| `styles.filter` | string | CSS filter (e.g., `"brightness(1.2) contrast(1.1)"`) |
+| `styles.borderRadius` | string | Corner rounding (e.g., `"8px"`) |
+| `styles.animation` | object | `{ enter: "fadeIn", exit: "fadeOut" }` |
+
+### Sound (audio) fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `src` | string | Audio URL |
+| `startFromSound` | number | Trim start point in the source audio (frames) |
+| `styles.volume` | number | Volume level: `0` (muted) to `1` (full). Default `1`. |
+
+### Text fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | string | The text to display |
+| `styles.fontSize` | string | Font size (e.g., `"48px"`) |
+| `styles.fontFamily` | string | Font name |
+| `styles.fontWeight` | string | `"400"`, `"700"`, etc. |
+| `styles.color` | string | Text color (hex or CSS color) |
+| `styles.textAlign` | string | `"left"`, `"center"`, `"right"` |
+| `styles.backgroundColor` | string | Background behind text |
+| `styles.animation` | object | `{ enter: "fadeIn", exit: "fadeOut" }` |
+
+### Caption fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `captions` | array | Array of `{ text, startMs, endMs, words: [{ word, startMs, endMs }] }` |
+| `template` | string | Caption style template name |
+| `styles` | object | Font, color, highlight styles for active words |
+
+<Aside type="tip">
+  To adjust volume, trim, or timing on an existing layer, use the **Update layer** endpoint and pass the new values inside `additional_attributes`.
+</Aside>
 
 ---
 
@@ -99,7 +179,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_
 
 ## Update layer
 
-Updates a layer's name, type, or attributes.
+Updates a layer's name, type, or composition attributes (volume, trim, position, styles, etc.).
 
 ```
 PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
@@ -115,21 +195,15 @@ PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={age
 
 ### Request body
 
-Pass the fields to update inside `video_layer`:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `video_layer.name` | string | No | Rename the layer. |
+| `video_layer.type` | string | No | Change layer type. |
+| `video_layer.additional_attributes` | object | No | Update composition settings (volume, trim, position, styles). |
 
-```json
-{
-  "video_layer": {
-    "name": "Renamed Layer"
-  }
-}
-```
+### Examples
 
-### Response
-
-Returns the updated layer.
-
-### Example
+**Rename a layer:**
 
 ```bash
 curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
@@ -137,6 +211,37 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/40
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"name": "Intro Music"}}'
 ```
+
+**Set volume to 50%:**
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"additional_attributes": {"styles": {"volume": 0.5}}}}'
+```
+
+**Trim a clip (start at frame 60, show for 150 frames):**
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4001?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"additional_attributes": {"from": 60, "durationInFrames": 150}}}'
+```
+
+**Move a text overlay and change its style:**
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4002?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"video_layer": {"additional_attributes": {"left": 50, "top": 400, "styles": {"fontSize": "64px", "color": "#ffffff", "fontWeight": "700"}}}}'
+```
+
+### Response
+
+Returns the updated layer.
 
 ---
 
