@@ -1,6 +1,6 @@
 ---
-title: Authentication
-description: How to create and use API keys to authenticate with the Auto Content Engine API.
+title: Get API Key
+description: Create an API key and understand permissions, credits, and access control.
 ---
 
 import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
@@ -105,11 +105,30 @@ curl -X DELETE https://api.gen.pro/v1/persisted_tokens/{token_id} \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 
-## Credit requirement
+## Permissions & access control
 
-<Aside>
-  Auto Content Engine endpoints require an active GEN subscription with available credits. If your account has no credits, API calls to `/v1/autocontentengine` endpoints will return a `402` error.
+Your API key inherits the permissions of the user who created it. Here's what determines what you can do:
+
+| Requirement | What it means |
+|-------------|---------------|
+| **Workspace credits** | Auto Content Engine endpoints require active GEN credits on the workspace. No credits → `422 usable_gen_credit_required`. |
+| **Owner or Manager role** | You can only access agents in workspaces where you are an **owner** or **manager**. Viewer and editor roles cannot use the API. |
+| **Agent scope** | All `/v1/autocontentengine/` requests require an `agent_id` parameter. You can only use agents you have access to. |
+
+<Aside type="caution">
+  If you get `403 forbidden` or `422 agent_not_found`, check that your account has the right role on the workspace that owns the agent.
 </Aside>
+
+### What each role can do
+
+| Action | Owner | Manager | Editor | Viewer |
+|--------|-------|---------|--------|--------|
+| List agents & engines | Yes | Yes | No | No |
+| Create/update content | Yes | Yes | No | No |
+| Trigger generations | Yes | Yes | No | No |
+| Create/delete agents | Yes | Yes | No | No |
+| Delete organization | Yes | No | No | No |
+| Manage API keys | Yes | Yes | Yes | Yes |
 
 ## Security best practices
 

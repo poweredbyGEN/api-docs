@@ -34,7 +34,7 @@ export default defineConfig({
 						{ label: 'Introduction', slug: 'guides/introduction' },
 						{ label: 'MCP Server (Claude Code)', slug: 'guides/claude-code' },
 						{ label: 'TypeScript SDK', slug: 'guides/typescript-sdk' },
-						{ label: 'Authentication', slug: 'guides/authentication' },
+						{ label: 'Get API Key', slug: 'guides/authentication' },
 						{ label: 'Quick Start', slug: 'guides/quickstart' },
 					],
 				},
