@@ -91,17 +91,17 @@ You can list, rename, and revoke keys through the API itself:
 
 ```bash
 # List all your keys
-curl https://api.gen.pro/v1/personal_access_tokens \
+curl https://api.gen.pro/v1/persisted_tokens \
   -H "X-API-Key: $GEN_API_KEY"
 
 # Rename a key
-curl -X PATCH https://api.gen.pro/v1/personal_access_tokens/{token_id} \
+curl -X PATCH https://api.gen.pro/v1/persisted_tokens/{token_id} \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "new-name"}'
 
 # Revoke a key
-curl -X DELETE https://api.gen.pro/v1/personal_access_tokens/{token_id} \
+curl -X DELETE https://api.gen.pro/v1/persisted_tokens/{token_id} \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 

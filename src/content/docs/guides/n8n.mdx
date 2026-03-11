@@ -57,8 +57,8 @@ This workflow checks a content engine for empty script cells every hour and trig
    Filter the response to find rows where the script cell is empty:
 
    ```javascript
-   const rows = $input.first().json.rows;
-   const scriptColumn = $input.first().json.columns.find(
+   const rows = $input.first().json.spreadsheet_rows;
+   const scriptColumn = $input.first().json.spreadsheet_columns.find(
      c => c.name === "Script"
    );
 
@@ -78,16 +78,13 @@ This workflow checks a content engine for empty script cells every hour and trig
    For each empty cell, trigger AI generation:
 
    ```
-   POST https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{{ $json.cell_id }}/generate
+   POST https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{{ $json.cell_id }}/generate?agent_id={{ $vars.GEN_AGENT_ID }}
    ```
 
    Body (JSON):
    ```json
    {
-     "generation_type": "script",
-     "data": {
-       "agent_id": "your_agent_id"
-     }
+     "generation_type": "text_generation"
    }
    ```
 
