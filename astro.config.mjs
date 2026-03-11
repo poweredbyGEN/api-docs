@@ -67,6 +67,7 @@ export default defineConfig({
 								{ label: 'Media', slug: 'reference/cards/media' },
 							],
 						},
+						{ label: 'Rendering', slug: 'reference/rendering' },
 						{ label: 'Variables', slug: 'reference/variables' },
 						{ label: 'Automation', slug: 'reference/automation' },
 						{ label: 'Pipelines', slug: 'reference/pipelines' },

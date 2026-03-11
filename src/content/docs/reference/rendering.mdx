@@ -1,0 +1,151 @@
+---
+title: Rendering
+description: Render the final composed video from all layers in a cell.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Once you've generated content for each layer (script, voiceover, video clips, captions), render the final composed video using the Remotion rendering endpoint. This merges all layers into a single downloadable video file.
+
+<Aside>
+  Rendering requires the `agent_id` query parameter and active GEN credits.
+</Aside>
+
+## Workflow
+
+```
+1. Generate content for each layer (text, speech, video clips)
+2. Trigger a render job → POST /v1/remotion_jobs
+3. Poll render status → GET /v1/remotion_jobs?project_id={id}
+4. Download the final video from the output URL
+```
+
+---
+
+## Trigger render
+
+Creates a Remotion render job that composes all layers in a cell into a final video.
+
+```
+POST /v1/remotion_jobs?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `job.project_id` | integer | Yes | The engine (project) ID. |
+| `job.container_id` | integer | Yes | The cell ID to render. |
+| `job.container_type` | string | Yes | `"SpreadsheetCell"` |
+| `job.input` | string | Yes | JSON string with render configuration. |
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/remotion_jobs?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job": {
+      "project_id": 101,
+      "container_id": 3000,
+      "container_type": "SpreadsheetCell",
+      "input": "{}"
+    }
+  }'
+```
+
+### Response (201)
+
+```json
+{
+  "job_id": 5000
+}
+```
+
+---
+
+## List render jobs
+
+Returns render jobs for an engine, newest first. Includes output URLs for completed renders.
+
+```
+GET /v1/remotion_jobs?agent_id={agent_id}&project_id={project_id}
+```
+
+### Query parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent ID. |
+| `project_id` | integer | Yes | The engine (project) ID. |
+| `page` | integer | No | Page number (20 per page, default 0). |
+
+### Response
+
+```json
+[
+  {
+    "created_at": "2026-03-10T12:00:00.000Z",
+    "status": "completed",
+    "content_resource_id": 8000,
+    "url": "https://cdn.gen.pro/outputs/final_video_001.mp4",
+    "thumbnail_url": "https://cdn.gen.pro/thumbnails/final_video_001.jpg"
+  },
+  {
+    "created_at": "2026-03-10T11:00:00.000Z",
+    "status": "processing"
+  }
+]
+```
+
+### Status flow
+
+```
+pending → processing → completed | failed
+```
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Queued, waiting for Remotion Lambda to pick it up. |
+| `processing` | Video is being rendered. |
+| `completed` | Done. `url` contains the final video CDN link. |
+| `failed` | Render failed (check logs). |
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/remotion_jobs?agent_id=42&project_id=101" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Downloading the video
+
+The `url` field on a completed render job is a direct CDN link. No authentication needed — just fetch it:
+
+```bash
+# Download the final video
+curl -o my_video.mp4 "https://cdn.gen.pro/outputs/final_video_001.mp4"
+```
+
+```typescript
+// Or in code
+const response = await fetch(renderJob.url);
+const blob = await response.blob();
+```
+
+<Aside type="tip">
+  Individual layer outputs (before composition) are also downloadable. Each layer's `default_user_job.output_resources[].url` has the raw asset URL — useful if you need just the voiceover MP3 or a single video clip.
+</Aside>
+
+---
+
+## Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Invalid API key. |
+| `404` | `project_not_found` | Engine not found or agent doesn't have access. |
+| `422` | `validation_error` | Missing or invalid render parameters. |
