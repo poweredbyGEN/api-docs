@@ -11,8 +11,13 @@ Content monitoring lets you discover and index social media posts and videos int
   All content monitoring endpoints require authentication via the `X-API-Key` header and a valid `agent_id` query parameter. The agent's workspace must have an active credit purchase.
 </Aside>
 
-<Aside type="caution">
-  Scraped content is indexed internally for the agent — there is no API to retrieve raw scraped data directly. The agent uses this data as context when generating responses, content, and recommendations through the conversation interface. Think of it as training material, not a queryable database.
+<Aside type="tip" title="Accessing scraped data">
+  There is no API to download raw scraped data directly. Instead, query the data through your agent:
+
+  - **Agent Chat** — ask natural language questions like "what are the top performing videos about skincare this week?" via `POST /v1/agent_chats`. The agent analyzes your scraped data with an LLM and returns insights.
+  - **Automation Pipelines** — set up scheduled prompts that query your data automatically and populate Vidsheet rows with the results. See [Pipelines](/reference/pipelines) for details.
+
+  Both approaches use the same LLM-powered search engine under the hood — your data is analyzed on demand, not exposed as a raw dump.
 </Aside>
 
 ## Platform capabilities
