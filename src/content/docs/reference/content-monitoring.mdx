@@ -5,10 +5,14 @@ description: Monitor and discover social media content across TikTok, Instagram,
 
 import { Aside } from '@astrojs/starlight/components';
 
-Content monitoring lets you discover and index social media posts and videos for your agent's knowledge base. Start a one-time scrape or set up ongoing monitoring across six platforms.
+Content monitoring lets you discover and index social media posts and videos into your agent's knowledge base. Start a one-time scrape or set up ongoing monitoring across six platforms. Scraped content trains the agent's understanding of trends, engagement patterns, and creator activity.
 
 <Aside type="note">
   All content monitoring endpoints require authentication via the `X-API-Key` header and a valid `agent_id` query parameter. The agent's workspace must have an active credit purchase.
+</Aside>
+
+<Aside type="caution">
+  Scraped content is indexed internally for the agent — there is no API to retrieve raw scraped data directly. The agent uses this data as context when generating responses, content, and recommendations through the conversation interface. Think of it as training material, not a queryable database.
 </Aside>
 
 ## Platform capabilities
