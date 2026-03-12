@@ -81,6 +81,8 @@ export default defineConfig({
 							],
 						},
 						{ label: 'Rendering', slug: 'reference/rendering' },
+						{ label: 'Publishing', slug: 'reference/publishing' },
+						{ label: 'Content Monitoring', slug: 'reference/content-monitoring' },
 						{ label: 'Variables', slug: 'reference/variables' },
 						{ label: 'Automation', slug: 'reference/automation' },
 						{ label: 'Pipelines', slug: 'reference/pipelines' },
