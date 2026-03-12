@@ -377,6 +377,76 @@ Body: {blob: {filename, byte_size (max 1GB), checksum (base64 MD5), content_type
 Compute checksum: openssl md5 -binary file | base64
 Errors: 422 invalid_content_type, 422 file_size_exceeded, 422 direct_upload_failed
 
+## Content Monitoring
+
+Monitor and discover social media content across TikTok, Instagram, YouTube, Reddit, Pinterest, and Twitter. Scraped content is indexed into your agent's knowledge base and queried via agent chat or automation pipelines — there is no raw data download API.
+
+### Platform Capabilities
+| Platform | Username | Hashtag | Keyword |
+|----------|----------|---------|---------|
+| TikTok | Yes | Yes | Yes |
+| Instagram | Yes | Yes | No |
+| YouTube | Yes | Yes | Yes |
+| Reddit | Yes | No | Yes |
+| Pinterest | Yes | Yes | Yes |
+| Twitter | Yes | No | No |
+
+### Pricing
+Per video/post scraped: $0.015
+Per comment (when comment monitoring enabled): $0.002
+
+POST /v1/train_socials?agent_id={id}
+Content-Type: multipart/form-data
+Body: user_job[data] = JSON string with:
+- platform (required): tiktok | instagram | youtube | reddit | pinterest | twitter
+- type (required): username | hashtag | keyword (must be supported by platform)
+- value (required): @creator, #topic, or plain text
+- days: 0 | 1 | 7 | 30 | 90 | 180
+- country: two-letter code (us, gb, etc.)
+- max_results: 1-1000
+- monitoring: true (ongoing) | false (one-time scrape)
+- comment_monitoring: true | false
+→ {user_job_id: 12345}
+
+PUT /v1/train_socials/{id}?agent_id={id}
+Same body format as create. Only pending/processing jobs can be updated.
+→ {user_job_id: 12345}
+
+Status flow: pending → processing → completed (one-time) or stays processing (monitoring)
+Poll: GET /v1/user_jobs/{id}?agent_id={id}
+
+Accessing scraped data: Query via POST /v1/agent_chats (natural language questions) or automation pipelines. No raw data API.
+
+## Publishing
+
+Post or schedule content to social media platforms. Currently supports TikTok.
+
+POST /v1/user_jobs?agent_id={id}
+Content-Type: application/json
+Body:
+{
+  "user_job_type": "publish_content",
+  "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://...\", \"description\": \"caption #hashtags\", \"schedule_type\": \"now\", \"media_type\": \"VIDEO\"}"
+}
+
+Data fields (JSON-stringified in data):
+- platform (required): tiktok
+- media_url (required): public URL to media file
+- description (required): post caption, max ~2200 chars for TikTok
+- title: post title
+- media_type: VIDEO (default) | IMAGE
+- schedule_type (required): now | scheduled
+- scheduled_time (conditional): ISO 8601 UTC datetime, required when schedule_type=scheduled
+- thumbnail_url: custom thumbnail URL
+- timezone_offset: minutes from UTC (default 0)
+
+→ {user_job_id: 138860}
+
+Status flow: pending → processing → completed (result contains post_id) | failed
+Poll: GET /v1/user_jobs/{id}?agent_id={id}
+
+Prerequisites: Agent must have connected TikTok account (via AURA). Media must be publicly accessible.
+
 ## Error Format
 
 {error: "Human-readable message", error_code: "machine_code"}
@@ -415,6 +485,17 @@ Common codes:
 2. PUT file to the returned URL with Content-Type and Content-MD5 headers
 3. POST /v1/content_resources?agent_id={id} with signed_id as content_resource[file]
 4. Use the returned content_resource.id in generation data (e.g., image_resource_id, audio_resource_id)
+
+### Monitor Social Media Content
+1. POST /v1/train_socials?agent_id={id} with user_job[data] containing platform, type, value
+2. Poll GET /v1/user_jobs/{id}?agent_id={id} until completed (one-time) or ongoing (monitoring)
+3. Query data via POST /v1/agent_chats — ask "what are the top performing videos about skincare?"
+
+### Publish Content
+1. Render or upload video → get public media_url
+2. POST /v1/user_jobs?agent_id={id} with user_job_type=publish_content
+3. Set schedule_type: "now" for immediate, "scheduled" with scheduled_time for later
+4. Poll status until completed — result contains post_id from the platform
 
 ### Set Up Automation Webhook
 1. PATCH /v1/agents/{agent_id}/automation_config → set webhook_url and callback_url
