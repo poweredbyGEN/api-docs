@@ -1,11 +1,11 @@
 ---
 title: Content Monitoring
-description: Monitor and discover social media content across TikTok, Instagram, YouTube, Reddit, Pinterest, and Twitter.
+description: Monitor and discover social media content across TikTok, Instagram, and YouTube.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Content monitoring lets you discover and index social media posts and videos into your agent's knowledge base. Start a one-time scrape or set up ongoing monitoring across six platforms. Scraped content trains the agent's understanding of trends, engagement patterns, and creator activity.
+Content monitoring lets you discover and index social media posts and videos into your agent's knowledge base. Start a one-time scrape or set up ongoing monitoring across TikTok, Instagram, and YouTube. Scraped content trains the agent's understanding of trends, engagement patterns, and creator activity.
 
 <Aside type="note">
   All content monitoring endpoints require authentication via the `X-API-Key` header and a valid `agent_id` query parameter. The agent's workspace must have an active credit purchase.
@@ -29,9 +29,6 @@ Not all platforms support all search types:
 | TikTok | Yes | Yes | Yes |
 | Instagram | Yes | Yes | No |
 | YouTube | Yes | Yes | Yes |
-| Reddit | Yes | No | Yes |
-| Pinterest | Yes | Yes | Yes |
-| Twitter | Yes | No | No |
 
 ## Pricing
 
@@ -49,7 +46,7 @@ Costs are converted to credits using the standard credit formula.
 Starts a social media content scrape or monitoring job. For one-time scrapes, the job transitions to `completed` after processing. For ongoing monitoring, the job stays in `processing` and scrapes on a recurring schedule.
 
 ```
-POST /v1/train_socials?agent_id={agent_id}
+POST /v1/user_jobs?agent_id={agent_id}
 ```
 
 ### Parameters
@@ -57,6 +54,7 @@ POST /v1/train_socials?agent_id={agent_id}
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `agent_id` | string | Yes | The agent ID (query parameter). |
+| `user_job[user_job_type]` | string | Yes | Must be `"train_social"`. |
 | `user_job[data]` | string (JSON) | Yes | JSON-stringified object containing the monitoring configuration (see Data fields below). |
 
 ### Data fields
@@ -65,13 +63,13 @@ The `user_job[data]` value is a JSON string containing:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `platform` | string | Yes | Target platform: `tiktok`, `instagram`, `youtube`, `reddit`, `pinterest`, or `twitter`. |
+| `platform` | string | Yes | Target platform: `tiktok`, `instagram`, or `youtube`. |
 | `type` | string | Yes | Search type: `username`, `hashtag`, or `keyword`. Must be supported by the chosen platform (see table above). |
 | `value` | string | Yes | The search value. Usernames must start with `@` (e.g. `@creator`). Hashtags must start with `#` (e.g. `#skincare`). Keywords are plain text. |
 | `days` | integer | No | Filter to content from the last N days. One of: `0` (no filter), `1`, `7`, `30`, `90`, `180`. |
 | `country` | string | No | Two-letter country code (e.g. `us`, `gb`) to filter by region. |
-| `max_results` | integer | No | Maximum number of results to fetch per scrape (1–1000). |
-| `monitoring` | boolean | No | `true` (default) for ongoing scheduled monitoring. `false` for a one-time scrape that completes after processing. |
+| `max_results` | integer | No | Maximum number of results to fetch per scrape (1–50). |
+| `monitoring` | boolean | No | `false` (default) for a one-time scrape that completes after processing. `true` for ongoing scheduled monitoring. |
 | `comment_monitoring` | boolean | No | `true` to also scrape comments (adds per-comment cost). Default `false`. |
 
 ### Response
@@ -96,27 +94,30 @@ Poll status via `GET /v1/user_jobs/{id}?agent_id={agent_id}`.
 ### Example: Monitor an Instagram account
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/train_socials?agent_id=your-agent-id" \
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: multipart/form-data" \
-  -F 'user_job[data]={"platform":"instagram","type":"username","value":"@fashionbrand","days":30,"max_results":200,"monitoring":true}'
+  -F 'user_job[user_job_type]=train_social' \
+  -F 'user_job[data]={"platform":"instagram","type":"username","value":"@fashionbrand","days":30,"max_results":50,"monitoring":true}'
 ```
 
 ### Example: One-time YouTube hashtag scrape
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/train_socials?agent_id=your-agent-id" \
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: multipart/form-data" \
+  -F 'user_job[user_job_type]=train_social' \
   -F 'user_job[data]={"platform":"youtube","type":"hashtag","value":"#cooking","max_results":50,"monitoring":false}'
 ```
 
 ### Example: TikTok keyword search with comments
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/train_socials?agent_id=your-agent-id" \
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: multipart/form-data" \
+  -F 'user_job[user_job_type]=train_social' \
   -F 'user_job[data]={"platform":"tiktok","type":"keyword","value":"ai tools","days":7,"country":"us","monitoring":true,"comment_monitoring":true}'
 ```
 
@@ -136,7 +137,7 @@ curl -X POST "https://api.gen.pro/v1/train_socials?agent_id=your-agent-id" \
 Updates the configuration of an existing monitoring job. Only jobs with `pending` or `processing` status can be updated.
 
 ```
-PUT /v1/train_socials/{id}?agent_id={agent_id}
+PUT /v1/user_jobs/{id}?agent_id={agent_id}
 ```
 
 ### Parameters
@@ -145,7 +146,14 @@ PUT /v1/train_socials/{id}?agent_id={agent_id}
 |-----------|------|----------|-------------|
 | `id` | integer | Yes | The user job ID (path parameter). |
 | `agent_id` | string | Yes | The agent ID (query parameter). |
-| `user_job[data]` | string (JSON) | Yes | JSON-stringified object with the updated monitoring configuration. Same fields as create. |
+| `platform` | string | No | Target platform: `tiktok`, `instagram`, or `youtube`. |
+| `type` | string | No | Search type: `username`, `hashtag`, or `keyword`. |
+| `value` | string | No | The search value. |
+| `days` | integer | No | Lookback window. One of: `0`, `1`, `7`, `30`, `90`, `180`. |
+| `country` | string | No | Two-letter country code. |
+| `max_results` | integer | No | Maximum results per scrape (1–50). |
+| `monitoring` | boolean | No | `true` for ongoing monitoring, `false` for one-time. |
+| `comment_monitoring` | boolean | No | `true` to also scrape comments. |
 
 ### Response
 
@@ -158,10 +166,15 @@ PUT /v1/train_socials/{id}?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/train_socials/12345?agent_id=your-agent-id" \
+curl -X PUT "https://api.gen.pro/v1/user_jobs/12345?agent_id=your-agent-id" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: multipart/form-data" \
-  -F 'user_job[data]={"platform":"instagram","type":"username","value":"@fashionbrand","days":7,"max_results":100,"monitoring":true}'
+  -F 'platform=instagram' \
+  -F 'type=username' \
+  -F 'value=@fashionbrand' \
+  -F 'days=7' \
+  -F 'max_results=50' \
+  -F 'monitoring=true'
 ```
 
 ### Errors

@@ -141,8 +141,8 @@ Checksum: base64-encoded MD5 (openssl md5 -binary file | base64)
 Max size: 1 GB
 
 ### Monitor Social Media Content
-1. POST /v1/train_socials?agent_id={id} — start monitoring (multipart form: user_job[data] as JSON string)
-2. Supported platforms: tiktok, instagram, youtube, reddit, pinterest, twitter
+1. POST /v1/user_jobs?agent_id={id} — start monitoring (multipart form: user_job[user_job_type]=train_social, user_job[data] as JSON string)
+2. Supported platforms: tiktok, instagram, youtube
 3. Search types: username (@creator), hashtag (#topic), keyword (plain text) — not all combos supported
 4. Set monitoring=true for ongoing scraping, false for one-time
 5. Poll GET /v1/user_jobs/{id}?agent_id={id} for status
@@ -265,8 +265,8 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 - POST /v1/agents/{agent_id}/automation_config/test_callback — test callback
 
 ### Content Monitoring
-- POST /v1/train_socials?agent_id={id} — create monitoring job (multipart: user_job[data] JSON string)
-- PUT /v1/train_socials/{id}?agent_id={id} — update monitoring job
+- POST /v1/user_jobs?agent_id={id} — create monitoring job (multipart: user_job[user_job_type]=train_social, user_job[data] JSON string)
+- PUT /v1/user_jobs/{id}?agent_id={id} — update monitoring job (flat params: platform, type, value, days, max_results, monitoring, comment_monitoring)
 
 ### Publishing
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})

@@ -379,7 +379,7 @@ Errors: 422 invalid_content_type, 422 file_size_exceeded, 422 direct_upload_fail
 
 ## Content Monitoring
 
-Monitor and discover social media content across TikTok, Instagram, YouTube, Reddit, Pinterest, and Twitter. Scraped content is indexed into your agent's knowledge base and queried via agent chat or automation pipelines — there is no raw data download API.
+Monitor and discover social media content across TikTok, Instagram, and YouTube. Scraped content is indexed into your agent's knowledge base and queried via agent chat or automation pipelines — there is no raw data download API.
 
 ### Platform Capabilities
 | Platform | Username | Hashtag | Keyword |
@@ -387,29 +387,28 @@ Monitor and discover social media content across TikTok, Instagram, YouTube, Red
 | TikTok | Yes | Yes | Yes |
 | Instagram | Yes | Yes | No |
 | YouTube | Yes | Yes | Yes |
-| Reddit | Yes | No | Yes |
-| Pinterest | Yes | Yes | Yes |
-| Twitter | Yes | No | No |
 
 ### Pricing
 Per video/post scraped: $0.015
 Per comment (when comment monitoring enabled): $0.002
 
-POST /v1/train_socials?agent_id={id}
+POST /v1/user_jobs?agent_id={id}
 Content-Type: multipart/form-data
-Body: user_job[data] = JSON string with:
-- platform (required): tiktok | instagram | youtube | reddit | pinterest | twitter
-- type (required): username | hashtag | keyword (must be supported by platform)
-- value (required): @creator, #topic, or plain text
-- days: 0 | 1 | 7 | 30 | 90 | 180
-- country: two-letter code (us, gb, etc.)
-- max_results: 1-1000
-- monitoring: true (ongoing) | false (one-time scrape)
-- comment_monitoring: true | false
+Body:
+- user_job[user_job_type] = "train_social"
+- user_job[data] = JSON string with:
+  - platform (required): tiktok | instagram | youtube
+  - type (required): username | hashtag | keyword (must be supported by platform)
+  - value (required): @creator, #topic, or plain text
+  - days: 0 | 1 | 7 | 30 | 90 | 180
+  - country: two-letter code (us, gb, etc.)
+  - max_results: 1-50
+  - monitoring: false (default, one-time scrape) | true (ongoing)
+  - comment_monitoring: true | false
 → {user_job_id: 12345}
 
-PUT /v1/train_socials/{id}?agent_id={id}
-Same body format as create. Only pending/processing jobs can be updated.
+PUT /v1/user_jobs/{id}?agent_id={id}
+Flat params (not nested): platform, type, value, days, country, max_results, monitoring, comment_monitoring. Only pending/processing jobs can be updated.
 → {user_job_id: 12345}
 
 Status flow: pending → processing → completed (one-time) or stays processing (monitoring)
@@ -487,7 +486,7 @@ Common codes:
 4. Use the returned content_resource.id in generation data (e.g., image_resource_id, audio_resource_id)
 
 ### Monitor Social Media Content
-1. POST /v1/train_socials?agent_id={id} with user_job[data] containing platform, type, value
+1. POST /v1/user_jobs?agent_id={id} with user_job[user_job_type]=train_social and user_job[data] containing platform, type, value
 2. Poll GET /v1/user_jobs/{id}?agent_id={id} until completed (one-time) or ongoing (monitoring)
 3. Query data via POST /v1/agent_chats — ask "what are the top performing videos about skincare?"
 
