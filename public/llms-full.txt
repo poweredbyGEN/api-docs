@@ -298,6 +298,32 @@ DELETE /v1/agents/{agent_id}/avatars/{id}
 id can be multiple IDs separated by underscores (e.g. 7_8_9).
 → 200 (empty body)
 
+## Agent Profile
+
+Unified view of agent identity + voice config + TrendPulse brand config in one endpoint.
+
+GET /v1/agent/profile
+→ {identity: {name, description, avatar_url, use_character, persona}, voice: {eleven_lab_api_key, hume_ai_api_key, default_voice: {id, name, provider}}, brand: {brand_name, description, goal, keywords: [], target_platforms: [], shortform, longform, linked_accounts: [{id, url, platform}], onboarding_status}}
+brand section is null if no TrendPulse config exists.
+Errors: 403 permission_denied, 422 agent_not_found
+
+POST /v1/agent/profile
+Body: {identity?: {name?, description?, use_character?, persona?}, voice?: {eleven_lab_api_key?, hume_ai_api_key?}, brand?: {brand_name?, description?, goal?, keywords?: [], target_platforms?: [], shortform?, longform?}}
+Creates profile (first-time setup). Creates TrendPulse config if needed. Updates agent identity in Rails.
+→ Full profile object
+Errors: 422 agent_not_found, 422 validation_error
+
+PUT /v1/agent/profile
+Body: Same as POST — send only sections/fields to change. Merges with existing data.
+Array fields (keywords, target_platforms, linked_accounts) are replaced entirely, not appended.
+→ Full profile object
+Errors: 422 agent_not_found, 422 validation_error, 422 invalid_api_key
+
+DELETE /v1/agent/profile
+Resets TrendPulse brand config only. Agent identity and voice settings preserved.
+→ 200 (empty body)
+Errors: 422 agent_not_found
+
 ## Organizations
 
 GET /v1/organizations

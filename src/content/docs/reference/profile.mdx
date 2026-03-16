@@ -1,0 +1,397 @@
+---
+title: Agent Profile
+description: Read and manage the unified agent profile — identity, voice, and brand configuration in a single endpoint.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The agent profile is a unified view of an agent's identity, voice configuration, and brand strategy. It merges data from the core agent model (Rails) with TrendPulse brand configuration into three sections: **identity**, **voice**, and **brand**.
+
+Instead of calling multiple endpoints to piece together an agent's full configuration, the profile endpoint gives you everything in one request and lets you update any combination of sections in a single call.
+
+<Aside type="note">
+  All profile endpoints require authentication via the `X-API-Key` header. The authenticated user must have access to the agent's workspace.
+</Aside>
+
+## Profile schema
+
+The profile response is grouped into three sections:
+
+```json
+{
+  "identity": {
+    "name": "Brilliant Earth",
+    "description": "Ethical jewelry company",
+    "avatar_url": "https://cdn.gen.pro/avatars/42/thumbnail.webp",
+    "use_character": false,
+    "persona": ""
+  },
+  "voice": {
+    "eleven_lab_api_key": "sk-...",
+    "hume_ai_api_key": null,
+    "default_voice": {
+      "id": 1,
+      "name": "Rachel",
+      "provider": "elevenlabs"
+    }
+  },
+  "brand": {
+    "brand_name": "Brilliant Earth",
+    "description": "Ethical jewelry specializing in conflict-free engagement rings...",
+    "goal": "sales",
+    "keywords": ["ethical engagement rings", "lab grown diamonds"],
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "linked_accounts": [
+      { "id": 210, "url": "https://tiktok.com/@brilliantearth", "platform": "tiktok" },
+      { "id": 211, "url": "https://instagram.com/brilliantearth", "platform": "instagram" }
+    ],
+    "onboarding_status": "active"
+  }
+}
+```
+
+If no TrendPulse brand configuration exists for the agent, the `brand` section returns `null`.
+
+---
+
+## Get profile
+
+Returns the full agent profile with all three sections.
+
+```
+GET /v1/agents/:agent_id/profile
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent ID (path parameter). |
+
+### Response
+
+Returns the full profile object with `identity`, `voice`, and `brand` sections. The `brand` section is `null` if no TrendPulse configuration has been created for this agent.
+
+### Example
+
+```bash
+curl https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+
+---
+
+## Create profile
+
+Creates the agent profile for the first time. Accepts any combination of sections. Creates the TrendPulse brand configuration if it does not already exist and updates identity fields in Rails.
+
+```
+POST /v1/agents/:agent_id/profile
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent ID (path parameter). |
+
+### Request body
+
+Same shape as the GET response. Send any sections you want to set. All fields within each section are optional.
+
+```json
+{
+  "identity": {
+    "name": "My Brand"
+  },
+  "brand": {
+    "brand_name": "My Brand",
+    "description": "We make cool stuff",
+    "goal": "growth",
+    "keywords": ["cool stuff", "trending"],
+    "target_platforms": ["tiktok"]
+  }
+}
+```
+
+### Response
+
+Returns the full profile object after creation.
+
+### Example
+
+```bash
+curl -X POST https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity": {
+      "name": "My Brand"
+    },
+    "brand": {
+      "brand_name": "My Brand",
+      "description": "We make cool stuff",
+      "goal": "growth",
+      "keywords": ["cool stuff", "trending"],
+      "target_platforms": ["tiktok"]
+    }
+  }'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+| `422` | `validation_error` | One or more fields failed validation. |
+
+---
+
+## Update profile
+
+Updates an existing profile. Supports partial updates — only send the sections and fields you want to change. Submitted fields are merged with existing data; omitted fields are left unchanged.
+
+```
+PUT /v1/agents/:agent_id/profile
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent ID (path parameter). |
+
+### Request body
+
+Send only the sections and fields you want to update.
+
+```json
+{
+  "brand": {
+    "keywords": ["new keyword 1", "new keyword 2"]
+  },
+  "voice": {
+    "eleven_lab_api_key": "sk-new-key"
+  }
+}
+```
+
+<Aside type="tip">
+  Array fields like `keywords`, `target_platforms`, and `linked_accounts` are replaced entirely — they are not appended. Send the full desired array each time.
+</Aside>
+
+### Response
+
+Returns the full profile object after the update.
+
+### Example
+
+```bash
+curl -X PUT https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "brand": {
+      "keywords": ["ethical engagement rings", "lab grown diamonds", "sustainability"]
+    }
+  }'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+| `422` | `validation_error` | One or more fields failed validation. |
+| `422` | `invalid_api_key` | The provided ElevenLabs or Hume AI API key is invalid. |
+
+---
+
+## Delete profile
+
+Resets the TrendPulse brand configuration for the agent. This deletes the `brand` section only. The agent itself and its identity/voice configuration are not affected.
+
+```
+DELETE /v1/agents/:agent_id/profile
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent ID (path parameter). |
+
+### Response
+
+Returns `200 OK` with an empty body on success.
+
+### Example
+
+```bash
+curl -X DELETE https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `agent_not_found` | No agent exists with the given ID. |
+
+---
+
+## Field reference
+
+### Identity section
+
+Fields from the core agent model in Rails.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | The agent's display name. |
+| `description` | string | A short description of the agent's purpose. |
+| `avatar_url` | string | URL of the agent's primary avatar image. Read-only — update via the [Agents](/reference/agents/) avatar endpoints. |
+| `use_character` | boolean | When `true`, the agent uses a fictional character persona instead of the brand identity. |
+| `persona` | string | The character persona description. Only used when `use_character` is `true`. |
+
+### Voice section
+
+Voice provider API keys and default voice selection.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `eleven_lab_api_key` | string | ElevenLabs API key for voice synthesis. Validated on submission. |
+| `hume_ai_api_key` | string | Hume AI API key for emotional voice. Validated on submission. |
+| `default_voice` | object | The agent's default voice. Contains `id`, `name`, and `provider`. |
+| `default_voice.id` | integer | Voice ID. |
+| `default_voice.name` | string | Human-readable voice name (e.g. "Rachel"). |
+| `default_voice.provider` | string | Voice provider — `elevenlabs` or `hume_ai`. |
+
+### Brand section
+
+TrendPulse brand configuration. This section is `null` if no configuration has been created.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `brand_name` | string | The brand's public name. |
+| `description` | string | A detailed description of the brand, its products, and positioning. |
+| `goal` | string | Primary content goal. One of `sales`, `growth`, `engagement`, or `awareness`. |
+| `keywords` | array | Target keywords and topics for content discovery and generation. |
+| `target_platforms` | array | Platforms to target. Values: `tiktok`, `instagram`, `youtube`. |
+| `shortform` | boolean | Whether the brand produces short-form content (Reels, TikToks, Shorts). |
+| `longform` | boolean | Whether the brand produces long-form content (YouTube videos, podcasts). |
+| `linked_accounts` | array | Social media accounts linked to this brand. Each object has `id`, `url`, and `platform`. |
+| `linked_accounts[].id` | integer | The linked account ID. |
+| `linked_accounts[].url` | string | Full URL of the social media profile. |
+| `linked_accounts[].platform` | string | Platform identifier — `tiktok`, `instagram`, or `youtube`. |
+| `onboarding_status` | string | Brand configuration status. One of `pending`, `active`, or `inactive`. Read-only. |
+
+---
+
+## Common flows
+
+### Set up a brand from scratch
+
+Create the full profile in one call after creating an agent.
+
+```bash
+curl -X POST https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity": {
+      "name": "Brilliant Earth",
+      "description": "Ethical jewelry company specializing in conflict-free diamonds",
+      "use_character": false
+    },
+    "voice": {
+      "eleven_lab_api_key": "sk-your-elevenlabs-key"
+    },
+    "brand": {
+      "brand_name": "Brilliant Earth",
+      "description": "Ethical jewelry specializing in conflict-free engagement rings and lab-grown diamonds",
+      "goal": "sales",
+      "keywords": ["ethical engagement rings", "lab grown diamonds", "conflict-free jewelry"],
+      "target_platforms": ["tiktok", "instagram"],
+      "shortform": true,
+      "longform": false
+    }
+  }'
+```
+
+### Update keywords
+
+Add or change target keywords without touching other settings.
+
+```bash
+curl -X PUT https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "brand": {
+      "keywords": ["ethical engagement rings", "lab grown diamonds", "sustainability", "moissanite"]
+    }
+  }'
+```
+
+### Connect ElevenLabs
+
+Set up voice synthesis by providing an ElevenLabs API key.
+
+```bash
+curl -X PUT https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "voice": {
+      "eleven_lab_api_key": "sk-your-elevenlabs-key"
+    }
+  }'
+```
+
+<Aside type="note">
+  The ElevenLabs API key is validated when submitted. If the key is invalid, the request returns a `422 invalid_api_key` error.
+</Aside>
+
+### Switch to character persona
+
+Change from brand identity to a fictional character.
+
+```bash
+curl -X PUT https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity": {
+      "use_character": true,
+      "persona": "Luna is a Gen-Z jewelry enthusiast who shares ethical shopping tips with her followers"
+    }
+  }'
+```
+
+### Reset brand configuration
+
+Remove TrendPulse brand settings to start over.
+
+```bash
+curl -X DELETE https://api.gen.pro/v1/agents/42/profile \
+  -H "X-API-Key: your-api-key"
+```
+
+After deleting, the `brand` section returns `null` on subsequent GET requests. The agent's identity and voice settings are preserved.
