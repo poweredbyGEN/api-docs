@@ -61,6 +61,10 @@ tags:
     description: Global variables for template substitution.
   - name: Automation
     description: Agent-level webhook and callback configuration.
+  - name: Content Monitoring
+    description: Monitor and discover social media content across multiple platforms.
+  - name: Publishing
+    description: Post and schedule content to social media platforms.
 
 paths:
   # ── Discovery ──────────────────────────────────────────────
@@ -1184,6 +1188,135 @@ paths:
                     type: boolean
                   error:
                     type: string
+
+  # ── Content Monitoring & Publishing ─────────────────────────
+  /user_jobs:
+    post:
+      operationId: createUserJob
+      summary: Create user job (monitoring or publishing)
+      description: |
+        Create a background job. Use `user_job_type` to select the job kind:
+
+        - **`train_social`** — scrape social media content into the agent's knowledge base. Supports TikTok, Instagram, and YouTube. Send as multipart/form-data with `user_job[user_job_type]` and `user_job[data]` (JSON-stringified).
+        - **`publish_content`** — post or schedule content to a social platform. Send as JSON with top-level `user_job_type` and `data` fields.
+      tags: [Content Monitoring, Publishing]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: ["user_job[user_job_type]", "user_job[data]"]
+              properties:
+                "user_job[user_job_type]":
+                  type: string
+                  enum: [train_social]
+                "user_job[data]":
+                  type: string
+                  description: JSON-stringified object with platform (tiktok|instagram|youtube), type (username|hashtag|keyword), value, days (0|1|7|30|90|180), country, max_results (1-50), monitoring (default false), comment_monitoring.
+            example:
+              "user_job[user_job_type]": train_social
+              "user_job[data]": '{"platform":"instagram","type":"username","value":"@fashionbrand","days":30,"max_results":50,"monitoring":true}'
+          application/json:
+            schema:
+              type: object
+              required: [user_job_type, data]
+              properties:
+                user_job_type:
+                  type: string
+                  enum: [publish_content]
+                data:
+                  type: string
+                  description: JSON-stringified object with platform, media_url, description, schedule_type, scheduled_time, media_type, title, thumbnail_url, timezone_offset.
+            example:
+              user_job_type: publish_content
+              data: '{"platform":"tiktok","media_url":"https://cdn.example.com/video.mp4","description":"Factory price reveal #sourcing","schedule_type":"now","media_type":"VIDEO"}'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_job_id:
+                    type: integer
+              example:
+                user_job_id: 12345
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validation error, unsupported platform/type combination, or no active credit purchase.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user_jobs/{id}:
+    put:
+      operationId: updateMonitoringJob
+      summary: Update monitoring job
+      description: Update an existing `train_social` job. Only jobs with `pending` or `processing` status can be updated. Send fields as flat form params (not nested).
+      tags: [Content Monitoring]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                platform:
+                  type: string
+                  enum: [tiktok, instagram, youtube]
+                type:
+                  type: string
+                  enum: [username, hashtag, keyword]
+                value:
+                  type: string
+                days:
+                  type: integer
+                  enum: [0, 1, 7, 30, 90, 180]
+                country:
+                  type: string
+                max_results:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                monitoring:
+                  type: boolean
+                comment_monitoring:
+                  type: boolean
+      responses:
+        '200':
+          description: Monitoring job updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_job_id:
+                    type: integer
+              example:
+                user_job_id: 12345
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Job status invalid or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   securitySchemes:

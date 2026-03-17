@@ -140,6 +140,19 @@ POST /v1/generations/{id}/continue — resume and re-charge credits
 Checksum: base64-encoded MD5 (openssl md5 -binary file | base64)
 Max size: 1 GB
 
+### Monitor Social Media Content
+1. POST /v1/user_jobs?agent_id={id} — start monitoring (multipart form: user_job[user_job_type]=train_social, user_job[data] as JSON string)
+2. Supported platforms: tiktok, instagram, youtube
+3. Search types: username (@creator), hashtag (#topic), keyword (plain text) — not all combos supported
+4. Set monitoring=true for ongoing scraping, false for one-time
+5. Poll GET /v1/user_jobs/{id}?agent_id={id} for status
+6. Query scraped data via POST /v1/agent_chats (ask natural language questions about the data)
+
+### Publish Content to Social Media
+1. POST /v1/user_jobs?agent_id={id} with user_job_type=publish_content
+2. data: {platform: "tiktok", media_url: "https://...", description: "caption #hashtags", schedule_type: "now" | "scheduled", scheduled_time: "2026-03-16T15:00:00Z", media_type: "VIDEO"}
+3. Poll GET /v1/user_jobs/{id}?agent_id={id} for status
+
 ## Column Types
 
 text — Text content (scripts, prompts, notes)
@@ -250,6 +263,13 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 - PATCH /v1/agents/{agent_id}/automation_config — update webhook/callback config
 - POST /v1/agents/{agent_id}/automation_config/test_webhook — test webhook
 - POST /v1/agents/{agent_id}/automation_config/test_callback — test callback
+
+### Content Monitoring
+- POST /v1/user_jobs?agent_id={id} — create monitoring job (multipart: user_job[user_job_type]=train_social, user_job[data] JSON string)
+- PUT /v1/user_jobs/{id}?agent_id={id} — update monitoring job (flat params: platform, type, value, days, max_results, monitoring, comment_monitoring)
+
+### Publishing
+- POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
 
 ## Integrations
 

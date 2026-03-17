@@ -1,0 +1,109 @@
+---
+title: Publishing
+description: Post and schedule content to social media platforms.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Publishing lets you post content to social media platforms immediately or schedule it for later. Currently supports TikTok, with more platforms coming soon.
+
+<Aside type="note">
+  Publishing requires authentication via the `X-API-Key` header. The agent must have a connected TikTok social account (via AURA) before publishing.
+</Aside>
+
+## Publish content
+
+Posts or schedules content to a social media platform. Uses the standard user job creation endpoint.
+
+```
+POST /v1/user_jobs?agent_id={agent_id}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent ID (query parameter). |
+| `user_job_type` | string | Yes | Must be `publish_content`. |
+| `data` | string (JSON) | Yes | JSON-stringified object containing the post configuration (see Data fields below). |
+
+### Data fields
+
+The `data` value is a JSON string containing:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `platform` | string | Yes | Target platform. Currently `tiktok`. |
+| `media_url` | string | Yes | Public URL to the media file (S3 presigned URL, CDN link, etc). Must be accessible at post time. |
+| `description` | string | Yes | Post caption/description. Max ~2200 characters for TikTok. Include hashtags inline. |
+| `title` | string | No | Post title (used on some platforms). |
+| `media_type` | string | No | `VIDEO` (default) or `IMAGE`. |
+| `schedule_type` | string | Yes | `now` for immediate posting. `scheduled` for future posting. |
+| `scheduled_time` | string | Conditional | ISO 8601 UTC datetime (e.g. `2026-03-16T15:00:00Z`). Required when `schedule_type` is `scheduled`. Must be in the future. |
+| `thumbnail_url` | string | No | Custom thumbnail URL. Auto-generated from video if not provided. |
+| `timezone_offset` | integer | No | Timezone offset in minutes from UTC. Default `0`. |
+
+### Schedule types
+
+| Value | Behavior |
+|-------|----------|
+| `now` | Posts immediately via the connected social account. |
+| `scheduled` | Queues for posting at `scheduled_time`. |
+
+### Response
+
+```json
+{
+  "user_job_id": 138860
+}
+```
+
+### Status flow
+
+Poll status via `GET /v1/user_jobs/{id}?agent_id={agent_id}`.
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Job created, queued for processing. |
+| `processing` | Post is being submitted to the platform. |
+| `completed` | Post published successfully. The `result` field contains the `post_id` from the platform. |
+| `failed` | Publishing failed. Check `failed_reason`. |
+
+### Example: Post now
+
+```bash
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_job_type": "publish_content",
+    "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://cdn.example.com/video.mp4\", \"description\": \"Factory price reveal #sourcing #china\", \"schedule_type\": \"now\", \"media_type\": \"VIDEO\"}"
+  }'
+```
+
+### Example: Schedule for later
+
+```bash
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_job_type": "publish_content",
+    "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://cdn.example.com/video.mp4\", \"description\": \"Your $12 beauty sponge costs 10 cents #beauty #factory\", \"title\": \"Beauty sponge price reveal\", \"schedule_type\": \"scheduled\", \"scheduled_time\": \"2026-03-16T15:00:00Z\", \"media_type\": \"VIDEO\"}"
+  }'
+```
+
+### Prerequisites
+
+- Agent must have a connected TikTok social account (connected via AURA)
+- Video/image must be publicly accessible via URL at post time
+- For scheduled posts, `scheduled_time` must be in the future
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `401` | `unauthorized` | Missing or invalid API key. |
+| `403` | `permission_denied` | You do not have access to this agent. |
+| `422` | `validation_error` | Invalid or missing required fields. |
+| `422` | `no_active_credit_purchase` | The agent's workspace has no active credit purchase. |
