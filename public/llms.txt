@@ -244,6 +244,13 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 - PATCH /v1/agents/{agent_id}/avatars/{id} — set avatar as primary
 - DELETE /v1/agents/{agent_id}/avatars/{id} — delete avatar (multiple IDs: 7_8_9)
 
+### Agent Profile
+Unified view of agent identity + voice config + TrendPulse brand config.
+- GET /v1/agent/profile — get full profile (identity, voice, brand sections)
+- POST /v1/agent/profile — create profile (first-time setup, any/all sections)
+- PUT /v1/agent/profile — update profile (partial update, merge with existing)
+- DELETE /v1/agent/profile — reset brand config (identity/voice preserved)
+
 ### Organizations
 - GET /v1/organizations — list organizations
 - POST /v1/organizations — create organization
