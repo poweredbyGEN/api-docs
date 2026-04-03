@@ -888,13 +888,28 @@ paths:
               properties:
                 generation_type:
                   type: string
-                  description: The type of AI generation to run.
-                  example: "gemini_content_generation"
+                  description: |
+                    The type of AI generation to run. Canonical names:
+                    text, image_from_text, video_from_text, video_from_image,
+                    video_from_ingredients, speech_from_text, lipsync, captions, media.
+                    Legacy names also accepted (text_generation, gemini_image_generation, etc.)
+                  enum:
+                    - text
+                    - image_from_text
+                    - video_from_text
+                    - video_from_image
+                    - video_from_ingredients
+                    - speech_from_text
+                    - lipsync
+                    - captions
+                    - media
+                  example: "text"
                 data:
                   type: object
                   description: Generation parameters (varies by type).
                   example:
                     prompt: "Write a TikTok script about morning routines"
+                    model: "gemini_2_0_flash"
       responses:
         '201':
           description: Generation started
@@ -940,7 +955,8 @@ paths:
               properties:
                 generation_type:
                   type: string
-                  example: "eleven_labs_voice"
+                  description: Generation type — see cell generate endpoint for full list.
+                  example: "speech_from_text"
                 data:
                   type: object
       responses:
@@ -1028,6 +1044,43 @@ paths:
                   status:
                     type: string
                     example: "pending"
+
+  # ── Render ────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/cells/{cell_id}/render:
+    post:
+      operationId: renderVideo
+      summary: Render final video
+      description: |
+        Composites all layers (video, audio, captions, text overlays) into a final video.
+        The result appears in the final_video column cell.
+        Returns a generation_id — poll `GET /v1/generations/{id}` until status is "completed".
+        Credits are pre-charged and refunded on failure.
+      tags: [Generations]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      responses:
+        '201':
+          description: Render started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "pending"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ── Variables ──────────────────────────────────────────────
   /autocontentengine/{sheet_id}/global_variables:
