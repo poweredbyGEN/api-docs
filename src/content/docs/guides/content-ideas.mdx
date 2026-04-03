@@ -1,0 +1,138 @@
+---
+title: Content Ideas API
+description: Generate data-driven video content ideas powered by trending data analysis.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+The Content Ideas API generates video content ideas by analyzing trending videos with engagement-weighted hooks and transcripts. Ideas include hooks, scripts, scene breakdowns, and inspiration sources with real creator data.
+
+**Base URL:** `https://agent.gen.pro/v1` (same API key as the main API)
+
+## Quick Start
+
+### 1. Generate Ideas
+
+<Tabs>
+<TabItem label="curl">
+```bash
+curl -X POST https://agent.gen.pro/v1/agent/run \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "generate 5 content ideas focused on before/after transformations, keep under 12 seconds",
+    "agent_id": "YOUR_AGENT_ID"
+  }'
+```
+</TabItem>
+<TabItem label="TypeScript SDK">
+```typescript
+const run = await client.agent.generateIdeas(agentId, {
+  numIdeas: 5,
+  requirements: ["focus on before/after", "under 12 seconds"],
+});
+```
+</TabItem>
+</Tabs>
+
+**Response (202):**
+```json
+{
+  "run_id": "abc-123",
+  "conversation_id": "def-456",
+  "status": "running",
+  "firebase_path": "/agent_runs/11/abc-123/"
+}
+```
+
+### 2. Poll for Completion
+
+```bash
+curl https://agent.gen.pro/v1/agent/runs/abc-123 \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Poll every 5 seconds until `status` is `"completed"`. The `messages` array contains the generated ideas.
+
+### 3. Refine Ideas
+
+```bash
+curl -X POST https://agent.gen.pro/v1/agent/run \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "make idea 1 hook shorter and punchier. change idea 3 to montage format.",
+    "conversation_id": "def-456",
+    "agent_id": "YOUR_AGENT_ID"
+  }'
+```
+
+Pass the `conversation_id` from step 1 to refine in context.
+
+## Three Layers of Control
+
+| Layer | Scope | Example |
+|-------|-------|---------|
+| **Per-batch requirements** | This generation only | "focus on before/after", "under 12 seconds" |
+| **Long-term preferences** | ALL future generations | "always use statement hooks", "target women 25-34" |
+| **Feedback/refinement** | Specific ideas | "make idea 3 punchier", "redo 2 and 4 as montage" |
+
+### Setting Persistent Preferences
+
+```bash
+curl -X POST https://agent.gen.pro/v1/agent/run \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "remember: always use statement hooks, never questions. target women 25-34.",
+    "agent_id": "YOUR_AGENT_ID"
+  }'
+```
+
+Preferences are stored in the agent's config and applied to every future generation.
+
+## Idea Status Lifecycle
+
+```
+generated → approve_to_create → ready_for_review → approved → published
+```
+
+### List Ideas
+
+```bash
+curl "https://agent.gen.pro/v1/agent/ideas?agent_id=YOUR_AGENT_ID&status=generated" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+### Update Status
+
+```bash
+curl -X PUT "https://agent.gen.pro/v1/agent/ideas/123/status/approve_to_create" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+## Real-Time Progress (Firebase)
+
+The `firebase_path` from the run response points to a Firebase RTDB path. Subscribe for real-time updates:
+
+- `status` — "running", "completed", or "failed"
+- `plan` — numbered checklist of what the agent is doing
+- `thinking` — progress messages
+- `messages` — output when complete
+
+<Aside>
+Firebase streaming is publicly readable — no authentication needed to subscribe.
+</Aside>
+
+## MCP Server
+
+All content ideas operations are available as MCP tools:
+
+| Tool | Purpose |
+|------|---------|
+| `gen_generate_content_ideas` | Generate ideas with optional requirements and video type filter |
+| `gen_refine_content_ideas` | Iterate on ideas in conversation context |
+| `gen_set_content_preference` | Set persistent generation rules |
+| `gen_get_run_status` | Poll run status |
+| `gen_list_content_ideas` | List ideas with optional status filter |
+| `gen_update_idea_status` | Update idea status |

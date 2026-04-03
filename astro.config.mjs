@@ -89,12 +89,14 @@ export default defineConfig({
 						{ label: 'Agents', slug: 'reference/agents' },
 						{ label: 'Organizations', slug: 'reference/organizations' },
 						{ label: 'Content Resources', slug: 'reference/content-resources' },
+						{ label: 'Agent Chat', slug: 'reference/agent-chat' },
 					],
 				},
 				{
 					label: 'Guides',
 					collapsed: false,
 					items: [
+						{ label: 'Content Ideas', slug: 'guides/content-ideas' },
 						{ label: 'Using with n8n', slug: 'guides/n8n' },
 						{ label: 'Error Handling', slug: 'guides/errors' },
 					],

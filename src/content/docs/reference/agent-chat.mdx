@@ -1,0 +1,216 @@
+---
+title: Agent Chat
+description: AI agent chat, content idea generation, and conversation management.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Agent Chat API provides conversational AI for content creation. Generate ideas, refine them, set preferences, and manage conversations.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+## Authentication
+
+Same as the main API — pass your API key in the `X-API-Key` header. JWT authentication (`Authorization: Bearer <token>`) is also supported for frontend integrations.
+
+## Runs
+
+### POST /v1/agent/run
+
+Start an agent run (generate ideas, refine, chat).
+
+**Request:**
+```json
+{
+  "message": "generate 5 content ideas",
+  "agent_id": "uuid",
+  "conversation_id": "uuid (optional — continue conversation)",
+  "attachments": [
+    {
+      "signed_id": "string",
+      "filename": "string",
+      "content_type": "string",
+      "url": "string"
+    }
+  ],
+  "context": {"vidsheet_id": 123},
+  "debug": false
+}
+```
+
+**Response (202):**
+```json
+{
+  "run_id": "uuid",
+  "conversation_id": "uuid",
+  "status": "running",
+  "firebase_path": "/agent_runs/:user_id/:run_id/"
+}
+```
+
+### GET /v1/agent/runs/:run_id
+
+Poll run status. Poll every 5 seconds until `status` is `"completed"`.
+
+**Response:**
+```json
+{
+  "run_id": "uuid",
+  "conversation_id": "uuid",
+  "status": "running | completed | failed",
+  "messages": [
+    {"role": "assistant", "content": "..."}
+  ]
+}
+```
+
+### POST /v1/agent/runs/:run_id/approve
+
+Approve a pending action gate.
+
+### POST /v1/agent/runs/:run_id/reject
+
+Reject a pending action gate.
+
+## Conversations
+
+### GET /v1/agent/conversations
+
+List conversations. Optional `agent_id` query parameter to filter by agent.
+
+### GET /v1/agent/conversations/:id
+
+Get a conversation with all messages.
+
+### GET /v1/agent/conversations/:id/messages
+
+Paginated message history for a conversation.
+
+### PATCH /v1/agent/conversations/:id
+
+Rename or pin/unpin a conversation.
+
+**Request:**
+```json
+{
+  "title": "New title",
+  "pinned": true
+}
+```
+
+### DELETE /v1/agent/conversations/:id
+
+Soft delete a conversation.
+
+### GET /v1/agent/conversations/:id/runs
+
+List all runs within a conversation.
+
+## Content Ideas
+
+### GET /v1/agent/ideas
+
+List content ideas for an agent.
+
+**Parameters:**
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `agent_id` | Yes | The agent ID |
+| `status` | No | Filter: `generated`, `approve_to_create`, `ready_for_review`, `approved`, `published` |
+
+**Response:**
+```json
+[
+  {
+    "id": 123,
+    "idea_id": 1,
+    "agent_id": "uuid",
+    "title": "Before & After Glow Up",
+    "hook": "Watch what happens in 7 days",
+    "description": "Side-by-side transformation...",
+    "video_type": "montage",
+    "video_type_id": 3,
+    "status": "generated",
+    "data": {},
+    "created_at": "2026-04-03T10:30:00Z"
+  }
+]
+```
+
+### POST /v1/agent/ideas/:id/status
+
+Cycle an idea to its next status in the flow.
+
+### PUT /v1/agent/ideas/:id/status/:status
+
+Set an explicit status value.
+
+**Status flow:**
+```
+generated → approve_to_create → ready_for_review → approved → published
+```
+
+## Agent Profile
+
+### GET /v1/agent/profile
+
+Get the full unified agent profile (identity + voice + brand config).
+
+**Parameters:** `agent_id` (query, required)
+
+**Response:**
+```json
+{
+  "identity": {
+    "name": "Jordan Mathews",
+    "description": "AI skincare content creator",
+    "avatar_url": "https://cdn.gen.pro/avatar.jpg",
+    "use_character": true,
+    "persona": "Warm, knowledgeable friend"
+  },
+  "voice": {
+    "eleven_lab_api_key": "...",
+    "default_voice": {"id": "...", "name": "...", "provider": "eleven_labs"}
+  },
+  "brand": {
+    "brand_name": "Jordan Skincare",
+    "description": "Honest skincare reviews",
+    "goal": "Grow TikTok to 100K",
+    "keywords": ["sensitive skin", "skincare routine"],
+    "target_platforms": ["tiktok", "instagram"],
+    "linked_accounts": [{"handle": "@jordanskincare", "platform": "tiktok"}],
+    "content_idea_preferences": "- always use statement hooks\n- target women 25-34",
+    "onboarding_status": "complete"
+  }
+}
+```
+
+### POST /v1/agent/profile
+
+Create or first-time setup of agent profile. Send any combination of `identity`, `voice`, and `brand` sections.
+
+### PUT /v1/agent/profile
+
+Update profile. Send only the fields you want to change. Array fields (`keywords`, `target_platforms`, `linked_accounts`) are replaced entirely, not appended.
+
+### DELETE /v1/agent/profile
+
+Reset TrendPulse brand config only. Agent identity and voice settings are preserved.
+
+## Firebase Streaming
+
+<Aside>
+Firebase streaming is publicly readable — no authentication needed.
+</Aside>
+
+The `firebase_path` returned by `POST /v1/agent/run` points to a Firebase RTDB node with real-time progress:
+
+| Key | Description |
+|-----|-------------|
+| `status` | `"running"`, `"completed"`, or `"failed"` |
+| `plan` | Numbered checklist of agent steps |
+| `thinking` | Progress/reasoning messages |
+| `messages` | Final output when complete |
+
+**Firebase project:** `proven-fort-442703-q1`
+**DB URL:** `https://proven-fort-442703-q1-default-rtdb.firebaseio.com`

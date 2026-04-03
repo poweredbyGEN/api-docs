@@ -144,3 +144,30 @@ export GEN_API_KEY="gen_pat_a1b2c3d4e5f6..."
 # Or use a .env file (make sure it's in .gitignore)
 echo "GEN_API_KEY=gen_pat_a1b2c3d4e5f6..." >> .env
 ```
+
+## JWT Authentication
+
+For frontend integrations, you can authenticate with a JWT token instead of an API key:
+
+```bash
+curl https://api.gen.pro/v1/me \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+JWTs are issued by Dynamic XYZ during user login. They contain the user's wallet address and are validated against the GEN user database.
+
+**When to use each method:**
+
+| Method | Best for |
+|--------|----------|
+| **API Key (PAT)** | Server-to-server, scripts, MCP, CLI tools, n8n |
+| **JWT** | Frontend apps, browser-based integrations |
+
+## Agent Chat API Authentication
+
+The [Agent Chat API](/reference/agent-chat) at `agent.gen.pro` accepts the same authentication methods:
+
+- `X-API-Key` header with your PAT
+- `Authorization: Bearer` header with a JWT
+
+Firebase real-time streaming is **unauthenticated** — anyone with the `firebase_path` can read progress updates.
