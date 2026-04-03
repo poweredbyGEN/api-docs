@@ -35,6 +35,8 @@ servers:
     description: Production
   - url: https://stagingapi.gen.pro/v1
     description: Staging
+  - url: https://agent.gen.pro/v1
+    description: Production (Agent Chat API)
 
 security:
   - apiKey: []
@@ -2427,6 +2429,468 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  # ── Agent Chat ────────────────────────────────────────────
+  # NOTE: All /agent/* chat endpoints use base URL https://agent.gen.pro/v1
+
+  /agent/run:
+    post:
+      operationId: startAgentRun
+      summary: Start an agent run
+      description: |
+        Sends a message to the agent and starts a new run. Returns immediately with a run ID.
+        Poll `GET /agent/runs/{run_id}` for status and messages, or listen via the Firebase path.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, agent_id]
+              properties:
+                message:
+                  type: string
+                  description: The user's message to the agent.
+                  example: "Generate 5 TikTok video ideas about morning routines"
+                agent_id:
+                  type: string
+                  description: The agent to chat with.
+                conversation_id:
+                  type: string
+                  description: Continue an existing conversation. Omit to start a new one.
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                  description: File attachments for the message.
+                context:
+                  type: object
+                  description: Additional context for the agent.
+                debug:
+                  type: boolean
+                  description: Enable debug mode for verbose logging.
+      responses:
+        '202':
+          description: Run started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  conversation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "running"
+                  firebase_path:
+                    type: string
+                    description: Firebase Realtime Database path for live streaming.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Invalid parameters or agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/runs/{run_id}:
+    get:
+      operationId: getAgentRun
+      summary: Get agent run status
+      description: |
+        Poll this endpoint to check run status and retrieve messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run status and messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  conversation_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [running, completed, failed, requires_action]
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          enum: [user, assistant, system]
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/runs/{run_id}/approve:
+    post:
+      operationId: approveAgentAction
+      summary: Approve a pending agent action
+      description: |
+        When a run has status `requires_action`, approve the proposed action to continue.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Action approved, run continues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "running"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Run not in requires_action state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/runs/{run_id}/reject:
+    post:
+      operationId: rejectAgentAction
+      summary: Reject a pending agent action
+      description: |
+        When a run has status `requires_action`, reject the proposed action.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Action rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  status:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Run not in requires_action state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/conversations:
+    get:
+      operationId: listConversations
+      summary: List conversations
+      description: |
+        Returns all conversations for the authenticated user.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agent/conversations/{id}:
+    get:
+      operationId: getConversation
+      summary: Get a conversation
+      description: |
+        Returns a conversation with its messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateConversation
+      summary: Rename or pin a conversation
+      description: |
+        Update conversation metadata (title, pinned status).
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                pinned:
+                  type: boolean
+      responses:
+        '200':
+          description: Conversation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteConversation
+      summary: Delete a conversation
+      description: |
+        Soft-deletes a conversation and its messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/conversations/{id}/messages:
+    get:
+      operationId: listConversationMessages
+      summary: List conversation messages
+      description: |
+        Returns paginated message history for a conversation.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                      enum: [user, assistant, system]
+                    content:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/conversations/{id}/runs:
+    get:
+      operationId: listConversationRuns
+      summary: List runs in a conversation
+      description: |
+        Returns all agent runs within a conversation.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    run_id:
+                      type: string
+                    status:
+                      type: string
+                      enum: [running, completed, failed, requires_action]
+                    created_at:
+                      type: string
+                      format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/ideas:
+    get:
+      operationId: listIdeas
+      summary: List content ideas
+      description: |
+        Returns content ideas for the agent. Requires `agent_id`.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, approved, rejected, in_progress, completed]
+          description: Filter by idea status.
+      responses:
+        '200':
+          description: List of ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Idea'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agent/ideas/{id}/status:
+    post:
+      operationId: cycleIdeaStatus
+      summary: Cycle idea status
+      description: |
+        Advances the idea to the next status in the workflow.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/ideas/{id}/status/{status}:
+    put:
+      operationId: setIdeaStatus
+      summary: Set idea status explicitly
+      description: |
+        Sets the idea to a specific status.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [new, approved, rejected, in_progress, completed]
+      responses:
+        '200':
+          description: Status set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Invalid status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   securitySchemes:
     apiKey:
@@ -2966,6 +3430,60 @@ components:
           type: object
         brand:
           type: object
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          nullable: true
+        agent_id:
+          type: string
+        pinned:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant, system]
+              content:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+
+    Idea:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [new, approved, rejected, in_progress, completed]
+        agent_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
     Error:
       type: object
