@@ -54,53 +54,47 @@ Default template columns: TEXT 1, TEXT 2, PROMPT (ingredient columns), VIDEO, FI
 ## Content Generation Types
 
 ### Text
-generation_type: "text_generation"
-data: {model: "gemini" | "openai", prompt: "Write a 30-second TikTok script about..."}
+generation_type: "text"
+data: {prompt, model: "gemini_2_0_flash" | "gemini_2_5_pro" | "gpt_4o" | "gpt_4o_mini" | "o3_mini" | "o4_mini" | "claude_sonnet_4"}
 
 ### Image from Text
-generation_type: "gemini_image_generation"
-data: {prompt: "...", model: "gemini" | "gemini_pro", aspect_ratio: "1024:1024" | "576:1024" | "1024:576", number_of_images: 1}
-
-generation_type: "midjourney"
-data: {prompt: "..."}
+generation_type: "image_from_text"
+data: {prompt, model: "gemini_image" | "gemini_pro_image" | "midjourney", aspect_ratio: "1:1" | "9:16" | "16:9" | "4:3" | "3:4"}
 
 ### Video from Text
-generation_type: "gemini_video_generation"
-data: {prompt: "...", model: "veo3" | "veo3-fast" | "veo3-1" | "veo3-1-fast", aspect_ratio: "1024:576", duration: 8, negative_prompt: "..."}
-
-generation_type: "sora2_video_generation"
-data: {prompt: "...", aspect_ratio: "1024:576", duration: 10}
-
-generation_type: "kling"
-data: {prompt: "...", model: "kling-v1-6", aspect_ratio: "576:1024", duration: 5}
-
-generation_type: "seedance_video_generation"
-data: {prompt: "...", model: "seedance-1.0-pro" | "seedance-1.5-pro", aspect_ratio: "576:1024", duration: 5}
+generation_type: "video_from_text"
+data: {prompt, model: "veo_3" | "veo_3_fast" | "veo_3_1" | "veo_3_1_fast" | "sora_2" | "kling_1_6" | "seedance_pro" | "seedance_pro_1_5", aspect_ratio: "1:1" | "9:16" | "16:9", duration: 5 | 10, negative_prompt?}
 
 ### Video from Image
-generation_type: "kling_image_video"
-data: {prompt: "...", model: "kling-v2-1" | "kling-v2-6", image_content_resource_id: 123, aspect_ratio: "576:1024", duration: 5}
+generation_type: "video_from_image"
+data: {prompt, model: "kling_2_1" | "kling_2_6" | "veo_3" | "veo_3_1" | "sora_2" | "seedance_lite" | "seedance_pro" | "seedance_pro_1_5", image_resource_id, image_tail_resource_id?, aspect_ratio, duration}
 
-generation_type: "gemini_video_generation" (with image)
-data: {prompt: "...", model: "veo3" | "veo3-1", image_content_resource_id: 123, aspect_ratio: "1024:576", duration: 8}
+### Video from Ingredients
+generation_type: "video_from_ingredients"
+data: {prompt, model: "pika" | "kling_1_6" | "seedance_lite" | "veo_3_1" | "veo_3_1_fast", asset_resource_ids: [], aspect_ratio, duration}
 
-generation_type: "sora2_video_generation" (with image)
-data: {prompt: "...", image_content_resource_id: 123, aspect_ratio: "1024:576", duration: 10}
-
-generation_type: "seedance_video_generation" (with image)
-data: {prompt: "...", model: "seedance-1.0-lite" | "seedance-1.0-pro" | "seedance-1.5-pro", image_content_resource_id: 123, aspect_ratio: "576:1024", duration: 5}
-
-### Speech from Text (ElevenLabs)
-generation_type: "eleven_labs"
-data: {voice_id: "...", script: "Text to speak", enhance_voice: true}
+### Speech from Text
+generation_type: "speech_from_text"
+data: {script, voice_method: "my_voices" | "design_voice" | "clone_voice", voice_id?, language?, gender?, enhance_voice?, speed?}
 
 ### Lipsync
 generation_type: "lipsync"
-data: {model: "sync.so" | "gen", video_content_resource_id: 123, audio_content_resource_id: 456}
+data: {model: "sync_so" | "gen", video_resource_id, audio_resource_id}
 
 ### Captions
 generation_type: "captions"
-data: {audio_content_resource_id: 123}
+data: {model: "gemini", source_resource_id}
+
+### Media (Direct Upload)
+generation_type: "media"
+data: {content_resource_id}
+
+### Render Final Video
+generation_type: "render"
+POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
+Composites all layers into a final video in the final_video column.
+
+Legacy type names (still accepted): text_generation, gemini_image_generation, midjourney, gemini_video_generation, sora2_video_generation, kling, kling_image_video, seedance_video_generation, eleven_labs
 
 ## Generation Status Flow
 
@@ -270,6 +264,31 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 
 ### Publishing
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
+
+## Content Ideas API
+
+Generate data-driven video content ideas powered by trending data analysis.
+Base URL: https://agent.gen.pro/v1 (same PAT auth)
+
+### Generate ideas
+POST /v1/agent/run
+Body: {"message": "generate 10 content ideas focused on before/after transformations", "agent_id": "YOUR_AGENT_ID"}
+Returns: {run_id, conversation_id, status: "running", firebase_path}
+Poll GET /v1/agent/runs/{run_id} until status = "completed".
+
+### Refine ideas
+POST /v1/agent/run
+Body: {"message": "make idea 1 punchier, change idea 3 to montage", "conversation_id": "CONV_ID", "agent_id": "YOUR_AGENT_ID"}
+
+### Set persistent preferences
+POST /v1/agent/run
+Body: {"message": "remember: always use statement hooks, target women 25-34", "agent_id": "YOUR_AGENT_ID"}
+Preferences apply to ALL future generations.
+
+### List ideas
+GET /v1/agent/ideas?agent_id={id}&status={status}
+Status flow: generated → approve_to_create → ready_for_review → approved → published
+PUT /v1/agent/ideas/{id}/status/{new_status}
 
 ## Integrations
 
