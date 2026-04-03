@@ -35,6 +35,8 @@ servers:
     description: Production
   - url: https://stagingapi.gen.pro/v1
     description: Staging
+  - url: https://agent.gen.pro/v1
+    description: Production (Agent Chat API)
 
 security:
   - apiKey: []
@@ -65,6 +67,23 @@ tags:
     description: Monitor and discover social media content across multiple platforms.
   - name: Publishing
     description: Post and schedule content to social media platforms.
+  - name: Templates
+    description: Browse and clone pre-configured engine templates.
+  - name: Agents
+    description: Create, read, update, and delete agents and their avatars.
+  - name: Organizations
+    description: Manage organizations (workspaces).
+  - name: Content Resources
+    description: Upload and manage content resources (images, videos, audio).
+  - name: Asset Libraries
+    description: Browse asset libraries and manage asset folders.
+  - name: Direct Upload
+    description: Get pre-signed S3 URLs for large file uploads.
+  - name: Agent Profile
+    description: Manage the agent's identity, voice, and brand profile.
+  - name: Agent Chat
+    description: |
+      Conversational AI agent interface. All endpoints use base URL `https://agent.gen.pro/v1`.
 
 paths:
   # ── Discovery ──────────────────────────────────────────────
@@ -131,6 +150,262 @@ paths:
                   $ref: '#/components/schemas/Agent'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createAgent
+      summary: Create an agent
+      description: Creates a new agent in the specified organization.
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: string
+                  description: Organization to create the agent in.
+                agent:
+                  type: object
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                      example: "My Brand Agent"
+                    description:
+                      type: string
+                    time_zone:
+                      type: string
+                      example: "America/New_York"
+                    eleven_lab_api_key:
+                      type: string
+                    hume_ai_api_key:
+                      type: string
+                    agent_avatars_attributes:
+                      type: array
+                      items:
+                        type: object
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/AgentDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Agent creation failed or organization not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agent_id}:
+    get:
+      operationId: getAgent
+      summary: Get an agent
+      description: Returns detailed information about a specific agent.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+        - name: with_organization_uuid
+          in: query
+          schema:
+            type: boolean
+          description: Include organization UUID in response.
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentDetail'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      operationId: updateAgent
+      summary: Update an agent
+      description: Updates agent properties including name, description, timezone, API keys, avatars, and default voice.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agent:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    time_zone:
+                      type: string
+                    eleven_lab_api_key:
+                      type: string
+                    hume_ai_api_key:
+                      type: string
+                    agent_avatars_attributes:
+                      type: array
+                      items:
+                        type: object
+                    default_user_voice_attributes:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                        voice_id:
+                          type: string
+      responses:
+        '200':
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    $ref: '#/components/schemas/AgentDetail'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Agent not found or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      operationId: deleteAgent
+      summary: Delete an agent
+      description: Permanently deletes an agent and all associated data.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      responses:
+        '200':
+          description: Agent deleted
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agent_id}/avatars:
+    get:
+      operationId: listAgentAvatars
+      summary: List agent avatars
+      description: Returns all avatars for the agent. Cursor-based pagination (20 per page). Primary avatar listed first.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor.
+      responses:
+        '200':
+          description: List of avatars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Avatar'
+
+    post:
+      operationId: createAgentAvatar
+      summary: Upload agent avatar
+      description: Upload one or more avatar images (JPEG, PNG, WebP) or link a DeGod avatar.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                "agent_avatars_attributes[]":
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPEG, PNG, WebP) or degod_avatar_id.
+      responses:
+        '200':
+          description: Avatar(s) created
+        '422':
+          description: Avatar creation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agent_id}/avatars/{id}:
+    patch:
+      operationId: setPrimaryAvatar
+      summary: Set avatar as primary
+      description: Sets this avatar as the primary avatar. All other avatars are marked non-primary.
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Avatar updated
+        '422':
+          description: Avatar update failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      operationId: deleteAgentAvatar
+      summary: Delete avatar(s)
+      description: Delete one or more avatars. Pass multiple IDs separated by underscores (e.g. `7_8_9`).
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentIdPath'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Avatar ID or multiple IDs separated by underscores.
+      responses:
+        '200':
+          description: Avatar(s) deleted
 
   # ── API Keys ───────────────────────────────────────────────
   /persisted_tokens:
@@ -888,13 +1163,28 @@ paths:
               properties:
                 generation_type:
                   type: string
-                  description: The type of AI generation to run.
-                  example: "gemini_content_generation"
+                  description: |
+                    The type of AI generation to run. Canonical names:
+                    text, image_from_text, video_from_text, video_from_image,
+                    video_from_ingredients, speech_from_text, lipsync, captions, media.
+                    Legacy names also accepted (text_generation, gemini_image_generation, etc.)
+                  enum:
+                    - text
+                    - image_from_text
+                    - video_from_text
+                    - video_from_image
+                    - video_from_ingredients
+                    - speech_from_text
+                    - lipsync
+                    - captions
+                    - media
+                  example: "text"
                 data:
                   type: object
                   description: Generation parameters (varies by type).
                   example:
                     prompt: "Write a TikTok script about morning routines"
+                    model: "gemini_2_0_flash"
       responses:
         '201':
           description: Generation started
@@ -940,7 +1230,8 @@ paths:
               properties:
                 generation_type:
                   type: string
-                  example: "eleven_labs_voice"
+                  description: Generation type — see cell generate endpoint for full list.
+                  example: "speech_from_text"
                 data:
                   type: object
       responses:
@@ -1028,6 +1319,43 @@ paths:
                   status:
                     type: string
                     example: "pending"
+
+  # ── Render ────────────────────────────────────────────────
+  /autocontentengine/{sheet_id}/cells/{cell_id}/render:
+    post:
+      operationId: renderVideo
+      summary: Render final video
+      description: |
+        Composites all layers (video, audio, captions, text overlays) into a final video.
+        The result appears in the final_video column cell.
+        Returns a generation_id — poll `GET /v1/generations/{id}` until status is "completed".
+        Credits are pre-charged and refunded on failure.
+      tags: [Generations]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - $ref: '#/components/parameters/CellId'
+      responses:
+        '201':
+          description: Render started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "pending"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ── Variables ──────────────────────────────────────────────
   /autocontentengine/{sheet_id}/global_variables:
@@ -1313,6 +1641,1251 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           description: Job status invalid or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ── Templates ─────────────────────────────────────────────
+  /templates/projects:
+    get:
+      operationId: listTemplates
+      summary: List templates
+      description: Returns paginated list of pre-configured engine templates. 20 per page.
+      tags: [Templates]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          description: Page number (starts at 1).
+      responses:
+        '200':
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Template'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /templates/projects/{slug}:
+    get:
+      operationId: getTemplate
+      summary: Get a template
+      description: Returns a single template by slug, UUID, or numeric ID.
+      tags: [Templates]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL slug, UUID, or numeric ID.
+      responses:
+        '200':
+          description: Template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /templates/spreadsheets/{slug}/clone:
+    post:
+      operationId: cloneTemplate
+      summary: Clone a template
+      description: Clones the template into the specified agent's workspace. Returns the new engine with columns, rows, and cells.
+      tags: [Templates]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Template slug, UUID, or numeric ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id]
+              properties:
+                agent_id:
+                  type: string
+                  description: Agent to clone the template into.
+      responses:
+        '201':
+          description: Cloned engine
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/CreditRequired'
+
+  # ── Organizations ─────────────────────────────────────────
+  /organizations:
+    get:
+      operationId: listOrganizations
+      summary: List organizations
+      description: Returns all organizations the authenticated user belongs to.
+      tags: [Organizations]
+      responses:
+        '200':
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createOrganization
+      summary: Create an organization
+      tags: [Organizations]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [organization]
+              properties:
+                "organization[name]":
+                  type: string
+                  example: "My Company"
+                "organization[avatar]":
+                  type: string
+                  format: binary
+                  description: Organization avatar image.
+      responses:
+        '201':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  organization_id:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /organizations/{organization_id}:
+    get:
+      operationId: getOrganization
+      summary: Get an organization
+      tags: [Organizations]
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '422':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      operationId: updateOrganization
+      summary: Update an organization
+      description: Requires owner or manager role.
+      tags: [Organizations]
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                "organization[name]":
+                  type: string
+                "organization[avatar]":
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Organization updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  organization_id:
+                    type: string
+        '403':
+          description: Forbidden (not owner or manager)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Organization not found or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      operationId: deleteOrganization
+      summary: Delete an organization
+      description: Permanently deletes the organization and all associated data. Requires owner role. Irreversible.
+      tags: [Organizations]
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization deleted
+        '403':
+          description: Forbidden (not owner)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ── Content Resources ─────────────────────────────────────
+  /content_resources:
+    get:
+      operationId: listContentResources
+      summary: List content resources
+      description: Returns paginated content resources. 20 items per page (page starts at 0).
+      tags: [Content Resources]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [image, video, audio, zip, safe_tensors]
+          description: Filter by resource type.
+        - name: project_id
+          in: query
+          schema:
+            type: string
+          description: Filter by project (engine) ID.
+        - name: ids[]
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by specific resource IDs.
+        - name: page
+          in: query
+          schema:
+            type: integer
+          description: Page number (starts at 0).
+      responses:
+        '200':
+          description: List of content resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createContentResource
+      summary: Upload a content resource
+      description: Upload a file as a content resource. Optionally assign to a project or asset folder.
+      tags: [Content Resources]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: ["content_resource[file]"]
+              properties:
+                "content_resource[file]":
+                  type: string
+                  format: binary
+                  description: The file to upload.
+                "project_node[project_id]":
+                  type: string
+                  description: Optional project (engine) ID.
+                "asset_folder[id]":
+                  type: string
+                  description: Optional asset folder ID.
+      responses:
+        '201':
+          description: Content resource created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content_resource:
+                    $ref: '#/components/schemas/ContentResource'
+                  project_node:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                  generator:
+                    type: object
+                    nullable: true
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Creation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /content_resources/{id}:
+    get:
+      operationId: getContentResource
+      summary: Get a content resource
+      tags: [Content Resources]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Content resource details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content_resource:
+                    $ref: '#/components/schemas/ContentResource'
+                  project_node:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                  generator:
+                    type: object
+                    nullable: true
+                    description: Null for manual uploads; contains job info for AI-generated resources.
+                    properties:
+                      id:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+        '404':
+          description: Content resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      operationId: updateContentResource
+      summary: Rename a content resource
+      tags: [Content Resources]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_resource:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+      responses:
+        '200':
+          description: Content resource updated
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteContentResource
+      summary: Delete a content resource
+      tags: [Content Resources]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Content resource deleted
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Asset Libraries ───────────────────────────────────────
+  /asset_libraries:
+    get:
+      operationId: listAssetLibraries
+      summary: Browse asset library
+      description: |
+        Unified view of files and folders. Polymorphic response — items have
+        `type: "AssetFolder"` or `type: "ContentResource"`.
+      tags: [Asset Libraries]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: folder_id
+          in: query
+          schema:
+            type: string
+          description: Browse inside a specific folder.
+        - name: asset_type
+          in: query
+          schema:
+            type: string
+            enum: [image, video, audio, folder]
+          description: Filter by asset type.
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by file name.
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [recent]
+          description: Sort order.
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of assets and folders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                      enum: [AssetFolder, ContentResource]
+                    name:
+                      type: string
+                      description: Folder name (AssetFolder only).
+                    url:
+                      type: string
+                      format: uri
+                      description: File URL (ContentResource only).
+                    thumbnail_url:
+                      type: string
+                      format: uri
+                      nullable: true
+                    file_name:
+                      type: string
+                    content_type:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /asset_folders:
+    post:
+      operationId: createAssetFolder
+      summary: Create an asset folder
+      tags: [Asset Libraries]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [asset_folder]
+              properties:
+                asset_folder:
+                  type: object
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                      example: "Campaign Assets"
+                    parent_id:
+                      type: string
+                      description: Parent folder ID for nesting.
+      responses:
+        '201':
+          description: Folder created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset_folder_id:
+                    type: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /asset_folders/{id}:
+    patch:
+      operationId: updateAssetFolder
+      summary: Rename an asset folder
+      tags: [Asset Libraries]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [asset_folder]
+              properties:
+                asset_folder:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+      responses:
+        '200':
+          description: Folder renamed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset_folder_id:
+                    type: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteAssetFolder
+      summary: Delete an asset folder
+      description: Deletes the folder and all its contents (subfolders and files).
+      tags: [Asset Libraries]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Folder deleted
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Direct Upload ─────────────────────────────────────────
+  /direct_upload:
+    post:
+      operationId: createDirectUpload
+      summary: Get pre-signed upload URL
+      description: |
+        Returns a pre-signed S3 URL for uploading large files (up to 1 GB).
+
+        **Workflow:**
+        1. Call this endpoint with file metadata
+        2. PUT the file to the returned URL with the specified headers
+        3. Use the `signed_id` as `content_resource[file]` in a content resource creation call
+
+        **Compute checksum:** `openssl md5 -binary file | base64`
+      tags: [Direct Upload]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [blob]
+              properties:
+                blob:
+                  type: object
+                  required: [filename, byte_size, checksum, content_type]
+                  properties:
+                    filename:
+                      type: string
+                      example: "hero-video.mp4"
+                    byte_size:
+                      type: integer
+                      description: File size in bytes (max 1 GB).
+                      example: 52428800
+                    checksum:
+                      type: string
+                      description: Base64-encoded MD5 checksum.
+                      example: "rL0Y20zC+Fzt72VPzMSk2A=="
+                    content_type:
+                      type: string
+                      example: "video/mp4"
+                    metadata:
+                      type: object
+      responses:
+        '200':
+          description: Pre-signed upload details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectUpload'
+        '422':
+          description: Invalid content type, file size exceeded, or upload failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ── Agent Profile ─────────────────────────────────────────
+  /agent/profile:
+    get:
+      operationId: getAgentProfile
+      summary: Get agent profile
+      description: Returns the agent's identity, voice, and brand profile configuration.
+      tags: [Agent Profile]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createAgentProfile
+      summary: Create agent profile
+      description: Creates an initial profile for the agent.
+      tags: [Agent Profile]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentProfileInput'
+      responses:
+        '201':
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      operationId: updateAgentProfile
+      summary: Update agent profile
+      description: Replaces the agent's profile with the provided data.
+      tags: [Agent Profile]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentProfileInput'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      operationId: deleteAgentProfile
+      summary: Delete agent profile
+      description: Removes the agent's profile configuration.
+      tags: [Agent Profile]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Profile deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── Agent Chat ────────────────────────────────────────────
+  # NOTE: All /agent/* chat endpoints use base URL https://agent.gen.pro/v1
+
+  /agent/run:
+    post:
+      operationId: startAgentRun
+      summary: Start an agent run
+      description: |
+        Sends a message to the agent and starts a new run. Returns immediately with a run ID.
+        Poll `GET /agent/runs/{run_id}` for status and messages, or listen via the Firebase path.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, agent_id]
+              properties:
+                message:
+                  type: string
+                  description: The user's message to the agent.
+                  example: "Generate 5 TikTok video ideas about morning routines"
+                agent_id:
+                  type: string
+                  description: The agent to chat with.
+                conversation_id:
+                  type: string
+                  description: Continue an existing conversation. Omit to start a new one.
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                  description: File attachments for the message.
+                context:
+                  type: object
+                  description: Additional context for the agent.
+                debug:
+                  type: boolean
+                  description: Enable debug mode for verbose logging.
+      responses:
+        '202':
+          description: Run started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  conversation_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "running"
+                  firebase_path:
+                    type: string
+                    description: Firebase Realtime Database path for live streaming.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Invalid parameters or agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/runs/{run_id}:
+    get:
+      operationId: getAgentRun
+      summary: Get agent run status
+      description: |
+        Poll this endpoint to check run status and retrieve messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run status and messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  conversation_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [running, completed, failed, requires_action]
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          enum: [user, assistant, system]
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/runs/{run_id}/approve:
+    post:
+      operationId: approveAgentAction
+      summary: Approve a pending agent action
+      description: |
+        When a run has status `requires_action`, approve the proposed action to continue.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Action approved, run continues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "running"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Run not in requires_action state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/runs/{run_id}/reject:
+    post:
+      operationId: rejectAgentAction
+      summary: Reject a pending agent action
+      description: |
+        When a run has status `requires_action`, reject the proposed action.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Action rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  status:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Run not in requires_action state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/conversations:
+    get:
+      operationId: listConversations
+      summary: List conversations
+      description: |
+        Returns all conversations for the authenticated user.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agent/conversations/{id}:
+    get:
+      operationId: getConversation
+      summary: Get a conversation
+      description: |
+        Returns a conversation with its messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateConversation
+      summary: Rename or pin a conversation
+      description: |
+        Update conversation metadata (title, pinned status).
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                pinned:
+                  type: boolean
+      responses:
+        '200':
+          description: Conversation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteConversation
+      summary: Delete a conversation
+      description: |
+        Soft-deletes a conversation and its messages.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/conversations/{id}/messages:
+    get:
+      operationId: listConversationMessages
+      summary: List conversation messages
+      description: |
+        Returns paginated message history for a conversation.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                      enum: [user, assistant, system]
+                    content:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/conversations/{id}/runs:
+    get:
+      operationId: listConversationRuns
+      summary: List runs in a conversation
+      description: |
+        Returns all agent runs within a conversation.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    run_id:
+                      type: string
+                    status:
+                      type: string
+                      enum: [running, completed, failed, requires_action]
+                    created_at:
+                      type: string
+                      format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/ideas:
+    get:
+      operationId: listIdeas
+      summary: List content ideas
+      description: |
+        Returns content ideas for the agent. Requires `agent_id`.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, approved, rejected, in_progress, completed]
+          description: Filter by idea status.
+      responses:
+        '200':
+          description: List of ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Idea'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agent/ideas/{id}/status:
+    post:
+      operationId: cycleIdeaStatus
+      summary: Cycle idea status
+      description: |
+        Advances the idea to the next status in the workflow.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/ideas/{id}/status/{status}:
+    put:
+      operationId: setIdeaStatus
+      summary: Set idea status explicitly
+      description: |
+        Sets the idea to a specific status.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [new, approved, rejected, in_progress, completed]
+      responses:
+        '200':
+          description: Status set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Invalid status
           content:
             application/json:
               schema:
@@ -1637,6 +3210,280 @@ components:
           nullable: true
         polling_enabled:
           type: boolean
+
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        tutorial_url:
+          type: string
+          format: uri
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        recent_generated_contents:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              thumbnail_url:
+                type: string
+                format: uri
+
+    AgentDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        organization_id:
+          type: string
+        time_zone:
+          type: string
+          nullable: true
+        primary_avatar_id:
+          type: string
+          nullable: true
+        primary_avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        agent_setup_project_id:
+          type: string
+          nullable: true
+        role:
+          type: string
+        default_user_voice:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            gender:
+              type: string
+            language:
+              type: string
+            provider:
+              type: string
+            url:
+              type: string
+              format: uri
+
+    Avatar:
+      type: object
+      properties:
+        id:
+          type: string
+        is_primary:
+          type: boolean
+        url:
+          type: string
+          format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+          nullable: true
+        degod_avatar_id:
+          type: string
+          nullable: true
+
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+        organization_id:
+          type: string
+        name:
+          type: string
+        avatar:
+          type: object
+          nullable: true
+          properties:
+            url:
+              type: string
+              format: uri
+            thumbnail_url:
+              type: string
+              format: uri
+        user_role:
+          type: string
+        credit:
+          type: number
+        available_credit:
+          type: object
+          properties:
+            generic:
+              type: number
+            aura:
+              type: number
+        total_members:
+          type: integer
+        credit_plan:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            cycle:
+              type: string
+
+    ContentResource:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+          nullable: true
+        file_name:
+          type: string
+        content_type:
+          type: string
+
+    DirectUpload:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        filename:
+          type: string
+        content_type:
+          type: string
+        byte_size:
+          type: integer
+        checksum:
+          type: string
+        signed_id:
+          type: string
+          description: Use this as `content_resource[file]` when creating a content resource.
+        direct_upload:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+              description: Pre-signed S3 URL. PUT the file here.
+            headers:
+              type: object
+              properties:
+                Content-Type:
+                  type: string
+                Content-MD5:
+                  type: string
+
+    AgentProfile:
+      type: object
+      properties:
+        identity:
+          type: object
+          description: Agent identity configuration (name, persona, backstory).
+        voice:
+          type: object
+          description: Voice and tone settings.
+        brand:
+          type: object
+          description: Brand guidelines, colors, and style.
+
+    AgentProfileInput:
+      type: object
+      description: All fields are optional. Provide only the sections you want to set.
+      properties:
+        identity:
+          type: object
+        voice:
+          type: object
+        brand:
+          type: object
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          nullable: true
+        agent_id:
+          type: string
+        pinned:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant, system]
+              content:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+
+    Idea:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [new, approved, rejected, in_progress, completed]
+        agent_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
     Error:
       type: object

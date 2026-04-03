@@ -502,6 +502,48 @@ Common codes:
 3. POST /v1/agents/{agent_id}/automation_config/test_callback → verify callback
 4. Generations will now POST status updates to your webhook_url
 
+## Content Ideas API (agent.gen.pro)
+
+Base URL: https://agent.gen.pro/v1
+Auth: Same PAT (X-API-Key) or JWT (Authorization: Bearer)
+
+POST /v1/agent/run
+Body: {message, agent_id, conversation_id?, attachments?, context?: {vidsheet_id?}, debug?}
+→ {run_id, conversation_id, status: "running", firebase_path}
+
+GET /v1/agent/runs/{run_id}
+→ {run_id, conversation_id, status: "running" | "completed" | "failed", messages: [{role, content}]}
+
+POST /v1/agent/runs/{run_id}/approve
+POST /v1/agent/runs/{run_id}/reject
+
+GET /v1/agent/conversations?agent_id={id}
+GET /v1/agent/conversations/{id}
+GET /v1/agent/conversations/{id}/messages
+PATCH /v1/agent/conversations/{id} — Body: {title?, pinned?}
+DELETE /v1/agent/conversations/{id}
+GET /v1/agent/conversations/{id}/runs
+
+GET /v1/agent/ideas?agent_id={id}&status={status}
+→ [{id, idea_id, agent_id, title, hook, description, video_type, video_type_id, status, data, created_at}]
+
+POST /v1/agent/ideas/{id}/status — cycle to next status
+PUT /v1/agent/ideas/{id}/status/{status} — set explicit status
+Status flow: generated → approve_to_create → ready_for_review → approved → published
+
+### Firebase Streaming
+The firebase_path from POST /v1/agent/run points to a Firebase RTDB path for real-time progress.
+Path: /agent_runs/{user_id}/{run_id}/
+Keys: status, plan (numbered checklist), thinking (progress messages), messages (output)
+Firebase project: proven-fort-442703-q1
+DB URL: https://proven-fort-442703-q1-default-rtdb.firebaseio.com
+Rules: agent_runs are publicly readable (no auth needed to subscribe).
+
+### Three layers of control
+- Per-batch requirements: one-time constraints ("focus on before/after", "under 12 seconds")
+- Long-term preferences: persistent rules for ALL future generations ("never use question hooks")
+- Feedback/refinement: iterate on specific ideas in conversation context ("make idea 3 punchier")
+
 ## Integrations
 
 MCP Server: npx @poweredbygen/autocontentengine-mcp-server@latest (env: GEN_API_KEY)
