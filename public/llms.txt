@@ -265,20 +265,31 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 ### Publishing
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
 
-## Content Ideas API
+## Agentic Chat API
 
-Generate data-driven video content ideas powered by trending data analysis.
+AI-powered content strategy with built-in research. The agent researches topics across
+10+ platforms, analyzes trending content, and generates video ideas with full production
+manifests and curated visual assets.
+
 Base URL: https://agent.gen.pro/v1 (same PAT auth)
 
-### Generate ideas
+### Generate research-backed ideas
 POST /v1/agent/run
-Body: {"message": "generate 10 content ideas focused on before/after transformations", "agent_id": "YOUR_AGENT_ID"}
+Body: {"message": "generate 5 content ideas about celebrity skincare routines", "agent_id": "YOUR_AGENT_ID"}
 Returns: {run_id, conversation_id, status: "running", firebase_path}
 Poll GET /v1/agent/runs/{run_id} until status = "completed".
+
+The agent automatically researches the topic, downloads and analyzes assets,
+writes scripts that match the actual visual content, and verifies factual claims.
 
 ### Refine ideas
 POST /v1/agent/run
 Body: {"message": "make idea 1 punchier, change idea 3 to montage", "conversation_id": "CONV_ID", "agent_id": "YOUR_AGENT_ID"}
+
+### Standalone research
+POST /v1/research
+Body: {"topic": "tariffs on beauty imports 2026", "depth": "default", "agent_id": "YOUR_AGENT_ID"}
+Returns structured findings from Reddit, X, YouTube, TikTok, Instagram, HN, Perplexity, Gemini.
 
 ### Set persistent preferences
 POST /v1/agent/run
@@ -289,6 +300,15 @@ Preferences apply to ALL future generations.
 GET /v1/agent/ideas?agent_id={id}&status={status}
 Status flow: generated → approve_to_create → ready_for_review → approved → published
 PUT /v1/agent/ideas/{id}/status/{new_status}
+
+### Content ideas response shape
+Each idea includes: title, hook, full_script, video_type, estimated_duration,
+selected_assets[] (url, type, description, usage, clip_range),
+project_manifest (timeline_layers), inspiration_sources[], rationale
+
+### Video type IDs
+0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven,
+5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit
 
 ## Integrations
 

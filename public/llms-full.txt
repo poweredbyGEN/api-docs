@@ -502,11 +502,15 @@ Common codes:
 3. POST /v1/agents/{agent_id}/automation_config/test_callback → verify callback
 4. Generations will now POST status updates to your webhook_url
 
-## Content Ideas API (agent.gen.pro)
+## Agentic Chat API (agent.gen.pro)
+
+AI-powered content strategy with built-in research. The agent researches topics across
+10+ platforms, analyzes trending content, and generates video ideas with production manifests.
 
 Base URL: https://agent.gen.pro/v1
 Auth: Same PAT (X-API-Key) or JWT (Authorization: Bearer)
 
+### Runs
 POST /v1/agent/run
 Body: {message, agent_id, conversation_id?, attachments?, context?: {vidsheet_id?}, debug?}
 → {run_id, conversation_id, status: "running", firebase_path}
@@ -517,6 +521,7 @@ GET /v1/agent/runs/{run_id}
 POST /v1/agent/runs/{run_id}/approve
 POST /v1/agent/runs/{run_id}/reject
 
+### Conversations
 GET /v1/agent/conversations?agent_id={id}
 GET /v1/agent/conversations/{id}
 GET /v1/agent/conversations/{id}/messages
@@ -524,12 +529,43 @@ PATCH /v1/agent/conversations/{id} — Body: {title?, pinned?}
 DELETE /v1/agent/conversations/{id}
 GET /v1/agent/conversations/{id}/runs
 
+### Research
+POST /v1/research
+Body: {topic, depth: "quick" | "default" | "deep", agent_id}
+→ {topic, depth, researched_at, sources: {reddit: {count, total_upvotes}, x: {count, total_likes}, youtube: {count, total_views}, tiktok: {count, total_views}, instagram: {count, total_likes}, hackernews: {count}, perplexity: {citations}, gemini: {grounded}}, perplexity: {text, citations[]}, gemini: {text, grounded}, summary_markdown}
+
+### Content Ideas
 GET /v1/agent/ideas?agent_id={id}&status={status}
 → [{id, idea_id, agent_id, title, hook, description, video_type, video_type_id, status, data, created_at}]
 
 POST /v1/agent/ideas/{id}/status — cycle to next status
 PUT /v1/agent/ideas/{id}/status/{status} — set explicit status
 Status flow: generated → approve_to_create → ready_for_review → approved → published
+
+### Content Ideas Response Shape
+Each idea includes:
+- title, description, hook, full_script
+- video_type (Talking Avatar, Green Screen, Montage, etc.)
+- selected_assets[] — curated assets needed for production
+  Each asset: {url, type: "image"|"video"|"audio", description, usage, source, clip_range: {start, end}}
+- project_manifest — full video production spec
+  {video_title, total_duration, aspect_ratio, global_extracted_assets[], timeline_layers[]}
+- inspiration_sources[] — trending videos that inspired the idea
+  {type, url, creator, watch_count, like_count, what_was_used}
+- rationale — why this idea works, with specific data points
+
+### Asset Sources
+- Social content (TikTok/IG/YouTube): assets.gen.buzz (permanent S3 URLs)
+- Web research assets: gen-agentic-assets S3 bucket
+- User uploads: Rails ContentResource
+
+### Research-Backed Generation
+The agent automatically:
+1. Researches the topic across web, X, TikTok, Instagram, YouTube, Reddit
+2. Downloads and analyzes assets (video segments, image regions)
+3. Writes scripts that match the actual visual content
+4. Verifies all factual claims against real sources
+5. Returns only the final curated assets needed for production
 
 ### Firebase Streaming
 The firebase_path from POST /v1/agent/run points to a Firebase RTDB path for real-time progress.
@@ -543,6 +579,10 @@ Rules: agent_runs are publicly readable (no auth needed to subscribe).
 - Per-batch requirements: one-time constraints ("focus on before/after", "under 12 seconds")
 - Long-term preferences: persistent rules for ALL future generations ("never use question hooks")
 - Feedback/refinement: iterate on specific ideas in conversation context ("make idea 3 punchier")
+
+### Video Type IDs
+0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven,
+5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit
 
 ## Integrations
 
