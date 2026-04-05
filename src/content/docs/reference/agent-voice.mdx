@@ -1,0 +1,225 @@
+---
+title: Voice
+description: List, design, clone, preview, and manage voices on an agent. Powered by the Agent Core service.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Voice API lives alongside Agent Core under `/v1/agents/{agent_id}/voice/*`. It unifies voice library listing, ElevenLabs integration, prompt-based voice design, audio sample cloning, TTS preview, and voice deletion.
+
+<Aside type="note">
+  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Authenticated via `X-API-Key` header.
+</Aside>
+
+## List voices
+
+```
+GET /v1/agents/{agent_id}/voice/library
+```
+
+**Query params:**
+- `source` (optional) — filter by origin: `public`, `user_designed`, `user_trained`, or `user_elevenlabs`
+
+**Response 200:**
+```json
+{
+  "voices": [
+    { "voice_id": "21m00...", "name": "Rachel",   "source": "public",          "preview_url": null },
+    { "voice_id": "huv-1",     "name": "Custom",   "source": "user_designed",   "preview_url": null },
+    { "voice_id": "huv-2",     "name": "Santiago", "source": "user_trained",    "preview_url": null },
+    { "voice_id": "el-abc",    "name": "My Voice", "source": "user_elevenlabs", "preview_url": null }
+  ],
+  "total": 4
+}
+```
+
+The `user_elevenlabs` source only appears when the agent has a connected ElevenLabs API key (see below).
+
+## ElevenLabs integration
+
+Users connect their own ElevenLabs API key to unlock their personal voice library and use their own usage quota. The key is validated against ElevenLabs `/v1/user` before being saved on the agent record.
+
+### Get status
+
+```
+GET /v1/agents/{agent_id}/voice/integrations/elevenlabs
+```
+
+**Response 200:**
+```json
+{ "connected": true, "masked_key": "***xyz1" }
+```
+
+### Connect (validate + save)
+
+```
+POST /v1/agents/{agent_id}/voice/integrations/elevenlabs
+```
+
+**Body:** `{"api_key": "sk_..."}`
+
+**Response 200:** `{"connected": true, "user": { "subscription": { "tier": "creator" } }}` on success. **400** with `invalid_key` if ElevenLabs rejects the key.
+
+### Test a key without saving
+
+```
+POST /v1/agents/{agent_id}/voice/integrations/elevenlabs/test
+```
+
+**Body:** `{"api_key": "sk_..."}`
+
+**Response 200:** `{"valid": true | false}`
+
+### Disconnect
+
+```
+DELETE /v1/agents/{agent_id}/voice/integrations/elevenlabs
+```
+
+Returns **204 No Content**.
+
+## Voice design — 4-step prompt flow
+
+Build a voice from a text description. Steps 1–3 are cheap (LLM calls only); step 4 persists.
+
+### 1. Generate script
+
+```
+POST /v1/agents/{agent_id}/voice/design/generate-script
+```
+
+**Body:** `{"language": "en"}` (optional)
+
+**Response 200:** `{"voice_sample": "Hi there, I'm your voice, and I'm going to tell you about..."}`
+
+### 2. Generate style description
+
+```
+POST /v1/agents/{agent_id}/voice/design/generate-description
+```
+
+**Body:** `{"gender": "male", "voice_description": "warm and confident", "language": "en", "script": "..."}`
+- `gender` is **required**
+- `voice_description`, `language`, `script` are optional hints
+
+**Response 200:** `{"voice_description": "A warm, confident male voice with a measured pace..."}`
+
+### 3. Generate candidate samples
+
+```
+POST /v1/agents/{agent_id}/voice/design/generate-samples
+```
+
+**Body:** `{"text": "...", "description": "..."}` — `text` required (typically the script from step 1)
+
+**Response 200:** `{"samples": [{"generation_id": "g1", "audio": "base64..."}, {"generation_id": "g2", ...}, {"generation_id": "g3", ...}]}`
+
+Pick one of the three `generation_id` values and pass it to step 4. Treat it as opaque.
+
+### 4. Finalize
+
+```
+POST /v1/agents/{agent_id}/voice/design
+```
+
+**Body:**
+```json
+{
+  "generation_id": "g2",
+  "name": "Santiago",
+  "gender": "male",
+  "language": "en",
+  "description": "warm, confident"
+}
+```
+
+**Response 201:** The created voice resource. Now visible in the library under `source: user_designed`.
+
+## Voice cloning (synchronous)
+
+Clone a voice from an existing audio sample. Returns the created voice immediately — no polling.
+
+```
+POST /v1/agents/{agent_id}/voice/clone
+```
+
+**Body:** Provide **exactly one** of `audio_url` or `audio_base64`.
+
+```json
+{
+  "name": "Santiago Clone",
+  "audio_url": "https://cdn.example.com/sample.mp3",
+  "gender": "male",
+  "language": "en",
+  "description": "A warm, natural speaking voice"
+}
+```
+
+Or with inline bytes for small clips:
+```json
+{
+  "name": "Santiago Clone",
+  "audio_base64": "SUQzBAAAAAAA...",
+  "gender": "male"
+}
+```
+
+`audio_url` is preferred for anything larger than a few seconds — the server downloads the file directly, which is faster and avoids base64 overhead.
+
+**Response 201:** The created voice resource. Visible in the library under `source: user_trained`.
+
+## Delete a user-owned voice
+
+```
+DELETE /v1/agents/{agent_id}/voice/{voice_id}
+```
+
+Returns **204 No Content**. Only works on voices the agent owns (`user_designed`, `user_trained`, `user_elevenlabs`). Public voices cannot be deleted.
+
+## TTS preview (asynchronous)
+
+Audition a voice saying specific text before assigning it via `PATCH /core`.
+
+### Start a preview
+
+```
+POST /v1/agents/{agent_id}/voice/{voice_id}/preview
+```
+
+**Body:** `{"text": "Hello world"}`
+
+**Response 202 Accepted:** `{"user_job_id": 138860}`
+
+This enqueues a UserJob on the GEN backend. The job charges credits and writes output audio as a ContentResource when complete.
+
+### Poll for completion
+
+```
+GET /v1/agents/{agent_id}/voice/preview/{job_id}
+```
+
+**Response 200:** The full user_job record. Check the `status` field:
+
+```json
+{
+  "id": 138860,
+  "status": "completed",
+  "output_resources": [
+    { "id": 99, "type": "audio", "file_url": "https://cdn.gen.pro/.../preview.mp3" }
+  ]
+}
+```
+
+Possible statuses: `pending`, `processing`, `completed`, `failed`.
+
+## Errors
+
+| Code | Meaning |
+|---|---|
+| 400 | Missing required field (e.g. `text` on preview, `name` on clone, `gender` on generate-description) |
+| 400 | `invalid_key` on ElevenLabs connect — the key was rejected by ElevenLabs |
+| 400 | Both `audio_url` and `audio_base64` provided on clone (supply exactly one) |
+| 401 | Missing or invalid `X-API-Key` |
+| 404 | Voice not found (on delete or preview) |
+
+See the [Agent Core reference](/reference/agent-core/) for identity, overview, personality, and other non-voice sections.

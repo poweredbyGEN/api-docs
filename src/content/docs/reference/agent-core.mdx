@@ -1,0 +1,167 @@
+---
+title: Agent Core
+description: Read and write the entire agent setup canvas — identity, overview, personality, inspiration, voice, look, accounts — in a single call.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Agent Core API exposes the agent setup canvas (the page you see at `gen.pro/{agent_id}/setup`) as a flat, PAT-authenticated API. One call reads or writes every section: identity, overview (brand profile), personality, inspiration, voice, look, and the agent's own social accounts.
+
+**Use this when you want to configure an agent programmatically.** It replaces the legacy per-resource sequence of TrendPulse endpoints.
+
+<Aside type="note">
+  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Authenticated via `X-API-Key` header. Backing service: `agent-core` on EC2.
+</Aside>
+
+## Get the full agent setup
+
+```
+GET /v1/agents/{agent_id}/core
+```
+
+Returns every section in one response.
+
+**Response 200:**
+```json
+{
+  "identity": {
+    "name": "Santiago",
+    "profile_photo_url": "https://cdn.gen.pro/..."
+  },
+  "overview": {
+    "agent_id": "abc123",
+    "brand_name": "Santiago",
+    "description": "Santiago is a San Antonio-based street food scout...",
+    "identity_type": "character",
+    "goal": "growth",
+    "keywords": ["streetfood", "foodtruck", "tacotok"],
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "primary_format": null,
+    "onboarding_status": "active"
+  },
+  "personality": "Santiago grew up eating at his tia's taco stand...",
+  "inspiration": [
+    { "id": 1, "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }
+  ],
+  "voice": {
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "name": "Rachel",
+    "source": "public"
+  },
+  "look": {
+    "description": "Latino male early 30s, athletic build...",
+    "reference_images": [
+      { "id": 11, "url": "https://cdn.gen.pro/refs/1.png" }
+    ]
+  },
+  "accounts": [
+    { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }
+  ]
+}
+```
+
+## Update the agent setup
+
+```
+PATCH /v1/agents/{agent_id}/core
+```
+
+Send any combination of sections. Semantics vary per section:
+
+| Section | Semantics |
+|---|---|
+| `identity` | **Merge** — only provided fields are updated |
+| `overview` | **Merge** — only provided fields |
+| `personality` | **Replace** — string replaces the full personality |
+| `inspiration` | **Replace** — array replaces the full inspiration list |
+| `voice` | **Replace** — `{voice_id, source}` sets the default voice |
+| `look.description` | **Merge** — only updates the description (use item-level endpoints below for reference images) |
+| `accounts` | **Replace** — array replaces the full account list |
+
+**Response 200** (all sections succeeded) or **207 Multi-Status** (partial failure) with per-section results:
+
+```json
+{
+  "identity":  { "status": "ok",    "data": { "name": "Santiago", "profile_photo_url": null } },
+  "overview":  { "status": "ok",    "data": { ... } },
+  "inspiration": { "status": "error", "error": "invalid url" }
+}
+```
+
+**Example — set up a character in one call:**
+
+```bash
+curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity":    { "name": "Santiago" },
+    "overview":    {
+      "brand_name": "Santiago",
+      "description": "Santiago is a San Antonio street food scout...",
+      "identity_type": "character",
+      "goal": "growth",
+      "keywords": ["streetfood", "tacotok"],
+      "target_platforms": ["tiktok", "instagram"],
+      "shortform": true
+    },
+    "personality": "Santiago grew up eating at his tia'\''s taco stand...",
+    "inspiration": [
+      { "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }
+    ],
+    "look":        { "description": "Latino male early 30s, athletic build" },
+    "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
+    "accounts":    [
+      { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }
+    ]
+  }'
+```
+
+## Identity — profile photo upload (multipart)
+
+The photo can't fit in a JSON PATCH, so it has its own endpoint.
+
+```
+POST /v1/agents/{agent_id}/core/identity/profile-photo
+Content-Type: multipart/form-data
+```
+
+**Form fields:**
+- `file` — JPEG, PNG, or WebP
+
+**Response 200:**
+```json
+{ "profile_photo_url": "https://cdn.gen.pro/agents/abc123/photo.png" }
+```
+
+## Item-level endpoints
+
+Add or remove a single inspiration source, social account, or reference image without replacing the whole list.
+
+### Inspiration
+
+- `POST /v1/agents/{agent_id}/core/inspiration` — body `{"url": "...", "platform": "tiktok"}`
+- `DELETE /v1/agents/{agent_id}/core/inspiration/{id}`
+
+### Accounts (the agent's own socials)
+
+- `POST /v1/agents/{agent_id}/core/accounts` — body `{"url": "...", "platform": "tiktok", "display_name": "..."}` (platform auto-detected from URL if omitted)
+- `DELETE /v1/agents/{agent_id}/core/accounts/{id}`
+
+### Look reference images
+
+- `POST /v1/agents/{agent_id}/core/look/reference-images` — body `{"url": "..."}`
+- `DELETE /v1/agents/{agent_id}/core/look/reference-images/{id}`
+
+## Errors
+
+| Code | Meaning |
+|---|---|
+| 400 | Missing required field (e.g. POST inspiration without `url`) |
+| 401 | Missing or invalid `X-API-Key` |
+| 404 | Agent not found, or item-level resource not found |
+| 207 | `PATCH /core` — partial success. Inspect per-section `status` in the response body. |
+
+See also the [Voice API reference](/reference/agent-voice/) for voice library, cloning, design, and preview.

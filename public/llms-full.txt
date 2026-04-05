@@ -446,6 +446,148 @@ Poll: GET /v1/user_jobs/{id}?agent_id={id}
 
 Prerequisites: Agent must have connected TikTok account (via AURA). Media must be publicly accessible.
 
+## Agent Core API (GEN-2755)
+
+**PREFERRED way to configure an agent.** Single-endpoint read/write for the entire agent setup canvas: identity, overview (brand profile), personality, inspiration sources, voice, look (+ reference images), and the agent's own social accounts. Replaces the legacy per-resource TrendPulse calls when you're setting up a new agent or editing its configuration.
+
+**Backing service:** `agent-core` on EC2 (ports 8800 prod, 8801 staging). Exposed through `api.gen.pro` (CloudFront) and `staging-api.gen.pro` for PAT callers, and through `trendpulse.gen.pro` / `staging-trendpulse.gen.pro` for JWT callers. All routes PAT-authenticated via `X-API-Key`.
+
+### GET /v1/agents/{agent_id}/core
+
+Returns every section of the agent setup canvas in one call.
+
+Response:
+```json
+{
+  "identity": { "name": "Santiago", "profile_photo_url": "https://cdn.example/a.png" },
+  "overview": {
+    "agent_id": "abc123",
+    "brand_name": "Santiago",
+    "description": "Santiago is a San Antonio street food scout...",
+    "identity_type": "character",
+    "goal": "growth",
+    "keywords": ["streetfood", "foodtruck", "tacotok"],
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "primary_format": null,
+    "onboarding_status": "active"
+  },
+  "personality": "Santiago grew up eating at his tia's taco stand...",
+  "inspiration": [{ "id": 1, "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }],
+  "voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "source": "public" },
+  "look": {
+    "description": "Latino male early 30s, athletic build",
+    "reference_images": [{ "id": 11, "url": "https://cdn.example/ref1.png" }]
+  },
+  "accounts": [{ "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }]
+}
+```
+
+### PATCH /v1/agents/{agent_id}/core
+
+Write any combination of sections in a single call. Merge semantics for `identity`, `overview`, `look.description`. Replace semantics for `personality`, `inspiration`, `voice`, `accounts`.
+
+Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-section results:
+```json
+{
+  "identity": { "status": "ok", "data": { ... } },
+  "overview": { "status": "error", "error": "..." }
+}
+```
+
+Example — fully configure a new character in one call:
+```bash
+curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity":    { "name": "Santiago" },
+    "overview":    {
+      "brand_name": "Santiago",
+      "description": "Santiago is a San Antonio street food scout...",
+      "identity_type": "character",
+      "goal": "growth",
+      "keywords": ["streetfood", "tacotok"],
+      "target_platforms": ["tiktok", "instagram"],
+      "shortform": true
+    },
+    "personality": "Santiago grew up eating at his tia\u0027s taco stand...",
+    "inspiration": [{ "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }],
+    "look":        { "description": "Latino male early 30s, athletic build" },
+    "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
+    "accounts":    [{ "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }]
+  }'
+```
+
+### Item-level endpoints (append single items without replacing the list)
+
+- POST /v1/agents/{agent_id}/core/identity/profile-photo — multipart `file=@photo.jpg`
+- POST /v1/agents/{agent_id}/core/inspiration — body `{url, platform?}`
+- DELETE /v1/agents/{agent_id}/core/inspiration/{item_id}
+- POST /v1/agents/{agent_id}/core/accounts — body `{url, platform?, display_name?}`
+- DELETE /v1/agents/{agent_id}/core/accounts/{account_id}
+- POST /v1/agents/{agent_id}/core/look/reference-images — body `{url}`
+- DELETE /v1/agents/{agent_id}/core/look/reference-images/{image_id}
+
+## Voice API (Agent Core)
+
+All under `/v1/agents/{agent_id}/voice/*`. PAT auth.
+
+### Library
+
+GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_trained|user_elevenlabs}
+
+Returns the merged voice list from all sources (shared public catalog, voices the user designed via the 4-step flow, voices cloned from audio, and voices from their connected ElevenLabs account).
+
+Response:
+```json
+{
+  "voices": [
+    { "voice_id": "21m00...", "name": "Rachel",  "source": "public",          "preview_url": null },
+    { "voice_id": "huv-1",     "name": "Custom",  "source": "user_designed",   "preview_url": null },
+    { "voice_id": "huv-2",     "name": "Clone 1", "source": "user_trained",    "preview_url": null }
+  ],
+  "total": 3
+}
+```
+
+### ElevenLabs integration
+
+Users connect their own ElevenLabs API key to unlock their personal voice library and use their own quota. The key is validated against ElevenLabs's `/v1/user` before being saved on the agent record.
+
+- GET /v1/agents/{agent_id}/voice/integrations/elevenlabs → `{connected: bool, masked_key: "***xyz1" | null}`
+- POST /v1/agents/{agent_id}/voice/integrations/elevenlabs — body `{api_key}`. Returns `{connected: true, user: {subscription: {...}}}` on success, 400 `{detail: "invalid_key"}` on failure.
+- POST /v1/agents/{agent_id}/voice/integrations/elevenlabs/test — body `{api_key}`. Returns `{valid: bool}` without saving.
+- DELETE /v1/agents/{agent_id}/voice/integrations/elevenlabs → disconnect
+
+### Voice design — 4-step prompt-based flow
+
+Build a voice from a text description. Steps 1-3 are cheap; step 4 persists.
+
+1. POST /v1/agents/{agent_id}/voice/design/generate-script — body `{language?}` → `{voice_sample: "..."}`
+2. POST /v1/agents/{agent_id}/voice/design/generate-description — body `{gender (required), voice_description?, language?, script?}` → `{voice_description: "..."}`
+3. POST /v1/agents/{agent_id}/voice/design/generate-samples — body `{text (required), description?}` → `{samples: [{generation_id, audio}, {generation_id, audio}, {generation_id, audio}]}` (3 candidates)
+4. POST /v1/agents/{agent_id}/voice/design — body `{generation_id (required), name (required), gender?, language?, description?}` → the created voice resource
+
+`generation_id` is an opaque token — do not parse or store it beyond step 4.
+
+### Voice cloning (synchronous)
+
+Create a voice from an existing audio sample. Synchronous — the created voice is returned immediately.
+
+POST /v1/agents/{agent_id}/voice/clone
+- body variant A (preferred): `{name (required), audio_url, gender?, language?, description?}`
+- body variant B (inline bytes): `{name (required), audio_base64, gender?, language?, description?}`
+
+Provide exactly one of `audio_url` or `audio_base64`.
+
+### Voice delete + preview
+
+- DELETE /v1/agents/{agent_id}/voice/{voice_id} — delete a user-owned voice
+- POST /v1/agents/{agent_id}/voice/{voice_id}/preview — body `{text}`. **Async.** Returns `{user_job_id}` immediately.
+- GET /v1/agents/{agent_id}/voice/preview/{job_id} — poll the preview job. When `status == "completed"`, read audio URL from `output_resources`.
+
 ## Error Format
 
 {error: "Human-readable message", error_code: "machine_code"}

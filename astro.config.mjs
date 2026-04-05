@@ -87,6 +87,8 @@ export default defineConfig({
 						{ label: 'Automation', slug: 'reference/automation' },
 						{ label: 'Pipelines', slug: 'reference/pipelines' },
 						{ label: 'Agents', slug: 'reference/agents' },
+						{ label: 'Agent Core', slug: 'reference/agent-core' },
+						{ label: 'Agent Voice', slug: 'reference/agent-voice' },
 						{ label: 'Organizations', slug: 'reference/organizations' },
 						{ label: 'Content Resources', slug: 'reference/content-resources' },
 						{ label: 'Agent Chat', slug: 'reference/agent-chat' },
