@@ -1,17 +1,54 @@
 ---
 title: Agent Core
-description: Read and write the entire agent setup canvas — identity, overview, personality, inspiration, voice, look, accounts — in a single call.
+description: Read and write an agent's full setup — brand, personality, inspiration sources, voice — in a single flat call.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Agent Core API exposes the agent setup canvas (the page you see at `gen.pro/{agent_id}/setup`) as a flat, PAT-authenticated API. One call reads or writes every section: identity, overview (brand profile), personality, inspiration, voice, look, and the agent's own social accounts.
+The Agent Core API exposes the agent setup canvas (`gen.pro/{agent_id}/setup`) as a flat, PAT-authenticated API. One `GET` returns every field; one `PATCH` updates any subset. Field names mirror exactly what the Setup canvas FE saves, so developers and the FE speak the same language.
 
-**Use this when you want to configure an agent programmatically.** It replaces the legacy per-resource sequence of TrendPulse endpoints.
+**Use this when you want to configure an agent programmatically.** It replaces the legacy sequence of per-resource TrendPulse + Rails calls.
 
 <Aside type="note">
-  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Authenticated via `X-API-Key` header. Backing service: `agent-core` on EC2.
+  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Auth: `X-API-Key` header with a Personal Access Token. Backing service: `agent-core` on EC2.
 </Aside>
+
+## Storage map
+
+The API is a thin facade — every field forwards to an existing upstream service. This is the full map:
+
+| Field | Upstream endpoint | Storage |
+|---|---|---|
+| `brand_name` | `PATCH trendpulse.gen.pro/v1/trendpulse/settings` | `trendpulse_configs.brand_name` |
+| `description` | same | `trendpulse_configs.description` (max 500 chars) |
+| `identity_type` | same | `trendpulse_configs.identity_type` — `brand` or `character` |
+| `goal` | same | `trendpulse_configs.goal` (comma-separated) |
+| `target_platforms` | same | `trendpulse_configs.target_platforms` (JSON list) |
+| `shortform`, `longform` | same | `trendpulse_configs.{shortform,longform}` |
+| `onboarding_status` | same | `trendpulse_configs.onboarding_status` |
+| `keywords` | same | `trendpulse_configs.keywords` (JSON list of strings) |
+| `monitored` | same | `trendpulse_configs.monitored` — inspiration sources |
+| `linked_accounts` | same | `trendpulse_linked_accounts` table (delete-then-insert diffing) |
+| `personality` | `PUT api.gen.pro/v1/projects/{pid}/project_nodes/{nid}` | Rails `project_nodes.data` where `node_type='personality'` |
+| `default_user_voice` | `PUT api.gen.pro/v1/agents/{id}` | Rails `agents.default_user_voice_attributes` |
+
+A single `PATCH` may fan out to up to three upstreams internally. You see one call and get `200` if all succeed, `207 Multi-Status` with per-target status if any fail.
+
+## Two important distinctions
+
+**`linked_accounts` vs `monitored`** — these are different concepts.
+
+- `linked_accounts` = the agent's **own** brand social accounts (the TikTok/Instagram/website the agent posts from).
+- `monitored` = **inspiration sources** — other creators, hashtags, or search keywords the agent watches for trending content.
+
+Don't mix them. Putting a competitor's TikTok URL in `linked_accounts` will eventually appear on the agent's own "My Socials" list and confuse the content pipeline.
+
+**`description` vs `personality`** — these are different lengths.
+
+- `description` is a 2-3 sentence brand summary. Hard-capped at 500 characters.
+- `personality` is the full persona text — voice, backstory, behavior rules. Max 20000 characters.
+
+If you try to put a 3000-character persona into `description`, the API returns a 422. This is intentional — the Lava bug that motivated this API came from callers stuffing persona text into the short-description field.
 
 ## Get the full agent setup
 
@@ -19,46 +56,35 @@ The Agent Core API exposes the agent setup canvas (the page you see at `gen.pro/
 GET /v1/agents/{agent_id}/core
 ```
 
-Returns every section in one response.
+Returns every field as a flat object. Fields that haven't been set return `null` or empty arrays.
 
 **Response 200:**
+
 ```json
 {
-  "identity": {
-    "name": "Santiago",
-    "profile_photo_url": "https://cdn.gen.pro/..."
-  },
-  "overview": {
-    "agent_id": "abc123",
-    "brand_name": "Santiago",
-    "description": "Santiago is a San Antonio-based street food scout...",
-    "identity_type": "character",
-    "goal": "growth",
-    "keywords": ["streetfood", "foodtruck", "tacotok"],
-    "target_platforms": ["tiktok", "instagram"],
-    "shortform": true,
-    "longform": false,
-    "primary_format": null,
-    "onboarding_status": "active"
-  },
-  "personality": "Santiago grew up eating at his tia's taco stand...",
-  "inspiration": [
-    { "id": 1, "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }
+  "agent_id": "abc123",
+  "brand_name": "Santiago",
+  "description": "Santiago is a San Antonio street food scout who hunts the best tacos in the city.",
+  "identity_type": "character",
+  "goal": "growth",
+  "target_platforms": ["tiktok", "instagram"],
+  "shortform": true,
+  "longform": false,
+  "onboarding_status": "profile_complete",
+  "keywords": ["streetfood", "tacotok", "sanantonioeats", "foodtruckfinds"],
+  "monitored": [
+    { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
+    { "handle": "tacotok", "item_type": "hashtag" }
   ],
-  "voice": {
+  "linked_accounts": [
+    { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago 🌮" }
+  ],
+  "personality": "Santiago grew up eating at his tía's taco stand in south San Antonio...",
+  "default_user_voice": {
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "name": "Rachel",
     "source": "public"
-  },
-  "look": {
-    "description": "Latino male early 30s, athletic build...",
-    "reference_images": [
-      { "id": 11, "url": "https://cdn.gen.pro/refs/1.png" }
-    ]
-  },
-  "accounts": [
-    { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }
-  ]
+  }
 }
 ```
 
@@ -68,100 +94,117 @@ Returns every section in one response.
 PATCH /v1/agents/{agent_id}/core
 ```
 
-Send any combination of sections. Semantics vary per section:
+Flat merge-patch body. Send only the fields you want to change — missing fields are not forwarded to any upstream.
 
-| Section | Semantics |
+### Field-level semantics
+
+| Field | Semantics |
 |---|---|
-| `identity` | **Merge** — only provided fields are updated |
-| `overview` | **Merge** — only provided fields |
-| `personality` | **Replace** — string replaces the full personality |
-| `inspiration` | **Replace** — array replaces the full inspiration list |
-| `voice` | **Replace** — `{voice_id, source}` sets the default voice |
-| `look.description` | **Merge** — only updates the description (use item-level endpoints below for reference images) |
-| `accounts` | **Replace** — array replaces the full account list |
+| Scalars (`brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`) | Replace |
+| `keywords` | Replace the full list |
+| `target_platforms` | Replace the full list |
+| `monitored` | **Replace the full list** — items you don't send are deleted |
+| `linked_accounts` | **Replace the full list** — rows you don't send are deleted. Rows with `id` are updated in place; rows without `id` are inserted. |
+| `default_user_voice` | Replace |
 
-**Response 200** (all sections succeeded) or **207 Multi-Status** (partial failure) with per-section results:
+To add a single `monitored` item or `linked_account` without touching others, `GET /core` first, append, then `PATCH` with the full list.
+
+### Validation guardrails
+
+- Unknown fields return **422** (`extra="forbid"` on every model).
+- `description` max 500 chars.
+- `personality` max 20000 chars.
+- `identity_type` strict enum: `"brand"` | `"character"`.
+- `monitored[].item_type` strict enum: `"account"` | `"hashtag"` | `"keyword"`.
+- `linked_accounts[].url` required.
+- `monitored[]` and `linked_accounts[]` also reject unknown keys.
+
+### Keyword → monitored auto-mirror
+
+If you send `keywords` without also sending `monitored`, the writer automatically populates `monitored` with `[{handle: kw, item_type: "keyword"}]` for each keyword, so the nightly monitoring cron stays in sync. This matches what the brand-analysis onboarding task does. If you send both, your explicit `monitored` wins — the auto-mirror is skipped.
+
+### Response
+
+`200` on full success, `207 Multi-Status` on partial failure. The body is a map keyed by **upstream target**, not by request field:
 
 ```json
 {
-  "identity":  { "status": "ok",    "data": { "name": "Santiago", "profile_photo_url": null } },
-  "overview":  { "status": "ok",    "data": { ... } },
-  "inspiration": { "status": "error", "error": "invalid url" }
+  "trendpulse":  { "status": "ok",    "data": { "brand_name": "Santiago", "keywords": ["streetfood"], ... } },
+  "personality": { "status": "ok",    "data": "Santiago grew up eating at..." },
+  "voice":       { "status": "error", "error": "rails 500 on PUT /v1/agents/abc123" }
 }
 ```
 
-**Example — set up a character in one call:**
+Targets only appear if the PATCH touched at least one field they own. A PATCH that only sets `brand_name` returns `{ "trendpulse": { "status": "ok", ... } }` — no `personality` or `voice` entry.
+
+## Example — set up a character in one call
 
 ```bash
 curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "identity":    { "name": "Santiago" },
-    "overview":    {
-      "brand_name": "Santiago",
-      "description": "Santiago is a San Antonio street food scout...",
-      "identity_type": "character",
-      "goal": "growth",
-      "keywords": ["streetfood", "tacotok"],
-      "target_platforms": ["tiktok", "instagram"],
-      "shortform": true
-    },
-    "personality": "Santiago grew up eating at his tia'\''s taco stand...",
-    "inspiration": [
-      { "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }
+    "brand_name": "Santiago",
+    "description": "Santiago is a San Antonio street food scout who hunts the best tacos in the city.",
+    "identity_type": "character",
+    "goal": "growth",
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "onboarding_status": "profile_complete",
+    "keywords": ["streetfood", "tacotok", "sanantonioeats"],
+    "monitored": [
+      { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
+      { "handle": "tacotok", "item_type": "hashtag" }
     ],
-    "look":        { "description": "Latino male early 30s, athletic build" },
-    "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
-    "accounts":    [
-      { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }
-    ]
+    "linked_accounts": [
+      { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
+    ],
+    "personality": "Santiago grew up eating at his tía'\''s taco stand in south San Antonio. He'\''s 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
+    "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
 ```
 
-## Identity — profile photo upload (multipart)
+**TypeScript SDK equivalent:**
 
-The photo can't fit in a JSON PATCH, so it has its own endpoint.
+```typescript
+import { GenClient } from '@poweredbygen/gen-sdk';
 
+const gen = new GenClient({ apiKey: process.env.GEN_API_KEY! });
+
+const result = await gen.agents.updateCore('abc123', {
+  brand_name: 'Santiago',
+  description: 'San Antonio street food scout who hunts the best tacos.',
+  identity_type: 'character',
+  goal: 'growth',
+  target_platforms: ['tiktok', 'instagram'],
+  shortform: true,
+  keywords: ['streetfood', 'tacotok', 'sanantonioeats'],
+  monitored: [
+    { handle: 'https://tiktok.com/@keilapacheco', item_type: 'account' },
+  ],
+  linked_accounts: [
+    { url: 'https://tiktok.com/@santiago_real', platform: 'tiktok' },
+  ],
+  personality: 'Santiago grew up eating at his tía\'s taco stand...',
+  default_user_voice: { voice_id: '21m00Tcm4TlvDq8ikWAM', source: 'public' },
+});
+
+if (result.personality?.status === 'error') {
+  console.error('personality write failed:', result.personality.error);
+}
 ```
-POST /v1/agents/{agent_id}/core/identity/profile-photo
-Content-Type: multipart/form-data
-```
-
-**Form fields:**
-- `file` — JPEG, PNG, or WebP
-
-**Response 200:**
-```json
-{ "profile_photo_url": "https://cdn.gen.pro/agents/abc123/photo.png" }
-```
-
-## Item-level endpoints
-
-Add or remove a single inspiration source, social account, or reference image without replacing the whole list.
-
-### Inspiration
-
-- `POST /v1/agents/{agent_id}/core/inspiration` — body `{"url": "...", "platform": "tiktok"}`
-- `DELETE /v1/agents/{agent_id}/core/inspiration/{id}`
-
-### Accounts (the agent's own socials)
-
-- `POST /v1/agents/{agent_id}/core/accounts` — body `{"url": "...", "platform": "tiktok", "display_name": "..."}` (platform auto-detected from URL if omitted)
-- `DELETE /v1/agents/{agent_id}/core/accounts/{id}`
-
-### Look reference images
-
-- `POST /v1/agents/{agent_id}/core/look/reference-images` — body `{"url": "..."}`
-- `DELETE /v1/agents/{agent_id}/core/look/reference-images/{id}`
 
 ## Errors
 
 | Code | Meaning |
 |---|---|
-| 400 | Missing required field (e.g. POST inspiration without `url`) |
 | 401 | Missing or invalid `X-API-Key` |
-| 404 | Agent not found, or item-level resource not found |
-| 207 | `PATCH /core` — partial success. Inspect per-section `status` in the response body. |
+| 404 | Agent not found |
+| 422 | Validation error — unknown field, bad enum, length cap exceeded, or missing required sub-field like `monitored[].item_type` |
+| 207 | Partial success. Inspect per-target `status` in the response body. |
 
-See also the [Voice API reference](/reference/agent-voice/) for voice library, cloning, design, and preview.
+## Related
+
+- [Voice API](/reference/agent-voice/) — voice library, design, cloning, preview (separate endpoint tree)
+- [Discovery API](/reference/discovery/) — listing agents, workspaces, organizations

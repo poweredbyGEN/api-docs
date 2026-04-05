@@ -83,7 +83,7 @@ tags:
     description: (Legacy) Manage the agent's identity, voice, and brand profile. Prefer Agent Core for new work.
   - name: Agent Core
     description: |
-      **Preferred** single-endpoint read/write for the agent setup canvas. One PATCH configures identity, overview, personality, inspiration, voice, look, and accounts. Backed by the agent-core service; exposed through api.gen.pro.
+      **Preferred** single-endpoint read/write for the agent setup canvas. One flat PATCH updates every brand field, personality, and default voice in a single call. Field names mirror what the FE Setup canvas saves, so developers and the FE speak the same language. Backed by the agent-core service; exposed through api.gen.pro.
   - name: Agent Voice
     description: |
       Voice library, ElevenLabs integration, prompt-based design (4-step flow), audio-sample cloning, async TTS preview.
@@ -2903,8 +2903,11 @@ paths:
       operationId: getAgentCore
       summary: Get the full agent setup
       description: |
-        Returns every section of the agent setup canvas in a single response:
-        identity, overview, personality, inspiration, voice, look, accounts.
+        Returns the agent's full setup as a flat object whose field names mirror
+        exactly what the GEN Setup canvas FE reads and writes. Fans out to
+        TrendPulse `/trendpulse/settings` (brand fields), Rails `agents` (voice
+        association), and Rails `project_nodes` (personality) and merges them
+        into one response.
       tags: [Agent Core]
       parameters:
         - name: agent_id
@@ -2922,12 +2925,35 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     patch:
       operationId: patchAgentCore
-      summary: Update any combination of setup sections
+      summary: Update any combination of setup fields
       description: |
-        Merge semantics for `identity`, `overview`, `look.description`. Replace
-        semantics for `personality`, `inspiration`, `voice`, `accounts`. Returns
-        200 on full success, 207 Multi-Status with per-section results on
-        partial failure.
+        Flat merge-patch. Send only the fields you want to change — missing
+        fields are not forwarded. Field names map 1:1 to the upstream service's
+        storage columns, with no wrappers or renames.
+
+        **Storage map:**
+        - `brand_name`, `description`, `identity_type`, `goal`, `keywords`,
+          `monitored`, `target_platforms`, `shortform`, `longform`,
+          `onboarding_status`, `linked_accounts` → forwarded in one PATCH to
+          the TrendPulse settings endpoint, which owns diffing for
+          `linked_accounts` (delete-then-insert on the full list).
+        - `personality` → Rails `project_nodes` row with `node_type='personality'`.
+        - `default_user_voice` → Rails `agents.default_user_voice_attributes`.
+
+        **Guardrails:**
+        - Unknown fields return 422 — typos fail fast.
+        - `description` is capped at 500 chars. Full persona text belongs in
+          `personality` (max 20000 chars).
+        - `identity_type` is a strict enum: `"brand"` or `"character"`.
+        - `monitored[].item_type` is a strict enum: `"account"`, `"hashtag"`,
+          or `"keyword"`.
+
+        **Semantics:** `linked_accounts` and `monitored` use full-list
+        replacement. To add one row without touching others, read the current
+        list via GET first, append, then PATCH.
+
+        Returns 200 on full success, 207 Multi-Status with per-target results
+        (`trendpulse`, `personality`, `voice`) on partial failure.
       tags: [Agent Core]
       parameters:
         - name: agent_id
@@ -2942,156 +2968,23 @@ paths:
               $ref: '#/components/schemas/AgentCorePatch'
       responses:
         '200':
-          description: All sections updated successfully
+          description: All fields updated successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentCorePatchResult'
         '207':
-          description: Partial success — inspect per-section status
+          description: Partial success — inspect per-target status
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentCorePatchResult'
         '401': { $ref: '#/components/responses/Unauthorized' }
-
-  /agents/{agent_id}/core/identity/profile-photo:
-    post:
-      operationId: uploadAgentCoreProfilePhoto
-      summary: Upload agent profile photo
-      description: Multipart upload. Proxied to the Rails agents endpoint; returns the CDN URL.
-      tags: [Agent Core]
-      parameters:
-        - name: agent_id
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-              required: [file]
-      responses:
-        '200':
-          description: Uploaded
+        '422':
+          description: Validation error — unknown field, bad enum, or length cap exceeded
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  profile_photo_url: { type: string }
-
-  /agents/{agent_id}/core/inspiration:
-    post:
-      operationId: addAgentInspiration
-      summary: Add one inspiration source
-      tags: [Agent Core]
-      parameters:
-        - name: agent_id
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                url: { type: string }
-                platform: { type: string, enum: [tiktok, instagram, youtube, x, linkedin, pinterest, facebook, threads, website] }
-              required: [url]
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/InspirationItem' }
-
-  /agents/{agent_id}/core/inspiration/{item_id}:
-    delete:
-      operationId: removeAgentInspiration
-      summary: Remove one inspiration source
-      tags: [Agent Core]
-      parameters:
-        - { name: agent_id, in: path, required: true, schema: { type: string } }
-        - { name: item_id, in: path, required: true, schema: { type: integer } }
-      responses:
-        '204': { description: Deleted }
-        '404': { $ref: '#/components/responses/NotFound' }
-
-  /agents/{agent_id}/core/accounts:
-    post:
-      operationId: addAgentAccount
-      summary: Add one of the agent's own social accounts
-      tags: [Agent Core]
-      parameters:
-        - { name: agent_id, in: path, required: true, schema: { type: string } }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                url: { type: string }
-                platform: { type: string }
-                display_name: { type: string }
-              required: [url]
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/AccountItem' }
-
-  /agents/{agent_id}/core/accounts/{account_id}:
-    delete:
-      operationId: removeAgentAccount
-      summary: Remove one linked account
-      tags: [Agent Core]
-      parameters:
-        - { name: agent_id, in: path, required: true, schema: { type: string } }
-        - { name: account_id, in: path, required: true, schema: { type: integer } }
-      responses:
-        '204': { description: Deleted }
-
-  /agents/{agent_id}/core/look/reference-images:
-    post:
-      operationId: addLookReferenceImage
-      summary: Add a look reference image URL
-      tags: [Agent Core]
-      parameters:
-        - { name: agent_id, in: path, required: true, schema: { type: string } }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                url: { type: string }
-              required: [url]
-      responses:
-        '201':
-          description: Created
-
-  /agents/{agent_id}/core/look/reference-images/{image_id}:
-    delete:
-      operationId: removeLookReferenceImage
-      summary: Remove a look reference image
-      tags: [Agent Core]
-      parameters:
-        - { name: agent_id, in: path, required: true, schema: { type: string } }
-        - { name: image_id, in: path, required: true, schema: { type: integer } }
-      responses:
-        '204': { description: Deleted }
+              schema: { $ref: '#/components/schemas/Error' }
 
   # ── Agent Voice (GEN-2755) ────────────────────────────────
   /agents/{agent_id}/voice/library:
@@ -3992,140 +3885,147 @@ components:
           description: Machine-readable error code.
 
     # ── Agent Core schemas (GEN-2755) ───────────────────────
+    # Flat schema — every field name mirrors what the GEN Setup canvas FE
+    # saves. See api/reference/agent-core for the full storage map.
     AgentCore:
       type: object
-      properties:
-        identity:
-          type: object
-          properties:
-            name: { type: string, nullable: true }
-            profile_photo_url: { type: string, nullable: true }
-        overview:
-          $ref: '#/components/schemas/BrandOverview'
-        personality:
-          type: string
-          nullable: true
-        inspiration:
-          type: array
-          items: { $ref: '#/components/schemas/InspirationItem' }
-        voice:
-          type: object
-          nullable: true
-          properties:
-            voice_id: { type: string }
-            name: { type: string, nullable: true }
-            source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
-        look:
-          type: object
-          properties:
-            description: { type: string, nullable: true }
-            reference_images:
-              type: array
-              items:
-                type: object
-                properties:
-                  id: { type: integer }
-                  url: { type: string }
-        accounts:
-          type: array
-          items: { $ref: '#/components/schemas/AccountItem' }
-
-    BrandOverview:
-      type: object
+      description: Full agent setup as returned by GET /agents/{id}/core.
       properties:
         agent_id: { type: string }
         brand_name: { type: string, nullable: true }
         description: { type: string, nullable: true }
         identity_type: { type: string, enum: [brand, character], nullable: true }
-        goal: { type: string, nullable: true }
-        keywords:
-          type: array
-          items: { type: string }
+        goal: { type: string, nullable: true, description: "Comma-separated, e.g. 'growth,authority,sales'" }
         target_platforms:
           type: array
           items: { type: string }
         shortform: { type: boolean, nullable: true }
         longform: { type: boolean, nullable: true }
-        primary_format: { type: string, nullable: true }
         onboarding_status: { type: string, nullable: true }
+        keywords:
+          type: array
+          items: { type: string }
+          description: Flat keyword list used by the monitoring cron. Auto-mirrored into `monitored` on write.
+        monitored:
+          type: array
+          items: { $ref: '#/components/schemas/MonitoredItem' }
+          description: Inspiration sources — accounts, hashtags, or keywords the agent monitors for trending content.
+        linked_accounts:
+          type: array
+          items: { $ref: '#/components/schemas/LinkedAccount' }
+          description: The agent's OWN brand social links. NOT the same as `monitored` (which holds sources to watch).
+        personality:
+          type: string
+          nullable: true
+          description: Full persona text. Canonical source is the Rails `project_nodes` row with `node_type='personality'`.
+        default_user_voice:
+          $ref: '#/components/schemas/VoiceRef'
 
     AgentCorePatch:
       type: object
-      description: "Any combination of sections. Merge semantics for identity/overview/look.description, replace for personality/inspiration/voice/accounts."
+      additionalProperties: false
+      description: |
+        Flat merge-patch body. Send any subset of fields — missing fields are not forwarded.
+        Unknown fields return 422. `linked_accounts` and `monitored` use full-list replacement
+        semantics: rows not in the list are deleted. To add without touching others, GET first,
+        append, then PATCH.
       properties:
-        identity:
-          type: object
-          properties:
-            name: { type: string }
-            profile_photo_url: { type: string }
-        overview:
-          type: object
-          properties:
-            brand_name: { type: string }
-            description: { type: string }
-            identity_type: { type: string, enum: [brand, character] }
-            goal: { type: string }
-            keywords: { type: array, items: { type: string } }
-            target_platforms: { type: array, items: { type: string } }
-            shortform: { type: boolean }
-            longform: { type: boolean }
-            onboarding_status: { type: string }
-        personality: { type: string }
-        inspiration:
+        brand_name: { type: string, maxLength: 200 }
+        description:
+          type: string
+          maxLength: 500
+          description: Short 2-3 sentence brand summary. NOT full persona — that goes in `personality`.
+        identity_type: { type: string, enum: [brand, character] }
+        goal: { type: string, maxLength: 100 }
+        target_platforms:
           type: array
-          items:
-            type: object
-            properties:
-              url: { type: string }
-              platform: { type: string }
-            required: [url]
-        look:
-          type: object
-          properties:
-            description: { type: string }
-        voice:
-          type: object
-          properties:
-            voice_id: { type: string }
-            source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
-        accounts:
+          items: { type: string }
+          maxItems: 10
+        shortform: { type: boolean }
+        longform: { type: boolean }
+        onboarding_status: { type: string, maxLength: 50 }
+        keywords:
           type: array
-          items:
-            type: object
-            properties:
-              url: { type: string }
-              platform: { type: string }
-              display_name: { type: string }
-            required: [url]
+          items: { type: string }
+          maxItems: 20
+          description: Flat keyword list. If set without `monitored`, auto-mirrored into monitored with item_type='keyword'.
+        monitored:
+          type: array
+          items: { $ref: '#/components/schemas/MonitoredItem' }
+          maxItems: 50
+          description: Full inspiration source list (replaces the existing list).
+        linked_accounts:
+          type: array
+          items: { $ref: '#/components/schemas/LinkedAccount' }
+          maxItems: 20
+        personality:
+          type: string
+          maxLength: 20000
+          description: Full persona text. Written to Rails `project_nodes` where `node_type='personality'`.
+        default_user_voice:
+          $ref: '#/components/schemas/VoiceRef'
+
+    MonitoredItem:
+      type: object
+      additionalProperties: false
+      required: [handle, item_type]
+      properties:
+        handle:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: For accounts — a @handle or URL. For hashtags — the tag (with or without #). For keywords — the search term.
+        item_type:
+          type: string
+          enum: [account, hashtag, keyword]
+
+    LinkedAccount:
+      type: object
+      additionalProperties: false
+      required: [url]
+      properties:
+        id:
+          type: integer
+          description: Row id if updating an existing row. Omit when adding a new account.
+        url: { type: string, minLength: 1, maxLength: 500 }
+        platform:
+          type: string
+          maxLength: 50
+          description: 'tiktok | instagram | youtube | x | linkedin | pinterest | facebook | threads | website | other'
+        display_name: { type: string, maxLength: 200 }
+
+    VoiceRef:
+      type: object
+      additionalProperties: false
+      required: [voice_id]
+      properties:
+        voice_id: { type: string, minLength: 1, maxLength: 200 }
+        source:
+          type: string
+          enum: [public, user_designed, user_trained, user_elevenlabs, eleven_labs]
+        name: { type: string, maxLength: 200 }
 
     AgentCorePatchResult:
       type: object
-      description: "Per-section result. status=ok means that section's write succeeded; status=error means it failed (see error field)."
+      description: |
+        Per-target result. agent-core fans out to up to three upstreams:
+          - `trendpulse` — any brand fields (brand_name, description, identity_type, goal,
+            target_platforms, shortform, longform, onboarding_status, keywords, monitored,
+            linked_accounts)
+          - `personality` — Rails project_nodes
+          - `voice` — Rails agents.default_user_voice_attributes
+        Each target appears only if the PATCH touched at least one field it owns.
+        `status=ok` means that target's write succeeded. `status=error` means it failed
+        (see `error` field). A 207 Multi-Status means at least one target errored.
       additionalProperties:
         type: object
         properties:
           status: { type: string, enum: [ok, error] }
           data:
-            description: "Section-specific payload on success."
+            description: Target-specific payload on success.
           error:
             type: string
-            description: "Error message on failure."
-
-    InspirationItem:
-      type: object
-      properties:
-        id: { type: integer }
-        url: { type: string }
-        platform: { type: string }
-
-    AccountItem:
-      type: object
-      properties:
-        id: { type: integer }
-        agent_id: { type: string }
-        url: { type: string }
-        platform: { type: string }
-        display_name: { type: string, nullable: true }
+            description: Error message on failure.
 
     VoiceLibraryItem:
       type: object

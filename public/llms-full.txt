@@ -448,51 +448,80 @@ Prerequisites: Agent must have connected TikTok account (via AURA). Media must b
 
 ## Agent Core API (GEN-2755)
 
-**PREFERRED way to configure an agent.** Single-endpoint read/write for the entire agent setup canvas: identity, overview (brand profile), personality, inspiration sources, voice, look (+ reference images), and the agent's own social accounts. Replaces the legacy per-resource TrendPulse calls when you're setting up a new agent or editing its configuration.
+**PREFERRED way to configure an agent.** Flat read/write for the entire agent setup canvas in a single call. Every field name mirrors exactly what the GEN Setup canvas FE saves, so developers and the FE speak the same language. Replaces the legacy sequence of per-resource TrendPulse + Rails calls.
 
-**Backing service:** `agent-core` on EC2 (ports 8800 prod, 8801 staging). Exposed through `api.gen.pro` (CloudFront) and `staging-api.gen.pro` for PAT callers, and through `trendpulse.gen.pro` / `staging-trendpulse.gen.pro` for JWT callers. All routes PAT-authenticated via `X-API-Key`.
+**Backing service:** `agent-core` on EC2 (ports 8800 prod, 8801 staging). Exposed through `api.gen.pro` (CloudFront) and `staging-api.gen.pro` for PAT callers. All routes PAT-authenticated via `X-API-Key`.
+
+### Storage map
+
+The API is a thin facade. Every PATCH field forwards to one of three upstreams:
+
+| Field | Upstream | Storage |
+|---|---|---|
+| `brand_name`, `description`, `identity_type`, `goal`, `target_platforms`, `shortform`, `longform`, `onboarding_status`, `keywords`, `monitored`, `linked_accounts` | `PATCH trendpulse.gen.pro/v1/trendpulse/settings` | `trendpulse_configs` + `trendpulse_linked_accounts` |
+| `personality` | `PUT api.gen.pro/v1/projects/{pid}/project_nodes/{nid}` with `{project_node: {data}}` | Rails `project_nodes.data` where `node_type='personality'` |
+| `default_user_voice` | `PUT api.gen.pro/v1/agents/{id}` with `default_user_voice_attributes` | Rails `agents.default_user_voice` association |
+
+### Two critical distinctions
+
+- **`linked_accounts` vs `monitored`.** `linked_accounts` = the agent's OWN brand socials (what it posts from, stored in `trendpulse_linked_accounts`). `monitored` = inspiration sources to watch (accounts/hashtags/keywords, stored in `trendpulse_configs.monitored`). Not the same thing.
+- **`description` vs `personality`.** `description` is a short 2-3 sentence brand summary, hard-capped at 500 chars. `personality` is the full persona text, max 20000 chars. A 3000-char persona dumped into `description` returns 422 by design.
 
 ### GET /v1/agents/{agent_id}/core
 
-Returns every section of the agent setup canvas in one call.
+Returns every field as a flat object.
 
 Response:
 ```json
 {
-  "identity": { "name": "Santiago", "profile_photo_url": "https://cdn.example/a.png" },
-  "overview": {
-    "agent_id": "abc123",
-    "brand_name": "Santiago",
-    "description": "Santiago is a San Antonio street food scout...",
-    "identity_type": "character",
-    "goal": "growth",
-    "keywords": ["streetfood", "foodtruck", "tacotok"],
-    "target_platforms": ["tiktok", "instagram"],
-    "shortform": true,
-    "longform": false,
-    "primary_format": null,
-    "onboarding_status": "active"
-  },
-  "personality": "Santiago grew up eating at his tia's taco stand...",
-  "inspiration": [{ "id": 1, "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }],
-  "voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "source": "public" },
-  "look": {
-    "description": "Latino male early 30s, athletic build",
-    "reference_images": [{ "id": 11, "url": "https://cdn.example/ref1.png" }]
-  },
-  "accounts": [{ "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }]
+  "agent_id": "abc123",
+  "brand_name": "Santiago",
+  "description": "San Antonio street food scout who hunts the best tacos.",
+  "identity_type": "character",
+  "goal": "growth",
+  "target_platforms": ["tiktok", "instagram"],
+  "shortform": true,
+  "longform": false,
+  "onboarding_status": "profile_complete",
+  "keywords": ["streetfood", "tacotok", "sanantonioeats"],
+  "monitored": [
+    { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
+    { "handle": "tacotok", "item_type": "hashtag" }
+  ],
+  "linked_accounts": [
+    { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
+  ],
+  "personality": "Santiago grew up eating at his tia's taco stand in south San Antonio...",
+  "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "source": "public" }
 }
 ```
 
 ### PATCH /v1/agents/{agent_id}/core
 
-Write any combination of sections in a single call. Merge semantics for `identity`, `overview`, `look.description`. Replace semantics for `personality`, `inspiration`, `voice`, `accounts`.
+Flat merge-patch. Send only the fields you want to change. Unknown fields return 422.
 
-Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-section results:
+**Field-level semantics:**
+- Scalars replace: `brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`
+- List fields use FULL replacement (missing = deleted): `keywords`, `target_platforms`, `monitored`, `linked_accounts`
+- `linked_accounts` diffing: rows with `id` are updated in place, rows without `id` are inserted, rows absent from the list are deleted. To add one row without touching others, GET first, append, PATCH.
+- `default_user_voice` replaces
+
+**Keyword auto-mirror:** Sending `keywords` without `monitored` auto-populates `monitored` with `[{handle: kw, item_type: "keyword"}]` so the nightly monitoring cron stays in sync. Send both explicitly if you want different values.
+
+**Validation:**
+- `description` max 500 chars
+- `personality` max 20000 chars
+- `identity_type` enum: `"brand"` | `"character"`
+- `monitored[].item_type` enum: `"account"` | `"hashtag"` | `"keyword"`
+- `linked_accounts[].url` required
+- All nested objects reject unknown keys
+
+Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-**target** results (not per-field). Targets only appear if the PATCH touched at least one field they own:
 ```json
 {
-  "identity": { "status": "ok", "data": { ... } },
-  "overview": { "status": "error", "error": "..." }
+  "trendpulse":  { "status": "ok", "data": { "brand_name": "Santiago", ... } },
+  "personality": { "status": "ok", "data": "Santiago grew up..." },
+  "voice":       { "status": "error", "error": "rails 500 on PUT /v1/agents/abc123" }
 }
 ```
 
@@ -502,33 +531,24 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "identity":    { "name": "Santiago" },
-    "overview":    {
-      "brand_name": "Santiago",
-      "description": "Santiago is a San Antonio street food scout...",
-      "identity_type": "character",
-      "goal": "growth",
-      "keywords": ["streetfood", "tacotok"],
-      "target_platforms": ["tiktok", "instagram"],
-      "shortform": true
-    },
-    "personality": "Santiago grew up eating at his tia\u0027s taco stand...",
-    "inspiration": [{ "url": "https://tiktok.com/@keilapacheco", "platform": "tiktok" }],
-    "look":        { "description": "Latino male early 30s, athletic build" },
-    "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
-    "accounts":    [{ "url": "https://tiktok.com/@santiago_real", "platform": "tiktok" }]
+    "brand_name": "Santiago",
+    "description": "San Antonio street food scout who hunts the best tacos.",
+    "identity_type": "character",
+    "goal": "growth",
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "keywords": ["streetfood", "tacotok", "sanantonioeats"],
+    "monitored": [
+      { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" }
+    ],
+    "linked_accounts": [
+      { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
+    ],
+    "personality": "Santiago grew up eating at his tia\u0027s taco stand in south San Antonio. 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
+    "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
 ```
-
-### Item-level endpoints (append single items without replacing the list)
-
-- POST /v1/agents/{agent_id}/core/identity/profile-photo — multipart `file=@photo.jpg`
-- POST /v1/agents/{agent_id}/core/inspiration — body `{url, platform?}`
-- DELETE /v1/agents/{agent_id}/core/inspiration/{item_id}
-- POST /v1/agents/{agent_id}/core/accounts — body `{url, platform?, display_name?}`
-- DELETE /v1/agents/{agent_id}/core/accounts/{account_id}
-- POST /v1/agents/{agent_id}/core/look/reference-images — body `{url}`
-- DELETE /v1/agents/{agent_id}/core/look/reference-images/{image_id}
 
 ## Voice API (Agent Core)
 
