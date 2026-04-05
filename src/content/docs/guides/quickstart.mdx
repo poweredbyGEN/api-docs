@@ -1,199 +1,191 @@
 ---
 title: Quick Start
-description: Make your first API call in under 5 minutes.
+description: Set up your agent, generate grounded content ideas, and produce your first video — in under 10 minutes.
 ---
 
 import { Steps, Aside, LinkCard } from '@astrojs/starlight/components';
 
-This guide walks you through your first API calls — from verifying your key to updating content in a content engine.
+The GEN workflow has two halves: **configure the agent** (who it is, how it sounds, what inspires it) and **generate content** (ideas → video → publish). Get the first half right and the second half takes care of itself.
 
-## The Fast Path: Clone a Template
+This guide walks the full happy path:
 
-The quickest way to start creating content is to clone a template:
+1. [**Agent Core**](#1-set-up-your-agent-core) — identity, overview, personality, inspiration, voice, look, accounts, **in one PATCH**
+2. [**Content Ideas**](#2-generate-content-ideas) — let the agent propose video ideas grounded in trending data
+3. [**Produce the video**](#3-produce-a-video-from-an-idea) — clone a template, drop in the idea, render
 
-```bash
-# 1. List available templates
-curl https://api.gen.pro/v1/templates/projects \
-  -H "X-API-Key: YOUR_API_KEY"
-
-# 2. Clone a template into your agent
-curl -X POST https://api.gen.pro/v1/templates/spreadsheets/TEMPLATE_SLUG/clone \
-  -H "X-API-Key: YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"agent_id": "YOUR_AGENT_ID"}'
-
-# 3. Generate content in a cell
-curl -X POST https://api.gen.pro/v1/autocontentengine/ENGINE_ID/cells/CELL_ID/generate?agent_id=AGENT_ID \
-  -H "X-API-Key: YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"generation_type": "text_generation", "data": {"model": "gemini", "prompt": "Write a 30-second TikTok script about morning routines"}}'
-
-# 4. Poll until complete
-curl https://api.gen.pro/v1/generations/GENERATION_ID \
-  -H "X-API-Key: YOUR_API_KEY"
-```
-
-If you want to understand each step in detail, continue with the full walkthrough below.
+You can skip straight to step 3 if you already have a configured agent, but for new agents you should always do step 1 first. Ideas generated from a blank agent will be generic.
 
 ## Prerequisites
 
 - A GEN account at [gen.pro](https://gen.pro)
 - An API key ([create one here](/guides/authentication/))
 - Active GEN credits on your account
-- At least one agent with a content engine
-
-Set your API key as an environment variable to follow along:
 
 ```bash
 export GEN_API_KEY="gen_pat_your_key_here"
 ```
 
-<Steps>
+## 0. Find your agent
 
-1. **Verify your API key**
+```bash
+curl -s https://api.gen.pro/v1/agents \
+  -H "X-API-Key: $GEN_API_KEY" | jq '.agents[0]'
+```
 
-   Confirm your key is working by hitting the `/v1/me` endpoint:
+```json
+{ "id": "agent_xyz789", "name": "Alex" }
+```
 
-   ```bash
-   curl -s https://api.gen.pro/v1/me \
-     -H "X-API-Key: $GEN_API_KEY" | jq
-   ```
+```bash
+export AGENT_ID="agent_xyz789"
+```
 
-   ```json
-   {
-     "id": "user_abc123",
-     "email": "you@example.com",
-     "name": "Your Name"
-   }
-   ```
+## 1. Set up your Agent Core
 
-   If you get a `401` response, double-check your key.
+This is the most important step for any new agent. `PATCH /v1/agents/{agent_id}/core` writes every section of the agent setup canvas in one call: identity, overview (brand profile), personality, inspiration sources, voice, look, and the agent's own social accounts.
 
-2. **List your workspaces**
+<Aside type="tip">
+  **Why this matters.** Content ideas, voice design, and template fills all read from these fields. A richly configured agent generates specific, on-brand ideas. A blank agent generates generic ones.
+</Aside>
 
-   Workspaces organize your agents and content. List them to orient yourself:
+```bash
+curl -s -X PATCH "https://api.gen.pro/v1/agents/$AGENT_ID/core" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identity": {
+      "name": "Santiago"
+    },
+    "overview": {
+      "brand_name": "Santiago",
+      "description": "Santiago is a San Antonio street food scout. He champions hole-in-the-wall spots over fine dining — food trucks, family-run tamale stands, tourist-blind gems.",
+      "identity_type": "character",
+      "goal": "growth",
+      "keywords": ["streetfood", "foodtruck", "tacotok"],
+      "target_platforms": ["tiktok", "instagram"],
+      "shortform": true
+    },
+    "personality": "Santiago grew up eating at his tias taco stand on the East Side. He believes the best food comes from the smallest kitchens. He is warm, specific, never condescending, always hungry.",
+    "inspiration": [
+      { "url": "https://tiktok.com/@keithlee", "platform": "tiktok" },
+      { "url": "https://tiktok.com/@foodwithsoy", "platform": "tiktok" }
+    ],
+    "look": {
+      "description": "Latino male early 30s, athletic build, usually wearing a plain t-shirt and a worn Spurs cap. Shoots handheld."
+    },
+    "accounts": [
+      { "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" },
+      { "url": "https://instagram.com/santiago_sa", "platform": "instagram" }
+    ]
+  }' | jq
+```
 
-   ```bash
-   curl -s https://api.gen.pro/v1/workspaces \
-     -H "X-API-Key: $GEN_API_KEY" | jq
-   ```
+**Response (200):** a `status: ok` entry per section you provided. If any section failed the response is `207 Multi-Status` and the failing sections include `status: error`.
 
-   ```json
-   {
-     "workspaces": [
-       {
-         "id": "ws_abc123",
-         "name": "My Workspace",
-         "agents_count": 3
-       }
-     ]
-   }
-   ```
+```json
+{
+  "identity":  { "status": "ok", "data": { "name": "Santiago", "profile_photo_url": null } },
+  "overview":  { "status": "ok", "data": { ... } },
+  "personality": { "status": "ok", "data": "Santiago grew up..." },
+  "inspiration": { "status": "ok", "data": [ { "id": 1, "url": "...", "platform": "tiktok" }, ... ] },
+  "look":      { "status": "ok", "data": { "description": "Latino male...", "reference_images": [] } },
+  "accounts":  { "status": "ok", "data": [ { "id": 42, "url": "...", "platform": "tiktok" }, ... ] }
+}
+```
 
-   <Aside>
-     You don't need a workspace ID for most requests — it's scoped through your agent. This is just useful for discovery.
-   </Aside>
+You can also set sections one at a time by calling `PATCH /core` with only that section in the body. Use the [Agent Core reference](/reference/agent-core/) for field shapes and [Agent Voice reference](/reference/agent-voice/) for voice library + design + cloning.
 
-3. **Find your agent**
+**Verify by reading back:**
 
-   Every content operation is scoped to an agent. List your agents to find the one you want to work with:
+```bash
+curl -s "https://api.gen.pro/v1/agents/$AGENT_ID/core" \
+  -H "X-API-Key: $GEN_API_KEY" | jq
+```
 
-   ```bash
-   curl -s https://api.gen.pro/v1/agents \
-     -H "X-API-Key: $GEN_API_KEY" | jq
-   ```
+## 2. Generate content ideas
 
-   ```json
-   {
-     "agents": [
-       {
-         "id": "agent_xyz789",
-         "name": "Alex",
-         "niche": "Tech Reviews"
-       }
-     ]
-   }
-   ```
+With your agent configured, let it propose video ideas. GEN's content-ideas agent pulls trending data from 10+ platforms, matches it to the agent's keywords and inspiration, and generates scripts grounded in real content.
 
-   Save the agent ID — you will need it for all content engine requests:
+```bash
+curl -s -X POST https://agent.gen.pro/v1/agent/run \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"agent_id\": \"$AGENT_ID\",
+    \"message\": \"Generate 5 content ideas grounded in this weeks trends\"
+  }" | jq
+```
 
-   ```bash
-   export AGENT_ID="agent_xyz789"
-   ```
+**Response:** `{ "run_id": "run_abc", "conversation_id": "conv_xyz" }`
 
-4. **Get a content engine**
+The run is async — poll status until it's done:
 
-   Fetch one of the agent's content engines to see its structure — rows, columns, and cells:
+```bash
+curl -s "https://agent.gen.pro/v1/runs/run_abc" \
+  -H "X-API-Key: $GEN_API_KEY" | jq '.status'
+```
 
-   ```bash
-   curl -s "https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id=$AGENT_ID" \
-     -H "X-API-Key: $GEN_API_KEY" | jq
-   ```
+Valid statuses: `pending` → `planning` → `executing` → `completed` (or `failed`).
 
-   ```json
-   {
-     "id": "sheet_001",
-     "name": "Week 12 Content",
-     "columns": [
-       { "id": "col_script", "name": "Script", "position": 0 },
-       { "id": "col_voice", "name": "Voiceover", "position": 1 },
-       { "id": "col_broll", "name": "B-Roll", "position": 2 }
-     ],
-     "rows": [
-       {
-         "id": "row_001",
-         "position": 0,
-         "cells": [
-           {
-             "id": "cell_abc",
-             "column_id": "col_script",
-             "value": "Top 5 phones of 2026..."
-           }
-         ]
-       }
-     ]
-   }
-   ```
+When complete, the ideas show up in the conversation:
 
-   <Aside>
-     Replace `{sheet_id}` with an actual content engine ID from your agent. You can find content engine IDs in the GEN web app URL or by listing the agent's content engines.
-   </Aside>
+```bash
+curl -s "https://agent.gen.pro/v1/conversations/conv_xyz" \
+  -H "X-API-Key: $GEN_API_KEY" | jq '.messages[-1]'
+```
 
-5. **Update a cell**
+Each idea includes: `title`, `hook`, `full_script`, `video_type`, `estimated_duration`, `selected_assets` (clips + images from the research phase), `project_manifest` (timeline layers for rendering), `rationale`. See the [Content Ideas guide](/guides/content-ideas/) for the full shape and refinement flow.
 
-   Now modify a cell value — for example, updating a script:
+<Aside type="note">
+  Because you set up the agent core in step 1, these ideas will reference Santiago's niche (street food), target platforms (TikTok + Instagram), personality (warm, specific, hungry), and inspiration sources (Keith Lee, FoodWithSoy). A blank agent would get you ideas that could belong to anyone.
+</Aside>
 
-   ```bash
-   curl -s -X PATCH \
-     "https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{cell_id}?agent_id=$AGENT_ID" \
-     -H "X-API-Key: $GEN_API_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "value": "The top 5 phones of 2026 will surprise you. Number one..."
-     }' | jq
-   ```
+## 3. Produce a video from an idea
 
-   ```json
-   {
-     "id": "cell_abc",
-     "column_id": "col_script",
-     "value": "The top 5 phones of 2026 will surprise you. Number one...",
-     "updated_at": "2026-03-09T12:00:00Z"
-   }
-   ```
+Once you like an idea, the fastest path to a rendered video is cloning a template that matches the video type and dropping the idea's fields into its cells.
 
-   The cell is updated immediately. If you open the content engine in the GEN web app, you will see the new value.
+```bash
+# a. list templates matching the video type (e.g. talking avatar, montage, split-screen)
+curl -s https://api.gen.pro/v1/templates/projects \
+  -H "X-API-Key: $GEN_API_KEY" | jq '.templates[] | {slug, name, video_type}'
 
-</Steps>
+# b. clone the chosen template into the agent
+curl -s -X POST "https://api.gen.pro/v1/templates/spreadsheets/TEMPLATE_SLUG/clone" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\": \"$AGENT_ID\"}" | jq
+
+# c. update a cell with the idea's script
+curl -s -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"value": "Your script here"}' | jq
+
+# d. generate content in the cell (text, image, video, speech — depends on the column type)
+curl -s -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"generation_type": "text_generation", "data": {"model": "gemini", "prompt": "..."}}' | jq
+
+# e. poll the generation until complete
+curl -s https://api.gen.pro/v1/generations/GENERATION_ID \
+  -H "X-API-Key: $GEN_API_KEY" | jq '.status'
+
+# f. render the final video once all cells are filled
+curl -s -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/render?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" | jq
+```
+
+See the [Content Resources guide](/reference/content-resources/) for downloading the rendered output and the [Publishing reference](/reference/publishing/) for pushing it to social.
 
 ## What's next?
 
-You have the basics down. Here is where to go from here:
+<LinkCard title="Agent Core reference" href="/reference/agent-core/" description="Full field reference for identity, overview, personality, inspiration, voice, look, accounts." />
 
-<LinkCard title="API Reference" href="/reference/overview/" description="Full endpoint documentation for content engines, rows, columns, cells, layers, and generations." />
+<LinkCard title="Agent Voice reference" href="/reference/agent-voice/" description="Library, ElevenLabs integration, 4-step voice design, audio cloning, TTS preview." />
 
-<LinkCard title="Using with n8n" href="/guides/n8n/" description="Connect GEN to n8n workflows for event-driven content automation." />
+<LinkCard title="Content Ideas" href="/guides/content-ideas/" description="The async run + conversation model, idea refinement, long-term preferences." />
 
-<LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Use the MCP server to manage content through natural language with Claude." />
+<LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the GEN MCP server and drive the whole workflow with natural language." />
 
-<LinkCard title="Error Handling" href="/guides/errors/" description="Understand error codes, rate limits, and how to handle failures gracefully." />
+<LinkCard title="Full API reference" href="/reference/overview/" description="Every endpoint on api.gen.pro + agent.gen.pro." />

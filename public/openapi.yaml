@@ -80,7 +80,13 @@ tags:
   - name: Direct Upload
     description: Get pre-signed S3 URLs for large file uploads.
   - name: Agent Profile
-    description: Manage the agent's identity, voice, and brand profile.
+    description: (Legacy) Manage the agent's identity, voice, and brand profile. Prefer Agent Core for new work.
+  - name: Agent Core
+    description: |
+      **Preferred** single-endpoint read/write for the agent setup canvas. One PATCH configures identity, overview, personality, inspiration, voice, look, and accounts. Backed by the agent-core service; exposed through api.gen.pro.
+  - name: Agent Voice
+    description: |
+      Voice library, ElevenLabs integration, prompt-based design (4-step flow), audio-sample cloning, async TTS preview.
   - name: Agent Chat
     description: |
       Conversational AI agent interface. All endpoints use base URL `https://agent.gen.pro/v1`.
@@ -2891,6 +2897,495 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ── Agent Core (GEN-2755) ─────────────────────────────────
+  /agents/{agent_id}/core:
+    get:
+      operationId: getAgentCore
+      summary: Get the full agent setup
+      description: |
+        Returns every section of the agent setup canvas in a single response:
+        identity, overview, personality, inspiration, voice, look, accounts.
+      tags: [Agent Core]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Full agent setup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentCore'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: patchAgentCore
+      summary: Update any combination of setup sections
+      description: |
+        Merge semantics for `identity`, `overview`, `look.description`. Replace
+        semantics for `personality`, `inspiration`, `voice`, `accounts`. Returns
+        200 on full success, 207 Multi-Status with per-section results on
+        partial failure.
+      tags: [Agent Core]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentCorePatch'
+      responses:
+        '200':
+          description: All sections updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentCorePatchResult'
+        '207':
+          description: Partial success — inspect per-section status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentCorePatchResult'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /agents/{agent_id}/core/identity/profile-photo:
+    post:
+      operationId: uploadAgentCoreProfilePhoto
+      summary: Upload agent profile photo
+      description: Multipart upload. Proxied to the Rails agents endpoint; returns the CDN URL.
+      tags: [Agent Core]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        '200':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile_photo_url: { type: string }
+
+  /agents/{agent_id}/core/inspiration:
+    post:
+      operationId: addAgentInspiration
+      summary: Add one inspiration source
+      tags: [Agent Core]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string }
+                platform: { type: string, enum: [tiktok, instagram, youtube, x, linkedin, pinterest, facebook, threads, website] }
+              required: [url]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InspirationItem' }
+
+  /agents/{agent_id}/core/inspiration/{item_id}:
+    delete:
+      operationId: removeAgentInspiration
+      summary: Remove one inspiration source
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: item_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /agents/{agent_id}/core/accounts:
+    post:
+      operationId: addAgentAccount
+      summary: Add one of the agent's own social accounts
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string }
+                platform: { type: string }
+                display_name: { type: string }
+              required: [url]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountItem' }
+
+  /agents/{agent_id}/core/accounts/{account_id}:
+    delete:
+      operationId: removeAgentAccount
+      summary: Remove one linked account
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: account_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Deleted }
+
+  /agents/{agent_id}/core/look/reference-images:
+    post:
+      operationId: addLookReferenceImage
+      summary: Add a look reference image URL
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string }
+              required: [url]
+      responses:
+        '201':
+          description: Created
+
+  /agents/{agent_id}/core/look/reference-images/{image_id}:
+    delete:
+      operationId: removeLookReferenceImage
+      summary: Remove a look reference image
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: image_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Deleted }
+
+  # ── Agent Voice (GEN-2755) ────────────────────────────────
+  /agents/{agent_id}/voice/library:
+    get:
+      operationId: listAgentVoices
+      summary: List voices available to the agent
+      description: |
+        Merges four sources: `public` (shared catalog), `user_designed`
+        (via the 4-step design flow), `user_trained` (cloned from audio),
+        and `user_elevenlabs` (from the user's connected ElevenLabs account).
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [public, user_designed, user_trained, user_elevenlabs]
+      responses:
+        '200':
+          description: Voice list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voices:
+                    type: array
+                    items: { $ref: '#/components/schemas/VoiceLibraryItem' }
+                  total: { type: integer }
+
+  /agents/{agent_id}/voice/integrations/elevenlabs:
+    get:
+      operationId: getElevenLabsIntegrationStatus
+      summary: Check whether the agent has an ElevenLabs key connected
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connected: { type: boolean }
+                  masked_key: { type: string, nullable: true }
+    post:
+      operationId: connectElevenLabs
+      summary: Connect the user's ElevenLabs API key
+      description: Validates the key against ElevenLabs /v1/user before saving it on the agent record.
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api_key: { type: string }
+              required: [api_key]
+      responses:
+        '200':
+          description: Connected
+        '400':
+          description: invalid_key
+    delete:
+      operationId: disconnectElevenLabs
+      summary: Remove the ElevenLabs key from the agent
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Disconnected }
+
+  /agents/{agent_id}/voice/integrations/elevenlabs/test:
+    post:
+      operationId: testElevenLabsKey
+      summary: Test an ElevenLabs key without saving it
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { api_key: { type: string } }
+              required: [api_key]
+      responses:
+        '200':
+          description: Tested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { valid: { type: boolean } }
+
+  /agents/{agent_id}/voice/design/generate-script:
+    post:
+      operationId: generateVoiceScript
+      summary: "Voice design step 1/4 — generate a read-aloud script"
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language: { type: string }
+      responses:
+        '200':
+          description: Script
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { voice_sample: { type: string } }
+
+  /agents/{agent_id}/voice/design/generate-description:
+    post:
+      operationId: generateVoiceDescription
+      summary: "Voice design step 2/4 — generate style descriptors"
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gender: { type: string }
+                voice_description: { type: string }
+                language: { type: string }
+                script: { type: string }
+              required: [gender]
+      responses:
+        '200':
+          description: Description
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { voice_description: { type: string } }
+
+  /agents/{agent_id}/voice/design/generate-samples:
+    post:
+      operationId: generateVoiceSamples
+      summary: "Voice design step 3/4 — generate 3 candidate audio samples"
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+                description: { type: string }
+              required: [text]
+      responses:
+        '200':
+          description: Candidates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  samples:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        generation_id: { type: string }
+                        audio: { type: string, description: "Base64-encoded audio bytes" }
+
+  /agents/{agent_id}/voice/design:
+    post:
+      operationId: finalizeDesignedVoice
+      summary: "Voice design step 4/4 — finalize"
+      description: "Persists a designed voice by picking one of the generation_id values from step 3."
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                generation_id: { type: string }
+                name: { type: string }
+                gender: { type: string }
+                language: { type: string }
+                description: { type: string }
+              required: [generation_id, name]
+      responses:
+        '201':
+          description: Voice created
+
+  /agents/{agent_id}/voice/clone:
+    post:
+      operationId: cloneVoice
+      summary: Clone a voice from an existing audio sample
+      description: |
+        Synchronous. Provide exactly one of `audio_url` (preferred — server
+        downloads) or `audio_base64` (inline bytes for small clips).
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                audio_url: { type: string, format: uri }
+                audio_base64: { type: string }
+                gender: { type: string }
+                language: { type: string }
+                description: { type: string }
+              required: [name]
+      responses:
+        '201':
+          description: Voice cloned
+
+  /agents/{agent_id}/voice/{voice_id}:
+    delete:
+      operationId: deleteAgentVoice
+      summary: Delete a user-owned voice
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: voice_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /agents/{agent_id}/voice/{voice_id}/preview:
+    post:
+      operationId: previewVoice
+      summary: "Enqueue a TTS preview job (async)"
+      description: |
+        Returns `{user_job_id}` immediately. Poll
+        `GET /v1/agents/{agent_id}/voice/preview/{job_id}` until
+        `status == "completed"`, then read the audio URL from
+        `output_resources`.
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: voice_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+              required: [text]
+      responses:
+        '202':
+          description: Job enqueued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { user_job_id: { type: integer } }
+
+  /agents/{agent_id}/voice/preview/{job_id}:
+    get:
+      operationId: getVoicePreviewStatus
+      summary: Poll a TTS preview job
+      tags: [Agent Voice]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: User job record
+
 components:
   securitySchemes:
     apiKey:
@@ -3495,6 +3990,150 @@ components:
         error_code:
           type: string
           description: Machine-readable error code.
+
+    # ── Agent Core schemas (GEN-2755) ───────────────────────
+    AgentCore:
+      type: object
+      properties:
+        identity:
+          type: object
+          properties:
+            name: { type: string, nullable: true }
+            profile_photo_url: { type: string, nullable: true }
+        overview:
+          $ref: '#/components/schemas/BrandOverview'
+        personality:
+          type: string
+          nullable: true
+        inspiration:
+          type: array
+          items: { $ref: '#/components/schemas/InspirationItem' }
+        voice:
+          type: object
+          nullable: true
+          properties:
+            voice_id: { type: string }
+            name: { type: string, nullable: true }
+            source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
+        look:
+          type: object
+          properties:
+            description: { type: string, nullable: true }
+            reference_images:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  url: { type: string }
+        accounts:
+          type: array
+          items: { $ref: '#/components/schemas/AccountItem' }
+
+    BrandOverview:
+      type: object
+      properties:
+        agent_id: { type: string }
+        brand_name: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        identity_type: { type: string, enum: [brand, character], nullable: true }
+        goal: { type: string, nullable: true }
+        keywords:
+          type: array
+          items: { type: string }
+        target_platforms:
+          type: array
+          items: { type: string }
+        shortform: { type: boolean, nullable: true }
+        longform: { type: boolean, nullable: true }
+        primary_format: { type: string, nullable: true }
+        onboarding_status: { type: string, nullable: true }
+
+    AgentCorePatch:
+      type: object
+      description: "Any combination of sections. Merge semantics for identity/overview/look.description, replace for personality/inspiration/voice/accounts."
+      properties:
+        identity:
+          type: object
+          properties:
+            name: { type: string }
+            profile_photo_url: { type: string }
+        overview:
+          type: object
+          properties:
+            brand_name: { type: string }
+            description: { type: string }
+            identity_type: { type: string, enum: [brand, character] }
+            goal: { type: string }
+            keywords: { type: array, items: { type: string } }
+            target_platforms: { type: array, items: { type: string } }
+            shortform: { type: boolean }
+            longform: { type: boolean }
+            onboarding_status: { type: string }
+        personality: { type: string }
+        inspiration:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              platform: { type: string }
+            required: [url]
+        look:
+          type: object
+          properties:
+            description: { type: string }
+        voice:
+          type: object
+          properties:
+            voice_id: { type: string }
+            source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
+        accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              platform: { type: string }
+              display_name: { type: string }
+            required: [url]
+
+    AgentCorePatchResult:
+      type: object
+      description: "Per-section result. status=ok means that section's write succeeded; status=error means it failed (see error field)."
+      additionalProperties:
+        type: object
+        properties:
+          status: { type: string, enum: [ok, error] }
+          data:
+            description: "Section-specific payload on success."
+          error:
+            type: string
+            description: "Error message on failure."
+
+    InspirationItem:
+      type: object
+      properties:
+        id: { type: integer }
+        url: { type: string }
+        platform: { type: string }
+
+    AccountItem:
+      type: object
+      properties:
+        id: { type: integer }
+        agent_id: { type: string }
+        url: { type: string }
+        platform: { type: string }
+        display_name: { type: string, nullable: true }
+
+    VoiceLibraryItem:
+      type: object
+      properties:
+        voice_id: { type: string }
+        name: { type: string, nullable: true }
+        source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
+        preview_url: { type: string, nullable: true }
 
   responses:
     Unauthorized:

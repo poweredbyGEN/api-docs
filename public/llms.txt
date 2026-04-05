@@ -1,8 +1,10 @@
-# GEN — Auto Content Engine
+# GEN — API Reference for AI Agents
 
-> GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically.
+> GEN is an Autonomous Social Media Agent platform. It detects trends, generates video content, publishes across platforms, and improves automatically.
 
-The Auto Content Engine API provides programmatic access to GEN's content creation system — generate text, images, video, speech, lipsync, and captions at scale.
+Two surfaces: **Agent Core** (`api.gen.pro/v1/agents/{id}/core` + `/voice`) for setting up an agent's identity, personality, voice, and brand; and **Auto Content Engine** (`api.gen.pro/v1/autocontentengine/*`) for producing videos from those agents. Both authenticate with an X-API-Key PAT.
+
+For any new agent, **start with Agent Core**. Generating content before the agent is configured gives you generic results; configuring it first means every downstream feature (content ideas, template fills, voice) speaks in the agent's voice from the first call.
 
 ## About GEN
 
@@ -27,19 +29,53 @@ Or create via API: POST /v1/persisted_tokens
 
 ## Quick Start
 
-The fastest path to your first generated content:
+The GEN workflow has two halves — configure the agent, then let it generate content. Get the configuration right and the rest takes care of itself.
 
-1. List templates: GET /v1/templates/projects
-2. Clone a template: POST /v1/templates/spreadsheets/{slug}/clone with {agent_id}
-3. Get the engine: GET /v1/autocontentengine/{id}?agent_id={id}
-4. Create a row: POST /v1/autocontentengine/{id}/rows?agent_id={id}
-5. Generate content: POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
-6. Poll status: GET /v1/generations/{generation_id} (until status = "completed")
+### Step 1: Configure the Agent Core (most important step for any new agent)
 
-Or from scratch:
-1. GET /v1/agents?workspace_id={id} → pick an agent
-2. POST /v1/autocontentengine?agent_id={id} → create engine
-3. Add columns, rows, then generate
+One PATCH writes identity, overview (brand profile), personality, inspiration, voice, look, and accounts. This is what every downstream feature (content ideas, template fills, voice generation) reads from. A blank agent produces generic ideas. A richly configured agent produces specific, on-brand ones.
+
+PATCH /v1/agents/{agent_id}/core
+```json
+{
+  "identity":    { "name": "Santiago" },
+  "overview":    {
+    "brand_name": "Santiago",
+    "description": "Santiago is a San Antonio street food scout...",
+    "identity_type": "character",
+    "goal": "growth",
+    "keywords": ["streetfood", "foodtruck", "tacotok"],
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true
+  },
+  "personality": "Santiago grew up eating at his tias taco stand...",
+  "inspiration": [{ "url": "https://tiktok.com/@keithlee", "platform": "tiktok" }],
+  "look":        { "description": "Latino male early 30s, athletic build" },
+  "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
+  "accounts":    [{ "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }]
+}
+```
+Returns 200 on full success or 207 Multi-Status with per-section results.
+
+### Step 2: Generate content ideas
+
+Let the agent propose videos grounded in real trending data (10+ platforms). Ideas reference the agent's keywords, inspiration, and personality from step 1.
+
+POST https://agent.gen.pro/v1/agent/run
+```json
+{ "agent_id": "...", "message": "Generate 5 content ideas grounded in this weeks trends" }
+```
+Returns `{run_id, conversation_id}`. Poll `GET /runs/{run_id}` until completed, then read ideas from `GET /conversations/{conversation_id}`.
+
+### Step 3: Produce a video from an idea
+
+Clone a template matching the idea's video type, drop the idea's script into cells, generate, render.
+
+1. POST /v1/templates/spreadsheets/{slug}/clone → new engine pre-configured for the video type
+2. PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id} → drop script into cells
+3. POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id} → AI fills in the cell
+4. GET /v1/generations/{generation_id} → poll until completed
+5. POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id} → composite final video
 
 ## Templates
 
