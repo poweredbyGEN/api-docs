@@ -265,6 +265,42 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 ### Publishing
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
 
+### Agent Core (GEN-2755, recommended for agent setup)
+One-call read/write for the entire agent setup canvas (identity, overview, personality, inspiration, voice, look, accounts). Prefer this over per-resource TrendPulse calls when configuring an agent.
+
+- GET /v1/agents/{agent_id}/core — read all sections in one call
+- PATCH /v1/agents/{agent_id}/core — write any combination of sections; 200 on full success, 207 Multi-Status on partial failure
+- POST /v1/agents/{agent_id}/core/identity/profile-photo — multipart upload
+- POST /v1/agents/{agent_id}/core/inspiration — append inspiration URL
+- DELETE /v1/agents/{agent_id}/core/inspiration/{id}
+- POST /v1/agents/{agent_id}/core/accounts — append the agent's own social URL
+- DELETE /v1/agents/{agent_id}/core/accounts/{id}
+- POST /v1/agents/{agent_id}/core/look/reference-images — add look reference image URL
+- DELETE /v1/agents/{agent_id}/core/look/reference-images/{id}
+
+Merge semantics: identity, overview, look.description. Replace semantics: personality, inspiration, voice, accounts.
+
+### Voice (Agent Core)
+- GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_trained|user_elevenlabs} — merged voice list
+- GET/POST/DELETE /v1/agents/{agent_id}/voice/integrations/elevenlabs — connect/validate/disconnect the user's ElevenLabs API key
+- POST /v1/agents/{agent_id}/voice/integrations/elevenlabs/test — validate a key without saving
+
+Voice design (4-step prompt-based flow, hide provider from callers):
+- POST /v1/agents/{agent_id}/voice/design/generate-script — step 1: get a read-aloud script
+- POST /v1/agents/{agent_id}/voice/design/generate-description — step 2: get style descriptors (requires gender)
+- POST /v1/agents/{agent_id}/voice/design/generate-samples — step 3: get 3 candidate `{generation_id, audio}`
+- POST /v1/agents/{agent_id}/voice/design — step 4: finalize with `{generation_id, name}`
+
+Voice cloning (sync):
+- POST /v1/agents/{agent_id}/voice/clone — body: `{name, audio_url}` (preferred) OR `{name, audio_base64}` (small clips)
+
+Voice delete + preview:
+- DELETE /v1/agents/{agent_id}/voice/{voice_id} — delete user-owned voice
+- POST /v1/agents/{agent_id}/voice/{voice_id}/preview — enqueue TTS preview job (ASYNC, returns `{user_job_id}`)
+- GET /v1/agents/{agent_id}/voice/preview/{job_id} — poll preview job status
+
+Auth: PAT (`X-API-Key`). Runs on `agent-core` service on EC2, exposed via `api.gen.pro` CloudFront + `staging-api.gen.pro` staging.
+
 ## Agentic Chat API
 
 AI-powered content strategy with built-in research. The agent researches topics across
