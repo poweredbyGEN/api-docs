@@ -69,16 +69,16 @@ If you're an AI agent or LLM, these resources are optimized for you:
 - **[llms.txt](/llms.txt)** — Complete API reference in plain text, designed to teach you how GEN works (concepts, workflows, every generation type with exact payloads)
 - **[llms-full.txt](/llms-full.txt)** — Exhaustive endpoint reference with request/response schemas
 - **[OpenAPI 3.1 Spec](/openapi.yaml)** — Machine-readable specification
-- **[MCP Server](https://github.com/poweredbyGEN/autocontentengine-mcp-server)** — 46 tools for Claude Code, Cursor, and VS Code (`npx @poweredbygen/autocontentengine-mcp-server@latest`)
+- **[MCP Server](https://github.com/poweredbyGEN/gen-mcp-server)** — 60+ tools for Claude Code, Cursor, and VS Code (`npx @poweredbygen/gen-mcp-server@latest`)
 
 ### Install the MCP Server
 
 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0;">
-  <a href="vscode://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/autocontentengine-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #007ACC; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
+  <a href="vscode://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/gen-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #007ACC; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.15 2.587L18.21.21a1.516 1.516 0 0 0-1.706.355L9.265 7.399l-4.53-3.44a1.012 1.012 0 0 0-1.293.049L.96 6.39a1.012 1.012 0 0 0 0 1.468l3.936 3.143L.96 14.142a1.012 1.012 0 0 0 0 1.468l2.482 2.383a1.012 1.012 0 0 0 1.293.049l4.53-3.44 7.239 6.834a1.516 1.516 0 0 0 1.706.355l4.94-2.377A1.516 1.516 0 0 0 24 18.016V5.984a1.516 1.516 0 0 0-.85-1.397zM18.5 16.607L11.461 11 18.5 5.393v11.214z"/></svg>
     Install in VS Code
   </a>
-  <a href="cursor://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/autocontentengine-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #000000; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
+  <a href="cursor://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/gen-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #000000; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-6.72 6.72a.75.75 0 0 1-1.06 0l-3.36-3.36a.75.75 0 1 1 1.06-1.06l2.83 2.83 6.19-6.19a.75.75 0 1 1 1.06 1.06z"/></svg>
     Install in Cursor
   </a>
@@ -86,11 +86,19 @@ If you're an AI agent or LLM, these resources are optimized for you:
 
 See the [Claude Code guide](/guides/claude-code/) for manual setup and usage examples.
 
-## Next steps
+## Start here
+
+The fastest way to get a grounded, on-brand video out of GEN is two calls:
+
+1. **Configure the agent** — `PATCH /v1/agents/{id}/core` once with identity, overview, personality, inspiration, voice, look, and accounts. This is the single most important step for any new agent — everything downstream reads from here. See the [Agent Core reference](/reference/agent-core/).
+2. **Generate content ideas** — the content-ideas agent pulls trending data from 10+ platforms, matches it to your configured keywords and inspiration, and proposes videos with scripts, hooks, and selected assets. See the [Content Ideas guide](/guides/content-ideas/).
+
+Then clone a template, drop the idea in, and render. The [Quick Start guide](/guides/quickstart/) walks through the whole path end-to-end in under 10 minutes.
 
 <CardGrid>
-  <LinkCard title="Clone a Template" href="/reference/templates/" description="Browse pre-configured engines and clone one to start creating content in seconds." />
-  <LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the MCP server and start managing content through natural language." />
+  <LinkCard title="Quick Start (10 min walkthrough)" href="/guides/quickstart/" description="Configure an agent with a single PATCH, generate ideas from trending data, produce a video." />
+  <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="One endpoint for identity, overview, personality, inspiration, voice, look, and accounts." />
+  <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="Async runs, conversations, refinement, long-term preferences." />
+  <LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the GEN MCP server and drive the whole workflow with natural language." />
   <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
-  <LinkCard title="Quick Start" href="/guides/quickstart/" description="Make your first API call in under 5 minutes." />
 </CardGrid>
