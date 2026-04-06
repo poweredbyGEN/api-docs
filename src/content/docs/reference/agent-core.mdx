@@ -7,39 +7,23 @@ import { Aside } from '@astrojs/starlight/components';
 
 The Agent Core API exposes the agent setup canvas (`gen.pro/{agent_id}/setup`) as a flat, PAT-authenticated API. One `GET` returns every field; one `PATCH` updates any subset. Field names mirror exactly what the Setup canvas FE saves, so developers and the FE speak the same language.
 
-**Use this when you want to configure an agent programmatically.** It replaces the legacy sequence of per-resource TrendPulse + Rails calls.
+**Use this when you want to configure an agent programmatically.** It replaces having to call multiple endpoints separately.
 
 <Aside type="note">
-  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Auth: `X-API-Key` header with a Personal Access Token. Backing service: `agent-core` on EC2.
+  **Base URL:** `https://api.gen.pro/v1`. Auth: `X-API-Key` header with a Personal Access Token — see [API Overview](/reference/overview/#how-to-get-an-api-key) for how to create one.
 </Aside>
 
-## Storage map
+## Fields
 
-The API is a thin facade — every field forwards to an existing upstream service. This is the full map:
+A single `PATCH` may update multiple internal systems at once. You see one call and get `200` if all succeed, or `207 Multi-Status` with per-section status if any one section fails.
 
-| Field | Upstream endpoint | Storage |
-|---|---|---|
-| `brand_name` | `PATCH trendpulse.gen.pro/v1/trendpulse/settings` | `trendpulse_configs.brand_name` |
-| `description` | same | `trendpulse_configs.description` (max 500 chars) |
-| `identity_type` | same | `trendpulse_configs.identity_type` — `brand` or `character` |
-| `goal` | same | `trendpulse_configs.goal` (comma-separated) |
-| `target_platforms` | same | `trendpulse_configs.target_platforms` (JSON list) |
-| `shortform`, `longform` | same | `trendpulse_configs.{shortform,longform}` |
-| `onboarding_status` | same | `trendpulse_configs.onboarding_status` |
-| `keywords` | same | `trendpulse_configs.keywords` (JSON list of strings) |
-| `monitored` | same | `trendpulse_configs.monitored` — inspiration sources |
-| `linked_accounts` | same | `trendpulse_linked_accounts` table (delete-then-insert diffing) |
-| `personality` | `PUT api.gen.pro/v1/projects/{pid}/project_nodes/{nid}` | Rails `project_nodes.data` where `node_type='personality'` |
-| `default_user_voice` | `PUT api.gen.pro/v1/agents/{id}` | Rails `agents.default_user_voice_attributes` |
+## Important distinctions
 
-A single `PATCH` may fan out to up to three upstreams internally. You see one call and get `200` if all succeed, `207 Multi-Status` with per-target status if any fail.
-
-## Two important distinctions
-
-**`linked_accounts` vs `monitored`** — these are different concepts.
+**`linked_accounts` vs `monitored` vs `research_topics`** — these are three different concepts.
 
 - `linked_accounts` = the agent's **own** brand social accounts (the TikTok/Instagram/website the agent posts from).
 - `monitored` = **inspiration sources** — other creators, hashtags, or search keywords the agent watches for trending content.
+- `research_topics` = **expertise areas** (labeled "Expertise" in the UI) — subjects the agent needs to stay current on. The platform automatically researches each topic daily and feeds the results into content generation. Only include topics where recent events matter — leave empty for evergreen niches.
 
 Don't mix them. Putting a competitor's TikTok URL in `linked_accounts` will eventually appear on the agent's own "My Socials" list and confuse the content pipeline.
 
@@ -48,7 +32,7 @@ Don't mix them. Putting a competitor's TikTok URL in `linked_accounts` will even
 - `description` is a 2-3 sentence brand summary. Hard-capped at 500 characters.
 - `personality` is the full persona text — voice, backstory, behavior rules. Max 20000 characters.
 
-If you try to put a 3000-character persona into `description`, the API returns a 422. This is intentional — the Lava bug that motivated this API came from callers stuffing persona text into the short-description field.
+If you try to put a 3000-character persona into `description`, the API returns a 422. This is intentional.
 
 ## Get the full agent setup
 
@@ -76,6 +60,11 @@ Returns every field as a flat object. Fields that haven't been set return `null`
     { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
     { "handle": "tacotok", "item_type": "hashtag" }
   ],
+  "research_topics": [
+    { "topic": "new food truck openings in San Antonio" },
+    { "topic": "viral street food TikTok moments" },
+    { "topic": "Texas food festival announcements" }
+  ],
   "linked_accounts": [
     { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago 🌮" }
   ],
@@ -94,7 +83,7 @@ Returns every field as a flat object. Fields that haven't been set return `null`
 PATCH /v1/agents/{agent_id}/core
 ```
 
-Flat merge-patch body. Send only the fields you want to change — missing fields are not forwarded to any upstream.
+Flat merge-patch body. Send only the fields you want to change — omitted fields are left unchanged.
 
 ### Field-level semantics
 
@@ -104,6 +93,7 @@ Flat merge-patch body. Send only the fields you want to change — missing field
 | `keywords` | Replace the full list |
 | `target_platforms` | Replace the full list |
 | `monitored` | **Replace the full list** — items you don't send are deleted |
+| `research_topics` | **Replace the full list** — topics you don't send are deleted. Max 20 items. |
 | `linked_accounts` | **Replace the full list** — rows you don't send are deleted. Rows with `id` are updated in place; rows without `id` are inserted. |
 | `default_user_voice` | Replace |
 
@@ -116,8 +106,9 @@ To add a single `monitored` item or `linked_account` without touching others, `G
 - `personality` max 20000 chars.
 - `identity_type` strict enum: `"brand"` | `"character"`.
 - `monitored[].item_type` strict enum: `"account"` | `"hashtag"` | `"keyword"`.
+- `research_topics` max 20 items, each `topic` max 500 chars.
 - `linked_accounts[].url` required.
-- `monitored[]` and `linked_accounts[]` also reject unknown keys.
+- `monitored[]`, `research_topics[]`, and `linked_accounts[]` also reject unknown keys.
 
 ### Keyword → monitored auto-mirror
 
@@ -129,13 +120,13 @@ If you send `keywords` without also sending `monitored`, the writer automaticall
 
 ```json
 {
-  "trendpulse":  { "status": "ok",    "data": { "brand_name": "Santiago", "keywords": ["streetfood"], ... } },
+  "brand":       { "status": "ok",    "data": { "brand_name": "Santiago", "keywords": ["streetfood"], ... } },
   "personality": { "status": "ok",    "data": "Santiago grew up eating at..." },
-  "voice":       { "status": "error", "error": "rails 500 on PUT /v1/agents/abc123" }
+  "voice":       { "status": "error", "error": "voice service unavailable" }
 }
 ```
 
-Targets only appear if the PATCH touched at least one field they own. A PATCH that only sets `brand_name` returns `{ "trendpulse": { "status": "ok", ... } }` — no `personality` or `voice` entry.
+Sections only appear if the PATCH touched at least one field they own. A PATCH that only sets `brand_name` returns `{ "brand": { "status": "ok", ... } }` — no `personality` or `voice` entry.
 
 ## Example — set up a character in one call
 
@@ -156,6 +147,10 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
     "monitored": [
       { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
       { "handle": "tacotok", "item_type": "hashtag" }
+    ],
+    "research_topics": [
+      { "topic": "new food truck openings in San Antonio" },
+      { "topic": "viral street food TikTok moments" }
     ],
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
@@ -182,6 +177,10 @@ const result = await gen.agents.updateCore('abc123', {
   keywords: ['streetfood', 'tacotok', 'sanantonioeats'],
   monitored: [
     { handle: 'https://tiktok.com/@keilapacheco', item_type: 'account' },
+  ],
+  research_topics: [
+    { topic: 'new food truck openings in San Antonio' },
+    { topic: 'viral street food TikTok moments' },
   ],
   linked_accounts: [
     { url: 'https://tiktok.com/@santiago_real', platform: 'tiktok' },

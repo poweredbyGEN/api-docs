@@ -32,11 +32,9 @@ info:
 
 servers:
   - url: https://api.gen.pro/v1
-    description: Production
-  - url: https://stagingapi.gen.pro/v1
-    description: Staging
+    description: Auto Content Engine API
   - url: https://agent.gen.pro/v1
-    description: Production (Agent Chat API)
+    description: Agent Chat API
 
 security:
   - apiKey: []

@@ -57,7 +57,7 @@ PATCH /v1/agents/{agent_id}/core
   "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
 }
 ```
-Returns 200 on full success or 207 Multi-Status with per-target results. Internally this fans out to TrendPulse (brand fields), Rails project_nodes (personality), and Rails agents (voice). You see one call.
+Returns 200 on full success or 207 Multi-Status with per-section results. A single call updates all relevant sections internally.
 
 **Critical distinction:** `linked_accounts` = the agent's OWN brand socials (what it posts from). `monitored` = inspiration sources (creators/hashtags/keywords to watch for trending content). Don't mix them. Also: `description` is a short 2-3 sentence summary (max 500 chars); full persona text goes in `personality` (max 20000 chars). Stuffing persona into description returns 422.
 
@@ -315,11 +315,12 @@ Fields:
 - brand_name, description, identity_type ("brand" | "character"), goal, target_platforms, shortform, longform, onboarding_status
 - keywords (flat list of strings)
 - monitored (list of {handle, item_type: "account"|"hashtag"|"keyword"}) — inspiration sources
+- research_topics (list of {topic: string}, max 20 items, each max 500 chars) — subjects the agent stays current on (labeled "Expertise" in UI). Platform researches daily and feeds results into content ideas. Leave empty for evergreen niches.
 - linked_accounts (list of {id?, url, platform, display_name}) — the agent's OWN brand socials
-- personality (string, max 20000 chars) — writes to Rails project_nodes
-- default_user_voice ({voice_id, source}) — writes to Rails agents
+- personality (string, max 20000 chars) — full persona text
+- default_user_voice ({voice_id, source}) — default TTS voice
 
-Full-list replacement: `keywords`, `monitored`, `target_platforms`, `linked_accounts`. To add one row without touching others, GET first, append, PATCH. Sending `keywords` without `monitored` auto-mirrors keywords into monitored with item_type='keyword'. `description` is hard-capped at 500 chars. Unknown fields return 422.
+Full-list replacement: `keywords`, `monitored`, `research_topics`, `target_platforms`, `linked_accounts`. To add one row without touching others, GET first, append, PATCH. Sending `keywords` without `monitored` auto-mirrors keywords into monitored with item_type='keyword'. `description` is hard-capped at 500 chars. Unknown fields return 422.
 
 ### Voice (Agent Core)
 - GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_trained|user_elevenlabs} — merged voice list
@@ -340,7 +341,7 @@ Voice delete + preview:
 - POST /v1/agents/{agent_id}/voice/{voice_id}/preview — enqueue TTS preview job (ASYNC, returns `{user_job_id}`)
 - GET /v1/agents/{agent_id}/voice/preview/{job_id} — poll preview job status
 
-Auth: PAT (`X-API-Key`). Runs on `agent-core` service on EC2, exposed via `api.gen.pro` CloudFront + `staging-api.gen.pro` staging.
+Auth: PAT (`X-API-Key`) via `api.gen.pro`.
 
 ## Agentic Chat API
 

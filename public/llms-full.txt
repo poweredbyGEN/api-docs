@@ -446,25 +446,19 @@ Poll: GET /v1/user_jobs/{id}?agent_id={id}
 
 Prerequisites: Agent must have connected TikTok account (via AURA). Media must be publicly accessible.
 
-## Agent Core API (GEN-2755)
+## Agent Core API
 
-**PREFERRED way to configure an agent.** Flat read/write for the entire agent setup canvas in a single call. Every field name mirrors exactly what the GEN Setup canvas FE saves, so developers and the FE speak the same language. Replaces the legacy sequence of per-resource TrendPulse + Rails calls.
+**PREFERRED way to configure an agent.** Flat read/write for the entire agent setup canvas in a single call. Every field name mirrors exactly what the GEN Setup canvas saves, so developers and the app speak the same language.
 
-**Backing service:** `agent-core` on EC2 (ports 8800 prod, 8801 staging). Exposed through `api.gen.pro` (CloudFront) and `staging-api.gen.pro` for PAT callers. All routes PAT-authenticated via `X-API-Key`.
+**Base URL:** `https://api.gen.pro/v1`. All routes authenticated via `X-API-Key` header with a Personal Access Token.
 
-### Storage map
+### Fields
 
-The API is a thin facade. Every PATCH field forwards to one of three upstreams:
-
-| Field | Upstream | Storage |
-|---|---|---|
-| `brand_name`, `description`, `identity_type`, `goal`, `target_platforms`, `shortform`, `longform`, `onboarding_status`, `keywords`, `monitored`, `linked_accounts` | `PATCH trendpulse.gen.pro/v1/trendpulse/settings` | `trendpulse_configs` + `trendpulse_linked_accounts` |
-| `personality` | `PUT api.gen.pro/v1/projects/{pid}/project_nodes/{nid}` with `{project_node: {data}}` | Rails `project_nodes.data` where `node_type='personality'` |
-| `default_user_voice` | `PUT api.gen.pro/v1/agents/{id}` with `default_user_voice_attributes` | Rails `agents.default_user_voice` association |
+A single PATCH may touch multiple internal systems. You see one call and get `200` if all succeed, or `207 Multi-Status` with per-section status if any one section fails.
 
 ### Two critical distinctions
 
-- **`linked_accounts` vs `monitored`.** `linked_accounts` = the agent's OWN brand socials (what it posts from, stored in `trendpulse_linked_accounts`). `monitored` = inspiration sources to watch (accounts/hashtags/keywords, stored in `trendpulse_configs.monitored`). Not the same thing.
+- **`linked_accounts` vs `monitored` vs `research_topics`.** `linked_accounts` = the agent's OWN brand socials (the TikTok/Instagram/website the agent posts from). `monitored` = inspiration sources the agent watches for trending content (other creators, hashtags, or search keywords). `research_topics` = expertise areas the agent stays current on — the platform researches each daily and feeds results into content ideas (labeled "Expertise" in the UI; only include topics where recent events matter). Not the same thing — putting a competitor's URL into `linked_accounts` will eventually show up on the agent's own "My Socials" list.
 - **`description` vs `personality`.** `description` is a short 2-3 sentence brand summary, hard-capped at 500 chars. `personality` is the full persona text, max 20000 chars. A 3000-char persona dumped into `description` returns 422 by design.
 
 ### GET /v1/agents/{agent_id}/core
@@ -488,6 +482,11 @@ Response:
     { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" },
     { "handle": "tacotok", "item_type": "hashtag" }
   ],
+  "research_topics": [
+    { "topic": "new food truck openings in San Antonio" },
+    { "topic": "viral street food TikTok moments" },
+    { "topic": "Texas food festival announcements" }
+  ],
   "linked_accounts": [
     { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
   ],
@@ -502,7 +501,7 @@ Flat merge-patch. Send only the fields you want to change. Unknown fields return
 
 **Field-level semantics:**
 - Scalars replace: `brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`
-- List fields use FULL replacement (missing = deleted): `keywords`, `target_platforms`, `monitored`, `linked_accounts`
+- List fields use FULL replacement (missing = deleted): `keywords`, `target_platforms`, `monitored`, `research_topics`, `linked_accounts`
 - `linked_accounts` diffing: rows with `id` are updated in place, rows without `id` are inserted, rows absent from the list are deleted. To add one row without touching others, GET first, append, PATCH.
 - `default_user_voice` replaces
 
@@ -513,15 +512,16 @@ Flat merge-patch. Send only the fields you want to change. Unknown fields return
 - `personality` max 20000 chars
 - `identity_type` enum: `"brand"` | `"character"`
 - `monitored[].item_type` enum: `"account"` | `"hashtag"` | `"keyword"`
+- `research_topics` max 20 items, each `topic` max 500 chars
 - `linked_accounts[].url` required
 - All nested objects reject unknown keys
 
-Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-**target** results (not per-field). Targets only appear if the PATCH touched at least one field they own:
+Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-**section** results (not per-field). Sections only appear if the PATCH touched at least one field they own:
 ```json
 {
-  "trendpulse":  { "status": "ok", "data": { "brand_name": "Santiago", ... } },
+  "brand":       { "status": "ok", "data": { "brand_name": "Santiago", ... } },
   "personality": { "status": "ok", "data": "Santiago grew up..." },
-  "voice":       { "status": "error", "error": "rails 500 on PUT /v1/agents/abc123" }
+  "voice":       { "status": "error", "error": "voice service unavailable" }
 }
 ```
 
@@ -541,6 +541,10 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
     "keywords": ["streetfood", "tacotok", "sanantonioeats"],
     "monitored": [
       { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" }
+    ],
+    "research_topics": [
+      { "topic": "new food truck openings in San Antonio" },
+      { "topic": "viral street food TikTok moments" }
     ],
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
@@ -717,9 +721,9 @@ Each idea includes:
 - rationale — why this idea works, with specific data points
 
 ### Asset Sources
-- Social content (TikTok/IG/YouTube): assets.gen.buzz (permanent S3 URLs)
-- Web research assets: gen-agentic-assets S3 bucket
-- User uploads: Rails ContentResource
+- Social content (TikTok/IG/YouTube): permanent CDN URLs
+- Web research assets: sourced by the research agent
+- User uploads: via the Content Resources API
 
 ### Research-Backed Generation
 The agent automatically:
