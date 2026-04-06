@@ -17,22 +17,31 @@ All paths in this reference are relative to the base URL. For example, `GET /v1/
 
 ## Authentication
 
-The API supports two authentication methods, sent via HTTP headers:
+Every API request requires authentication via one of these headers:
 
-| Header | Description |
+| Header | When to use |
 |--------|-------------|
-| `X-API-Key` | A Personal Access Token (PAT) created in the GEN dashboard or via the [API Keys](/reference/api-keys/) endpoints. |
-| `Authorization` | A `Bearer` JWT issued by Clerk or Dynamic XYZ (used by the GEN web app). |
-
-For programmatic integrations, use `X-API-Key`. For browser-based apps that already authenticate through GEN's login flow, use `Authorization: Bearer <jwt>`.
+| `X-API-Key` | **Recommended for all integrations.** A Personal Access Token (PAT) you create in the GEN dashboard. |
+| `Authorization: Bearer <jwt>` | Only if your app already uses GEN's browser login flow. |
 
 ```bash
 curl https://api.gen.pro/v1/me \
   -H "X-API-Key: your-api-key"
 ```
 
+### How to get an API key
+
+1. Log in to [gen.pro](https://gen.pro)
+2. Select an agent (or create one)
+3. Go to the **API** page in the left sidebar (`gen.pro/{agent_id}/api`)
+4. Click **Create API Key**, give it a name, and copy the token
+
+That token is your `X-API-Key`. Store it securely — it won't be shown again.
+
+You can also create and manage API keys programmatically via the [API Keys endpoints](/reference/api-keys/).
+
 <Aside type="tip">
-  PATs are the recommended method for automation. Create one in Settings or via `POST /v1/persisted_tokens`.
+  API keys are scoped to your user account. Any agent you have access to can be used with the same key by passing the `agent_id` parameter.
 </Aside>
 
 ## Agent scoping

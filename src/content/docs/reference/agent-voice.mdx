@@ -1,14 +1,14 @@
 ---
 title: Voice
-description: List, design, clone, preview, and manage voices on an agent. Powered by the Agent Core service.
+description: List, design, clone, preview, and manage voices on an agent.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Voice API lives alongside Agent Core under `/v1/agents/{agent_id}/voice/*`. It unifies voice library listing, ElevenLabs integration, prompt-based voice design, audio sample cloning, TTS preview, and voice deletion.
+The Voice API lives alongside Agent Core under `/v1/agents/{agent_id}/voice/*`. It unifies voice library listing, prompt-based voice design, audio sample cloning, TTS preview, and voice deletion.
 
 <Aside type="note">
-  **Base URL:** `https://api.gen.pro/v1` (production) or `https://staging-api.gen.pro/v1` (staging). Authenticated via `X-API-Key` header.
+  **Base URL:** `https://api.gen.pro/v1`. Authenticated via `X-API-Key` header — see [API Overview](/reference/overview/#how-to-get-an-api-key) for how to create one.
 </Aside>
 
 ## List voices

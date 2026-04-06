@@ -63,7 +63,12 @@ curl -s -X PATCH "https://api.gen.pro/v1/agents/$AGENT_ID/core" \
       "goal": "growth",
       "keywords": ["streetfood", "foodtruck", "tacotok"],
       "target_platforms": ["tiktok", "instagram"],
-      "shortform": true
+      "shortform": true,
+      "research_topics": [
+        {"topic": "new food truck openings in San Antonio"},
+        {"topic": "viral street food TikTok moments"},
+        {"topic": "Texas food festival announcements"}
+      ]
     },
     "personality": "Santiago grew up eating at his tias taco stand on the East Side. He believes the best food comes from the smallest kitchens. He is warm, specific, never condescending, always hungry.",
     "inspiration": [
@@ -182,7 +187,7 @@ See the [Content Resources guide](/reference/content-resources/) for downloading
 
 <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="Full field reference for identity, overview, personality, inspiration, voice, look, accounts." />
 
-<LinkCard title="Agent Voice reference" href="/reference/agent-voice/" description="Library, ElevenLabs integration, 4-step voice design, audio cloning, TTS preview." />
+<LinkCard title="Agent Voice reference" href="/reference/agent-voice/" description="Voice library, 4-step voice design, audio cloning, TTS preview." />
 
 <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="The async run + conversation model, idea refinement, long-term preferences." />
 

@@ -2,7 +2,7 @@
 
 > GEN is an Autonomous Social Media Agent platform. It detects trends, generates video content, publishes across platforms, and improves automatically.
 
-Two surfaces: **Agent Core** (`api.gen.pro/v1/agents/{id}/core` + `/voice`) for setting up an agent's identity, personality, voice, and brand; and **Auto Content Engine** (`api.gen.pro/v1/autocontentengine/*`) for producing videos from those agents. Both authenticate with an X-API-Key PAT.
+Two surfaces: **Agent Core** (`api.gen.pro/v1/agents/{id}/core` + `/voice`) for setting up an agent's brand, personality, inspiration sources, and voice; and **Auto Content Engine** (`api.gen.pro/v1/autocontentengine/*`) for producing videos from those agents. Both authenticate with an X-API-Key PAT.
 
 For any new agent, **start with Agent Core**. Generating content before the agent is configured gives you generic results; configuring it first means every downstream feature (content ideas, template fills, voice) speaks in the agent's voice from the first call.
 
@@ -33,29 +33,33 @@ The GEN workflow has two halves — configure the agent, then let it generate co
 
 ### Step 1: Configure the Agent Core (most important step for any new agent)
 
-One PATCH writes identity, overview (brand profile), personality, inspiration, voice, look, and accounts. This is what every downstream feature (content ideas, template fills, voice generation) reads from. A blank agent produces generic ideas. A richly configured agent produces specific, on-brand ones.
+One flat PATCH writes every field the GEN Setup canvas can save: brand, inspiration sources, personality, voice. Every field name maps 1:1 to how the FE saves it. This is what every downstream feature (content ideas, template fills, voice generation) reads from. A blank agent produces generic ideas. A richly configured agent produces specific, on-brand ones.
 
 PATCH /v1/agents/{agent_id}/core
 ```json
 {
-  "identity":    { "name": "Santiago" },
-  "overview":    {
-    "brand_name": "Santiago",
-    "description": "Santiago is a San Antonio street food scout...",
-    "identity_type": "character",
-    "goal": "growth",
-    "keywords": ["streetfood", "foodtruck", "tacotok"],
-    "target_platforms": ["tiktok", "instagram"],
-    "shortform": true
-  },
-  "personality": "Santiago grew up eating at his tias taco stand...",
-  "inspiration": [{ "url": "https://tiktok.com/@keithlee", "platform": "tiktok" }],
-  "look":        { "description": "Latino male early 30s, athletic build" },
-  "voice":       { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" },
-  "accounts":    [{ "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }]
+  "brand_name": "Santiago",
+  "description": "San Antonio street food scout who hunts the best tacos.",
+  "identity_type": "character",
+  "goal": "growth",
+  "target_platforms": ["tiktok", "instagram"],
+  "shortform": true,
+  "longform": false,
+  "keywords": ["streetfood", "foodtruck", "tacotok"],
+  "monitored": [
+    { "handle": "https://tiktok.com/@keithlee", "item_type": "account" },
+    { "handle": "sanantonioeats", "item_type": "hashtag" }
+  ],
+  "linked_accounts": [
+    { "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }
+  ],
+  "personality": "Santiago grew up eating at his tia's taco stand in south San Antonio. 28, easy-going, trusts his tongue over reviews.",
+  "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
 }
 ```
-Returns 200 on full success or 207 Multi-Status with per-section results.
+Returns 200 on full success or 207 Multi-Status with per-section results. A single call updates all relevant sections internally.
+
+**Critical distinction:** `linked_accounts` = the agent's OWN brand socials (what it posts from). `monitored` = inspiration sources (creators/hashtags/keywords to watch for trending content). Don't mix them. Also: `description` is a short 2-3 sentence summary (max 500 chars); full persona text goes in `personality` (max 20000 chars). Stuffing persona into description returns 422.
 
 ### Step 2: Generate content ideas
 
@@ -302,19 +306,21 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
 
 ### Agent Core (GEN-2755, recommended for agent setup)
-One-call read/write for the entire agent setup canvas (identity, overview, personality, inspiration, voice, look, accounts). Prefer this over per-resource TrendPulse calls when configuring an agent.
+Flat one-call read/write for the entire agent setup canvas. Field names mirror what the FE saves — no sections, no wrappers. Prefer this over per-resource TrendPulse calls.
 
-- GET /v1/agents/{agent_id}/core — read all sections in one call
-- PATCH /v1/agents/{agent_id}/core — write any combination of sections; 200 on full success, 207 Multi-Status on partial failure
-- POST /v1/agents/{agent_id}/core/identity/profile-photo — multipart upload
-- POST /v1/agents/{agent_id}/core/inspiration — append inspiration URL
-- DELETE /v1/agents/{agent_id}/core/inspiration/{id}
-- POST /v1/agents/{agent_id}/core/accounts — append the agent's own social URL
-- DELETE /v1/agents/{agent_id}/core/accounts/{id}
-- POST /v1/agents/{agent_id}/core/look/reference-images — add look reference image URL
-- DELETE /v1/agents/{agent_id}/core/look/reference-images/{id}
+- GET /v1/agents/{agent_id}/core — read all fields in one call
+- PATCH /v1/agents/{agent_id}/core — write any subset; 200 on full success, 207 Multi-Status on partial failure
 
-Merge semantics: identity, overview, look.description. Replace semantics: personality, inspiration, voice, accounts.
+Fields:
+- brand_name, description, identity_type ("brand" | "character"), goal, target_platforms, shortform, longform, onboarding_status
+- keywords (flat list of strings)
+- monitored (list of {handle, item_type: "account"|"hashtag"|"keyword"}) — inspiration sources
+- research_topics (list of {topic: string}, max 20 items, each max 500 chars) — subjects the agent stays current on (labeled "Expertise" in UI). Platform researches daily and feeds results into content ideas. Leave empty for evergreen niches.
+- linked_accounts (list of {id?, url, platform, display_name}) — the agent's OWN brand socials
+- personality (string, max 20000 chars) — full persona text
+- default_user_voice ({voice_id, source}) — default TTS voice
+
+Full-list replacement: `keywords`, `monitored`, `research_topics`, `target_platforms`, `linked_accounts`. To add one row without touching others, GET first, append, PATCH. Sending `keywords` without `monitored` auto-mirrors keywords into monitored with item_type='keyword'. `description` is hard-capped at 500 chars. Unknown fields return 422.
 
 ### Voice (Agent Core)
 - GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_trained|user_elevenlabs} — merged voice list
@@ -335,7 +341,7 @@ Voice delete + preview:
 - POST /v1/agents/{agent_id}/voice/{voice_id}/preview — enqueue TTS preview job (ASYNC, returns `{user_job_id}`)
 - GET /v1/agents/{agent_id}/voice/preview/{job_id} — poll preview job status
 
-Auth: PAT (`X-API-Key`). Runs on `agent-core` service on EC2, exposed via `api.gen.pro` CloudFront + `staging-api.gen.pro` staging.
+Auth: PAT (`X-API-Key`) via `api.gen.pro`.
 
 ## Agentic Chat API
 
