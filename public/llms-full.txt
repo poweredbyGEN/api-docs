@@ -490,6 +490,7 @@ Response:
   "linked_accounts": [
     { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
   ],
+  "look": "Warm earthy tones, close-up street food shots, natural light. Mid-20s Latino man, often seen on bustling sidewalks with a taco in hand.",
   "personality": "Santiago grew up eating at his tia's taco stand in south San Antonio...",
   "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "source": "public" }
 }
@@ -500,7 +501,7 @@ Response:
 Flat merge-patch. Send only the fields you want to change. Unknown fields return 422.
 
 **Field-level semantics:**
-- Scalars replace: `brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`
+- Scalars replace: `brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `look`, `personality`
 - List fields use FULL replacement (missing = deleted): `keywords`, `target_platforms`, `monitored`, `research_topics`, `linked_accounts`
 - `linked_accounts` diffing: rows with `id` are updated in place, rows without `id` are inserted, rows absent from the list are deleted. To add one row without touching others, GET first, append, PATCH.
 - `default_user_voice` replaces
@@ -509,6 +510,7 @@ Flat merge-patch. Send only the fields you want to change. Unknown fields return
 
 **Validation:**
 - `description` max 500 chars
+- `look` max 2000 chars
 - `personality` max 20000 chars
 - `identity_type` enum: `"brand"` | `"character"`
 - `monitored[].item_type` enum: `"account"` | `"hashtag"` | `"keyword"`
@@ -549,6 +551,7 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
     ],
+    "look": "Warm earthy tones, close-up street food shots, natural light. Mid-20s Latino man, often seen on bustling sidewalks with a taco in hand.",
     "personality": "Santiago grew up eating at his tia\u0027s taco stand in south San Antonio. 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
     "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
