@@ -68,14 +68,23 @@ Returns every field as a flat object. Fields that haven't been set return `null`
   "linked_accounts": [
     { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago 🌮" }
   ],
+  "look": "Warm earthy tones, close-up food shots, natural light",
+  "content_themes": ["street food", "local spots", "food reviews"],
+  "persona_inspirations": ["@keilapacheco", "@thetacochronicles"],
   "personality": "Santiago grew up eating at his tía's taco stand in south San Antonio...",
   "default_user_voice": {
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "name": "Rachel",
     "source": "public"
-  }
+  },
+  "name": "Santiago Real",
+  "profile_photo_url": "https://cdn.gen.pro/avatars/abc123.jpg",
+  "timezone": "America/Chicago",
+  "eleven_lab_api_key": null
 }
 ```
+
+Fields marked with a `*` below are sourced from the Rails agent record and returned alongside the local brand profile fields. If Rails is unreachable, they return `null` — the rest of the response still succeeds.
 
 ## Update the agent setup
 
@@ -89,13 +98,17 @@ Flat merge-patch body. Send only the fields you want to change — omitted field
 
 | Field | Semantics |
 |---|---|
-| Scalars (`brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`) | Replace |
+| Scalars (`brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`, `look`) | Replace |
 | `keywords` | Replace the full list |
 | `target_platforms` | Replace the full list |
+| `content_themes` | Replace the full list |
+| `persona_inspirations` | Replace the full list |
 | `monitored` | **Replace the full list** — items you don't send are deleted |
 | `research_topics` | **Replace the full list** — topics you don't send are deleted. Max 20 items. |
 | `linked_accounts` | **Replace the full list** — rows you don't send are deleted. Rows with `id` are updated in place; rows without `id` are inserted. |
-| `default_user_voice` | Replace |
+| `default_user_voice` | Replace — forwarded to the Rails agent record |
+| `timezone` | Replace — IANA timezone string (e.g. `"America/Chicago"`). Forwarded to the Rails agent record. |
+| `eleven_lab_api_key` | Replace — ElevenLabs API key for AURA voice connection. Send `null` to disconnect. Forwarded to the Rails agent record. |
 
 To add a single `monitored` item or `linked_account` without touching others, `GET /core` first, append, then `PATCH` with the full list.
 
@@ -104,6 +117,10 @@ To add a single `monitored` item or `linked_account` without touching others, `G
 - Unknown fields return **422** (`extra="forbid"` on every model).
 - `description` max 500 chars.
 - `personality` max 20000 chars.
+- `look` max 2000 chars.
+- `goal` max 100 chars.
+- `timezone` max 100 chars (IANA format, e.g. `"America/Chicago"`).
+- `eleven_lab_api_key` max 100 chars.
 - `identity_type` strict enum: `"brand"` | `"character"`.
 - `monitored[].item_type` strict enum: `"account"` | `"hashtag"` | `"keyword"`.
 - `research_topics` max 20 items, each `topic` max 500 chars.
@@ -116,17 +133,7 @@ If you send `keywords` without also sending `monitored`, the writer automaticall
 
 ### Response
 
-`200` on full success, `207 Multi-Status` on partial failure. The body is a map keyed by **upstream target**, not by request field:
-
-```json
-{
-  "brand":       { "status": "ok",    "data": { "brand_name": "Santiago", "keywords": ["streetfood"], ... } },
-  "personality": { "status": "ok",    "data": "Santiago grew up eating at..." },
-  "voice":       { "status": "error", "error": "voice service unavailable" }
-}
-```
-
-Sections only appear if the PATCH touched at least one field they own. A PATCH that only sets `brand_name` returns `{ "brand": { "status": "ok", ... } }` — no `personality` or `voice` entry.
+`200` with the full updated agent core object (same shape as `GET /core`). If an upstream Rails write fails (e.g. saving `timezone` or `eleven_lab_api_key` to the Rails agent record), the failure is logged but does **not** affect the HTTP status — local fields are always saved first.
 
 ## Example — set up a character in one call
 
@@ -156,6 +163,10 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
     ],
     "personality": "Santiago grew up eating at his tía'\''s taco stand in south San Antonio. He'\''s 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
+    "look": "Warm earthy tones, close-up food shots, natural light",
+    "content_themes": ["street food", "local spots", "food reviews"],
+    "persona_inspirations": ["@keilapacheco", "@thetacochronicles"],
+    "timezone": "America/Chicago",
     "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
 ```
@@ -167,7 +178,7 @@ import { GenClient } from '@poweredbygen/gen-sdk';
 
 const gen = new GenClient({ apiKey: process.env.GEN_API_KEY! });
 
-const result = await gen.agents.updateCore('abc123', {
+const result = await gen.updateAgentCore('abc123', {
   brand_name: 'Santiago',
   description: 'San Antonio street food scout who hunts the best tacos.',
   identity_type: 'character',
@@ -189,9 +200,7 @@ const result = await gen.agents.updateCore('abc123', {
   default_user_voice: { voice_id: '21m00Tcm4TlvDq8ikWAM', source: 'public' },
 });
 
-if (result.personality?.status === 'error') {
-  console.error('personality write failed:', result.personality.error);
-}
+console.log(result.agent_id, result.brand_name);
 ```
 
 ## Errors
@@ -199,9 +208,9 @@ if (result.personality?.status === 'error') {
 | Code | Meaning |
 |---|---|
 | 401 | Missing or invalid `X-API-Key` |
-| 404 | Agent not found |
+| 403 | Valid PAT but the agent belongs to a different user |
+| 404 | Agent config not found |
 | 422 | Validation error — unknown field, bad enum, length cap exceeded, or missing required sub-field like `monitored[].item_type` |
-| 207 | Partial success. Inspect per-target `status` in the response body. |
 
 ## Related
 

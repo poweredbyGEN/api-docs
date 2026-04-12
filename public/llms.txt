@@ -54,12 +54,21 @@ PATCH /v1/agents/{agent_id}/core
     { "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }
   ],
   "personality": "Santiago grew up eating at his tia's taco stand in south San Antonio. 28, easy-going, trusts his tongue over reviews.",
+  "look": "Warm earthy tones, close-up food shots, natural light",
+  "content_themes": ["street food", "local spots", "food reviews"],
+  "persona_inspirations": ["@keilapacheco", "@thetacochronicles"],
+  "timezone": "America/Chicago",
   "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
 }
 ```
-Returns 200 on full success or 207 Multi-Status with per-section results. A single call updates all relevant sections internally.
+Returns 200 with the full updated agent core object. Upstream Rails failures (timezone, voice, ElevenLabs key) are logged but don't affect the HTTP status — local fields save first.
 
-**Critical distinction:** `linked_accounts` = the agent's OWN brand socials (what it posts from). `monitored` = inspiration sources (creators/hashtags/keywords to watch for trending content). Don't mix them. Also: `description` is a short 2-3 sentence summary (max 500 chars); full persona text goes in `personality` (max 20000 chars). Stuffing persona into description returns 422.
+**Field distinctions:**
+- `linked_accounts` = the agent's OWN brand socials (what it posts from). `monitored` = inspiration sources (creators/hashtags to watch).
+- `description` is a short 2-3 sentence summary (max 500 chars); full persona text goes in `personality` (max 20000 chars).
+- `content_themes` = content pillars (e.g. "street food", "travel"). `persona_inspirations` = creator accounts whose style to emulate.
+- `look` = visual style description for reference image generation (max 2000 chars).
+- `timezone` + `eleven_lab_api_key` = Rails-owned fields forwarded automatically; they appear in GET responses alongside the local brand fields.
 
 ### Step 2: Generate content ideas
 
