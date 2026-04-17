@@ -306,7 +306,7 @@ Column roles: ingredient (user-creatable), video, final_video, stats (system-man
 - POST /v1/user_jobs?agent_id={id} — publish content (body: {user_job_type: "publish_content", data: JSON string})
 
 ### Agent Core (GEN-2755, recommended for agent setup)
-Flat one-call read/write for the entire agent setup canvas. Field names mirror what the FE saves — no sections, no wrappers. Prefer this over per-resource TrendPulse calls.
+Flat one-call read/write for the entire agent setup canvas. Field names mirror what the FE saves — no sections, no wrappers. Use this for all agent setup reads and writes.
 
 - GET /v1/agents/{agent_id}/core — read all fields in one call
 - PATCH /v1/agents/{agent_id}/core — write any subset; 200 on full success, 207 Multi-Status on partial failure

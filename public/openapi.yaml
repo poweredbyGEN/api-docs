@@ -2902,10 +2902,9 @@ paths:
       summary: Get the full agent setup
       description: |
         Returns the agent's full setup as a flat object whose field names mirror
-        exactly what the GEN Setup canvas FE reads and writes. Fans out to
-        TrendPulse `/trendpulse/settings` (brand fields), Rails `agents` (voice
-        association), and Rails `project_nodes` (personality) and merges them
-        into one response.
+        exactly what the GEN Setup canvas FE reads and writes. Merges brand
+        setup, voice association, and personality into a single response — you
+        get the whole agent in one call.
       tags: [Agent Core]
       parameters:
         - name: agent_id
@@ -2926,17 +2925,15 @@ paths:
       summary: Update any combination of setup fields
       description: |
         Flat merge-patch. Send only the fields you want to change — missing
-        fields are not forwarded. Field names map 1:1 to the upstream service's
-        storage columns, with no wrappers or renames.
+        fields are not forwarded. Field names map 1:1 to the GEN Setup canvas
+        FE — no wrappers, no sections.
 
-        **Storage map:**
-        - `brand_name`, `description`, `identity_type`, `goal`, `keywords`,
-          `monitored`, `target_platforms`, `shortform`, `longform`,
-          `onboarding_status`, `linked_accounts` → forwarded in one PATCH to
-          the TrendPulse settings endpoint, which owns diffing for
-          `linked_accounts` (delete-then-insert on the full list).
-        - `personality` → Rails `project_nodes` row with `node_type='personality'`.
-        - `default_user_voice` → Rails `agents.default_user_voice_attributes`.
+        **Field groups:**
+        - Brand setup — `brand_name`, `description`, `identity_type`, `goal`,
+          `keywords`, `monitored`, `target_platforms`, `shortform`, `longform`,
+          `onboarding_status`, `linked_accounts`.
+        - Personality — `personality` (full persona/backstory, max 20000 chars).
+        - Voice — `default_user_voice`.
 
         **Guardrails:**
         - Unknown fields return 422 — typos fail fast.
@@ -2951,7 +2948,7 @@ paths:
         list via GET first, append, then PATCH.
 
         Returns 200 on full success, 207 Multi-Status with per-target results
-        (`trendpulse`, `personality`, `voice`) on partial failure.
+        on partial failure. See `AgentCorePatchResult` for target keys.
       tags: [Agent Core]
       parameters:
         - name: agent_id
@@ -4006,12 +4003,14 @@ components:
     AgentCorePatchResult:
       type: object
       description: |
-        Per-target result. agent-core fans out to up to three upstreams:
-          - `trendpulse` — any brand fields (brand_name, description, identity_type, goal,
+        Per-target result. agent-core fans out to up to three internal targets.
+        Target keys currently returned:
+          - `trendpulse` — brand fields (brand_name, description, identity_type, goal,
             target_platforms, shortform, longform, onboarding_status, keywords, monitored,
-            linked_accounts)
-          - `personality` — Rails project_nodes
-          - `voice` — Rails agents.default_user_voice_attributes
+            linked_accounts). Legacy name; will be renamed to `brand` in a future release —
+            clients should treat target keys as opaque strings.
+          - `personality` — personality text.
+          - `voice` — voice association.
         Each target appears only if the PATCH touched at least one field it owns.
         `status=ok` means that target's write succeeded. `status=error` means it failed
         (see `error` field). A 207 Multi-Status means at least one target errored.
