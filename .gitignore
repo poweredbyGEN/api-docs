@@ -2,3 +2,11 @@ node_modules
 dist
 .firecrawl
 .astro
+
+
+# Local-only tooling (not shipped)
+.claude/
+CLAUDE.md
+graphify-out/
+src/graphify-out/
+
