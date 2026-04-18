@@ -30,21 +30,6 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: { name: 'ai-content-declaration', content: 'This site provides API documentation for AI agents. See /llms.txt for machine-readable reference.' },
 				},
-				{
-					tag: 'link',
-					attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-				},
-				{
-					tag: 'link',
-					attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-				},
-				{
-					tag: 'link',
-					attrs: {
-						rel: 'stylesheet',
-						href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap',
-					},
-				},
 			],
 			customCss: ['./src/styles/custom.css'],
 			social: [
