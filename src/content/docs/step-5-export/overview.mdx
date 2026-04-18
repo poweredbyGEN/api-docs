@@ -1,0 +1,85 @@
+---
+title: Step 5 — Export & Publish
+description: Render the final composite, download the MP4, and optionally publish to TikTok / Instagram / YouTube.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+All cells are filled from [Step 4](/step-4-edit/overview/). Now you turn the vidsheet into a **final MP4** and ship it.
+
+## The three sub-steps
+
+```
+1. Render          — composite all layers into one video
+2. Poll            — wait for the render pipeline to finish
+3. Download / Publish
+```
+
+## Render the final video
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Returns a `generation_id` pointing at the render job. Renders are async — poll:
+
+```bash
+curl "https://api.gen.pro/v1/generations/$GEN_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Status flow:
+
+```
+pending → processing → completed | failed
+```
+
+On `completed`, `output_resources[0].url` is the CDN URL for the final MP4.
+
+## Download the MP4
+
+```bash
+curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
+```
+
+CDN URLs are public — no auth required to download. See [Download the Video](/step-5-export/download/) for streaming / signed-URL patterns and handling.
+
+## Publish to social
+
+Currently TikTok is fully supported (Instagram / YouTube coming):
+
+```bash
+curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_job_type": "publish_content",
+    "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"The $2 taco at 2am #streetfood #tacotok\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
+  }'
+```
+
+Returns a `user_job_id`. Poll `GET /v1/user_jobs/:id` until `completed`; `result.post_id` is the TikTok post ID.
+
+## Credits & billing
+
+Renders charge credits — same pre-charge / reconcile pattern as every other generation. Publishing is free. See [Credits & Billing](/step-5-export/credits/) for cost breakdowns and the pricing formula.
+
+<Aside type="tip">
+  Renders are the single most expensive generation type in a typical workflow. Before kicking off a batch of 50+ renders, check org credit balance via `GET /v1/organizations/:id`. Partial batches are painful to clean up.
+</Aside>
+
+## Sub-topics
+
+<CardGrid>
+  <LinkCard title="Render the Final Video" href="/reference/rendering/" description="Trigger, poll, handle render failures." />
+  <LinkCard title="Download the Video" href="/step-5-export/download/" description="CDN URL, streaming, TypeScript + curl patterns." />
+  <LinkCard title="Publish to Social" href="/reference/publishing/" description="Post now or schedule for later; TikTok supported." />
+  <LinkCard title="Credits & Billing" href="/step-5-export/credits/" description="How credits are charged and reconciled across the whole journey." />
+</CardGrid>
+
+## You've completed the journey
+
+You configured an agent, generated data-driven ideas, converted one into a vidsheet, edited and generated every cell, rendered the composite, and publish-ready.
+
+**To scale:** duplicate rows, duplicate the engine, or orchestrate the whole arc through the [MCP server](/guides/claude-code/) — Claude Code will drive the 5 steps for you in natural language.

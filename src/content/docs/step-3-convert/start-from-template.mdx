@@ -1,0 +1,100 @@
+---
+title: Start from a Template (recommended)
+description: The 80% path — clone a template that matches your idea video type and get a working engine in one call.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Templates are pre-configured Auto Content Engines. Each one has the right columns, creation cards, and layer stacks for a specific video type. **Clone a template and you get a production-ready engine in one API call** — instead of the 15–25 calls it takes to build one from scratch.
+
+## The full flow
+
+<Steps>
+
+1. **Get an idea from Step 2**
+
+   From the Ideas Engine, an idea looks like:
+
+   ```json
+   {
+     "id": 901,
+     "title": "The $2 taco at 2am",
+     "video_type": "talking_avatar",
+     "video_type_id": 1,
+     "full_script": "...",
+     "project_manifest": { ... }
+   }
+   ```
+
+   Note the `video_type` — that's what drives template selection.
+
+2. **List templates that match the video type**
+
+   ```bash
+   curl "https://api.gen.pro/v1/templates/projects" \
+     -H "X-API-Key: $GEN_API_KEY"
+   ```
+
+   Response includes `slug`, `title`, `description`, `tags`. Filter by tag or inspect individually.
+
+3. **Clone the template into your agent**
+
+   ```bash
+   curl -X POST "https://api.gen.pro/v1/templates/spreadsheets/tiktok-talking-avatar/clone" \
+     -H "X-API-Key: $GEN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "agent_id": "'"$AGENT_ID"'" }'
+   ```
+
+   Returns the full engine object — `id`, `slug`, `title`, `spreadsheet_columns`, `spreadsheet_rows`, `spreadsheet_cells`. All cells start empty.
+
+4. **Fill cells with the idea's content**
+
+   Find the script cell, drop the idea's `full_script` in:
+
+   ```bash
+   curl -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+     -H "X-API-Key: $GEN_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{ "spreadsheet_cell": { "value": "<script text>" } }'
+   ```
+
+5. **Trigger generations**
+
+   Covered in [Step 4](/step-4-edit/overview/).
+
+</Steps>
+
+## Why templates are the 80% path
+
+- Columns are pre-wired with the right **creation cards** — TEXT 1 is a text card, VIDEO is a video-from-image card, AUDIO is a speech-from-text card
+- Layers are pre-stacked in the right order (z-index, duration, fade-ins)
+- Variables are pre-populated so brand name, CTAs, colors already substitute
+- The template's `tags` make it searchable by video type
+
+## Recommended starter templates
+
+These cover the vast majority of short-form content.
+
+| Slug | Video type | Use when |
+|------|------------|----------|
+| `tiktok-talking-avatar` | Talking avatar | Founder-style VO, explainer, testimonial |
+| `tiktok-montage` | Montage | Multi-shot b-roll with music |
+| `tiktok-vo-broll` | Narrated / voiceover | VO over curated b-roll clips |
+| `tiktok-text-driven` | Text-driven | Kinetic text + music, no avatar |
+| `tiktok-split-screen` | Split screen | Reaction / comparison |
+| `ig-reel-story` | Narrated | Longer 30-60s vertical |
+| `yt-short-explainer` | Text-driven | 45s explainer with text + VO |
+
+<Aside type="tip">
+  List templates by tag: the slug won't always match perfectly, so pick the closest one and customize in [Step 4](/step-4-edit/overview/). Most users end up favoring 2-3 templates and cloning them repeatedly.
+</Aside>
+
+## Preview before cloning
+
+```bash
+curl "https://api.gen.pro/v1/templates/projects/tiktok-talking-avatar" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Returns the template definition with all its columns, layer stack, and `recent_generated_contents` so you can see actual videos produced from this template before committing.

@@ -1,0 +1,82 @@
+---
+title: Step 3 — Convert Idea to Vidsheet
+description: Clone a template that matches the idea's video type. The fastest path to a production-ready engine.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+You have ideas from [Step 2](/step-2-ideas/overview/). Each idea has a `video_type` (talking avatar, montage, split-screen, etc.) and a `project_manifest` describing the timeline. Now you turn that idea into an **Auto Content Engine** (vidsheet) — the actual production surface where rows, columns, cells, and layers live.
+
+**There are two paths.** Both are legitimate, but one is dramatically faster.
+
+## Path A — Clone a template (recommended)
+
+Templates are pre-configured engines with the right columns, creation cards, and layer stacks for a specific video type. Cloning a template gives you a working engine in **one API call**.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/templates/spreadsheets/tiktok-talking-avatar/clone" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "agent_id": "'"$AGENT_ID"'" }'
+```
+
+Returns a fully configured engine with columns for script, voice, video, and final output — ready to fill. Jump to [Start from a Template](/step-3-convert/start-from-template/) for the full flow.
+
+## Path B — Build a custom engine
+
+If no template matches your idea, build an engine from scratch:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "spreadsheet": { "title": "Custom campaign" } }'
+```
+
+Then create each column, configure creation cards, and set up layers by hand. See [Build a Custom Engine](/reference/sheets/). Expect 15–25 API calls vs the 1 for a template clone.
+
+<Aside type="tip">
+  **Start with templates 90% of the time.** Even if the template is only 80% right, it's faster to clone it and customize than to build from zero. The `video_type` returned by the Ideas Engine often maps 1:1 to a template slug.
+</Aside>
+
+## Match the idea to a template
+
+Each idea has a `video_type_id` (see [video type IDs](#video-type-ids)). List templates and pick one whose tags include the same video type:
+
+```bash
+curl "https://api.gen.pro/v1/templates/projects" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Response includes `slug`, `title`, `description`, `tags`, and `cover`. Pick a slug that matches the idea's video type, then clone.
+
+## Video type IDs
+
+| ID | Name | Typical templates |
+|----|------|-------------------|
+| 0 | Any | Generic engines |
+| 1 | Talking Avatar | AI talking head + lipsync + captions |
+| 2 | Green Screen | Presenter over dynamic background |
+| 3 | Montage | Short clips stitched with music |
+| 4 | Text-Driven | Kinetic text + voiceover |
+| 5 | POV Object | Object-focused (unboxing, product shots) |
+| 6 | Narrated / Voiceover | VO + b-roll |
+| 8 | Split Screen | Reaction / comparison format |
+| 9 | Skit | Multi-character scene |
+
+## Sub-topics
+
+<CardGrid>
+  <LinkCard title="Start from a Template (recommended)" href="/step-3-convert/start-from-template/" description="Full recipe from idea to cloned engine." />
+  <LinkCard title="Browse Templates" href="/reference/templates/" description="List, filter, and inspect templates." />
+  <LinkCard title="Clone a Template" href="/step-3-convert/clone-template/" description="The single API call + what gets created." />
+  <LinkCard title="Build a Custom Engine" href="/reference/sheets/" description="Create, get, clone an Auto Content Engine from scratch." />
+</CardGrid>
+
+## Next step
+
+<LinkCard
+  title="Step 4 — Edit & Generate"
+  href="/step-4-edit/overview/"
+  description="Fill cells with the idea's content, configure creation cards, trigger generations, poll until complete."
+/>

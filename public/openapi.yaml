@@ -2,20 +2,34 @@ openapi: 3.1.0
 info:
   title: Auto Content Engine API
   description: |
-    The Auto Content Engine API lets you programmatically manage vidsheets (content spreadsheets),
-    generate AI content, and automate video creation workflows.
+    The GEN Auto Content Engine API takes a raw idea all the way to a published video — agent setup, idea research, vidsheet production, layer composition, render, and publish.
+
+    ## The 5-step journey
+
+    Every operation belongs to one phase of a 5-step user journey. Each operation carries an `x-phase` extension you can filter on:
+
+    | Phase | Meaning |
+    |-------|---------|
+    | `setup` | Step 1 — Set Up Your Agent (identity, voice, personality, API keys, workspaces) |
+    | `ideas` | Step 2 — Generate Content Ideas (trending data, research, refinement, preferences) |
+    | `convert` | Step 3 — Convert Idea to Vidsheet (clone template or build custom engine) |
+    | `edit` | Step 4 — Edit & Generate (cells, layers, creation cards, trigger + poll) |
+    | `export` | Step 5 — Export & Publish (render, download, publish to social) |
+
+    Full journey-oriented docs: https://api.gen.pro
 
     ## Authentication
 
     All endpoints require authentication via one of:
 
-    - **API Key** (recommended): Pass your API key in the `X-API-Key` header. Create keys in Settings > API Keys.
-    - **JWT**: Pass a Clerk/Dynamic XYZ JWT in the `Authorization: Bearer <token>` header.
+    - **API Key** (recommended): Pass your API key in the `X-API-Key` header. Create keys on the agent's API page in the GEN dashboard.
+    - **JWT**: Pass a Bearer JWT in the `Authorization: Bearer <token>` header.
 
-    ## Base URL
+    ## Base URLs
 
     ```
-    https://api.gen.pro/v1
+    https://api.gen.pro/v1       — agent setup, vidsheets, generations, renders, publishing
+    https://agent.gen.pro/v1     — content ideas, research, conversations, chat
     ```
 
     ## Credits
@@ -81,7 +95,7 @@ tags:
     description: (Legacy) Manage the agent's identity, voice, and brand profile. Prefer Agent Core for new work.
   - name: Agent Core
     description: |
-      **Preferred** single-endpoint read/write for the agent setup canvas. One flat PATCH updates every brand field, personality, and default voice in a single call. Field names mirror what the FE Setup canvas saves, so developers and the FE speak the same language. Backed by the agent-core service; exposed through api.gen.pro.
+      **Preferred** single-endpoint read/write for the agent setup canvas. One flat PATCH updates every brand field, personality, and default voice in a single call. Field names mirror what the FE Setup canvas saves, so developers and the FE speak the same language.
   - name: Agent Voice
     description: |
       Voice library, ElevenLabs integration, prompt-based design (4-step flow), audio-sample cloning, async TTS preview.
@@ -94,6 +108,7 @@ paths:
   /me:
     get:
       operationId: getMe
+      x-phase: setup
       summary: Get current user
       description: Returns the authenticated user's profile. Use this to verify your API key works.
       tags: [Discovery]
@@ -116,6 +131,7 @@ paths:
   /workspaces:
     get:
       operationId: listWorkspaces
+      x-phase: setup
       summary: List workspaces
       description: Returns organizations where the authenticated user is an owner or manager.
       tags: [Discovery]
@@ -134,6 +150,7 @@ paths:
   /agents:
     get:
       operationId: listAgents
+      x-phase: setup
       summary: List agents
       description: Returns all agents the authenticated user has access to across their workspaces.
       tags: [Discovery]
@@ -157,6 +174,7 @@ paths:
 
     post:
       operationId: createAgent
+      x-phase: setup
       summary: Create an agent
       description: Creates a new agent in the specified organization.
       tags: [Agents]
@@ -212,6 +230,7 @@ paths:
   /agents/{agent_id}:
     get:
       operationId: getAgent
+      x-phase: setup
       summary: Get an agent
       description: Returns detailed information about a specific agent.
       tags: [Agents]
@@ -244,6 +263,7 @@ paths:
 
     patch:
       operationId: updateAgent
+      x-phase: setup
       summary: Update an agent
       description: Updates agent properties including name, description, timezone, API keys, avatars, and default voice.
       tags: [Agents]
@@ -305,6 +325,7 @@ paths:
 
     delete:
       operationId: deleteAgent
+      x-phase: setup
       summary: Delete an agent
       description: Permanently deletes an agent and all associated data.
       tags: [Agents]
@@ -323,6 +344,7 @@ paths:
   /agents/{agent_id}/avatars:
     get:
       operationId: listAgentAvatars
+      x-phase: setup
       summary: List agent avatars
       description: Returns all avatars for the agent. Cursor-based pagination (20 per page). Primary avatar listed first.
       tags: [Agents]
@@ -345,6 +367,7 @@ paths:
 
     post:
       operationId: createAgentAvatar
+      x-phase: setup
       summary: Upload agent avatar
       description: Upload one or more avatar images (JPEG, PNG, WebP) or link a DeGod avatar.
       tags: [Agents]
@@ -374,6 +397,7 @@ paths:
   /agents/{agent_id}/avatars/{id}:
     patch:
       operationId: setPrimaryAvatar
+      x-phase: setup
       summary: Set avatar as primary
       description: Sets this avatar as the primary avatar. All other avatars are marked non-primary.
       tags: [Agents]
@@ -396,6 +420,7 @@ paths:
 
     delete:
       operationId: deleteAgentAvatar
+      x-phase: setup
       summary: Delete avatar(s)
       description: Delete one or more avatars. Pass multiple IDs separated by underscores (e.g. `7_8_9`).
       tags: [Agents]
@@ -415,6 +440,7 @@ paths:
   /persisted_tokens:
     get:
       operationId: listApiKeys
+      x-phase: setup
       summary: List API keys
       description: Returns all API keys for the authenticated user, including revoked and expired ones.
       tags: [API Keys]
@@ -432,6 +458,7 @@ paths:
 
     post:
       operationId: createApiKey
+      x-phase: setup
       summary: Create API key
       description: |
         Creates a new API key. The plain-text key is returned **only once** in the response.
@@ -471,6 +498,7 @@ paths:
   /persisted_tokens/{id}:
     patch:
       operationId: updateApiKey
+      x-phase: setup
       summary: Rename API key
       tags: [API Keys]
       parameters:
@@ -503,6 +531,7 @@ paths:
   /persisted_tokens/{id}/revoke:
     delete:
       operationId: revokeApiKey
+      x-phase: setup
       summary: Revoke API key
       description: Permanently revokes a single API key. This cannot be undone.
       tags: [API Keys]
@@ -519,6 +548,7 @@ paths:
   /persisted_tokens/revoke_all:
     delete:
       operationId: revokeAllApiKeys
+      x-phase: setup
       summary: Revoke all API keys
       description: Revokes every active API key for the authenticated user.
       tags: [API Keys]
@@ -540,6 +570,7 @@ paths:
   /autocontentengine:
     post:
       operationId: createSheet
+      x-phase: convert
       summary: Create a sheet
       description: Creates a new Auto Content Engine sheet for the specified agent.
       tags: [Sheets]
@@ -577,6 +608,7 @@ paths:
   /autocontentengine/{sheet_id}:
     get:
       operationId: getSheet
+      x-phase: convert
       summary: Get a sheet
       description: |
         Returns a sheet with all columns, rows, cells, layers, and global variables.
@@ -607,6 +639,7 @@ paths:
   /autocontentengine/{sheet_id}/clone:
     post:
       operationId: cloneSheet
+      x-phase: convert
       summary: Clone a sheet
       description: Creates a deep copy of the sheet, optionally into a different agent.
       tags: [Sheets]
@@ -638,6 +671,7 @@ paths:
   /autocontentengine/{sheet_id}/rows:
     get:
       operationId: listRows
+      x-phase: edit
       summary: List rows
       tags: [Rows]
       parameters:
@@ -657,6 +691,7 @@ paths:
 
     post:
       operationId: createRow
+      x-phase: edit
       summary: Create a row
       tags: [Rows]
       parameters:
@@ -687,6 +722,7 @@ paths:
   /autocontentengine/{sheet_id}/rows/{row_id}:
     get:
       operationId: getRow
+      x-phase: edit
       summary: Get a row
       tags: [Rows]
       parameters:
@@ -708,6 +744,7 @@ paths:
   /autocontentengine/{sheet_id}/rows/{row_id}/duplicate:
     post:
       operationId: duplicateRow
+      x-phase: edit
       summary: Duplicate a row
       description: Creates a deep copy of the row including all cells and layers.
       tags: [Rows]
@@ -728,6 +765,7 @@ paths:
   /autocontentengine/{sheet_id}/rows/update_positions:
     put:
       operationId: updateRowPositions
+      x-phase: edit
       summary: Reorder rows
       tags: [Rows]
       parameters:
@@ -764,6 +802,7 @@ paths:
   /autocontentengine/{sheet_id}/rows/mass_update:
     put:
       operationId: massUpdateRows
+      x-phase: edit
       summary: Bulk update rows
       tags: [Rows]
       parameters:
@@ -790,6 +829,7 @@ paths:
   /autocontentengine/{sheet_id}/columns:
     get:
       operationId: listColumns
+      x-phase: edit
       summary: List columns
       tags: [Columns]
       parameters:
@@ -807,6 +847,7 @@ paths:
 
     post:
       operationId: createColumn
+      x-phase: edit
       summary: Create a column
       tags: [Columns]
       parameters:
@@ -840,6 +881,7 @@ paths:
   /autocontentengine/{sheet_id}/columns/{column_id}/duplicate:
     post:
       operationId: duplicateColumn
+      x-phase: edit
       summary: Duplicate a column
       tags: [Columns]
       parameters:
@@ -861,6 +903,7 @@ paths:
   /autocontentengine/{sheet_id}/columns/update_positions:
     patch:
       operationId: updateColumnPositions
+      x-phase: edit
       summary: Reorder columns
       tags: [Columns]
       parameters:
@@ -891,6 +934,7 @@ paths:
   /autocontentengine/{sheet_id}/columns/mass_update:
     put:
       operationId: massUpdateColumns
+      x-phase: edit
       summary: Bulk update columns
       tags: [Columns]
       parameters:
@@ -910,6 +954,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}:
     get:
       operationId: getCell
+      x-phase: edit
       summary: Get a cell
       tags: [Cells]
       parameters:
@@ -926,6 +971,7 @@ paths:
 
     patch:
       operationId: updateCell
+      x-phase: edit
       summary: Update a cell
       description: Update the value or attributes of a cell.
       tags: [Cells]
@@ -957,6 +1003,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/mass_update:
     put:
       operationId: massUpdateCells
+      x-phase: edit
       summary: Bulk update cells
       tags: [Cells]
       parameters:
@@ -975,6 +1022,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/set_default_user_job:
     patch:
       operationId: setDefaultUserJob
+      x-phase: edit
       summary: Set default generation for a cell
       description: Pin a specific generation result as the active/visible one for this cell.
       tags: [Cells]
@@ -1001,6 +1049,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/layers:
     post:
       operationId: createLayer
+      x-phase: edit
       summary: Create a layer
       description: Add a new video layer (text, sound, clip, etc.) to a cell.
       tags: [Layers]
@@ -1037,6 +1086,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
     get:
       operationId: getLayer
+      x-phase: edit
       summary: Get a layer
       tags: [Layers]
       parameters:
@@ -1054,6 +1104,7 @@ paths:
 
     patch:
       operationId: updateLayer
+      x-phase: edit
       summary: Update a layer
       tags: [Layers]
       parameters:
@@ -1084,6 +1135,7 @@ paths:
 
     delete:
       operationId: deleteLayer
+      x-phase: edit
       summary: Delete a layer
       tags: [Layers]
       parameters:
@@ -1098,6 +1150,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
       operationId: duplicateLayer
+      x-phase: edit
       summary: Duplicate a layer
       tags: [Layers]
       parameters:
@@ -1116,6 +1169,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/layers/update_positions:
     put:
       operationId: updateLayerPositions
+      x-phase: edit
       summary: Reorder layers
       tags: [Layers]
       parameters:
@@ -1148,6 +1202,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/generate:
     post:
       operationId: generateCellContent
+      x-phase: edit
       summary: Generate content for a cell
       description: |
         Triggers AI content generation for a cell. Credits are pre-charged.
@@ -1214,6 +1269,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
     post:
       operationId: generateLayerContent
+      x-phase: edit
       summary: Generate content for a layer
       description: |
         Triggers AI generation for a video layer (voice, music, clip, etc.).
@@ -1255,6 +1311,7 @@ paths:
   /generations/{generation_id}:
     get:
       operationId: getGeneration
+      x-phase: edit
       summary: Get generation status
       description: Check the status and result of an AI generation job.
       tags: [Generations]
@@ -1275,6 +1332,7 @@ paths:
   /generations/{generation_id}/stop:
     post:
       operationId: stopGeneration
+      x-phase: edit
       summary: Stop a generation
       description: Cancels a running generation. Credits are refunded.
       tags: [Generations]
@@ -1301,6 +1359,7 @@ paths:
   /generations/{generation_id}/continue:
     post:
       operationId: continueGeneration
+      x-phase: edit
       summary: Continue a stopped generation
       description: Resumes a previously stopped generation. Credits are re-charged.
       tags: [Generations]
@@ -1328,6 +1387,7 @@ paths:
   /autocontentengine/{sheet_id}/cells/{cell_id}/render:
     post:
       operationId: renderVideo
+      x-phase: export
       summary: Render final video
       description: |
         Composites all layers (video, audio, captions, text overlays) into a final video.
@@ -1365,6 +1425,7 @@ paths:
   /autocontentengine/{sheet_id}/global_variables:
     get:
       operationId: getGlobalVariables
+      x-phase: edit
       summary: Get global variables
       description: Returns the global variables sheet associated with this sheet.
       tags: [Variables]
@@ -1382,6 +1443,7 @@ paths:
   /autocontentengine/{sheet_id}/import_global_variables:
     post:
       operationId: importGlobalVariables
+      x-phase: edit
       summary: Import global variables from XLSX
       description: Upload an XLSX file to populate the global variables sheet.
       tags: [Variables]
@@ -1411,6 +1473,7 @@ paths:
   /autocontentengine/global_variables_template:
     get:
       operationId: downloadVariablesTemplate
+      x-phase: edit
       summary: Download variables template
       description: Downloads a blank XLSX template for global variables.
       tags: [Variables]
@@ -1427,6 +1490,7 @@ paths:
   /agents/{agent_id}/automation_config:
     get:
       operationId: getAutomationConfig
+      x-phase: edit
       summary: Get automation config
       description: Returns the agent's webhook and callback configuration.
       tags: [Automation]
@@ -1442,6 +1506,7 @@ paths:
 
     patch:
       operationId: updateAutomationConfig
+      x-phase: edit
       summary: Update automation config
       description: Configure webhooks and callbacks for the agent.
       tags: [Automation]
@@ -1482,6 +1547,7 @@ paths:
   /agents/{agent_id}/automation_config/test_webhook:
     post:
       operationId: testWebhook
+      x-phase: edit
       summary: Test webhook
       description: Sends a test payload to the configured webhook URL.
       tags: [Automation]
@@ -1503,6 +1569,7 @@ paths:
   /agents/{agent_id}/automation_config/test_callback:
     post:
       operationId: testCallback
+      x-phase: edit
       summary: Test callback
       description: Sends a test payload to the configured callback URL.
       tags: [Automation]
@@ -1525,6 +1592,7 @@ paths:
   /user_jobs:
     post:
       operationId: createUserJob
+      x-phase: [ideas, export]
       summary: Create user job (monitoring or publishing)
       description: |
         Create a background job. Use `user_job_type` to select the job kind:
@@ -1587,8 +1655,54 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /user_jobs/{id}:
+    get:
+      operationId: getUserJob
+      x-phase: [ideas, export]
+      summary: Get user job status
+      description: |
+        Poll an async user job. Works for both `train_social` (content monitoring) and `publish_content` (social publishing) jobs. Returns current status, progress, and the final `result` on completion.
+      tags: [Content Monitoring, Publishing]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: User job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  user_job_type:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  result:
+                    type: object
+                    description: Populated on `completed`. For `publish_content`, contains `post_id`.
+                  failed_reason:
+                    type: string
+                    description: Populated on `failed`.
+              example:
+                id: 138860
+                user_job_type: publish_content
+                status: completed
+                result:
+                  post_id: "7459234123456"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     put:
       operationId: updateMonitoringJob
+      x-phase: ideas
       summary: Update monitoring job
       description: Update an existing `train_social` job. Only jobs with `pending` or `processing` status can be updated. Send fields as flat form params (not nested).
       tags: [Content Monitoring]
@@ -1654,6 +1768,7 @@ paths:
   /templates/projects:
     get:
       operationId: listTemplates
+      x-phase: convert
       summary: List templates
       description: Returns paginated list of pre-configured engine templates. 20 per page.
       tags: [Templates]
@@ -1678,6 +1793,7 @@ paths:
   /templates/projects/{slug}:
     get:
       operationId: getTemplate
+      x-phase: convert
       summary: Get a template
       description: Returns a single template by slug, UUID, or numeric ID.
       tags: [Templates]
@@ -1703,6 +1819,7 @@ paths:
   /templates/spreadsheets/{slug}/clone:
     post:
       operationId: cloneTemplate
+      x-phase: convert
       summary: Clone a template
       description: Clones the template into the specified agent's workspace. Returns the new engine with columns, rows, and cells.
       tags: [Templates]
@@ -1740,6 +1857,7 @@ paths:
   /organizations:
     get:
       operationId: listOrganizations
+      x-phase: setup
       summary: List organizations
       description: Returns all organizations the authenticated user belongs to.
       tags: [Organizations]
@@ -1757,6 +1875,7 @@ paths:
 
     post:
       operationId: createOrganization
+      x-phase: setup
       summary: Create an organization
       tags: [Organizations]
       requestBody:
@@ -1796,6 +1915,7 @@ paths:
   /organizations/{organization_id}:
     get:
       operationId: getOrganization
+      x-phase: setup
       summary: Get an organization
       tags: [Organizations]
       parameters:
@@ -1820,6 +1940,7 @@ paths:
 
     patch:
       operationId: updateOrganization
+      x-phase: setup
       summary: Update an organization
       description: Requires owner or manager role.
       tags: [Organizations]
@@ -1866,6 +1987,7 @@ paths:
 
     delete:
       operationId: deleteOrganization
+      x-phase: setup
       summary: Delete an organization
       description: Permanently deletes the organization and all associated data. Requires owner role. Irreversible.
       tags: [Organizations]
@@ -1895,6 +2017,7 @@ paths:
   /content_resources:
     get:
       operationId: listContentResources
+      x-phase: edit
       summary: List content resources
       description: Returns paginated content resources. 20 items per page (page starts at 0).
       tags: [Content Resources]
@@ -1937,6 +2060,7 @@ paths:
 
     post:
       operationId: createContentResource
+      x-phase: edit
       summary: Upload a content resource
       description: Upload a file as a content resource. Optionally assign to a project or asset folder.
       tags: [Content Resources]
@@ -1995,6 +2119,7 @@ paths:
   /content_resources/{id}:
     get:
       operationId: getContentResource
+      x-phase: edit
       summary: Get a content resource
       tags: [Content Resources]
       parameters:
@@ -2040,6 +2165,7 @@ paths:
 
     patch:
       operationId: updateContentResource
+      x-phase: edit
       summary: Rename a content resource
       tags: [Content Resources]
       parameters:
@@ -2075,6 +2201,7 @@ paths:
 
     delete:
       operationId: deleteContentResource
+      x-phase: edit
       summary: Delete a content resource
       tags: [Content Resources]
       parameters:
@@ -2100,6 +2227,7 @@ paths:
   /asset_libraries:
     get:
       operationId: listAssetLibraries
+      x-phase: edit
       summary: Browse asset library
       description: |
         Unified view of files and folders. Polymorphic response — items have
@@ -2173,6 +2301,7 @@ paths:
   /asset_folders:
     post:
       operationId: createAssetFolder
+      x-phase: edit
       summary: Create an asset folder
       tags: [Asset Libraries]
       parameters:
@@ -2221,6 +2350,7 @@ paths:
   /asset_folders/{id}:
     patch:
       operationId: updateAssetFolder
+      x-phase: edit
       summary: Rename an asset folder
       tags: [Asset Libraries]
       parameters:
@@ -2264,6 +2394,7 @@ paths:
 
     delete:
       operationId: deleteAssetFolder
+      x-phase: edit
       summary: Delete an asset folder
       description: Deletes the folder and all its contents (subfolders and files).
       tags: [Asset Libraries]
@@ -2290,6 +2421,7 @@ paths:
   /direct_upload:
     post:
       operationId: createDirectUpload
+      x-phase: edit
       summary: Get pre-signed upload URL
       description: |
         Returns a pre-signed S3 URL for uploading large files (up to 1 GB).
@@ -2347,6 +2479,7 @@ paths:
   /agent/profile:
     get:
       operationId: getAgentProfile
+      x-phase: setup
       summary: Get agent profile
       description: Returns the agent's identity, voice, and brand profile configuration.
       tags: [Agent Profile]
@@ -2364,6 +2497,7 @@ paths:
 
     post:
       operationId: createAgentProfile
+      x-phase: setup
       summary: Create agent profile
       description: Creates an initial profile for the agent.
       tags: [Agent Profile]
@@ -2393,6 +2527,7 @@ paths:
 
     put:
       operationId: updateAgentProfile
+      x-phase: setup
       summary: Update agent profile
       description: Replaces the agent's profile with the provided data.
       tags: [Agent Profile]
@@ -2422,6 +2557,7 @@ paths:
 
     delete:
       operationId: deleteAgentProfile
+      x-phase: setup
       summary: Delete agent profile
       description: Removes the agent's profile configuration.
       tags: [Agent Profile]
@@ -2439,6 +2575,7 @@ paths:
   /agent/run:
     post:
       operationId: startAgentRun
+      x-phase: ideas
       summary: Start an agent run
       description: |
         Sends a message to the agent and starts a new run. Returns immediately with a run ID.
@@ -2505,6 +2642,7 @@ paths:
   /agent/runs/{run_id}:
     get:
       operationId: getAgentRun
+      x-phase: ideas
       summary: Get agent run status
       description: |
         Poll this endpoint to check run status and retrieve messages.
@@ -2551,6 +2689,7 @@ paths:
   /agent/runs/{run_id}/approve:
     post:
       operationId: approveAgentAction
+      x-phase: ideas
       summary: Approve a pending agent action
       description: |
         When a run has status `requires_action`, approve the proposed action to continue.
@@ -2588,6 +2727,7 @@ paths:
   /agent/runs/{run_id}/reject:
     post:
       operationId: rejectAgentAction
+      x-phase: ideas
       summary: Reject a pending agent action
       description: |
         When a run has status `requires_action`, reject the proposed action.
@@ -2624,6 +2764,7 @@ paths:
   /agent/conversations:
     get:
       operationId: listConversations
+      x-phase: ideas
       summary: List conversations
       description: |
         Returns all conversations for the authenticated user.
@@ -2647,6 +2788,7 @@ paths:
   /agent/conversations/{id}:
     get:
       operationId: getConversation
+      x-phase: ideas
       summary: Get a conversation
       description: |
         Returns a conversation with its messages.
@@ -2671,6 +2813,7 @@ paths:
 
     patch:
       operationId: updateConversation
+      x-phase: ideas
       summary: Rename or pin a conversation
       description: |
         Update conversation metadata (title, pinned status).
@@ -2706,6 +2849,7 @@ paths:
 
     delete:
       operationId: deleteConversation
+      x-phase: ideas
       summary: Delete a conversation
       description: |
         Soft-deletes a conversation and its messages.
@@ -2727,6 +2871,7 @@ paths:
   /agent/conversations/{id}/messages:
     get:
       operationId: listConversationMessages
+      x-phase: ideas
       summary: List conversation messages
       description: |
         Returns paginated message history for a conversation.
@@ -2771,6 +2916,7 @@ paths:
   /agent/conversations/{id}/runs:
     get:
       operationId: listConversationRuns
+      x-phase: ideas
       summary: List runs in a conversation
       description: |
         Returns all agent runs within a conversation.
@@ -2807,6 +2953,7 @@ paths:
   /agent/ideas:
     get:
       operationId: listIdeas
+      x-phase: ideas
       summary: List content ideas
       description: |
         Returns content ideas for the agent. Requires `agent_id`.
@@ -2836,6 +2983,7 @@ paths:
   /agent/ideas/{id}/status:
     post:
       operationId: cycleIdeaStatus
+      x-phase: ideas
       summary: Cycle idea status
       description: |
         Advances the idea to the next status in the workflow.
@@ -2861,6 +3009,7 @@ paths:
   /agent/ideas/{id}/status/{status}:
     put:
       operationId: setIdeaStatus
+      x-phase: ideas
       summary: Set idea status explicitly
       description: |
         Sets the idea to a specific status.
@@ -2895,10 +3044,91 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # ── Agent Core (GEN-2755) ─────────────────────────────────
+  # ── Research (agent.gen.pro) ──────────────────────────────
+  /research:
+    post:
+      operationId: runResearch
+      x-phase: ideas
+      summary: Research a topic
+      description: |
+        Runs standalone research across 8+ sources — Reddit, X, YouTube, TikTok, Instagram, Hacker News, Perplexity, and Gemini — and returns structured findings with source counts, engagement totals, citations, and a summary markdown.
+
+        Depths: `quick` (~10s, surface), `default` (~30-45s), `deep` (~90s, thorough). A paid operation (~35 credits per call at default depth).
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic, agent_id]
+              properties:
+                topic:
+                  type: string
+                  example: "tariffs on beauty imports 2026"
+                depth:
+                  type: string
+                  enum: [quick, default, deep]
+                  default: default
+                agent_id:
+                  type: string
+      responses:
+        '200':
+          description: Research findings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topic:
+                    type: string
+                  depth:
+                    type: string
+                  researched_at:
+                    type: string
+                    format: date-time
+                  sources:
+                    type: object
+                    description: Per-source counts and engagement totals.
+                  perplexity:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                      citations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                            title:
+                              type: string
+                  gemini:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                      grounded:
+                        type: boolean
+                  summary_markdown:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Invalid parameters or insufficient credits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ── Agent Core ────────────────────────────────────────────
   /agents/{agent_id}/core:
     get:
       operationId: getAgentCore
+      x-phase: setup
       summary: Get the full agent setup
       description: |
         Returns the agent's full setup as a flat object whose field names mirror
@@ -2922,6 +3152,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     patch:
       operationId: patchAgentCore
+      x-phase: setup
       summary: Update any combination of setup fields
       description: |
         Flat merge-patch. Send only the fields you want to change — missing
@@ -2981,10 +3212,11 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
-  # ── Agent Voice (GEN-2755) ────────────────────────────────
+  # ── Agent Voice ───────────────────────────────────────────
   /agents/{agent_id}/voice/library:
     get:
       operationId: listAgentVoices
+      x-phase: setup
       summary: List voices available to the agent
       description: |
         Merges four sources: `public` (shared catalog), `user_designed`
@@ -3014,6 +3246,7 @@ paths:
   /agents/{agent_id}/voice/integrations/elevenlabs:
     get:
       operationId: getElevenLabsIntegrationStatus
+      x-phase: setup
       summary: Check whether the agent has an ElevenLabs key connected
       tags: [Agent Voice]
       parameters:
@@ -3030,6 +3263,7 @@ paths:
                   masked_key: { type: string, nullable: true }
     post:
       operationId: connectElevenLabs
+      x-phase: setup
       summary: Connect the user's ElevenLabs API key
       description: Validates the key against ElevenLabs /v1/user before saving it on the agent record.
       tags: [Agent Voice]
@@ -3051,6 +3285,7 @@ paths:
           description: invalid_key
     delete:
       operationId: disconnectElevenLabs
+      x-phase: setup
       summary: Remove the ElevenLabs key from the agent
       tags: [Agent Voice]
       parameters:
@@ -3061,6 +3296,7 @@ paths:
   /agents/{agent_id}/voice/integrations/elevenlabs/test:
     post:
       operationId: testElevenLabsKey
+      x-phase: setup
       summary: Test an ElevenLabs key without saving it
       tags: [Agent Voice]
       parameters:
@@ -3085,6 +3321,7 @@ paths:
   /agents/{agent_id}/voice/design/generate-script:
     post:
       operationId: generateVoiceScript
+      x-phase: setup
       summary: "Voice design step 1/4 — generate a read-aloud script"
       tags: [Agent Voice]
       parameters:
@@ -3108,6 +3345,7 @@ paths:
   /agents/{agent_id}/voice/design/generate-description:
     post:
       operationId: generateVoiceDescription
+      x-phase: setup
       summary: "Voice design step 2/4 — generate style descriptors"
       tags: [Agent Voice]
       parameters:
@@ -3136,6 +3374,7 @@ paths:
   /agents/{agent_id}/voice/design/generate-samples:
     post:
       operationId: generateVoiceSamples
+      x-phase: setup
       summary: "Voice design step 3/4 — generate 3 candidate audio samples"
       tags: [Agent Voice]
       parameters:
@@ -3169,6 +3408,7 @@ paths:
   /agents/{agent_id}/voice/design:
     post:
       operationId: finalizeDesignedVoice
+      x-phase: setup
       summary: "Voice design step 4/4 — finalize"
       description: "Persists a designed voice by picking one of the generation_id values from step 3."
       tags: [Agent Voice]
@@ -3194,6 +3434,7 @@ paths:
   /agents/{agent_id}/voice/clone:
     post:
       operationId: cloneVoice
+      x-phase: setup
       summary: Clone a voice from an existing audio sample
       description: |
         Synchronous. Provide exactly one of `audio_url` (preferred — server
@@ -3222,6 +3463,7 @@ paths:
   /agents/{agent_id}/voice/{voice_id}:
     delete:
       operationId: deleteAgentVoice
+      x-phase: setup
       summary: Delete a user-owned voice
       tags: [Agent Voice]
       parameters:
@@ -3234,6 +3476,7 @@ paths:
   /agents/{agent_id}/voice/{voice_id}/preview:
     post:
       operationId: previewVoice
+      x-phase: setup
       summary: "Enqueue a TTS preview job (async)"
       description: |
         Returns `{user_job_id}` immediately. Poll
@@ -3265,6 +3508,7 @@ paths:
   /agents/{agent_id}/voice/preview/{job_id}:
     get:
       operationId: getVoicePreviewStatus
+      x-phase: setup
       summary: Poll a TTS preview job
       tags: [Agent Voice]
       parameters:
@@ -3879,7 +4123,7 @@ components:
           type: string
           description: Machine-readable error code.
 
-    # ── Agent Core schemas (GEN-2755) ───────────────────────
+    # ── Agent Core schemas ──────────────────────────────────
     # Flat schema — every field name mirrors what the GEN Setup canvas FE
     # saves. See api/reference/agent-core for the full storage map.
     AgentCore:
@@ -4003,17 +4247,16 @@ components:
     AgentCorePatchResult:
       type: object
       description: |
-        Per-target result. agent-core fans out to up to three internal targets.
-        Target keys currently returned:
-          - `trendpulse` — brand fields (brand_name, description, identity_type, goal,
+        Per-section result. A PATCH to Agent Core may update multiple sections atomically.
+        Section keys currently returned:
+          - `brand` — brand fields (brand_name, description, identity_type, goal,
             target_platforms, shortform, longform, onboarding_status, keywords, monitored,
-            linked_accounts). Legacy name; will be renamed to `brand` in a future release —
-            clients should treat target keys as opaque strings.
+            linked_accounts). Clients should treat section keys as opaque strings.
           - `personality` — personality text.
           - `voice` — voice association.
-        Each target appears only if the PATCH touched at least one field it owns.
-        `status=ok` means that target's write succeeded. `status=error` means it failed
-        (see `error` field). A 207 Multi-Status means at least one target errored.
+        Each section appears only if the PATCH touched at least one field it owns.
+        `status=ok` means that section succeeded. `status=error` means it failed
+        (see `error` field). A 207 Multi-Status means at least one section errored.
       additionalProperties:
         type: object
         properties:

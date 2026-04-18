@@ -1,0 +1,75 @@
+---
+title: The 5-Step Journey
+description: Every GEN API workflow follows the same arc — set up the agent, generate ideas, convert an idea to a vidsheet, edit and generate, then export and publish.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+Every GEN API workflow follows the same arc. Whether you're building a one-off TikTok or automating a 100-video pipeline, the journey has the same five steps. The docs are organized around this arc, and so is the MCP server, the TypeScript SDK, and `llms.txt`.
+
+Pick a step to jump in, or walk the whole path in order from the [Quick Start](/guides/quickstart/).
+
+<CardGrid>
+  <LinkCard
+    title="Step 1 — Set Up Your Agent"
+    href="/step-1-setup/overview/"
+    description="Configure identity, voice, personality, API keys, and workspaces. One PATCH to Agent Core writes everything downstream reads from."
+  />
+  <LinkCard
+    title="Step 2 — Generate Content Ideas"
+    href="/step-2-ideas/overview/"
+    description="Let the agent propose videos grounded in real trending data from 10+ platforms. Refine, research, set preferences."
+  />
+  <LinkCard
+    title="Step 3 — Convert Idea to Vidsheet"
+    href="/step-3-convert/overview/"
+    description="Clone a template that matches the idea's video type. The fastest path to a production-ready engine."
+  />
+  <LinkCard
+    title="Step 4 — Edit & Generate"
+    href="/step-4-edit/overview/"
+    description="Fill cells, configure layers, pick creation cards, trigger generations, poll until complete."
+  />
+  <LinkCard
+    title="Step 5 — Export & Publish"
+    href="/step-5-export/overview/"
+    description="Render the final composite, download the MP4, optionally publish to TikTok / Instagram / YouTube."
+  />
+</CardGrid>
+
+## Mental model
+
+```
+Workspace
+  └── Agent                     ← Step 1: configure once
+        ├── Content Ideas       ← Step 2: data-driven proposals
+        └── Auto Content Engine ← Step 3: clone a template
+              ├── Sheet         ← Step 4: rows, columns, cells
+              │     └── Cells
+              │           └── Creation Cards (9 types)
+              ├── Video side    ← Step 4: layers per cell
+              └── Final Video   ← Step 5: render + publish
+```
+
+Each step produces the input the next step needs. The arc compresses what is otherwise a dozen decisions into a linear path.
+
+## Why a journey, not a resource list?
+
+A resource-oriented API reference ("here are the endpoints for Agents, Rows, Cells...") is great once you know what you want. But the first time someone touches the API, they don't ask "what does `PUT /v1/autocontentengine/:id/cells/mass_update` do?" — they ask "how do I get a video out?"
+
+The 5-step journey is the answer to that question. Every doc surface teaches this arc so you can:
+
+- Skim the overview for each step and pick the right endpoint
+- Copy-paste a curl chain from `llms.txt` that walks the full path
+- Let an AI assistant (Claude Code, Cursor) pick the right MCP tool per step
+
+<Aside type="tip">
+  If you're pair-programming with an LLM, point it at [`/llms.txt`](/llms.txt). The file is written as a system prompt that teaches the 5-step model directly.
+</Aside>
+
+## Not sure where to start?
+
+- **"I want a video in 10 minutes"** → [Quick Start](/guides/quickstart/)
+- **"Give me an AI assistant that does this for me"** → [Install the MCP Server](/guides/claude-code/)
+- **"I want to see everything"** → [All Endpoints A–Z](/reference/endpoints-index/)
+- **"I want machine-readable"** → [OpenAPI 3.1 Spec](/openapi.yaml) or [llms-full.txt](/llms-full.txt)

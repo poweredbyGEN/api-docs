@@ -1,0 +1,122 @@
+---
+title: Step 4 — Edit & Generate
+description: Fill cells, configure layers, pick creation cards, trigger generations, poll until complete.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+You have a vidsheet from [Step 3](/step-3-convert/overview/). Now you drive it:
+
+- **Fill ingredient cells** with the idea's content (script, topic, B-roll prompt)
+- **Configure creation cards** on each cell — which model, what prompt, what aspect ratio
+- **Configure layers** on each video cell — background, avatar, captions, CTA, z-index
+- **Trigger generations** on cells and layers
+- **Poll generation status** until `completed`
+
+## Vidsheet anatomy recap
+
+```
+Auto Content Engine
+├── Sheet (left)                       ← data grid
+│    ├── Rows (one per video)
+│    ├── Columns (content type, e.g. SCRIPT / VIDEO / CAPTIONS)
+│    └── Cells (intersection of row + column)
+│         └── Creation card (generation_type + data)
+└── Video composition (right)          ← timeline
+     └── Layers (per cell: bg, avatar, text, captions, music)
+```
+
+Every cell has exactly one **creation card** — a declaration of how that cell generates content. Every video cell has a stack of **layers** that composite into the final video.
+
+## The 3-call pattern for every cell
+
+```
+1. PATCH cell value or card config  — say what you want
+2. POST cell generate                — trigger the AI job
+3. GET generation status             — poll until completed
+```
+
+Repeat for each cell you want to fill. For a typical 3-column video engine (script / voice / video), that's 9 calls.
+
+## Trigger a generation
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "video_from_text",
+    "data": {
+      "prompt": "San Antonio taco truck at golden hour, steam rising, handheld camera",
+      "model": "veo_3",
+      "aspect_ratio": "9:16",
+      "duration": 10
+    }
+  }'
+```
+
+Response:
+
+```json
+{ "generation_id": 789, "status": "pending" }
+```
+
+## Poll until complete
+
+```bash
+curl "https://api.gen.pro/v1/generations/789" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Status flow:
+
+```
+pending → processing → completed | failed | stopped
+```
+
+On `completed`: `result` (text) or `output_resources` (media URLs) are populated.
+
+## The 9 creation card types
+
+Every cell picks one:
+
+| Type | Generates | Typical column |
+|------|-----------|----------------|
+| Text | Text (scripts, prompts, notes) | SCRIPT, CAPTION COPY |
+| Image from Text | Image | THUMBNAIL, HERO IMAGE |
+| Video from Text | Video (no source image) | B-ROLL |
+| Video from Image | Video (animating an image) | AVATAR VIDEO |
+| Video from Ingredients | Video (compositing multiple assets) | MONTAGE CLIP |
+| Speech from Text | Audio (TTS) | VOICE |
+| Lipsync | Video (sync mouth to audio) | TALKING AVATAR |
+| Captions | Captions over audio or video | CAPTIONS |
+| Media (Upload) | Pass-through of an uploaded asset | BACKGROUND MUSIC |
+
+## Regenerate workflow
+
+Not happy with a generation? Update the card's `data.prompt` or `data.model` and re-trigger. Generations are idempotent per `generation_id` but creating a new generation for the same cell is always allowed — the latest one becomes the cell's displayed output.
+
+See [Regenerate Workflow](/step-4-edit/regenerate/) for the stop/continue/re-run patterns and credit behavior.
+
+## Sub-topics
+
+<CardGrid>
+  <LinkCard title="Vidsheet Anatomy" href="/step-4-edit/anatomy/" description="Rows / columns / cells / layers — how they fit together." />
+  <LinkCard title="Creation Cards (9 types)" href="/reference/creation-cards/" description="Every generation type with exact data params and models." />
+  <LinkCard title="Rows" href="/reference/rows/" description="Create, duplicate, reorder, bulk-update rows." />
+  <LinkCard title="Columns" href="/reference/columns/" description="Types, roles, default creation cards." />
+  <LinkCard title="Cells" href="/reference/cells/" description="Read, update value, bulk-update, set default generation." />
+  <LinkCard title="Layers" href="/reference/layers/" description="Per-cell timeline elements with z-index and duration." />
+  <LinkCard title="Variables" href="/reference/variables/" description="Template substitution across prompts and content." />
+  <LinkCard title="Assets & Content Resources" href="/reference/content-resources/" description="Upload files, browse the library, use in generations." />
+  <LinkCard title="Trigger + Poll" href="/reference/generations/" description="Kick off a generation, poll until complete, stop / continue." />
+  <LinkCard title="Regenerate Workflow" href="/step-4-edit/regenerate/" description="Re-run a cell, swap models, swap prompts, credit behavior." />
+</CardGrid>
+
+## Next step
+
+<LinkCard
+  title="Step 5 — Export & Publish"
+  href="/step-5-export/overview/"
+  description="All cells filled? Render the final composite, download the MP4, optionally publish to TikTok / IG / YT."
+/>
