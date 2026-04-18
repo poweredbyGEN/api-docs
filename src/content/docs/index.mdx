@@ -68,16 +68,16 @@ hero:
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>PATCH /v1/agents/:id/core
+            <pre><code>{`PATCH /v1/agents/:id/core
 X-API-Key: $GEN_API_KEY
 
-&#123;
+{
   "name": "Kai",
   "overview": "B2B SaaS founder audience",
   "personality": "...",
   "voice_id": "voice_01h...",
-  "accounts": [&#123; "platform": "tiktok", "handle": "@kai" &#125;]
-&#125;</code></pre>
+  "accounts": [{ "platform": "tiktok", "handle": "@kai" }]
+}`}</code></pre>
           </figure>
           <a href="/reference/agent-core/" class="gen-step__link">
             Agent Core reference
@@ -96,15 +96,15 @@ X-API-Key: $GEN_API_KEY
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>POST /v1/agent/run
+            <pre><code>{`POST /v1/agent/run
 X-API-Key: $GEN_API_KEY
 
-&#123;
+{
   "agent_id": "agt_...",
   "intent": "generate_ideas",
   "with_research": true,
   "count": 5
-&#125;</code></pre>
+}`}</code></pre>
           </figure>
           <a href="/guides/content-ideas/" class="gen-step__link">
             Content Ideas guide
@@ -123,12 +123,12 @@ X-API-Key: $GEN_API_KEY
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>POST /v1/templates/spreadsheets/:slug/clone
+            <pre><code>{`POST /v1/templates/spreadsheets/:slug/clone
 X-API-Key: $GEN_API_KEY
 
-&#123; "agent_id": "agt_..." &#125;
+{ "agent_id": "agt_..." }
 
-&rarr; then PATCH cells with the idea fields</code></pre>
+→ then PATCH cells with the idea fields`}</code></pre>
           </figure>
           <a href="/reference/templates/" class="gen-step__link">
             Templates reference
@@ -147,17 +147,17 @@ X-API-Key: $GEN_API_KEY
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>POST /v1/vidsheet/:id/cells/:cell_id/generate
+            <pre><code>{`POST /v1/vidsheet/:id/cells/:cell_id/generate
 X-API-Key: $GEN_API_KEY
 
-&#123;
+{
   "generation_type": "video_from_text",
-  "data": &#123;
+  "data": {
     "prompt": "...",
     "model": "veo_3",
     "duration": 8
-  &#125;
-&#125;</code></pre>
+  }
+}`}</code></pre>
           </figure>
           <a href="/reference/generations/" class="gen-step__link">
             Generations reference
@@ -176,12 +176,12 @@ X-API-Key: $GEN_API_KEY
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>POST /v1/vidsheet/:id/cells/:cell_id/render
+            <pre><code>{`POST /v1/vidsheet/:id/cells/:cell_id/render
 X-API-Key: $GEN_API_KEY
 
-&rarr; poll GET /v1/generations/:generation_id
-&rarr; status: "completed"
-&rarr; output_resources: [&#123; file_url: "..." &#125;]</code></pre>
+→ poll GET /v1/generations/:generation_id
+→ status: "completed"
+→ output_resources: [{ file_url: "..." }]`}</code></pre>
           </figure>
           <a href="/reference/rendering/" class="gen-step__link">
             Rendering reference
