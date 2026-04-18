@@ -1,104 +1,253 @@
 ---
-title: Introduction
-description: What is the Auto Content Engine API and what can you build with it.
+title: Auto Content Engine
+description: One API surface takes a raw idea all the way to a published video — agent setup, idea research, vidsheet production, composition, and export.
+template: splash
+hero:
+  title: ""
+  tagline: ""
+  actions: []
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+<div class="gen-splash">
 
-## What is GEN?
+  <header class="gen-splash__eyebrow">
+    <span class="gen-splash__vol">Vol. 01 · API v1</span>
+    <span class="gen-splash__rule" aria-hidden="true"></span>
+    <span class="gen-splash__no">api.gen.pro</span>
+  </header>
 
-GEN is an autonomous social media agent platform. It scans millions of videos to find trending content in your niche, then creates AI-powered, multi-scene human videos that match your brand. Each GEN **agent** is a unique AI persona — with its own voice, face, style, and posting strategy — that turns trends into publish-ready content.
+  <section class="gen-splash__hero">
+    <p class="gen-splash__kicker">Auto Content Engine</p>
+    <h1 class="gen-splash__headline">
+      Programmable short-form video,<br/>
+      <em>end&nbsp;to&nbsp;end.</em>
+    </h1>
+    <p class="gen-splash__sub">
+      One API surface takes a raw idea all the way to a published video — agent setup, idea research, vidsheet production, layer composition, and export.
+    </p>
 
-## What is the Auto Content Engine?
+    <div class="gen-splash__cta">
+      <a href="/guides/quickstart/" class="gen-splash__primary">
+        Read the quickstart
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </a>
+      <a href="/llms.txt" class="gen-splash__secondary">
+        <code>/llms.txt</code>
+        <span>for AI agents</span>
+      </a>
+    </div>
 
-The Auto Content Engine is the system at the core of GEN's content creation workflow. Each engine has two sides:
+    <dl class="gen-splash__spec" aria-label="API reference card">
+      <div><dt>Base</dt><dd><code>https://api.gen.pro/v1</code></dd></div>
+      <div><dt>Auth</dt><dd><code>X-API-Key</code></dd></div>
+      <div><dt>SDK</dt><dd><code>npm i @poweredbygen/autocontentengine</code></dd></div>
+      <div><dt>MCP</dt><dd><code>npx @poweredbygen/autocontentengine-mcp-server</code></dd></div>
+    </dl>
+  </section>
 
-**The Sheet** (left side) — a data grid where you prepare content inputs:
-- Each **row** is a video
-- Each **column** is a content type (script, voiceover, image prompt, etc.)
-- Each **cell** holds one piece of generated or manual content
+  <section class="gen-splash__flow">
+    <header class="gen-splash__flow-header">
+      <span class="gen-splash__flow-label">The production pipeline</span>
+      <h2 class="gen-splash__flow-title">
+        Five steps. <em>Idea to rendered video.</em>
+      </h2>
+      <p class="gen-splash__flow-sub">
+        Every endpoint on this API maps to one of these five steps. Follow them in order for your first video; branch freely once you know the shape.
+      </p>
+    </header>
 
-**The Video** (right side) — a timeline editor where layers compose the final video:
-- **Layers** are the building blocks — text overlays, sound tracks, video clips, captions
-- Each layer has its own position, duration, volume, and styling
-- Layers stack and merge into the final rendered video
+    <ol class="gen-splash__steps">
 
-In the GEN web app, this is the "Vidsheets" interface. The API gives you full programmatic access to both sides — the sheet data and the video composition.
+      <li class="gen-step">
+        <span class="gen-step__no" aria-hidden="true">01</span>
+        <div class="gen-step__body">
+          <p class="gen-step__tag">Step one</p>
+          <h3 class="gen-step__title">Set up your <em>agent.</em></h3>
+          <p class="gen-step__desc">
+            One call to <code>/agents/:id/core</code> configures identity, personality, voice, inspiration, and the social accounts the agent will publish to. Every downstream call reads from this core — it's the single most important step for a new agent.
+          </p>
+          <figure class="gen-step__code">
+            <div class="gen-step__code-lang">HTTP</div>
+            <pre><code>PATCH /v1/agents/:id/core
+X-API-Key: $GEN_API_KEY
 
-## What can you build?
+&#123;
+  "name": "Kai",
+  "overview": "B2B SaaS founder audience",
+  "personality": "...",
+  "voice_id": "voice_01h...",
+  "accounts": [&#123; "platform": "tiktok", "handle": "@kai" &#125;]
+&#125;</code></pre>
+          </figure>
+          <a href="/reference/agent-core/" class="gen-step__link">
+            Agent Core reference
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </a>
+        </div>
+      </li>
 
-The Auto Content Engine API lets you read, create, and update content engines — and trigger AI generations — without touching the GEN UI.
+      <li class="gen-step">
+        <span class="gen-step__no" aria-hidden="true">02</span>
+        <div class="gen-step__body">
+          <p class="gen-step__tag">Step two</p>
+          <h3 class="gen-step__title">Generate <em>content ideas.</em></h3>
+          <p class="gen-step__desc">
+            The ideas engine pulls trending data across 10+ platforms, matches it to your agent's keywords and inspiration, and proposes videos with hooks, scripts, and selected assets. Refine with follow-ups; ground with deeper research when the stakes are high.
+          </p>
+          <figure class="gen-step__code">
+            <div class="gen-step__code-lang">HTTP</div>
+            <pre><code>POST /v1/agent/run
+X-API-Key: $GEN_API_KEY
 
-<CardGrid>
-  <Card title="Claude Code / MCP">
-    Use the official MCP server to manage agents, content engines, and AI generations through natural language. Just talk to Claude — it handles the API calls.
-  </Card>
-  <Card title="Workflow automation">
-    Connect GEN to n8n, Make, or Zapier. Trigger video creation from RSS feeds, CRM events, or Slack messages.
-  </Card>
-  <Card title="Batch operations">
-    Script bulk updates — populate 50 rows with scripts, swap voiceover styles across an entire content engine, or update variables in one call.
-  </Card>
-  <Card title="Custom dashboards">
-    Build internal tools that pull content status, track generation progress, and give your team visibility into the pipeline.
-  </Card>
-  <Card title="TypeScript SDK">
-    Import the SDK into your Node.js or TypeScript project for type-safe access to agents, content engines, generations, and assets.
-  </Card>
-</CardGrid>
+&#123;
+  "agent_id": "agt_...",
+  "intent": "generate_ideas",
+  "with_research": true,
+  "count": 5
+&#125;</code></pre>
+          </figure>
+          <a href="/guides/content-ideas/" class="gen-step__link">
+            Content Ideas guide
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </a>
+        </div>
+      </li>
 
-## Key concepts
+      <li class="gen-step">
+        <span class="gen-step__no" aria-hidden="true">03</span>
+        <div class="gen-step__body">
+          <p class="gen-step__tag">Step three</p>
+          <h3 class="gen-step__title">Convert idea to <em>vidsheet.</em></h3>
+          <p class="gen-step__desc">
+            Clone a template into your agent, then PATCH the idea's content into the vidsheet's global variables and first-row cells. Rows become scenes, columns are content types, cells hold each piece. Templates are the 80% path; building from scratch is the other 20%.
+          </p>
+          <figure class="gen-step__code">
+            <div class="gen-step__code-lang">HTTP</div>
+            <pre><code>POST /v1/templates/spreadsheets/:slug/clone
+X-API-Key: $GEN_API_KEY
 
-Before diving in, here are the core objects you will work with:
+&#123; "agent_id": "agt_..." &#125;
 
-| Concept | Description |
-|---------|-------------|
-| **Agent** | An AI persona/character with its own identity, voice, and content style. Every API request is scoped to an agent via `agent_id`. |
-| **Content Engine** | A content spreadsheet. Each agent can have multiple content engines. |
-| **Row** | A single video within a content engine. Rows contain cells for each column. |
-| **Column** | A content type definition (e.g., "Script", "Voiceover", "B-Roll"). Columns define what kind of content each cell holds. |
-| **Cell** | The intersection of a row and column. Holds one piece of content (a script, a voiceover, an image, etc.). |
-| **Layer** | A video composition element — text overlay, sound track, video clip, or captions. Layers live on the video side, not inside cells. |
-| **Generation** | An AI job that produces content for a cell or a layer. You trigger a generation, and GEN's AI fills in the content. |
-| **Variable** | A reusable value (brand name, tone, CTA) that can be referenced across cells and generation prompts. |
+&rarr; then PATCH cells with the idea fields</code></pre>
+          </figure>
+          <a href="/reference/templates/" class="gen-step__link">
+            Templates reference
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </a>
+        </div>
+      </li>
 
-## For AI Agents
+      <li class="gen-step">
+        <span class="gen-step__no" aria-hidden="true">04</span>
+        <div class="gen-step__body">
+          <p class="gen-step__tag">Step four</p>
+          <h3 class="gen-step__title">Edit and <em>generate.</em></h3>
+          <p class="gen-step__desc">
+            Tweak cells (prompts, scripts, variables), add or reorder layers (text, audio, clips, captions), then trigger generations per cell. Jobs are async — poll <code>/generations/:id</code> for status and output.
+          </p>
+          <figure class="gen-step__code">
+            <div class="gen-step__code-lang">HTTP</div>
+            <pre><code>POST /v1/vidsheet/:id/cells/:cell_id/generate
+X-API-Key: $GEN_API_KEY
 
-If you're an AI agent or LLM, these resources are optimized for you:
+&#123;
+  "generation_type": "video_from_text",
+  "data": &#123;
+    "prompt": "...",
+    "model": "veo_3",
+    "duration": 8
+  &#125;
+&#125;</code></pre>
+          </figure>
+          <a href="/reference/generations/" class="gen-step__link">
+            Generations reference
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </a>
+        </div>
+      </li>
 
-- **[llms.txt](/llms.txt)** — Complete API reference in plain text, designed to teach you how GEN works (concepts, workflows, every generation type with exact payloads)
-- **[llms-full.txt](/llms-full.txt)** — Exhaustive endpoint reference with request/response schemas
-- **[OpenAPI 3.1 Spec](/openapi.yaml)** — Machine-readable specification
-- **[MCP Server](https://github.com/poweredbyGEN/gen-mcp-server)** — 60+ tools for Claude Code, Cursor, and VS Code (`npx @poweredbygen/gen-mcp-server@latest`)
+      <li class="gen-step">
+        <span class="gen-step__no" aria-hidden="true">05</span>
+        <div class="gen-step__body">
+          <p class="gen-step__tag">Step five</p>
+          <h3 class="gen-step__title">Render and <em>export.</em></h3>
+          <p class="gen-step__desc">
+            Composite all layers into a final video. Poll the same <code>/generations/:id</code> endpoint for render status. When it completes, you get a downloadable URL — or optionally publish straight to TikTok, Instagram, or YouTube.
+          </p>
+          <figure class="gen-step__code">
+            <div class="gen-step__code-lang">HTTP</div>
+            <pre><code>POST /v1/vidsheet/:id/cells/:cell_id/render
+X-API-Key: $GEN_API_KEY
 
-### Install the MCP Server
+&rarr; poll GET /v1/generations/:generation_id
+&rarr; status: "completed"
+&rarr; output_resources: [&#123; file_url: "..." &#125;]</code></pre>
+          </figure>
+          <a href="/reference/rendering/" class="gen-step__link">
+            Rendering reference
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </a>
+        </div>
+      </li>
 
-<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0;">
-  <a href="vscode://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/gen-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #007ACC; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.15 2.587L18.21.21a1.516 1.516 0 0 0-1.706.355L9.265 7.399l-4.53-3.44a1.012 1.012 0 0 0-1.293.049L.96 6.39a1.012 1.012 0 0 0 0 1.468l3.936 3.143L.96 14.142a1.012 1.012 0 0 0 0 1.468l2.482 2.383a1.012 1.012 0 0 0 1.293.049l4.53-3.44 7.239 6.834a1.516 1.516 0 0 0 1.706.355l4.94-2.377A1.516 1.516 0 0 0 24 18.016V5.984a1.516 1.516 0 0 0-.85-1.397zM18.5 16.607L11.461 11 18.5 5.393v11.214z"/></svg>
-    Install in VS Code
-  </a>
-  <a href="cursor://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/gen-mcp-server" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #000000; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-6.72 6.72a.75.75 0 0 1-1.06 0l-3.36-3.36a.75.75 0 1 1 1.06-1.06l2.83 2.83 6.19-6.19a.75.75 0 1 1 1.06 1.06z"/></svg>
-    Install in Cursor
-  </a>
+    </ol>
+  </section>
+
+  <section class="gen-splash__ai">
+    <header class="gen-splash__ai-header">
+      <span class="gen-splash__flow-label">For AI agents</span>
+      <h2 class="gen-splash__flow-title">
+        Built to be <em>machine-readable.</em>
+      </h2>
+      <p class="gen-splash__flow-sub">
+        Every surface on this site has a plain-text equivalent. Point your agent at any of these and it will learn the whole API without a human in the loop.
+      </p>
+    </header>
+
+    <ul class="gen-splash__ai-grid">
+      <li>
+        <a href="/llms.txt">
+          <span class="gen-splash__ai-name">llms.txt</span>
+          <span class="gen-splash__ai-desc">System-prompt style teaching doc. Read this first.</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+      </li>
+      <li>
+        <a href="/llms-full.txt">
+          <span class="gen-splash__ai-name">llms-full.txt</span>
+          <span class="gen-splash__ai-desc">Exhaustive endpoint reference with request and response shapes.</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+      </li>
+      <li>
+        <a href="/openapi.yaml">
+          <span class="gen-splash__ai-name">openapi.yaml</span>
+          <span class="gen-splash__ai-desc">Machine-readable OpenAPI 3.1 spec, phase-tagged.</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+      </li>
+      <li>
+        <a href="/guides/claude-code/">
+          <span class="gen-splash__ai-name">MCP server</span>
+          <span class="gen-splash__ai-desc">90+ tools for Claude Code, Cursor, and VS Code.</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </a>
+      </li>
+    </ul>
+
+    <div class="gen-splash__install">
+      <a href="vscode://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/autocontentengine-mcp-server" class="gen-splash__install-btn">
+        Install MCP in VS Code
+      </a>
+      <a href="cursor://anthropic.claude-code/installMcpServer?url=https://www.npmjs.com/package/@poweredbygen/autocontentengine-mcp-server" class="gen-splash__install-btn">
+        Install MCP in Cursor
+      </a>
+    </div>
+  </section>
+
+  <footer class="gen-splash__foot">
+    <div><span class="gen-splash__foot-label">Colophon</span> Set in Instrument Serif, IBM Plex Sans, IBM Plex Mono. No cookies. No tracking on this page.</div>
+    <div><span class="gen-splash__foot-label">Revised</span> 2026 · v1</div>
+  </footer>
+
 </div>
-
-See the [Claude Code guide](/guides/claude-code/) for manual setup and usage examples.
-
-## Start here
-
-The fastest way to get a grounded, on-brand video out of GEN is two calls:
-
-1. **Configure the agent** — `PATCH /v1/agents/{id}/core` once with identity, overview, personality, inspiration, voice, look, and accounts. This is the single most important step for any new agent — everything downstream reads from here. See the [Agent Core reference](/reference/agent-core/).
-2. **Generate content ideas** — the content-ideas agent pulls trending data from 10+ platforms, matches it to your configured keywords and inspiration, and proposes videos with scripts, hooks, and selected assets. See the [Content Ideas guide](/guides/content-ideas/).
-
-Then clone a template, drop the idea in, and render. The [Quick Start guide](/guides/quickstart/) walks through the whole path end-to-end in under 10 minutes.
-
-<CardGrid>
-  <LinkCard title="Quick Start (10 min walkthrough)" href="/guides/quickstart/" description="Configure an agent with a single PATCH, generate ideas from trending data, produce a video." />
-  <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="One endpoint for identity, overview, personality, inspiration, voice, look, and accounts." />
-  <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="Async runs, conversations, refinement, long-term preferences." />
-  <LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the GEN MCP server and drive the whole workflow with natural language." />
-  <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
-</CardGrid>
