@@ -1,0 +1,102 @@
+---
+title: Clone a Template
+description: One API call that creates a fully configured Auto Content Engine in your agent workspace.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Cloning a template is a single API call that produces a fully configured engine under your agent. Everything that would normally require a dozen setup calls — columns, creation cards, layer stacks, variables — is created atomically.
+
+## Endpoint
+
+```
+POST /v1/templates/spreadsheets/:slug/clone
+```
+
+## Request
+
+```bash
+curl -X POST "https://api.gen.pro/v1/templates/spreadsheets/tiktok-talking-avatar/clone" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "agent_id": "'"$AGENT_ID"'" }'
+```
+
+### Path parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| `slug` | string | Template slug, UUID, or numeric ID. |
+
+### Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent to clone the template into. Must be accessible to the authenticated user. |
+
+## Response (201)
+
+Returns the newly created engine with all its nested structure:
+
+```json
+{
+  "id": 4710,
+  "slug": "tiktok-talking-avatar-1",
+  "title": "TikTok Talking Avatar",
+  "project_type": "autocontentengine",
+  "uuid": "a1b2c3d4-...",
+  "status": "active",
+  "spreadsheet_columns": [
+    { "id": 22001, "title": "TEXT 1",      "type": "text",  "role": "ingredient",  "position": 0 },
+    { "id": 22002, "title": "SCRIPT",      "type": "text",  "role": "ingredient",  "position": 1 },
+    { "id": 22003, "title": "VOICE",       "type": "audio", "role": "ingredient",  "position": 2 },
+    { "id": 22004, "title": "VIDEO",       "type": "video", "role": "video",       "position": 3 },
+    { "id": 22005, "title": "FINAL VIDEO", "type": "video", "role": "final_video", "position": 4 },
+    { "id": 22006, "title": "STATS",       "type": "stats", "role": "stats",       "position": 5 }
+  ],
+  "spreadsheet_rows": [
+    {
+      "id": 33001,
+      "position": 0,
+      "spreadsheet_cells": [
+        { "id": 44001, "column_id": 22001, "value": null },
+        { "id": 44002, "column_id": 22002, "value": null },
+        { "id": 44003, "column_id": 22003, "value": null },
+        { "id": 44004, "column_id": 22004, "value": null },
+        { "id": 44005, "column_id": 22005, "value": null },
+        { "id": 44006, "column_id": 22006, "value": null }
+      ]
+    }
+  ]
+}
+```
+
+## What gets created
+
+- A new engine under the target agent
+- All columns with their type (text / image / video / audio) and role (ingredient / video / final_video / stats)
+- A default first row with empty cells for each column
+- Default creation cards pre-configured on each column — so when you trigger a cell generation, the right model + prompt template runs automatically
+- Default layer stack on the video column (e.g. background, avatar, captions, CTA) with correct z-index and timing
+
+<Aside type="note">
+  Cloning is **free** — no credits consumed. You only burn credits when you trigger a cell or layer generation in [Step 4](/step-4-edit/overview/).
+</Aside>
+
+## Clone into a different agent
+
+To clone into an agent you don't currently have selected, pass that agent's ID as `agent_id`. The authenticated user must have access.
+
+## Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| 401 | `unauthorized` | Invalid API key. |
+| 403 | `forbidden` | User doesn't have access to the target agent. |
+| 404 | `template_not_found` | Slug / UUID / ID did not match any template. |
+| 422 | `agent_not_found` | Invalid `agent_id` in body. |
+| 422 | `no_active_credit_purchase` | Agent workspace has no active credit purchase. |
+
+## Next step
+
+Jump to [Step 4 — Edit & Generate](/step-4-edit/overview/) to fill cells, configure creation cards, and trigger generations.

@@ -1,0 +1,62 @@
+---
+title: Preferences
+description: Persistent rules that apply to every future content ideas run.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Preferences are rules that apply to **every** future idea generation, not just one batch. They live on the agent and are read every time the Ideas Engine runs. Use them to encode durable constraints: hook styles, audience, off-limits topics, preferred video formats, required CTAs.
+
+## Set a preference
+
+Just send a natural-language instruction to the agent that starts with `remember:` (or similar). The agent recognizes that as a persistent rule and stores it.
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "'"$AGENT_ID"'",
+    "message": "remember: always use statement hooks, never question hooks. target women 25-34. never mention competitors by name."
+  }'
+```
+
+The agent confirms the preference in the run output and stores it on the agent's config.
+
+## Preferences vs per-batch requirements
+
+| | Preferences | Per-batch requirements |
+|---|---|---|
+| Scope | Every future run | This run only |
+| How to set | "remember: ..." | "focus on ..." / "keep under ..." |
+| Where stored | Agent config | Just this one message |
+| Override | New "remember:" or "forget:" | Next run clears it |
+
+## Examples of good preferences
+
+- **Hook rules** — "always use statement hooks; never pose questions in the first 3 seconds"
+- **Audience** — "target women 25-34 in the US"
+- **Brand voice** — "warm, specific, never condescending; no corporate-speak"
+- **Format prefs** — "90% of ideas should be 10-14 seconds; skip anything over 20"
+- **No-go list** — "never mention competitors by name; no political content"
+- **Signature style** — "always end with a first-person callback to an earlier line"
+
+<Aside type="tip">
+  Preferences compound. Set 5–10 at setup time and the Ideas Engine will produce noticeably more on-brand ideas on the very next run. The richer the preferences, the less refinement you need downstream.
+</Aside>
+
+## Removing a preference
+
+Just tell the agent:
+
+```
+forget: that rule about statement hooks. allow questions in hooks again.
+```
+
+## Reviewing current preferences
+
+```
+list all my current preferences
+```
+
+The agent returns the active preference set so you can audit what's applied.

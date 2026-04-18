@@ -1,0 +1,119 @@
+---
+title: Download the Video
+description: How to pull the rendered MP4 out of GEN and into your own storage, app, or social scheduler.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+When a render completes, the final MP4 is hosted on GEN's CDN and accessible via a public URL. This page covers the practical patterns for pulling that MP4 somewhere useful.
+
+## The URL
+
+After polling a render to `completed`, `output_resources[0].url` is the CDN URL:
+
+```json
+{
+  "id": 56789,
+  "status": "completed",
+  "output_resources": [
+    {
+      "id": 4821,
+      "url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/render_xyz.jpg",
+      "object_type": "video"
+    }
+  ]
+}
+```
+
+## Download patterns
+
+<Tabs>
+
+<TabItem label="curl">
+
+```bash
+curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
+```
+
+</TabItem>
+
+<TabItem label="TypeScript">
+
+```ts
+const response = await fetch(generation.output_resources[0].url);
+if (!response.ok) throw new Error(`download failed: ${response.status}`);
+const blob = await response.blob();
+
+// Save to disk (Node)
+import { writeFile } from 'node:fs/promises';
+await writeFile('final_video.mp4', Buffer.from(await blob.arrayBuffer()));
+```
+
+</TabItem>
+
+<TabItem label="Python">
+
+```python
+import requests
+
+url = generation["output_resources"][0]["url"]
+with requests.get(url, stream=True) as r:
+    r.raise_for_status()
+    with open("final_video.mp4", "wb") as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            f.write(chunk)
+```
+
+</TabItem>
+
+</Tabs>
+
+## Stream directly to another service
+
+For integrations that post to a scheduler or mirror to your own CDN, skip local disk:
+
+```ts
+const src = await fetch(generation.output_resources[0].url);
+const dest = await fetch('https://your-storage.example.com/upload', {
+  method: 'PUT',
+  body: src.body,  // streams through
+  headers: { 'Content-Type': 'video/mp4' },
+});
+```
+
+## Publishing flow expects a URL, not bytes
+
+The [Publishing API](/reference/publishing/) takes `media_url` and expects a **publicly accessible** URL at post time. The GEN CDN URL works directly — no need to re-upload:
+
+```json
+{
+  "platform": "tiktok",
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+  "description": "caption #hashtags",
+  "schedule_type": "now"
+}
+```
+
+## Thumbnails
+
+Every render produces a `thumbnail_url` — a JPEG of the first frame. Use it for previews in your own UI without fetching the full MP4.
+
+## Retention
+
+Rendered output resources persist indefinitely under your workspace. If you delete the engine, the output resources are detached but the files remain accessible until you explicitly delete them.
+
+To delete a single output resource:
+
+```bash
+curl -X DELETE "https://api.gen.pro/v1/content_resources/$RESOURCE_ID?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+<Aside type="note">
+  Deleting a content resource is irreversible. Any row or publish job referencing the URL will 404 after the delete propagates.
+</Aside>
+
+## Individual layer outputs
+
+The render is the composite, but each layer also has a downloadable output. If you only need the voiceover MP3 or a single b-roll clip, fetch the layer's `default_user_job.output_resources[0].url` instead.

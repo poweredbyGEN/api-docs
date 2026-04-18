@@ -1,0 +1,145 @@
+---
+title: Vidsheet Anatomy
+description: How rows, columns, cells, layers, and creation cards fit together in an Auto Content Engine.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+A vidsheet (Auto Content Engine) has two sides that produce one thing: **a final rendered video per row**.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Auto Content Engine (one per campaign or workflow)             │
+│                                                                 │
+│  ┌─────────── Sheet side ───────────┐  ┌── Video side ────┐     │
+│  │                                  │  │                  │     │
+│  │   Row 1 → cells → final_video────┼──▶  Layers stack    │     │
+│  │   Row 2 → cells → final_video────┼──▶  Layers stack    │     │
+│  │   Row 3 → cells → final_video────┼──▶  Layers stack    │     │
+│  │                                  │  │                  │     │
+│  └──────────────────────────────────┘  └──────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Rows — one per video
+
+Each row is one video. If you want 20 videos in a batch, create 20 rows.
+
+- `POST /v1/autocontentengine/:id/rows?agent_id=` — create
+- `POST /v1/autocontentengine/:id/rows/:row_id/duplicate` — clone a row
+- `PUT /v1/autocontentengine/:id/rows/mass_update` — bulk update
+
+## Columns — one per content type
+
+Each column defines **what kind of content** lives at that intersection. Common columns in a template:
+
+| Column | Type | Role | Example |
+|--------|------|------|---------|
+| TEXT 1 | text | ingredient | Topic / subject |
+| SCRIPT | text | ingredient | Full VO script |
+| VOICE | audio | ingredient | Generated TTS |
+| VIDEO | video | video | Avatar / b-roll clip |
+| FINAL VIDEO | video | final_video | Composite output |
+| STATS | stats | stats | Credit cost + metadata |
+
+Types: `text` / `image` / `video` / `audio`.
+Roles: `ingredient` (user-editable), `video`, `final_video`, `stats` (system-managed).
+
+<Aside type="note">
+  Only `ingredient` role columns can be created, updated, or deleted by users. System roles (`video`, `final_video`, `stats`, `global_variable_*`) are managed by the platform.
+</Aside>
+
+## Cells — the intersection
+
+A cell is one piece of content for one row / column pair. Cells hold:
+
+- A `value` (text, or a content resource URL)
+- A creation card (the `generation_type` + `data` that generates its value)
+- Zero or more layers (if the column is `video` role)
+
+```
+PATCH /v1/autocontentengine/:id/cells/:cell_id?agent_id=
+  body: { "spreadsheet_cell": { "value": "the script text" } }
+```
+
+## Creation cards — one per cell
+
+Every cell has a creation card declaring **how to generate** its content. There are 9 types — [see the full reference](/reference/creation-cards/).
+
+Example — a text cell that uses Gemini 2.5 Pro:
+
+```json
+{
+  "generation_type": "text",
+  "data": {
+    "prompt": "Write a 12-second TikTok hook for {{topic}}",
+    "model": "gemini_2_5_pro",
+    "variables": { "topic": "San Antonio tacos" }
+  }
+}
+```
+
+Example — a video cell that animates an image:
+
+```json
+{
+  "generation_type": "video_from_image",
+  "data": {
+    "image_resource_id": 4821,
+    "prompt": "zoom in slowly, handheld feel",
+    "model": "kling_2_6",
+    "aspect_ratio": "9:16",
+    "duration": 5
+  }
+}
+```
+
+## Layers — per-cell timeline
+
+A video-role cell composites **layers** into the final output. Each layer has:
+
+- `type` — image / video / audio / text / captions
+- `position` — z-index (lower = further back)
+- Timing — `start_at`, `duration`, fade-ins
+- Source — either its own generation, or a reference to another cell
+
+Typical talking-avatar layer stack (bottom to top):
+
+```
+z=0  background      (video or image)
+z=1  avatar          (video_from_image)
+z=2  audio           (speech_from_text)
+z=3  captions        (captions generated from audio)
+z=4  text overlay    (CTA, watermark)
+```
+
+Create a layer:
+
+```
+POST /v1/autocontentengine/:id/cells/:cell_id/layers?agent_id=
+  body: { "video_layer": { "name": "captions", "type": "captions", "position": 3 } }
+```
+
+Reorder by updating positions:
+
+```
+PUT /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions?agent_id=
+  body: { "layers": [{ "id": 1, "position": 0 }, { "id": 2, "position": 1 }] }
+```
+
+## Variables — reusable template values
+
+Global variables live on the engine and substitute into any prompt containing `{{variable_name}}`. Use them for brand name, CTA, tone, color, aspect ratio preferences, anything reused across cells.
+
+```
+GET /v1/autocontentengine/:id/global_variables?agent_id=
+POST /v1/autocontentengine/:id/import_global_variables   (XLSX upload)
+```
+
+See [Variables](/reference/variables/) for the full flow.
+
+## Why this structure?
+
+The sheet side is **human-friendly** — it looks like a spreadsheet, so non-devs can drive it. The video side is **renderer-friendly** — timelines with layers is exactly what Remotion composites expect.
+
+The API exposes both sides orthogonally. You can drive the sheet without ever touching layers (let the template's layer stack just work). Or you can ignore the sheet and drive layers directly. Most workflows do a bit of both.

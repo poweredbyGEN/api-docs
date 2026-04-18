@@ -1,0 +1,87 @@
+---
+title: Research
+description: Standalone research across Reddit, X, YouTube, TikTok, Instagram, Hacker News, Perplexity, and Gemini.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Ideas Engine uses research under the hood, but you can also call it directly. `POST /v1/research` gathers signals from 8+ sources, synthesizes them, and returns structured findings.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+## Trigger research
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/research" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "'"$AGENT_ID"'",
+    "topic": "tariffs on beauty imports 2026",
+    "depth": "default"
+  }'
+```
+
+## Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | string | Yes | Scope research to this agent. |
+| `topic` | string | Yes | The subject to research. |
+| `depth` | string | No | `quick` (fast, surface-level), `default`, or `deep` (slower, thorough). Defaults to `default`. |
+
+## Response
+
+```json
+{
+  "topic": "tariffs on beauty imports 2026",
+  "depth": "default",
+  "researched_at": "2026-04-18T10:00:00Z",
+  "sources": {
+    "reddit":      { "count": 18, "total_upvotes": 4120 },
+    "x":           { "count": 42, "total_likes": 9810 },
+    "youtube":     { "count": 12, "total_views": 2100000 },
+    "tiktok":      { "count": 24, "total_views": 8900000 },
+    "instagram":   { "count": 15, "total_likes": 124000 },
+    "hackernews":  { "count": 3 },
+    "perplexity":  { "citations": 14 },
+    "gemini":      { "grounded": true }
+  },
+  "perplexity": {
+    "text": "...",
+    "citations": [
+      { "url": "https://...", "title": "..." }
+    ]
+  },
+  "gemini": {
+    "text": "...",
+    "grounded": true
+  },
+  "summary_markdown": "## Key findings\\n\\n- ..."
+}
+```
+
+## When to call research directly
+
+- You want the raw data to drive your own idea generation pipeline
+- You need sources for a specific claim (Perplexity returns citations)
+- You want to build a research digest email or Slack post
+
+<Aside type="note">
+  Research is a paid operation (`web_research` credit type, ~35 credits). The Ideas Engine automatically runs research when the agent decides it needs fresh data; calling `/v1/research` directly gives you the same signal without generating ideas on top.
+</Aside>
+
+## Research is daily on configured topics
+
+If you set `research_topics` on Agent Core, the platform **automatically researches each topic daily** and feeds the findings into the agent's Ideas Engine on the next run. No polling needed — just set the topics and consume the ideas downstream.
+
+```json
+{
+  "research_topics": [
+    { "topic": "new food truck openings in San Antonio" },
+    { "topic": "viral street food TikTok moments" }
+  ]
+}
+```
+
+See [Agent Core — research_topics](/reference/agent-core/) for how to configure them.

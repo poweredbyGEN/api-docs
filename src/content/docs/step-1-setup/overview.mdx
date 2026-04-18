@@ -1,0 +1,90 @@
+---
+title: Step 1 — Set Up Your Agent
+description: Configure identity, voice, personality, inspiration sources, API keys, and workspaces. Everything downstream reads from here.
+---
+
+import { LinkCard, CardGrid, Aside, Steps } from '@astrojs/starlight/components';
+
+**This is the most important step for any new agent.** Every downstream feature — content ideas, template fills, voice generation, captions — reads from the agent's configuration. A blank agent produces generic output. A richly configured agent produces specific, on-brand output from the very first call.
+
+The whole setup is a single PATCH to **Agent Core**. Every field maps 1:1 to how the GEN Setup canvas saves.
+
+## Prerequisites
+
+- A GEN account at [gen.pro](https://gen.pro)
+- An [API key](/reference/api-keys/)
+- An organization (workspace) with active GEN credits
+
+## The one call that sets everything up
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/agents/$AGENT_ID/core" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "brand_name": "Santiago",
+    "description": "San Antonio street food scout who hunts the best tacos.",
+    "identity_type": "character",
+    "goal": "growth",
+    "target_platforms": ["tiktok", "instagram"],
+    "shortform": true,
+    "longform": false,
+    "keywords": ["streetfood", "foodtruck", "tacotok"],
+    "monitored": [
+      { "handle": "https://tiktok.com/@keithlee", "item_type": "account" },
+      { "handle": "sanantonioeats", "item_type": "hashtag" }
+    ],
+    "research_topics": [
+      { "topic": "new food truck openings in San Antonio" }
+    ],
+    "linked_accounts": [
+      { "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }
+    ],
+    "personality": "Santiago grew up eating at his tia taco stand in south San Antonio...",
+    "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
+  }'
+```
+
+Returns `200 OK` on full success, or `207 Multi-Status` with per-section results if any one section fails. See the [Agent Core reference](/reference/agent-core/) for every field.
+
+## Three distinctions that trip people up
+
+**`linked_accounts` vs `monitored` vs `research_topics`**
+
+- `linked_accounts` — the agent's **OWN** brand socials (what it posts from)
+- `monitored` — **inspiration sources** (creators / hashtags / keywords to watch for trending content)
+- `research_topics` — **expertise** areas the agent stays current on (researched daily)
+
+Don't mix them. Putting a competitor's URL in `linked_accounts` will eventually show up on the agent's "My Socials" list.
+
+**`description` vs `personality`**
+
+- `description` is a short 2–3 sentence summary (max 500 chars)
+- `personality` is the full persona text (max 20000 chars)
+
+Stuffing a 3000-char persona into `description` returns 422 by design.
+
+## Voice design
+
+Agent Core accepts a `default_user_voice` pointing at any voice in the library. To create a new voice, use the 4-step prompt-based design flow, clone from an audio sample, or connect an ElevenLabs API key.
+
+<CardGrid>
+  <LinkCard title="Voice Design" href="/reference/agent-voice/" description="Design voices from text, clone from audio, or connect ElevenLabs. Preview and save." />
+  <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="Every field, the per-section 207 response, validation rules." />
+  <LinkCard title="Organizations & Workspaces" href="/reference/organizations/" description="Workspace membership, credit balance, ownership." />
+  <LinkCard title="API Keys" href="/reference/api-keys/" description="Create, rotate, revoke Personal Access Tokens." />
+</CardGrid>
+
+## What Step 1 unlocks
+
+- **Step 2 — Content Ideas** references `keywords`, `monitored`, `personality`, and `research_topics` to generate ideas that sound like your brand
+- **Step 3 — Template Fills** references `default_user_voice` and `linked_accounts` when cloning templates
+- **Step 4 — Generations** reference `personality` and brand tone when generating text in cells
+
+## Next step
+
+<LinkCard
+  title="Step 2 — Generate Content Ideas"
+  href="/step-2-ideas/overview/"
+  description="With the agent configured, let it propose videos grounded in real trending data."
+/>

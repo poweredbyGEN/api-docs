@@ -1,0 +1,92 @@
+---
+title: Regenerate Workflow
+description: Re-run a cell, swap models, swap prompts, and the credit behavior around stop / continue / retry.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The first generation on a cell is rarely the final one. You'll iterate — swap the model, tweak the prompt, pass different assets, regenerate. This page covers the patterns and the credit behavior so you know what's actually happening.
+
+## Pattern 1 — update the card, regenerate
+
+If you want to swap models or tweak the prompt, just POST a new generation with the updated `data`:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "video_from_text",
+    "data": {
+      "prompt": "... updated prompt ...",
+      "model": "veo_3_1_fast",
+      "aspect_ratio": "9:16",
+      "duration": 10
+    }
+  }'
+```
+
+A new `generation_id` is returned. The previous generation is still there in the history (you can find it via the cell's `generations` list), but the cell's displayed output updates to the new one once it completes.
+
+## Pattern 2 — stop and retry
+
+If a generation is running long and you want to bail:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/generations/789/stop" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Credits for that generation are **refunded** to your workspace. The generation's final status becomes `stopped`. You can then fire a new generation immediately.
+
+## Pattern 3 — continue a stopped generation
+
+If you stopped by accident, continue it:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/generations/789/continue" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Credits are **re-charged** and the job resumes from `pending`.
+
+## Pattern 4 — mass regenerate
+
+Want to regenerate a whole column across all rows (e.g. you swapped the script prompt)? Use `mass_update` on the cells + trigger each. No single endpoint regenerates N cells at once — trigger each `POST /cells/:cell_id/generate` in a tight loop.
+
+<Aside type="tip">
+  Poll status on the returned `generation_id` values in parallel. Each generation runs independently on the platform side, so firing 20 at once and polling each completes much faster than doing them sequentially.
+</Aside>
+
+## Credit behavior summary
+
+| Event | Credit behavior |
+|-------|-----------------|
+| `POST /cells/:id/generate` | Pre-charge on creation. |
+| Generation completes successfully | Final cost reconciled (refund delta or charge extra). |
+| Generation fails | Full refund. |
+| Generation stopped via `/stop` | Full refund. |
+| Generation resumed via `/continue` | Re-charged. |
+| Triggering a new generation on the same cell | Independent charge — previous generation's credits are not reused. |
+
+## Check credit balance before a batch
+
+Before kicking off N generations, read the org balance:
+
+```bash
+curl "https://api.gen.pro/v1/organizations/$ORG_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Response includes `available_credit: { generic, aura }`. If generic credits are too low for the expected batch cost, top up first — a 422 `insufficient_credits_for_job` mid-batch is painful.
+
+## Seeing all generations for a cell
+
+A cell tracks all its generations, not just the latest. To see the history:
+
+```bash
+curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Response includes the current `user_job_id` (the generation currently displayed) and, via the engine's `user_jobs`, all historical generations with timestamps and statuses.

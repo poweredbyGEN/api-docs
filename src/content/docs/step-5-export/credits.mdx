@@ -1,0 +1,113 @@
+---
+title: Credits & Billing
+description: How credits are charged, refunded, and reconciled across the 5-step journey.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+GEN charges **credits** for every compute-intensive operation — text generation, image generation, video generation, voice synthesis, lipsync, captions, research, content ideas, and renders. All reads and CRUD writes are free.
+
+## Where credits live
+
+Credits live on the **organization** (workspace), not the agent. Every request to an agent-scoped endpoint checks the agent's parent org for credits.
+
+```bash
+curl "https://api.gen.pro/v1/organizations/$ORG_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Response includes `available_credit: { generic, aura }`. The `generic` bucket covers all Auto Content Engine + agent.gen.pro operations; the `aura` bucket is for connected-social features and isn't consumed by the API surface.
+
+## Pricing formula
+
+Credits are derived from vendor cost + a tier-specific markup:
+
+```
+credits = round(vendor_cost_usd / 0.0087 × markup_ratio)
+```
+
+| Tier | Markup | Examples |
+|------|--------|----------|
+| Generative AI (image) | 1.3× | Nano Banana, Midjourney, Imagen |
+| GPU workloads | 1.5× | Lipsync, custom GPU jobs |
+| LLM (text / intelligence) | 3.0× | OpenAI, Gemini, Anthropic, Perplexity, ElevenLabs |
+
+## What's free
+
+| | Free | Charged |
+|---|------|---------|
+| `GET` any endpoint | yes | — |
+| Create / update / delete engines, rows, columns, cells, layers | yes | — |
+| Clone a template | yes | — |
+| Upload a content resource | yes | — |
+| Set a content preference | yes | — |
+| `POST /cells/:id/generate` (any type) | — | yes |
+| `POST /cells/:id/layers/:id/generate` | — | yes |
+| `POST /cells/:id/render` | — | yes |
+| `POST /v1/research` | — | yes |
+| `POST /v1/agent/run` (content ideas / chat) | — | yes |
+
+## Pre-charge and reconcile
+
+Every compute operation:
+
+1. **Pre-charges** the estimated credits before running (to avoid a mid-job overdraft)
+2. **Runs** the vendor operation
+3. **Reconciles** — refunds the delta if actual < estimated, charges extra if actual > estimated
+
+If the job fails or is stopped, the **full pre-charge is refunded**. You never pay for a failed generation.
+
+## Example costs (agent.gen.pro operations)
+
+| Operation | Vendor cost | Credits | $ at $0.008/credit |
+|-----------|------------|---------|---------------------|
+| Content ideas (5 ideas, no research) | $0.17 | ~59 | $0.47 |
+| Content ideas (5 ideas, with research) | $0.32 | ~110 | $0.88 |
+| Standalone research | $0.10 | ~35 | $0.28 |
+| Idea refinement | $0.10 | ~35 | $0.28 |
+| Simple agent chat | $0.02 | ~7 | $0.06 |
+
+## Example costs (common generations)
+
+Exact credit cost depends on model + duration + aspect ratio. Rough ranges:
+
+| Generation | Typical credits |
+|------------|-----------------|
+| Text (Gemini 2.0 Flash, 500 tokens) | 1-3 |
+| Text (Gemini 2.5 Pro, 500 tokens) | 4-8 |
+| Image (Gemini Image) | ~5 |
+| Image (Midjourney) | ~15 |
+| Video from text (5s, Seedance Pro) | ~250 |
+| Video from text (10s, Veo 3) | ~600 |
+| Speech (1 minute, ElevenLabs) | ~30 |
+| Lipsync (10s) | ~200 |
+| Captions (1 min audio) | ~10 |
+| Render (30s vertical video) | ~50 |
+
+Query the authoritative current pricing via `GET /v1/pricing_configs` if you need to compute estimates in your own code.
+
+## Running out mid-batch
+
+If credits run out mid-batch you'll see:
+
+```json
+{ "error": "Insufficient credits for this job", "error_code": "insufficient_credits_for_job" }
+```
+
+The in-flight generation's pre-charge is refunded; subsequent `POST /generate` calls reject until the org tops up. No partial renders charged.
+
+<Aside type="tip">
+  Before firing 50+ generations, check balance. Top up through the dashboard or contact sales for bulk credit pricing.
+</Aside>
+
+## Idempotency
+
+Pre-charge endpoints accept an `Idempotency-Key` header. If you retry a request with the same key within 24 hours, you get the same response without double-charging. Services that integrate GEN and need at-most-once guarantees should derive the key deterministically from their own request ID.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/autocontentengine/$EID/cells/$CID/generate?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Idempotency-Key: myapp-request-abc123" \
+  -H "Content-Type: application/json" \
+  -d '{ "generation_type": "text", "data": { "prompt": "...", "model": "gemini_2_0_flash" } }'
+```

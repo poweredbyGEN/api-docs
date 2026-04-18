@@ -1,471 +1,96 @@
 # GEN — Auto Content Engine API (Full Reference)
 
-> GEN is an Autonomous Social Media Agent. It detects trends, generates video content, publishes across platforms, and improves automatically — every single day.
+> Exhaustive endpoint reference. This doc is organized around the **5-step journey**, not by resource, so every endpoint sits next to the endpoints it gets called alongside in real workflows.
 
-## Overview
+For a teaching-style introduction with runnable curl chains, read `https://api.gen.pro/llms.txt` first. This file is the full spec.
 
-GEN is structured as: Workspace → Agent → Auto Content Engine → Content Loop
+## Base URLs and Auth
 
-- **Workspace**: Top-level container for a company or brand
-- **Agent**: A brand identity with voice, personality, and strategy
-- **Auto Content Engine**: Self-running content system with sheet (rows/columns/cells), video layers, automations, and global variables
-- **Content Loop**: Spot → Generate → Deploy → Measure → Adapt → Repeat
+- `https://api.gen.pro/v1` — agent setup, vidsheets, generations, renders, content monitoring, publishing
+- `https://agent.gen.pro/v1` — content ideas, research, conversations, chat
 
-## Authentication
+Auth on both surfaces:
+- `X-API-Key: <your-PAT>` — recommended; create via `POST /v1/persisted_tokens` or in the GEN dashboard
+- `Authorization: Bearer <jwt>` — for browser-login apps
 
-Base URL: https://api.gen.pro/v1
-Auth: `X-API-Key: <your-api-key>` header
+All `/autocontentengine/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
 
-Create an API key: POST /v1/persisted_tokens
-The plain-text key is returned once in the `token` field. Store it securely.
+## OpenAPI
 
-All /v1/autocontentengine/ endpoints require:
-- `agent_id` query parameter
-- Active GEN credit balance
+Full OpenAPI 3.1 spec: https://api.gen.pro/openapi.yaml. Every operation carries an `x-phase` extension set to one of: `setup`, `ideas`, `convert`, `edit`, `export`.
 
-## OpenAPI Spec
+---
 
-Full OpenAPI 3.1 specification: https://api.gen.pro/openapi.yaml
+# Phase 1 — Setup
+
+Everything you do once per agent: create the agent, configure identity / voice / personality / inspiration sources, set up API keys, manage workspaces.
 
 ## Discovery
 
+```
 GET /v1/me
-→ {id, email, name, username, created_at}
+→ { id, email, name, username, created_at }
 
 GET /v1/workspaces
-→ [{id, name}]
+→ [{ id, name }]
 
 GET /v1/agents?workspace_id={id}
-→ [{id, name}]
-
-## API Keys
-
-POST /v1/persisted_tokens
-Body: {name?, expires_in?}
-→ {id, name, token_type, status, token} (token shown once)
-
-GET /v1/persisted_tokens
-→ [{id, name, token_type, created_at, expires_at, last_used_at, revoked_at, status}]
-
-PATCH /v1/persisted_tokens/{id}
-Body: {persisted_token: {name}}
-
-DELETE /v1/persisted_tokens/{id}/revoke
-
-DELETE /v1/persisted_tokens/revoke_all
-
-## Templates
-
-Templates are pre-configured engines synced from a curated library. Cloning a template is the fastest way to create a production-ready engine with the right columns.
-
-GET /v1/templates/projects?page={page}
-→ [{id, slug, title, name, description, cover, tutorial_url, tags: [], recent_generated_contents: [{id, type, thumbnail_url}]}]
-20 per page.
-
-GET /v1/templates/projects/{slug}
-slug can be a URL slug, UUID, or numeric ID.
-→ {id, slug, title, name, description, cover, tutorial_url, tags: [], ...}
-
-POST /v1/templates/spreadsheets/{slug}/clone
-Body: {agent_id}
-Clones the template into the specified agent's workspace. Returns the new engine.
-→ Full engine object with columns, rows, cells
-
-## Auto Content Engine
-
-POST /v1/autocontentengine?agent_id={id}
-Body: {spreadsheet: {title, is_default?}}
-→ Full engine object with columns, rows, cells
-
-GET /v1/autocontentengine/{id}?agent_id={id}&with_execution_cost=true
-→ Full engine with nested data
-
-POST /v1/autocontentengine/{id}/clone?agent_id={id}
-Body: {target_agent_id?}
-
-## Rows
-
-GET /v1/autocontentengine/{id}/rows?agent_id={id}
-POST /v1/autocontentengine/{id}/rows?agent_id={id}
-Body: {spreadsheet_row: {position?}}
-
-GET /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id}
-POST /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id}
-PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={id}
-Body: {rows: [{id, position}]}
-
-PUT /v1/autocontentengine/{id}/rows/mass_update?agent_id={id}
-
-## Columns
-
-GET /v1/autocontentengine/{id}/columns?agent_id={id}
-POST /v1/autocontentengine/{id}/columns?agent_id={id}
-Body: {spreadsheet_column: {title, type, position?}}
-
-POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
-PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
-PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
-
-## Column Types & Roles
-
-Types: text, image, video, audio
-
-Roles:
-- ingredient — User-editable input columns (ONLY these can be created/updated/deleted by users)
-- video — Generated video layer column (system)
-- final_video — Final composite video column (system)
-- stats — Statistics/metadata column (system)
-- global_variable_name — Variable name (system)
-- global_variable_value — Variable value (system)
-
-Default template columns: TEXT 1 (text/ingredient), TEXT 2 (text/ingredient), PROMPT (text/ingredient), VIDEO (video/video), FINAL VIDEO (video/final_video), STATS (stats/stats)
-
-## Cells
-
-GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
-Body: {spreadsheet_cell: {value}}
-
-PUT /v1/autocontentengine/{id}/cells/mass_update?agent_id={id}
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}
-Body: {user_job_id}
-
-## Layers
-
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id}
-Body: {video_layer: {name, type, position?}}
-
-GET /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-POST .../layers/{layer_id}/duplicate?agent_id={id}
-PUT .../layers/update_positions?agent_id={id}
-
-## Global Variables
-
-GET /v1/autocontentengine/{id}/global_variables?agent_id={id}
-→ Key-value pairs used for template substitution in prompts and content
-
-POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}
-(multipart/form-data with XLSX file)
-
-GET /v1/autocontentengine/global_variables_template
-→ XLSX template download
-
-## Generations
-
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
-Body: {generation_type, data: {prompt, model, ...}}
-→ {generation_id, status: "pending"}
-
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
-Body: {generation_type, data: {...}}
-→ {generation_id, status: "pending"}
-
-GET /v1/generations/{id}
-→ {id, status, user_job_type, result, output_resources: [{id, url, thumbnail_url, object_type}]}
-
-POST /v1/generations/{id}/stop → credits refunded
-POST /v1/generations/{id}/continue → credits re-charged
-
-## Creation Card Types
-
-Each cell in a content engine has a creation card type that determines what kind of content it generates.
-
-### Text
-generation_type: "text"
-Models: gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4
-data: {prompt, model, variables: {key: value}}
-Inputs: prompt text (supports AI generation with {{variable}} substitution), model selection
-Output: text string in cell value
-
-### Image from Text
-generation_type: "image_from_text"
-Models: gemini_image, gemini_pro_image, midjourney
-data: {prompt, model, aspect_ratio, variables: {key: value}}
-Aspect ratios: 1:1, 9:16, 16:9, 4:3, 3:4
-Inputs: prompt (AI text + variable substitution), aspect ratio
-Output: image content resource
-
-### Video from Text
-generation_type: "video_from_text"
-Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5
-data: {prompt, negative_prompt?, model, aspect_ratio, duration, variables: {key: value}}
-Aspect ratios: 1:1, 9:16, 16:9
-Durations: 5s, 10s (model-dependent)
-Inputs: prompt, optional negative prompt, ratio, duration, variables
-Output: video content resource
-
-### Video from Image
-generation_type: "video_from_image"
-Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5
-data: {prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, duration}
-Aspect ratios: 1:1, 9:16, 16:9
-Durations: 5s, 10s (model-dependent)
-Inputs: source image (content resource ID), optional tail image, prompt, negative prompt, ratio, duration
-Output: video content resource
-
-### Video from Ingredients
-generation_type: "video_from_ingredients"
-Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast
-data: {prompt, model, asset_resource_ids: [], aspect_ratio, duration}
-Aspect ratios: 1:1, 9:16, 16:9
-Durations: 5s, 10s (model-dependent)
-Inputs: prompt with asset selector (multiple content resource IDs), ratio, duration
-Output: video content resource
-
-### Speech from Text
-generation_type: "speech_from_text"
-Voice methods: my_voices (saved voices), design_voice (create from parameters), clone_voice (clone from audio)
-data: {script, voice_method, voice_id?, language?, gender?, enhance_voice?, speed?}
-For my_voices: {script, voice_method: "my_voices", voice_id}
-For design_voice: {script, voice_method: "design_voice", language, gender, enhance_voice: true/false}
-For clone_voice: {script, voice_method: "clone_voice", audio_resource_id}
-Inputs: voice selection, script text, enhancement toggle, language, gender
-Output: audio content resource
-
-### Lipsync
-generation_type: "lipsync"
-Models: sync_so, gen
-data: {model, video_resource_id, audio_resource_id}
-Inputs: source video (content resource ID), source audio (content resource ID), lipsync model
-Output: video content resource with synced lip movements
-
-### Captions
-generation_type: "captions"
-Models: gemini
-data: {model, source_resource_id}
-Inputs: audio or video content resource ID
-Output: caption/subtitle data
-
-### Media
-generation_type: "media"
-Upload: image or video file directly to a cell
-data: {content_resource_id}
-Inputs: content resource ID from a prior upload
-Output: media attached to cell
-
-### Render Final Video
-generation_type: "render"
-POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
-Composites all layers (video, audio, captions, lipsync) into a final video.
-Output: final video content resource in the final_video column cell
-
-## Automation
-
-GET /v1/agents/{agent_id}/automation_config
-PATCH /v1/agents/{agent_id}/automation_config
-Body: {automation_config: {webhook_url?, callback_url?, polling_enabled?}}
-
-POST /v1/agents/{agent_id}/automation_config/test_webhook
-POST /v1/agents/{agent_id}/automation_config/test_callback
+→ [{ id, name }]
+```
 
 ## Agents
 
+```
 POST /v1/agents
-Body: {organization_id?, agent: {name, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes?}}
-→ {agent: {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, role, default_user_voice}}
+Body: { organization_id?, agent: { name, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes? } }
+→ { agent: { id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, role, default_user_voice } }
 Errors: 422 agent_creation_failed, 422 organization_not_found, 422 invalid_api_key
 
 GET /v1/agents/{id}?with_organization_uuid=true
-→ {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, agent_setup_project_id, role, default_user_voice: {id, name, gender, language, provider, url}}
+→ { id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, agent_setup_project_id, role, default_user_voice: { id, name, gender, language, provider, url } }
 Errors: 403 permission_denied, 422 agent_not_found
 
 PATCH /v1/agents/{id}
-Body: {agent: {name?, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes?, default_user_voice_attributes?: {source, voice_id}}}
-→ {agent: {id, name, description, organization_id, time_zone, primary_avatar_id, primary_avatar_url, role, default_user_voice}}
+Body: { agent: { name?, description?, time_zone?, eleven_lab_api_key?, hume_ai_api_key?, agent_avatars_attributes?, default_user_voice_attributes?: { source, voice_id } } }
+→ updated agent
 Errors: 403 permission_denied, 404 user_voice_resource_not_found, 422 agent_not_found, 422 validation_error, 422 invalid_api_key, 422 voice_id_required
 
 DELETE /v1/agents/{id}
-→ 200 (empty body)
+→ 200 empty
 Errors: 403 forbidden
 
 GET /v1/agents/{agent_id}/avatars?cursor={cursor}
-→ [{id, is_primary, url, thumbnail_url, degod_avatar_id}]
-Cursor-based pagination (20 per page). Primary avatar listed first.
+→ [{ id, is_primary, url, thumbnail_url, degod_avatar_id }]  (20/page, cursor pagination)
 
 POST /v1/agents/{agent_id}/avatars
-Body (multipart): agent_avatars_attributes[]: {file (JPEG/PNG/WebP) or degod_avatar_id}
-→ 200 (empty body)
+Body (multipart): agent_avatars_attributes[]: { file (JPEG/PNG/WebP) or degod_avatar_id }
+→ 200 empty
 Errors: 422 avatar_creation_failed
 
 PATCH /v1/agents/{agent_id}/avatars/{id}
-Sets avatar as primary. All other avatars marked non-primary.
-→ 200 (empty body)
+Marks avatar primary; all others non-primary.
+→ 200 empty
 Errors: 422 avatar_update_failed
 
 DELETE /v1/agents/{agent_id}/avatars/{id}
-id can be multiple IDs separated by underscores (e.g. 7_8_9).
-→ 200 (empty body)
+id may be underscore-joined for multi-delete (e.g. "7_8_9").
+→ 200 empty
+```
 
-## Organizations
+## Agent Core (preferred single-call setup)
 
-GET /v1/organizations
-→ [{id, uuid, organization_id, name, avatar: {url, thumbnail_url}, user_role, credit, available_credit: {generic, aura}, total_members, credit_plan: {id, name, cycle}}]
+**Use this for all agent setup reads and writes.** Flat endpoint. Every field name mirrors the GEN Setup canvas.
 
-POST /v1/organizations
-Body: {organization: {name, avatar? (file)}}
-→ {organization_id}
-Errors: 422 validation_error
+### Three critical distinctions
 
-GET /v1/organizations/{organization_id}
-→ {id, uuid, organization_id, name, avatar, user_role, credit, available_credit, total_members, credit_plan}
-Errors: 422 organization_not_found
-
-PATCH /v1/organizations/{organization_id}
-Body: {organization: {name?, avatar? (file)}}
-→ {organization_id}
-Errors: 403 forbidden (not owner/manager), 422 organization_not_found, 422 validation_error
-
-DELETE /v1/organizations/{organization_id}
-Permanently deletes organization and all associated data. Requires owner role. Irreversible.
-→ 200 (empty body)
-Errors: 403 forbidden (not owner), 422 organization_not_found
-
-## Content Resources & Assets
-
-GET /v1/content_resources?agent_id={id}&type={image|video|audio|zip|safe_tensors}&project_id={id}&ids[]={id}&page={page}
-→ [{id, url, thumbnail_url, file_name, content_type}]
-20 items per page (page starts at 0).
-
-POST /v1/content_resources?agent_id={id}
-Body (multipart): content_resource[file] (required), project_node[project_id]?, asset_folder[id]?
-→ {content_resource: {id, url, thumbnail_url, file_name, content_type}, project_node: {id}, generator: null}
-Errors: 403 forbidden, 422 content_resource_creation_failed
-
-GET /v1/content_resources/{id}?agent_id={id}
-→ {content_resource: {id, url, thumbnail_url, file_name, content_type}, project_node: {id}, generator: {id, status, type} | null}
-generator is null for manual uploads, contains job info for AI-generated resources.
-Errors: 404 content_resource_not_found
-
-PATCH /v1/content_resources/{id}?agent_id={id}
-Body: {content_resource: {filename}}
-→ 200 (empty body)
-Errors: 403 forbidden, 404 not_found, 422 validation_error
-
-DELETE /v1/content_resources/{id}?agent_id={id}
-→ 200 (empty body)
-Errors: 403 forbidden, 404 not_found, 422 validation_error
-
-GET /v1/asset_libraries?agent_id={id}&folder_id={id}&asset_type={image,video,audio,folder}&search={query}&order={recent}&page={page}&page_size={size}
-Unified view of files and folders. Polymorphic response — items have "type": "AssetFolder" or "ContentResource".
-→ [{id, type: "AssetFolder", name} | {id, type: "ContentResource", url, thumbnail_url, file_name, content_type}]
-
-## Asset Folders
-
-POST /v1/asset_folders?agent_id={id}
-Body: {asset_folder: {name, parent_id?}}
-→ {asset_folder_id}
-Errors: 403 forbidden, 422 validation_error
-
-PATCH /v1/asset_folders/{id}?agent_id={id}
-Body: {asset_folder: {name}}
-→ {asset_folder_id}
-Errors: 403 forbidden, 404 not_found, 422 validation_error
-
-DELETE /v1/asset_folders/{id}?agent_id={id}
-Deletes folder and all contents (subfolders and files).
-→ 200 (empty body)
-Errors: 403 forbidden, 404 not_found, 422 folder_removal_failed
-
-## Direct Upload
-
-POST /v1/direct_upload
-Get a pre-signed S3 URL for large file uploads. Workflow: (1) call this, (2) PUT file to returned URL with headers, (3) use signed_id as content_resource[file].
-Body: {blob: {filename, byte_size (max 1GB), checksum (base64 MD5), content_type, metadata?}}
-→ {id, key, filename, content_type, byte_size, checksum, signed_id, direct_upload: {url, headers: {Content-Type, Content-MD5}}}
-Compute checksum: openssl md5 -binary file | base64
-Errors: 422 invalid_content_type, 422 file_size_exceeded, 422 direct_upload_failed
-
-## Content Monitoring
-
-Monitor and discover social media content across TikTok, Instagram, and YouTube. Scraped content is indexed into your agent's knowledge base and queried via agent chat or automation pipelines — there is no raw data download API.
-
-### Platform Capabilities
-| Platform | Username | Hashtag | Keyword |
-|----------|----------|---------|---------|
-| TikTok | Yes | Yes | Yes |
-| Instagram | Yes | Yes | No |
-| YouTube | Yes | Yes | Yes |
-
-### Pricing
-Per video/post scraped: $0.015
-Per comment (when comment monitoring enabled): $0.002
-
-POST /v1/user_jobs?agent_id={id}
-Content-Type: multipart/form-data
-Body:
-- user_job[user_job_type] = "train_social"
-- user_job[data] = JSON string with:
-  - platform (required): tiktok | instagram | youtube
-  - type (required): username | hashtag | keyword (must be supported by platform)
-  - value (required): @creator, #topic, or plain text
-  - days: 0 | 1 | 7 | 30 | 90 | 180
-  - country: two-letter code (us, gb, etc.)
-  - max_results: 1-50
-  - monitoring: false (default, one-time scrape) | true (ongoing)
-  - comment_monitoring: true | false
-→ {user_job_id: 12345}
-
-PUT /v1/user_jobs/{id}?agent_id={id}
-Flat params (not nested): platform, type, value, days, country, max_results, monitoring, comment_monitoring. Only pending/processing jobs can be updated.
-→ {user_job_id: 12345}
-
-Status flow: pending → processing → completed (one-time) or stays processing (monitoring)
-Poll: GET /v1/user_jobs/{id}?agent_id={id}
-
-Accessing scraped data: Query via POST /v1/agent_chats (natural language questions) or automation pipelines. No raw data API.
-
-## Publishing
-
-Post or schedule content to social media platforms. Currently supports TikTok.
-
-POST /v1/user_jobs?agent_id={id}
-Content-Type: application/json
-Body:
-{
-  "user_job_type": "publish_content",
-  "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://...\", \"description\": \"caption #hashtags\", \"schedule_type\": \"now\", \"media_type\": \"VIDEO\"}"
-}
-
-Data fields (JSON-stringified in data):
-- platform (required): tiktok
-- media_url (required): public URL to media file
-- description (required): post caption, max ~2200 chars for TikTok
-- title: post title
-- media_type: VIDEO (default) | IMAGE
-- schedule_type (required): now | scheduled
-- scheduled_time (conditional): ISO 8601 UTC datetime, required when schedule_type=scheduled
-- thumbnail_url: custom thumbnail URL
-- timezone_offset: minutes from UTC (default 0)
-
-→ {user_job_id: 138860}
-
-Status flow: pending → processing → completed (result contains post_id) | failed
-Poll: GET /v1/user_jobs/{id}?agent_id={id}
-
-Prerequisites: Agent must have connected TikTok account (via AURA). Media must be publicly accessible.
-
-## Agent Core API
-
-**PREFERRED way to configure an agent.** Flat read/write for the entire agent setup canvas in a single call. Every field name mirrors exactly what the GEN Setup canvas saves, so developers and the app speak the same language.
-
-**Base URL:** `https://api.gen.pro/v1`. All routes authenticated via `X-API-Key` header with a Personal Access Token.
-
-### Fields
-
-A single PATCH may touch multiple internal systems. You see one call and get `200` if all succeed, or `207 Multi-Status` with per-section status if any one section fails.
-
-### Two critical distinctions
-
-- **`linked_accounts` vs `monitored` vs `research_topics`.** `linked_accounts` = the agent's OWN brand socials (the TikTok/Instagram/website the agent posts from). `monitored` = inspiration sources the agent watches for trending content (other creators, hashtags, or search keywords). `research_topics` = expertise areas the agent stays current on — the platform researches each daily and feeds results into content ideas (labeled "Expertise" in the UI; only include topics where recent events matter). Not the same thing — putting a competitor's URL into `linked_accounts` will eventually show up on the agent's own "My Socials" list.
-- **`description` vs `personality`.** `description` is a short 2-3 sentence brand summary, hard-capped at 500 chars. `personality` is the full persona text, max 20000 chars. A 3000-char persona dumped into `description` returns 422 by design.
+- `linked_accounts` = agent's OWN brand socials (what it posts from)
+- `monitored` = inspiration sources (creators / hashtags / keywords to watch)
+- `research_topics` = expertise areas the platform researches daily (labeled "Expertise" in UI)
+- `description` = 2-3 sentence summary (max 500 chars)
+- `personality` = full persona text (max 20000 chars)
 
 ### GET /v1/agents/{agent_id}/core
 
-Returns every field as a flat object.
-
-Response:
 ```json
 {
   "agent_id": "abc123",
@@ -483,14 +108,12 @@ Response:
     { "handle": "tacotok", "item_type": "hashtag" }
   ],
   "research_topics": [
-    { "topic": "new food truck openings in San Antonio" },
-    { "topic": "viral street food TikTok moments" },
-    { "topic": "Texas food festival announcements" }
+    { "topic": "new food truck openings in San Antonio" }
   ],
   "linked_accounts": [
     { "id": 42, "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
   ],
-  "personality": "Santiago grew up eating at his tia's taco stand in south San Antonio...",
+  "personality": "Santiago grew up eating at his tia taco stand in south San Antonio...",
   "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "source": "public" }
 }
 ```
@@ -499,15 +122,15 @@ Response:
 
 Flat merge-patch. Send only the fields you want to change. Unknown fields return 422.
 
-**Field-level semantics:**
+Field-level semantics:
 - Scalars replace: `brand_name`, `description`, `identity_type`, `goal`, `shortform`, `longform`, `onboarding_status`, `personality`
 - List fields use FULL replacement (missing = deleted): `keywords`, `target_platforms`, `monitored`, `research_topics`, `linked_accounts`
-- `linked_accounts` diffing: rows with `id` are updated in place, rows without `id` are inserted, rows absent from the list are deleted. To add one row without touching others, GET first, append, PATCH.
+- `linked_accounts` diffing: rows with `id` are updated in place, rows without `id` are inserted, rows absent from the list are deleted. To add one row without touching others: GET, append, PATCH.
 - `default_user_voice` replaces
 
-**Keyword auto-mirror:** Sending `keywords` without `monitored` auto-populates `monitored` with `[{handle: kw, item_type: "keyword"}]` so the nightly monitoring cron stays in sync. Send both explicitly if you want different values.
+Keyword auto-mirror: sending `keywords` without `monitored` auto-populates `monitored` with `[{ handle: kw, item_type: "keyword" }]`.
 
-**Validation:**
+Validation:
 - `description` max 500 chars
 - `personality` max 20000 chars
 - `identity_type` enum: `"brand"` | `"character"`
@@ -516,7 +139,8 @@ Flat merge-patch. Send only the fields you want to change. Unknown fields return
 - `linked_accounts[].url` required
 - All nested objects reject unknown keys
 
-Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status` with per-**section** results (not per-field). Sections only appear if the PATCH touched at least one field they own:
+Response: `200` on full success. On partial failure, `207 Multi-Status` with per-section results:
+
 ```json
 {
   "brand":       { "status": "ok", "data": { "brand_name": "Santiago", ... } },
@@ -525,9 +149,10 @@ Returns `200 OK` on full success. On partial failure, returns `207 Multi-Status`
 }
 ```
 
-Example — fully configure a new character in one call:
+Example:
+
 ```bash
-curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
+curl -X PATCH "https://api.gen.pro/v1/agents/abc123/core" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -543,34 +168,30 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
       { "handle": "https://tiktok.com/@keilapacheco", "item_type": "account" }
     ],
     "research_topics": [
-      { "topic": "new food truck openings in San Antonio" },
-      { "topic": "viral street food TikTok moments" }
+      { "topic": "new food truck openings in San Antonio" }
     ],
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
     ],
-    "personality": "Santiago grew up eating at his tia\u0027s taco stand in south San Antonio. 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
+    "personality": "Santiago grew up eating at his tia taco stand...",
     "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
 ```
 
-## Voice API (Agent Core)
+## Voice API (Agent Core sub-surface)
 
 All under `/v1/agents/{agent_id}/voice/*`. PAT auth.
 
 ### Library
 
+```
 GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_trained|user_elevenlabs}
 
-Returns the merged voice list from all sources (shared public catalog, voices the user designed via the 4-step flow, voices cloned from audio, and voices from their connected ElevenLabs account).
-
-Response:
-```json
-{
+→ {
   "voices": [
-    { "voice_id": "21m00...", "name": "Rachel",  "source": "public",          "preview_url": null },
-    { "voice_id": "huv-1",     "name": "Custom",  "source": "user_designed",   "preview_url": null },
-    { "voice_id": "huv-2",     "name": "Clone 1", "source": "user_trained",    "preview_url": null }
+    { "voice_id": "21m00...", "name": "Rachel",  "source": "public",        "preview_url": null },
+    { "voice_id": "huv-1",    "name": "Custom",  "source": "user_designed", "preview_url": null },
+    { "voice_id": "huv-2",    "name": "Clone 1", "source": "user_trained",  "preview_url": null }
   ],
   "total": 3
 }
@@ -578,182 +199,701 @@ Response:
 
 ### ElevenLabs integration
 
-Users connect their own ElevenLabs API key to unlock their personal voice library and use their own quota. The key is validated against ElevenLabs's `/v1/user` before being saved on the agent record.
+Users connect their own ElevenLabs API key to unlock their personal voice library and use their own quota.
 
-- GET /v1/agents/{agent_id}/voice/integrations/elevenlabs → `{connected: bool, masked_key: "***xyz1" | null}`
-- POST /v1/agents/{agent_id}/voice/integrations/elevenlabs — body `{api_key}`. Returns `{connected: true, user: {subscription: {...}}}` on success, 400 `{detail: "invalid_key"}` on failure.
-- POST /v1/agents/{agent_id}/voice/integrations/elevenlabs/test — body `{api_key}`. Returns `{valid: bool}` without saving.
-- DELETE /v1/agents/{agent_id}/voice/integrations/elevenlabs → disconnect
+```
+GET    /v1/agents/{agent_id}/voice/integrations/elevenlabs          → { connected, masked_key }
+POST   /v1/agents/{agent_id}/voice/integrations/elevenlabs          Body: { api_key } → { connected: true, user: { subscription } }
+POST   /v1/agents/{agent_id}/voice/integrations/elevenlabs/test     Body: { api_key } → { valid }  (no save)
+DELETE /v1/agents/{agent_id}/voice/integrations/elevenlabs          → { connected: false }
+```
 
 ### Voice design — 4-step prompt-based flow
 
 Build a voice from a text description. Steps 1-3 are cheap; step 4 persists.
 
-1. POST /v1/agents/{agent_id}/voice/design/generate-script — body `{language?}` → `{voice_sample: "..."}`
-2. POST /v1/agents/{agent_id}/voice/design/generate-description — body `{gender (required), voice_description?, language?, script?}` → `{voice_description: "..."}`
-3. POST /v1/agents/{agent_id}/voice/design/generate-samples — body `{text (required), description?}` → `{samples: [{generation_id, audio}, {generation_id, audio}, {generation_id, audio}]}` (3 candidates)
-4. POST /v1/agents/{agent_id}/voice/design — body `{generation_id (required), name (required), gender?, language?, description?}` → the created voice resource
+```
+1. POST /v1/agents/{agent_id}/voice/design/generate-script
+   Body: { language? }
+   → { voice_sample: "..." }
 
-`generation_id` is an opaque token — do not parse or store it beyond step 4.
+2. POST /v1/agents/{agent_id}/voice/design/generate-description
+   Body: { gender (required), voice_description?, language?, script? }
+   → { voice_description: "..." }
+
+3. POST /v1/agents/{agent_id}/voice/design/generate-samples
+   Body: { text (required), description? }
+   → { samples: [{ generation_id, audio }, { generation_id, audio }, { generation_id, audio }] }
+
+4. POST /v1/agents/{agent_id}/voice/design
+   Body: { generation_id (required), name (required), gender?, language?, description? }
+   → created voice resource
+```
+
+`generation_id` is opaque. Don't parse or store it beyond step 4.
 
 ### Voice cloning (synchronous)
 
-Create a voice from an existing audio sample. Synchronous — the created voice is returned immediately.
-
+```
 POST /v1/agents/{agent_id}/voice/clone
-- body variant A (preferred): `{name (required), audio_url, gender?, language?, description?}`
-- body variant B (inline bytes): `{name (required), audio_base64, gender?, language?, description?}`
+Body variant A (preferred): { name (required), audio_url,    gender?, language?, description? }
+Body variant B (inline):    { name (required), audio_base64, gender?, language?, description? }
+```
 
-Provide exactly one of `audio_url` or `audio_base64`.
+Exactly one of `audio_url` / `audio_base64`. Small clips only for base64; prefer audio_url for files.
 
 ### Voice delete + preview
 
-- DELETE /v1/agents/{agent_id}/voice/{voice_id} — delete a user-owned voice
-- POST /v1/agents/{agent_id}/voice/{voice_id}/preview — body `{text}`. **Async.** Returns `{user_job_id}` immediately.
-- GET /v1/agents/{agent_id}/voice/preview/{job_id} — poll the preview job. When `status == "completed"`, read audio URL from `output_resources`.
+```
+DELETE /v1/agents/{agent_id}/voice/{voice_id}                      — delete user-owned voice
+POST   /v1/agents/{agent_id}/voice/{voice_id}/preview              Body: { text } — **ASYNC**. → { user_job_id }
+GET    /v1/agents/{agent_id}/voice/preview/{job_id}                — poll the preview
+   When status == "completed", audio URL is in output_resources.
+```
 
-## Error Format
+## Organizations (Workspaces)
 
-{error: "Human-readable message", error_code: "machine_code"}
+```
+GET /v1/organizations
+→ [{ id, uuid, organization_id, name, avatar: { url, thumbnail_url }, user_role, credit, available_credit: { generic, aura }, total_members, credit_plan: { id, name, cycle } }]
 
-Common codes:
-- 401 unauthorized — invalid API key
-- 403 forbidden — insufficient permissions for this resource
-- 404 not_found — resource doesn't exist
-- 422 usable_gen_credit_required — no active credits
-- 422 agent_not_found — invalid agent_id
-- 422 insufficient_credits_for_job — not enough credits
-- 422 validation_error — invalid request body or parameters
+POST /v1/organizations
+Body: { organization: { name, avatar? (file) } }
+→ { organization_id }
+Errors: 422 validation_error
 
-## Common Workflows
+GET /v1/organizations/{organization_id}
+→ { id, uuid, organization_id, name, avatar, user_role, credit, available_credit, total_members, credit_plan }
+Errors: 422 organization_not_found
 
-### Create a TikTok Video (End to End)
-1. GET /v1/templates/projects → pick a video template
-2. POST /v1/templates/spreadsheets/{slug}/clone → {agent_id} → get engine
-3. GET /v1/autocontentengine/{id}?agent_id={id} → see columns and cells
-4. PATCH /v1/autocontentengine/{id}/cells/{text_cell_id}?agent_id={id} → set script
-5. POST /v1/autocontentengine/{id}/cells/{video_cell_id}/generate?agent_id={id} → generate video
-6. GET /v1/generations/{gen_id} → poll until completed
-7. POST /v1/autocontentengine/{id}/cells/{audio_cell_id}/generate → generate speech
-8. POST /v1/autocontentengine/{id}/cells/{lipsync_cell_id}/generate → lipsync
-9. POST /v1/autocontentengine/{id}/cells/{final_cell_id}/render → render final video
+PATCH /v1/organizations/{organization_id}
+Body: { organization: { name?, avatar? (file) } }
+Errors: 403 forbidden (not owner/manager), 422 organization_not_found, 422 validation_error
 
-### Generate Batch Images
-1. POST /v1/autocontentengine?agent_id={id} → create engine
-2. POST /v1/autocontentengine/{id}/columns?agent_id={id} → add image column
-3. POST /v1/autocontentengine/{id}/rows?agent_id={id} → add rows
-4. POST .../cells/{cell_id}/generate → generate in each cell
-5. GET /v1/generations/{id} → poll each generation
+DELETE /v1/organizations/{organization_id}
+Permanent. Owner role required. Irreversible.
+Errors: 403 forbidden (not owner), 422 organization_not_found
+```
 
-### Upload and Use a Large Asset
-1. POST /v1/direct_upload → get pre-signed S3 URL
-2. PUT file to the returned URL with Content-Type and Content-MD5 headers
-3. POST /v1/content_resources?agent_id={id} with signed_id as content_resource[file]
-4. Use the returned content_resource.id in generation data (e.g., image_resource_id, audio_resource_id)
+## API Keys
 
-### Monitor Social Media Content
-1. POST /v1/user_jobs?agent_id={id} with user_job[user_job_type]=train_social and user_job[data] containing platform, type, value
-2. Poll GET /v1/user_jobs/{id}?agent_id={id} until completed (one-time) or ongoing (monitoring)
-3. Query data via POST /v1/agent_chats — ask "what are the top performing videos about skincare?"
+```
+POST /v1/persisted_tokens
+Body: { name?, expires_in? }
+→ { id, name, token_type, status, token }   (token shown once)
 
-### Publish Content
-1. Render or upload video → get public media_url
-2. POST /v1/user_jobs?agent_id={id} with user_job_type=publish_content
-3. Set schedule_type: "now" for immediate, "scheduled" with scheduled_time for later
-4. Poll status until completed — result contains post_id from the platform
+GET /v1/persisted_tokens
+→ [{ id, name, token_type, created_at, expires_at, last_used_at, revoked_at, status }]
 
-### Set Up Automation Webhook
-1. PATCH /v1/agents/{agent_id}/automation_config → set webhook_url and callback_url
-2. POST /v1/agents/{agent_id}/automation_config/test_webhook → verify delivery
-3. POST /v1/agents/{agent_id}/automation_config/test_callback → verify callback
-4. Generations will now POST status updates to your webhook_url
+PATCH /v1/persisted_tokens/{id}
+Body: { persisted_token: { name } }
 
-## Agentic Chat API (agent.gen.pro)
+DELETE /v1/persisted_tokens/{id}/revoke
+DELETE /v1/persisted_tokens/revoke_all
+```
 
-AI-powered content strategy with built-in research. The agent researches topics across
-10+ platforms, analyzes trending content, and generates video ideas with production manifests.
+---
 
-Base URL: https://agent.gen.pro/v1
-Auth: Same PAT (X-API-Key) or JWT (Authorization: Bearer)
+# Phase 2 — Ideas
 
-### Runs
+Everything related to proposing and refining video ideas backed by real trending data.
+
+**Base URL for this phase:** `https://agent.gen.pro/v1` (plus content monitoring on `api.gen.pro`).
+
+## Runs (trigger ideas, refine, chat, set preferences)
+
+Same endpoint for every intent — the natural-language `message` determines what the agent does.
+
+```
 POST /v1/agent/run
-Body: {message, agent_id, conversation_id?, attachments?, context?: {vidsheet_id?}, debug?}
-→ {run_id, conversation_id, status: "running", firebase_path}
+Body: {
+  message,
+  agent_id,
+  conversation_id?,      // omit to start a new conversation; pass to refine
+  attachments?,          // optional URLs for vision grounding
+  context?: { vidsheet_id? },
+  debug?
+}
+→ { run_id, conversation_id, status: "running", firebase_path }
+```
 
+Message patterns:
+- Generate ideas: `"Generate 5 content ideas grounded in this weeks trends"` (no conversation_id → new conv)
+- Refine: pass `conversation_id`, `"Make idea 1 punchier. Drop idea 3."`
+- Set preference: `"remember: always use statement hooks, never questions"`
+- Remove preference: `"forget: that rule about statement hooks"`
+- Simple chat: `"What performed best last week in my niche?"`
+
+```
 GET /v1/agent/runs/{run_id}
-→ {run_id, conversation_id, status: "running" | "completed" | "failed", messages: [{role, content}]}
+→ { run_id, conversation_id, status: "running" | "completed" | "failed", messages: [{ role, content, data }] }
 
-POST /v1/agent/runs/{run_id}/approve
-POST /v1/agent/runs/{run_id}/reject
+POST /v1/agent/runs/{run_id}/approve         — approve a pending action in a run
+POST /v1/agent/runs/{run_id}/reject          — reject a pending action in a run
+```
 
-### Conversations
-GET /v1/agent/conversations?agent_id={id}
-GET /v1/agent/conversations/{id}
-GET /v1/agent/conversations/{id}/messages
-PATCH /v1/agent/conversations/{id} — Body: {title?, pinned?}
-DELETE /v1/agent/conversations/{id}
-GET /v1/agent/conversations/{id}/runs
+Firebase streaming (no auth required to subscribe):
+- Path: `/agent_runs/{user_id}/{run_id}/`
+- Keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
 
-### Research
-POST /v1/research
-Body: {topic, depth: "quick" | "default" | "deep", agent_id}
-→ {topic, depth, researched_at, sources: {reddit: {count, total_upvotes}, x: {count, total_likes}, youtube: {count, total_views}, tiktok: {count, total_views}, instagram: {count, total_likes}, hackernews: {count}, perplexity: {citations}, gemini: {grounded}}, perplexity: {text, citations[]}, gemini: {text, grounded}, summary_markdown}
+## Conversations
 
-### Content Ideas
+```
+GET    /v1/agent/conversations?agent_id={id}
+→ { conversations: [{ id, agent_id, title, pinned, created_at, updated_at, run_count }] }
+
+GET    /v1/agent/conversations/{id}                    — conversation metadata
+GET    /v1/agent/conversations/{id}/messages           — all messages (chronological)
+GET    /v1/agent/conversations/{id}/runs               — all runs in the conversation
+PATCH  /v1/agent/conversations/{id}                    — Body: { title?, pinned? }
+DELETE /v1/agent/conversations/{id}                    — deletes conversation, runs, messages
+```
+
+## Content Ideas
+
+Ideas produced by runs are first-class records.
+
+```
 GET /v1/agent/ideas?agent_id={id}&status={status}
-→ [{id, idea_id, agent_id, title, hook, description, video_type, video_type_id, status, data, created_at}]
+→ [{
+  id, idea_id, agent_id,
+  title, hook, full_script, description,
+  video_type, video_type_id, status,
+  estimated_duration, aspect_ratio,
+  data: {
+    selected_assets: [ { url, type, description, usage, source, clip_range: { start, end } } ],
+    project_manifest: {
+      video_title, total_duration, aspect_ratio,
+      global_extracted_assets: [...],
+      timeline_layers: [...]
+    },
+    inspiration_sources: [ { type, url, creator, watch_count, like_count, what_was_used } ],
+    rationale
+  },
+  created_at
+}]
 
-POST /v1/agent/ideas/{id}/status — cycle to next status
-PUT /v1/agent/ideas/{id}/status/{status} — set explicit status
-Status flow: generated → approve_to_create → ready_for_review → approved → published
+POST /v1/agent/ideas/{id}/status                       — cycle to next status
+PUT  /v1/agent/ideas/{id}/status/{status}              — set explicit status
+```
 
-### Content Ideas Response Shape
-Each idea includes:
-- title, description, hook, full_script
-- video_type (Talking Avatar, Green Screen, Montage, etc.)
-- selected_assets[] — curated assets needed for production
-  Each asset: {url, type: "image"|"video"|"audio", description, usage, source, clip_range: {start, end}}
-- project_manifest — full video production spec
-  {video_title, total_duration, aspect_ratio, global_extracted_assets[], timeline_layers[]}
-- inspiration_sources[] — trending videos that inspired the idea
-  {type, url, creator, watch_count, like_count, what_was_used}
-- rationale — why this idea works, with specific data points
+Status flow: `generated → approve_to_create → ready_for_review → approved → published`
 
-### Asset Sources
-- Social content (TikTok/IG/YouTube): permanent CDN URLs
-- Web research assets: sourced by the research agent
-- User uploads: via the Content Resources API
+Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven, 5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit`.
 
-### Research-Backed Generation
-The agent automatically:
-1. Researches the topic across web, X, TikTok, Instagram, YouTube, Reddit
-2. Downloads and analyzes assets (video segments, image regions)
-3. Writes scripts that match the actual visual content
-4. Verifies all factual claims against real sources
-5. Returns only the final curated assets needed for production
+## Research (standalone)
 
-### Firebase Streaming
-The firebase_path from POST /v1/agent/run points to a Firebase RTDB path for real-time progress.
-Path: /agent_runs/{user_id}/{run_id}/
-Keys: status, plan (numbered checklist), thinking (progress messages), messages (output)
-Firebase project: proven-fort-442703-q1
-DB URL: https://proven-fort-442703-q1-default-rtdb.firebaseio.com
-Rules: agent_runs are publicly readable (no auth needed to subscribe).
+```
+POST /v1/research
+Body: { topic, depth: "quick" | "default" | "deep", agent_id }
+→ {
+  topic, depth, researched_at,
+  sources: {
+    reddit:     { count, total_upvotes },
+    x:          { count, total_likes },
+    youtube:    { count, total_views },
+    tiktok:     { count, total_views },
+    instagram:  { count, total_likes },
+    hackernews: { count },
+    perplexity: { citations },
+    gemini:     { grounded }
+  },
+  perplexity: { text, citations: [{ url, title }] },
+  gemini:     { text, grounded },
+  summary_markdown: "..."
+}
+```
 
-### Three layers of control
-- Per-batch requirements: one-time constraints ("focus on before/after", "under 12 seconds")
-- Long-term preferences: persistent rules for ALL future generations ("never use question hooks")
-- Feedback/refinement: iterate on specific ideas in conversation context ("make idea 3 punchier")
+Depth notes: `quick` ≈ 10s, `default` ≈ 30-45s, `deep` ≈ 90s.
 
-### Video Type IDs
-0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven,
-5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit
+## Research topics (daily background research)
 
-## Integrations
+Configured via Agent Core (`research_topics` field). The platform researches each topic daily and feeds findings into the Ideas Engine automatically. No poll needed — just set topics and consume ideas downstream.
 
-MCP Server: npx @poweredbygen/autocontentengine-mcp-server@latest (env: GEN_API_KEY)
-TypeScript SDK: npm install @poweredbygen/autocontentengine-sdk
-n8n: HTTP Request node with X-API-Key header
-OpenAPI Spec: https://api.gen.pro/openapi.yaml
-Full Docs: https://api.gen.pro
+## Content Monitoring (trending data into agent knowledge base)
+
+**Base URL for this sub-surface:** `https://api.gen.pro/v1`
+
+```
+POST /v1/user_jobs?agent_id={id}
+Content-Type: multipart/form-data
+Body:
+  - user_job[user_job_type] = "train_social"
+  - user_job[data] = JSON string:
+      platform (required):   "tiktok" | "instagram" | "youtube"
+      type (required):       "username" | "hashtag" | "keyword"   (not all combos supported)
+      value (required):      @creator, #topic, or plain text
+      days:                  0 | 1 | 7 | 30 | 90 | 180
+      country:               two-letter code (us, gb, etc.)
+      max_results:           1-50
+      monitoring:            false (default, one-time) | true (ongoing)
+      comment_monitoring:    true | false
+→ { user_job_id }
+
+PUT /v1/user_jobs/{id}?agent_id={id}
+Flat params: platform, type, value, days, country, max_results, monitoring, comment_monitoring
+Only pending/processing jobs can be updated.
+```
+
+### Platform capabilities
+
+| Platform | Username | Hashtag | Keyword |
+|----------|----------|---------|---------|
+| TikTok | Yes | Yes | Yes |
+| Instagram | Yes | Yes | No |
+| YouTube | Yes | Yes | Yes |
+
+### Pricing
+
+Per video/post: $0.015. Per comment (when enabled): $0.002.
+
+### Reading scraped data
+
+No raw data dump endpoint — query through the agent:
+- **Agent Chat**: `POST /v1/agent_chats` with natural-language questions
+- **Automation Pipelines**: scheduled prompts that populate vidsheet rows with results
+
+Status flow: `pending → processing → completed` (one-time) or stays `processing` (monitoring). Poll `GET /v1/user_jobs/{id}?agent_id={id}`.
+
+---
+
+# Phase 3 — Convert
+
+Everything related to taking an idea and producing an Auto Content Engine (vidsheet) to work it in.
+
+## Templates
+
+Templates are pre-configured engines synced from a curated library. Cloning is the 80% path.
+
+```
+GET /v1/templates/projects?page={page}
+→ [{ id, slug, title, name, description, cover, tutorial_url, tags: [], recent_generated_contents: [{ id, type, thumbnail_url }] }]
+(20/page, page starts at 1.)
+
+GET /v1/templates/projects/{slug}
+slug can be a URL slug, UUID, or numeric ID.
+→ full template definition with columns, layer stacks, recent renders
+
+POST /v1/templates/spreadsheets/{slug}/clone
+Body: { agent_id }
+→ full engine object with columns, rows, cells, layer stack
+```
+
+Default template columns: TEXT 1, TEXT 2, PROMPT (ingredient), VIDEO, FINAL VIDEO, STATS.
+
+Cloning is **free** — no credits consumed.
+
+## Auto Content Engine (create from scratch)
+
+If no template matches, build manually.
+
+```
+POST /v1/autocontentengine?agent_id={id}
+Body: { spreadsheet: { title, is_default? } }
+→ full engine with empty columns / rows
+
+GET /v1/autocontentengine/{id}?agent_id={id}&with_execution_cost=true
+→ full engine with nested spreadsheet_columns, spreadsheet_rows (each with spreadsheet_cells), global_variables_sheet
+
+POST /v1/autocontentengine/{id}/clone?agent_id={id}
+Body: { target_agent_id? }
+→ new engine, optionally under a different agent
+```
+
+---
+
+# Phase 4 — Edit
+
+Everything related to filling the vidsheet: cells, layers, creation cards, generations, variables, assets, automation.
+
+## Rows
+
+```
+GET    /v1/autocontentengine/{id}/rows?agent_id={id}
+POST   /v1/autocontentengine/{id}/rows?agent_id={id}                Body: { spreadsheet_row: { position? } }
+GET    /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id}
+POST   /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id}
+PUT    /v1/autocontentengine/{id}/rows/update_positions?agent_id={id}   Body: { rows: [{ id, position }] }
+PUT    /v1/autocontentengine/{id}/rows/mass_update?agent_id={id}
+```
+
+## Columns
+
+Only `ingredient` role columns can be created / updated / deleted by users. System roles (`video`, `final_video`, `stats`, `global_variable_*`) are platform-managed.
+
+Types: `text`, `image`, `video`, `audio`.
+
+```
+GET    /v1/autocontentengine/{id}/columns?agent_id={id}
+POST   /v1/autocontentengine/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
+POST   /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
+PATCH  /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
+PUT    /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
+```
+
+## Cells
+
+```
+GET    /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
+PATCH  /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}       Body: { spreadsheet_cell: { value } }
+PUT    /v1/autocontentengine/{id}/cells/mass_update?agent_id={id}
+PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}   Body: { user_job_id }
+```
+
+## Layers
+
+Per-cell timeline elements. `position` is z-index.
+
+```
+POST   /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id}       Body: { video_layer: { name, type, position? } }
+GET    /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+POST   .../layers/{layer_id}/duplicate?agent_id={id}
+PUT    .../layers/update_positions?agent_id={id}
+```
+
+## Generations (trigger + poll)
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
+Body: { generation_type, data: { ... } }
+→ { generation_id, status: "pending" }
+
+POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
+Body: { generation_type, data: { ... } }
+→ { generation_id, status: "pending" }
+
+GET /v1/generations/{id}
+→ { id, status, user_job_type, result, output_resources: [{ id, url, thumbnail_url, object_type }] }
+
+POST /v1/generations/{id}/stop       — credits refunded; status → "stopped"
+POST /v1/generations/{id}/continue   — credits re-charged; status → "pending"
+```
+
+Status flow: `pending → processing → completed | failed | stopped`.
+
+## Creation Card Types (exact `generation_type` + `data`)
+
+### text
+
+```
+generation_type: "text"
+Models: gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4
+data: { prompt, model, variables: { key: value } }
+Output: text string in cell value
+```
+
+### image_from_text
+
+```
+generation_type: "image_from_text"
+Models: gemini_image, gemini_pro_image, midjourney
+Aspect ratios: "1:1", "9:16", "16:9", "4:3", "3:4"
+data: { prompt, model, aspect_ratio, variables }
+Output: image content resource
+```
+
+### video_from_text
+
+```
+generation_type: "video_from_text"
+Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5
+Aspect ratios: "1:1", "9:16", "16:9"
+Durations: 5s, 10s (model-dependent)
+data: { prompt, negative_prompt?, model, aspect_ratio, duration, variables }
+Output: video content resource
+```
+
+### video_from_image
+
+```
+generation_type: "video_from_image"
+Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5
+data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, duration }
+Output: video content resource
+```
+
+### video_from_ingredients
+
+```
+generation_type: "video_from_ingredients"
+Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast
+data: { prompt, model, asset_resource_ids: [], aspect_ratio, duration }
+Output: video content resource
+```
+
+### speech_from_text
+
+```
+generation_type: "speech_from_text"
+Voice methods: my_voices | design_voice | clone_voice
+data (my_voices):    { script, voice_method: "my_voices",    voice_id, enhance_voice?, speed?, language? }
+data (design_voice): { script, voice_method: "design_voice", language, gender, enhance_voice? }
+data (clone_voice):  { script, voice_method: "clone_voice",  audio_resource_id }
+Output: audio content resource
+```
+
+### lipsync
+
+```
+generation_type: "lipsync"
+Models: sync_so, gen
+data: { model, video_resource_id, audio_resource_id }
+Output: video content resource with synced lip movements
+```
+
+### captions
+
+```
+generation_type: "captions"
+Models: gemini
+data: { model, source_resource_id }
+Output: caption / subtitle data
+```
+
+### media (pass-through upload)
+
+```
+generation_type: "media"
+data: { content_resource_id }
+Output: attaches an uploaded resource to the cell (no AI)
+```
+
+### render (composite)
+
+See Phase 5 — it's the export step.
+
+## Global Variables
+
+Template substitution for `{{variable_name}}` across prompts and cells.
+
+```
+GET  /v1/autocontentengine/{id}/global_variables?agent_id={id}
+POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}      (multipart XLSX upload)
+GET  /v1/autocontentengine/global_variables_template                        (XLSX template download)
+```
+
+## Content Resources (upload and manage assets)
+
+```
+GET /v1/content_resources?agent_id={id}&type={image|video|audio|zip|safe_tensors}&project_id={id}&ids[]={id}&page={page}
+→ [{ id, url, thumbnail_url, file_name, content_type }]          (20/page, page starts at 0)
+
+POST /v1/content_resources?agent_id={id}
+Body (multipart): content_resource[file] (required), project_node[project_id]?, asset_folder[id]?
+→ { content_resource: {...}, project_node: { id }, generator: null }
+Errors: 403 forbidden, 422 content_resource_creation_failed
+
+GET    /v1/content_resources/{id}?agent_id={id}
+→ { content_resource: {...}, project_node: { id }, generator: { id, status, type } | null }
+   generator is null for manual uploads; populated for AI-generated resources.
+
+PATCH  /v1/content_resources/{id}?agent_id={id}    Body: { content_resource: { filename } }
+DELETE /v1/content_resources/{id}?agent_id={id}
+```
+
+### Asset Library (files + folders, unified view)
+
+```
+GET /v1/asset_libraries?agent_id={id}&folder_id={id}&asset_type={image,video,audio,folder}&search={q}&order={recent}&page={p}&page_size={s}
+→ [
+  { id, type: "AssetFolder", name },
+  { id, type: "ContentResource", url, thumbnail_url, file_name, content_type }
+]
+```
+
+### Asset folders
+
+```
+POST   /v1/asset_folders?agent_id={id}       Body: { asset_folder: { name, parent_id? } }
+PATCH  /v1/asset_folders/{id}?agent_id={id}  Body: { asset_folder: { name } }
+DELETE /v1/asset_folders/{id}?agent_id={id}  — deletes folder AND all contents (subfolders + files)
+```
+
+### Direct Upload (large files, up to 1 GB)
+
+```
+POST /v1/direct_upload
+Body: { blob: { filename, byte_size (max 1GB), checksum (base64 MD5), content_type, metadata? } }
+→ { id, key, filename, content_type, byte_size, checksum, signed_id, direct_upload: { url, headers: { Content-Type, Content-MD5 } } }
+
+Workflow:
+  1. POST /v1/direct_upload
+  2. PUT file to direct_upload.url with the returned headers
+  3. POST /v1/content_resources?agent_id={id} with signed_id as content_resource[file]
+
+Compute checksum: openssl md5 -binary file | base64
+```
+
+## Automation
+
+```
+GET   /v1/agents/{agent_id}/automation_config
+PATCH /v1/agents/{agent_id}/automation_config    Body: { automation_config: { webhook_url?, callback_url?, polling_enabled? } }
+
+POST /v1/agents/{agent_id}/automation_config/test_webhook
+POST /v1/agents/{agent_id}/automation_config/test_callback
+```
+
+Once configured, generations POST status updates to your `webhook_url`.
+
+---
+
+# Phase 5 — Export
+
+Render the final composite, poll to completion, download the MP4, optionally publish to TikTok.
+
+## Render the Final Video
+
+Render is an async generation — same polling pattern as every other generation.
+
+```
+POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
+→ { generation_id, status: "pending" }
+```
+
+The target `cell_id` is the cell in the `final_video` column for a given row. That cell composites all layers on its row's video cell.
+
+### Polling the render
+
+```
+GET /v1/generations/{generation_id}
+```
+
+Status flow:
+
+```
+pending → processing → completed | failed
+```
+
+On `completed`:
+
+```json
+{
+  "id": 56789,
+  "status": "completed",
+  "output_resources": [
+    {
+      "id": 4821,
+      "url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/render_xyz.jpg",
+      "object_type": "video"
+    }
+  ]
+}
+```
+
+`output_resources[0].url` is a public CDN URL — no auth needed to download. `thumbnail_url` is a JPEG of the first frame for previews.
+
+### Stop / continue
+
+```
+POST /v1/generations/{id}/stop       — full refund
+POST /v1/generations/{id}/continue   — re-charge, resume
+```
+
+### Render failures
+
+On `status: "failed"`, `failed_reason` contains a user-facing message. Credits are fully refunded. Retry by calling `POST /render` again — a new generation_id is returned.
+
+### Listing past renders for an engine (via content resources)
+
+All render outputs are content resources on the agent, filterable by type:
+
+```
+GET /v1/content_resources?agent_id={id}&type=video
+```
+
+## Download
+
+```
+curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
+```
+
+CDN URLs are public and permanent until you explicitly delete the content resource. Individual layer outputs are also downloadable via each layer's `default_user_job.output_resources[0].url`.
+
+## Publish to Social
+
+Currently TikTok. Instagram and YouTube coming.
+
+```
+POST /v1/user_jobs?agent_id={id}
+Content-Type: application/json
+Body:
+{
+  "user_job_type": "publish_content",
+  "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"caption #hashtags\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
+}
+→ { user_job_id }
+```
+
+Data fields (JSON-stringified in `data`):
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `platform` | string | Yes | `tiktok` |
+| `media_url` | string | Yes | public URL to media (render URL works directly) |
+| `description` | string | Yes | caption, max ~2200 chars for TikTok; include hashtags inline |
+| `title` | string | No | post title |
+| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` |
+| `schedule_type` | string | Yes | `now` \| `scheduled` |
+| `scheduled_time` | string | if `scheduled` | ISO 8601 UTC, must be future |
+| `thumbnail_url` | string | No | custom thumbnail URL |
+| `timezone_offset` | integer | No | minutes from UTC |
+
+### Poll the publish job
+
+```
+GET /v1/user_jobs/{id}?agent_id={id}
+```
+
+Status flow: `pending → processing → completed | failed`. On `completed`, `result.post_id` is the platform's post ID.
+
+### Prerequisites
+
+- Agent must have a connected TikTok account (connected via the GEN app)
+- Media must be publicly accessible at post time
+- For scheduled posts, `scheduled_time` must be in the future
+
+---
+
+# Error Format
+
+```json
+{ "error": "Human-readable message", "error_code": "machine_code" }
+```
+
+| Status | Code | Meaning |
+|--------|------|---------|
+| 401 | `unauthorized` | missing or invalid API key |
+| 403 | `forbidden` | no permission for this resource |
+| 404 | `not_found` | resource doesn't exist |
+| 422 | `usable_gen_credit_required` | no active credits |
+| 422 | `agent_not_found` | invalid `agent_id` |
+| 422 | `insufficient_credits_for_job` | not enough credits for this generation |
+| 422 | `validation_error` | invalid request body |
+
+## Common status codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Resource created |
+| 204 | Success, no content (used for deletes) |
+| 207 | Multi-Status (partial success on PATCH /core) |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not found |
+| 422 | Validation / credits / business-rule error |
+
+---
+
+# Integrations
+
+- MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env `GEN_API_KEY`)
+- TypeScript SDK: `npm install @poweredbygen/autocontentengine-sdk`
+- n8n: HTTP Request node with `X-API-Key` header
+- OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
+- Full Docs (5-step journey): https://api.gen.pro
+- Teaching llms.txt: https://api.gen.pro/llms.txt

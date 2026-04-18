@@ -1,0 +1,78 @@
+---
+title: Conversations
+description: List, read, pin, rename, delete conversations where ideas were generated and refined.
+---
+
+Every time you start a fresh content ideas run (without a `conversation_id`), the Ideas Engine creates a new conversation. Every refinement call with that `conversation_id` appends to it. Conversations are the durable record of a brainstorm — you can come back weeks later, scroll back through the ideas, and iterate.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+## List conversations
+
+```bash
+curl "https://agent.gen.pro/v1/agent/conversations?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+**Response:**
+
+```json
+{
+  "conversations": [
+    {
+      "id": "conv_def456",
+      "agent_id": "agent_xyz789",
+      "title": "Before/after taco ideas",
+      "pinned": false,
+      "created_at": "2026-04-10T09:00:00Z",
+      "updated_at": "2026-04-18T11:30:00Z",
+      "run_count": 4
+    }
+  ]
+}
+```
+
+## Get a conversation
+
+```bash
+curl "https://agent.gen.pro/v1/agent/conversations/conv_def456" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+## List messages in a conversation
+
+```bash
+curl "https://agent.gen.pro/v1/agent/conversations/conv_def456/messages" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Messages come back in chronological order. Each message has a `role` (`"user"` or `"assistant"`) and the `content`. Assistant messages carrying ideas have structured `data` with the full idea payloads.
+
+## List runs in a conversation
+
+```bash
+curl "https://agent.gen.pro/v1/agent/conversations/conv_def456/runs" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Useful for auditing which runs touched this conversation and their completion status.
+
+## Rename or pin a conversation
+
+```bash
+curl -X PATCH "https://agent.gen.pro/v1/agent/conversations/conv_def456" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "title": "Taco launch campaign", "pinned": true }'
+```
+
+Pinned conversations float to the top of the list in the UI.
+
+## Delete a conversation
+
+```bash
+curl -X DELETE "https://agent.gen.pro/v1/agent/conversations/conv_def456" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Deletes the conversation and all its runs + messages. Ideas that were generated in the conversation survive — delete those separately through the ideas endpoints if you want them gone.

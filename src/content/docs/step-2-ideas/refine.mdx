@@ -1,0 +1,67 @@
+---
+title: Refine Ideas
+description: Iterate on specific ideas in conversation context — make them punchier, change video type, swap angles.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+After generating a first batch of ideas, you'll often want to iterate on individual ideas. **Refinement is just another message in the same conversation** — pass the `conversation_id` from the original run and describe the change in plain language.
+
+## Refine in the conversation
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "'"$AGENT_ID"'",
+    "conversation_id": "conv_def456",
+    "message": "Make idea 1 hook shorter and punchier. Change idea 3 to montage format. Drop idea 5 entirely."
+  }'
+```
+
+Returns a new `run_id` — poll like before. When it completes, the conversation's latest message contains the updated idea set.
+
+## What the refinement agent understands
+
+- **Tone changes** — "punchier", "less salesy", "more casual"
+- **Format changes** — "make it a montage", "switch to talking avatar", "turn this into a skit"
+- **Length changes** — "cut to 10 seconds", "make it a 30-second explainer"
+- **Angle changes** — "from the customer perspective", "add a surprise twist at the end"
+- **Selection** — "drop idea 2", "keep only ideas 1 and 4", "double down on idea 3 with three variations"
+- **Data grounding** — "use more data from @keithlee", "reference the festival trending this week"
+
+<Aside type="tip">
+  Refinement operates on the **most recent** idea set in the conversation. To refine older ideas, either scroll the conversation back explicitly ("revisit the first 5 ideas you gave me") or start a new conversation with the ones you want to keep.
+</Aside>
+
+## Approve individual ideas
+
+Ideas have a status lifecycle:
+
+```
+generated → approve_to_create → ready_for_review → approved → published
+```
+
+Move an idea forward in the lifecycle:
+
+```bash
+curl -X PUT "https://agent.gen.pro/v1/agent/ideas/901/status/approve_to_create" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Or cycle to the next status automatically:
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agent/ideas/901/status" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+## List ideas
+
+```bash
+curl "https://agent.gen.pro/v1/agent/ideas?agent_id=$AGENT_ID&status=generated" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+Filter by status to see what's ready to convert into a vidsheet in [Step 3](/step-3-convert/overview/).

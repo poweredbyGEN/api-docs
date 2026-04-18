@@ -1,0 +1,207 @@
+---
+title: All Generation Types
+description: One-page reference for every generation_type with exact data params and valid models.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Every cell or layer generation declares a `generation_type` and a `data` object. This page lists every valid combination in one place. See the [Creation Cards](/reference/creation-cards/) section for per-type deep dives with examples.
+
+<Aside type="tip">
+  The values below are **canonical names** — the way the docs, MCP server, and TypeScript SDK all refer to generation types. Legacy Rails-internal names (`text_generation`, `gemini_image_generation`, `kling`, `eleven_labs`, etc.) still work if you find them in older integrations, but new code should use the canonical names.
+</Aside>
+
+## Quick index
+
+| `generation_type` | Produces | Key models |
+|---|---|---|
+| `text` | text | gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4 |
+| `image_from_text` | image | gemini_image, gemini_pro_image, midjourney |
+| `video_from_text` | video | veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5 |
+| `video_from_image` | video | kling_2_1, kling_2_6, veo_3, veo_3_1, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5 |
+| `video_from_ingredients` | video | pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast |
+| `speech_from_text` | audio | (voice_method: my_voices, design_voice, clone_voice) |
+| `lipsync` | video | sync_so, gen |
+| `captions` | caption data | gemini |
+| `media` | pass-through upload | — |
+| `render` | composite video | (no model — uses layer stack) |
+
+## Text
+
+```json
+{
+  "generation_type": "text",
+  "data": {
+    "prompt": "Write a 12-second TikTok hook for {{topic}}",
+    "model": "gemini_2_5_pro",
+    "variables": { "topic": "San Antonio tacos" }
+  }
+}
+```
+
+Variables substitute `{{key}}` in the prompt. Output lives in the cell's `value` as a plain string.
+
+## Image from Text
+
+```json
+{
+  "generation_type": "image_from_text",
+  "data": {
+    "prompt": "a neon-lit street food stall at night, handheld feel",
+    "model": "midjourney",
+    "aspect_ratio": "9:16",
+    "variables": { }
+  }
+}
+```
+
+Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`. Output is a content resource (image).
+
+## Video from Text
+
+```json
+{
+  "generation_type": "video_from_text",
+  "data": {
+    "prompt": "San Antonio taco truck at golden hour, steam rising, handheld camera",
+    "model": "veo_3",
+    "aspect_ratio": "9:16",
+    "duration": 10,
+    "negative_prompt": "no text overlays, no logos"
+  }
+}
+```
+
+Aspect ratios: `1:1`, `9:16`, `16:9`. Duration: `5` or `10` (model-dependent).
+
+## Video from Image
+
+```json
+{
+  "generation_type": "video_from_image",
+  "data": {
+    "image_resource_id": 4821,
+    "image_tail_resource_id": 4822,
+    "prompt": "zoom in slowly, handheld feel",
+    "model": "kling_2_6",
+    "aspect_ratio": "9:16",
+    "duration": 5
+  }
+}
+```
+
+`image_tail_resource_id` optional — provides a target end frame for the video.
+
+## Video from Ingredients
+
+```json
+{
+  "generation_type": "video_from_ingredients",
+  "data": {
+    "prompt": "combine these 3 products in a tabletop pan-around shot",
+    "model": "pika",
+    "asset_resource_ids": [4821, 4822, 4823],
+    "aspect_ratio": "9:16",
+    "duration": 5
+  }
+}
+```
+
+Use when you want the generator to composite multiple uploaded assets.
+
+## Speech from Text
+
+Three voice methods:
+
+### my_voices (use a saved voice)
+
+```json
+{
+  "generation_type": "speech_from_text",
+  "data": {
+    "script": "Welcome to Santiago's taco tour...",
+    "voice_method": "my_voices",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "enhance_voice": true,
+    "speed": 1.0
+  }
+}
+```
+
+### design_voice (voice from a text description)
+
+```json
+{
+  "generation_type": "speech_from_text",
+  "data": {
+    "script": "Welcome to Santiago's taco tour...",
+    "voice_method": "design_voice",
+    "language": "en",
+    "gender": "male",
+    "enhance_voice": true
+  }
+}
+```
+
+### clone_voice (voice cloned from audio)
+
+```json
+{
+  "generation_type": "speech_from_text",
+  "data": {
+    "script": "Welcome to Santiago's taco tour...",
+    "voice_method": "clone_voice",
+    "audio_resource_id": 5921
+  }
+}
+```
+
+## Lipsync
+
+```json
+{
+  "generation_type": "lipsync",
+  "data": {
+    "model": "sync_so",
+    "video_resource_id": 6001,
+    "audio_resource_id": 5921
+  }
+}
+```
+
+Models: `sync_so`, `gen`.
+
+## Captions
+
+```json
+{
+  "generation_type": "captions",
+  "data": {
+    "model": "gemini",
+    "source_resource_id": 6001
+  }
+}
+```
+
+Works from either audio or video source. Returns caption timing data usable as a caption layer.
+
+## Media (pass-through upload)
+
+```json
+{
+  "generation_type": "media",
+  "data": {
+    "content_resource_id": 7000
+  }
+}
+```
+
+No AI generation — just attaches an uploaded asset to the cell. Useful for background music, uploaded b-roll, etc.
+
+## Render (composite)
+
+```
+POST /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=
+```
+
+No `generation_type` in the body — the render endpoint is dedicated. It composites **all layers** on the cell in order into one final video. Output lives in the cell's `output_resources`.

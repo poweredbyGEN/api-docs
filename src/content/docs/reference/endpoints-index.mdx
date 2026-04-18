@@ -1,0 +1,228 @@
+---
+title: All Endpoints A–Z
+description: Exhaustive list of every public endpoint on api.gen.pro and agent.gen.pro, organized by resource.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The journey-oriented navigation is the recommended way to explore the API. This page is the exhaustive resource-oriented index for developers who already know what they want.
+
+<Aside type="tip">
+  The machine-readable version is [`/openapi.yaml`](/openapi.yaml). Every operation also has an `x-phase` extension marking which step of the 5-step journey it belongs to: `setup`, `ideas`, `convert`, `edit`, or `export`.
+</Aside>
+
+## Base URLs
+
+| Host | Purpose |
+|------|---------|
+| `https://api.gen.pro/v1` | Auto Content Engine + agent setup + content monitoring + publishing |
+| `https://agent.gen.pro/v1` | Content ideas, research, agent chat, conversations |
+
+All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Bearer <jwt>`.
+
+---
+
+## Discovery
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/me | setup |
+| GET | /v1/workspaces | setup |
+| GET | /v1/agents?workspace_id= | setup |
+
+## Agents
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/agents | setup |
+| GET | /v1/agents/:id | setup |
+| PATCH | /v1/agents/:id | setup |
+| DELETE | /v1/agents/:id | setup |
+| GET | /v1/agents/:agent_id/avatars | setup |
+| POST | /v1/agents/:agent_id/avatars | setup |
+| PATCH | /v1/agents/:agent_id/avatars/:id | setup |
+| DELETE | /v1/agents/:agent_id/avatars/:id | setup |
+
+## Agent Core (recommended one-PATCH setup)
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/agents/:agent_id/core | setup |
+| PATCH | /v1/agents/:agent_id/core | setup |
+
+## Voice
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/agents/:agent_id/voice/library | setup |
+| GET | /v1/agents/:agent_id/voice/integrations/elevenlabs | setup |
+| POST | /v1/agents/:agent_id/voice/integrations/elevenlabs | setup |
+| POST | /v1/agents/:agent_id/voice/integrations/elevenlabs/test | setup |
+| DELETE | /v1/agents/:agent_id/voice/integrations/elevenlabs | setup |
+| POST | /v1/agents/:agent_id/voice/design/generate-script | setup |
+| POST | /v1/agents/:agent_id/voice/design/generate-description | setup |
+| POST | /v1/agents/:agent_id/voice/design/generate-samples | setup |
+| POST | /v1/agents/:agent_id/voice/design | setup |
+| POST | /v1/agents/:agent_id/voice/clone | setup |
+| DELETE | /v1/agents/:agent_id/voice/:voice_id | setup |
+| POST | /v1/agents/:agent_id/voice/:voice_id/preview | setup |
+| GET | /v1/agents/:agent_id/voice/preview/:job_id | setup |
+
+## Organizations
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/organizations | setup |
+| POST | /v1/organizations | setup |
+| GET | /v1/organizations/:id | setup |
+| PATCH | /v1/organizations/:id | setup |
+| DELETE | /v1/organizations/:id | setup |
+
+## API Keys
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/persisted_tokens | setup |
+| GET | /v1/persisted_tokens | setup |
+| PATCH | /v1/persisted_tokens/:id | setup |
+| DELETE | /v1/persisted_tokens/:id/revoke | setup |
+| DELETE | /v1/persisted_tokens/revoke_all | setup |
+
+## Content Ideas, Research, Conversations (agent.gen.pro)
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/agent/run | ideas |
+| GET | /v1/agent/runs/:run_id | ideas |
+| POST | /v1/agent/runs/:run_id/approve | ideas |
+| POST | /v1/agent/runs/:run_id/reject | ideas |
+| GET | /v1/agent/conversations?agent_id= | ideas |
+| GET | /v1/agent/conversations/:id | ideas |
+| PATCH | /v1/agent/conversations/:id | ideas |
+| DELETE | /v1/agent/conversations/:id | ideas |
+| GET | /v1/agent/conversations/:id/messages | ideas |
+| GET | /v1/agent/conversations/:id/runs | ideas |
+| GET | /v1/agent/ideas?agent_id= | ideas |
+| POST | /v1/agent/ideas/:id/status | ideas |
+| PUT | /v1/agent/ideas/:id/status/:status | ideas |
+| POST | /v1/research | ideas |
+
+## Content Monitoring
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/user_jobs (user_job_type=train_social) | ideas |
+| PUT | /v1/user_jobs/:id | ideas |
+| GET | /v1/user_jobs/:id | ideas |
+
+## Templates
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/templates/projects | convert |
+| GET | /v1/templates/projects/:slug | convert |
+| POST | /v1/templates/spreadsheets/:slug/clone | convert |
+
+## Auto Content Engine
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/autocontentengine | convert |
+| GET | /v1/autocontentengine/:id | convert |
+| POST | /v1/autocontentengine/:id/clone | convert |
+
+## Rows
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/autocontentengine/:id/rows | edit |
+| POST | /v1/autocontentengine/:id/rows | edit |
+| GET | /v1/autocontentengine/:id/rows/:row_id | edit |
+| POST | /v1/autocontentengine/:id/rows/:row_id/duplicate | edit |
+| PUT | /v1/autocontentengine/:id/rows/update_positions | edit |
+| PUT | /v1/autocontentengine/:id/rows/mass_update | edit |
+
+## Columns
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/autocontentengine/:id/columns | edit |
+| POST | /v1/autocontentengine/:id/columns | edit |
+| POST | /v1/autocontentengine/:id/columns/:col_id/duplicate | edit |
+| PATCH | /v1/autocontentengine/:id/columns/update_positions | edit |
+| PUT | /v1/autocontentengine/:id/columns/mass_update | edit |
+
+## Cells
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/autocontentengine/:id/cells/:cell_id | edit |
+| PATCH | /v1/autocontentengine/:id/cells/:cell_id | edit |
+| PUT | /v1/autocontentengine/:id/cells/mass_update | edit |
+| PATCH | /v1/autocontentengine/:id/cells/:cell_id/set_default_user_job | edit |
+
+## Layers
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/autocontentengine/:id/cells/:cell_id/layers | edit |
+| GET | /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id | edit |
+| PATCH | /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id | edit |
+| DELETE | /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id | edit |
+| POST | /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/duplicate | edit |
+| PUT | /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions | edit |
+
+## Generations
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/autocontentengine/:id/cells/:cell_id/generate | edit |
+| POST | /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/generate | edit |
+| GET | /v1/generations/:id | edit |
+| POST | /v1/generations/:id/stop | edit |
+| POST | /v1/generations/:id/continue | edit |
+
+## Variables
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/autocontentengine/:id/global_variables | edit |
+| POST | /v1/autocontentengine/:id/import_global_variables | edit |
+| GET | /v1/autocontentengine/global_variables_template | edit |
+
+## Content Resources & Assets
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/content_resources | edit |
+| POST | /v1/content_resources | edit |
+| GET | /v1/content_resources/:id | edit |
+| PATCH | /v1/content_resources/:id | edit |
+| DELETE | /v1/content_resources/:id | edit |
+| GET | /v1/asset_libraries | edit |
+| POST | /v1/asset_folders | edit |
+| PATCH | /v1/asset_folders/:id | edit |
+| DELETE | /v1/asset_folders/:id | edit |
+| POST | /v1/direct_upload | edit |
+
+## Rendering
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/autocontentengine/:id/cells/:cell_id/render | export |
+
+## Publishing
+
+| Method | Path | Phase |
+|--------|------|-------|
+| POST | /v1/user_jobs (user_job_type=publish_content) | export |
+| GET | /v1/user_jobs/:id | export |
+
+## Automation
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/agents/:agent_id/automation_config | edit |
+| PATCH | /v1/agents/:agent_id/automation_config | edit |
+| POST | /v1/agents/:agent_id/automation_config/test_webhook | edit |
+| POST | /v1/agents/:agent_id/automation_config/test_callback | edit |
