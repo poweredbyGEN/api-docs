@@ -119,18 +119,16 @@ X-API-Key: $GEN_API_KEY
           <p class="gen-step__tag">Step three</p>
           <h3 class="gen-step__title">Convert idea to <em>vidsheet.</em></h3>
           <p class="gen-step__desc">
-            Clone a template, inject the idea's fields as variables, and you have a ready-to-edit vidsheet — rows of scenes, columns of content types, cells for each piece. Templates are the 80% path; building from scratch is the other 20%.
+            Clone a template into your agent, then PATCH the idea's content into the vidsheet's global variables and first-row cells. Rows become scenes, columns are content types, cells hold each piece. Templates are the 80% path; building from scratch is the other 20%.
           </p>
           <figure class="gen-step__code">
             <div class="gen-step__code-lang">HTTP</div>
-            <pre><code>POST /v1/vidsheet/from_idea
+            <pre><code>POST /v1/templates/spreadsheets/:slug/clone
 X-API-Key: $GEN_API_KEY
 
-&#123;
-  "agent_id": "agt_...",
-  "idea_id": "idea_...",
-  "template_slug": "talking-head-3-scene"
-&#125;</code></pre>
+&#123; "agent_id": "agt_..." &#125;
+
+&rarr; then PATCH cells with the idea fields</code></pre>
           </figure>
           <a href="/reference/templates/" class="gen-step__link">
             Templates reference
