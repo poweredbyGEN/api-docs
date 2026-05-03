@@ -36,14 +36,14 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
-| Veo 3 | `gemini_video_generation` | `"veo3"` |
-| Veo 3 Fast | `gemini_video_generation` | `"veo3-fast"` |
-| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
-| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
-| Sora 2 | `sora2_video_generation` | -- |
-| Kling 1.6 | `kling` | `"kling-v1-6"` |
-| Seedance Pro | `seedance_video_generation` | `"seedance-1.0-pro"` |
-| Seedance Pro 1.5 | `seedance_video_generation` | `"seedance-1.5-pro"` |
+| Veo 3 | `video_from_text` | `"veo_3"` |
+| Veo 3 Fast | `video_from_text` | `"veo_3_fast"` |
+| Veo 3.1 | `video_from_text` | `"veo_3_1"` |
+| Veo 3.1 Fast | `video_from_text` | `"veo_3_1_fast"` |
+| Sora 2 | `video_from_text` | `"sora_2"` |
+| Kling 1.6 | `video_from_text` | `"kling_1_6"` |
+| Seedance Pro | `video_from_text` | `"seedance_pro"` |
+| Seedance Pro 1.5 | `video_from_text` | `"seedance_pro_1_5"` |
 
 ---
 
@@ -51,11 +51,11 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | See [Models](#models) table above. |
+| `generation_type` | string | Yes | `"video_from_text"`. |
 | `data.prompt` | string | Yes | Text description of the video to generate. Supports `{{variable_name}}` syntax. |
 | `data.negative_prompt` | string | No | What to avoid in the generated video. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
-| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. |
 | `data.duration` | integer | No | Video duration in seconds. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
 | `data.negative_prompt_var` | string | No | Variable name to map the negative prompt from a column. |
@@ -82,13 +82,13 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3100/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "gemini_video_generation",
+    "generation_type": "video_from_text",
     "data": {
       "prompt": "A drone shot flying over a tropical beach at golden hour, waves gently crashing on white sand, cinematic 4K",
       "negative_prompt": "text, watermark, blurry, low quality",
-      "model": "veo3",
-      "aspect_ratio": "1024:576",
-      "duration": 8
+      "model": "veo_3",
+      "aspect_ratio": "16:9",
+      "duration": 10
     }
   }'
 ```
@@ -125,7 +125,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3100/generate?a
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"veo-3"`, `"veo-3-fast"`, `"veo-3.1"`, `"veo-3.1-fast"`, `"sora2_video_generation"`, `"seedance-1.0-pro"`, `"seedance-1.5-pro"`. |
+| `model` | string | Default model: `"veo_3"`, `"veo_3_fast"`, `"veo_3_1"`, `"veo_3_1_fast"`, `"sora_2"`, `"kling_1_6"`, `"seedance_pro"`, or `"seedance_pro_1_5"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

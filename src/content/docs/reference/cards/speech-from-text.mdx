@@ -13,11 +13,11 @@ The Speech from Text card converts written text into spoken audio using ElevenLa
 
 ## Voice methods
 
-There are three ways to generate speech, each using a different `generation_type`:
+Use canonical `generation_type: "speech_from_text"` for all speech generation. Choose the voice path with `data.voice_method`.
 
-| Method | `generation_type` | Description |
-|--------|-------------------|-------------|
-| My Voices | `eleven_labs` | Use an existing ElevenLabs voice by ID. |
+| Method | `data.voice_method` | Description |
+|--------|---------------------|-------------|
+| My Voices | `my_voices` | Use an existing saved voice by ID. |
 | Design Voice | `design_voice` | Create a new voice from a text description. |
 | Clone Voice | `clone_voice` | Clone a voice from an audio sample. |
 
@@ -35,10 +35,12 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | `"eleven_labs"` |
-| `data.text` | string | Yes | The text to convert to speech. |
-| `data.voice_id` | string | Yes | The ElevenLabs voice ID. |
-| `data.model_id` | string | No | ElevenLabs model to use. Defaults to the standard model. |
+| `generation_type` | string | Yes | `"speech_from_text"`. |
+| `data.script` | string | Yes | The text to convert to speech. |
+| `data.voice_method` | string | Yes | `"my_voices"`. |
+| `data.voice_id` | string | Yes | Saved voice ID. |
+| `data.language` | string | No | Language code, for example `"en"`. |
+| `data.speed` | number | No | Playback speed. |
 
 ### Example
 
@@ -47,9 +49,10 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "eleven_labs",
+    "generation_type": "speech_from_text",
     "data": {
-      "text": "Welcome back to another episode of our series.",
+      "script": "Welcome back to another episode of our series.",
+      "voice_method": "my_voices",
       "voice_id": "pNInz6obpgDQGcFmaJgB"
     }
   }'
@@ -69,8 +72,9 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | `"design_voice"` |
-| `data.text` | string | Yes | The text to convert to speech. |
+| `generation_type` | string | Yes | `"speech_from_text"`. |
+| `data.script` | string | Yes | The text to convert to speech. |
+| `data.voice_method` | string | Yes | `"design_voice"`. |
 | `data.name` | string | Yes | A name for the new voice. |
 | `data.language` | string | Yes | Language code (e.g., `"en"`). |
 | `data.gender` | string | Yes | `"male"` or `"female"`. |
@@ -83,9 +87,10 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "design_voice",
+    "generation_type": "speech_from_text",
     "data": {
-      "text": "Welcome back to another episode of our series.",
+      "script": "Welcome back to another episode of our series.",
+      "voice_method": "design_voice",
       "name": "Friendly Narrator",
       "language": "en",
       "gender": "male",
@@ -108,10 +113,11 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | `"clone_voice"` |
-| `data.text` | string | Yes | The text to convert to speech. |
+| `generation_type` | string | Yes | `"speech_from_text"`. |
+| `data.script` | string | Yes | The text to convert to speech. |
+| `data.voice_method` | string | Yes | `"clone_voice"`. |
 | `data.name` | string | Yes | A name for the cloned voice. |
-| `data.voice_sample` | string | Yes | URL to an audio file of the voice to clone. |
+| `data.audio_resource_id` | string | Yes | Content resource ID for the voice sample. |
 | `data.language` | string | Yes | Language code (e.g., `"en"`). |
 | `data.gender` | string | Yes | `"male"` or `"female"`. |
 
@@ -126,11 +132,12 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "clone_voice",
+    "generation_type": "speech_from_text",
     "data": {
-      "text": "Welcome back to another episode of our series.",
+      "script": "Welcome back to another episode of our series.",
+      "voice_method": "clone_voice",
       "name": "My Custom Voice",
-      "voice_sample": "https://cdn.example.com/voice-sample.mp3",
+      "audio_resource_id": "audio_res_123",
       "language": "en",
       "gender": "male"
     }

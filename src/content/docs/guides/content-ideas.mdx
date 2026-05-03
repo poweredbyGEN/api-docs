@@ -94,8 +94,10 @@ Preferences are stored in the agent's config and applied to every future generat
 ## Idea Status Lifecycle
 
 ```
-generated → approve_to_create → ready_for_review → approved → published
+generated → approve_to_create → ready_for_review → approved_to_post → posted
 ```
+
+Use `change_idea`, `change_video`, or `rejected` when an idea needs edits or should not move forward.
 
 ### List Ideas
 
@@ -111,18 +113,14 @@ curl -X PUT "https://agent.gen.pro/v1/agent/ideas/123/status/approve_to_create" 
   -H "X-API-Key: $GEN_API_KEY"
 ```
 
-## Real-Time Progress (Firebase)
+## Real-Time Progress
 
-The `firebase_path` from the run response points to a Firebase RTDB path. Subscribe for real-time updates:
+The `firebase_path` from the run response points to a run-specific progress stream:
 
 - `status` — "running", "completed", or "failed"
 - `plan` — numbered checklist of what the agent is doing
 - `thinking` — progress messages
 - `messages` — output when complete
-
-<Aside>
-Firebase streaming is publicly readable — no authentication needed to subscribe.
-</Aside>
 
 ## MCP Server
 

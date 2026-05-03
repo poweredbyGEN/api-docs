@@ -40,8 +40,10 @@ Returns a new `run_id` — poll like before. When it completes, the conversation
 Ideas have a status lifecycle:
 
 ```
-generated → approve_to_create → ready_for_review → approved → published
+generated → approve_to_create → ready_for_review → approved_to_post → posted
 ```
+
+Use `change_idea`, `change_video`, or `rejected` when the idea needs edits or should not move forward.
 
 Move an idea forward in the lifecycle:
 

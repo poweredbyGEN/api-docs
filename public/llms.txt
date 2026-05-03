@@ -197,7 +197,7 @@ curl -X POST "https://agent.gen.pro/v1/research" \
   -d '{ "agent_id": "'"$AGENT_ID"'", "topic": "tariffs on beauty imports 2026", "depth": "default" }'
 ```
 
-Depths: `quick`, `default`, `deep`. Returns structured findings from Reddit, X, YouTube, TikTok, Instagram, HN, Perplexity, Gemini with source counts, engagement totals, and a summary markdown.
+Depths: `quick`, `default`, `deep`. Returns a `run_id`; poll `GET /v1/agent/runs/:run_id` until `completed` to read the structured research findings and summary.
 
 **Trending data** (scrape content into the agent knowledge base):
 
@@ -220,8 +220,7 @@ Supported platforms/types: TikTok (username / hashtag / keyword), Instagram (use
 ```
 POST   /v1/agent/run                              — trigger run (ideas/refine/preferences/chat)
 GET    /v1/agent/runs/:run_id                     — poll run status
-POST   /v1/agent/runs/:run_id/approve             — approve a pending action
-POST   /v1/agent/runs/:run_id/reject              — reject a pending action
+POST   /v1/agent/runs/:run_id/approve             — approve or reject a pending action; body { approved: true|false }
 
 GET    /v1/agent/conversations?agent_id=          — list conversations
 GET    /v1/agent/conversations/:id                — read conversation
@@ -241,7 +240,8 @@ GET    /v1/user_jobs/:id                          — poll monitoring job
 PUT    /v1/user_jobs/:id                          — update monitoring job
 ```
 
-Idea status flow: `generated` → `approve_to_create` → `ready_for_review` → `approved` → `published`.
+Idea status flow: `generated` → `approve_to_create` → `ready_for_review` → `approved_to_post` → `posted`.
+Edit/rejection statuses: `change_idea`, `change_video`, `rejected`.
 
 Video type IDs: 0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven, 5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit.
 
@@ -630,7 +630,7 @@ POST /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=
 ```
 No `generation_type` in body. Composites all layers into one final video.
 
-Legacy names still accepted: `text_generation`, `gemini_image_generation`, `midjourney`, `gemini_video_generation`, `sora2_video_generation`, `kling`, `kling_image_video`, `seedance_video_generation`, `eleven_labs`.
+Use canonical generation type names for new integrations.
 
 ---
 

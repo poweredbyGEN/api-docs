@@ -36,16 +36,14 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
-| Kling 2.1 | `kling_img2video` | `"kling-v2-1"` |
-| Kling 2.6 | `kling_img2video` | `"kling-v2-6"` |
-| Veo 3 | `gemini_video_generation` | `"veo3"` |
-| Veo 3 Fast | `gemini_video_generation` | `"veo3-fast"` |
-| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
-| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
-| Sora 2 | `sora2_video_generation` | -- |
-| Seedance Lite | `seedance_video_generation` | `"seedance-1.0-lite"` |
-| Seedance Pro | `seedance_video_generation` | `"seedance-1.0-pro"` |
-| Seedance Pro 1.5 | `seedance_video_generation` | `"seedance-1.5-pro"` |
+| Kling 2.1 | `video_from_image` | `"kling_2_1"` |
+| Kling 2.6 | `video_from_image` | `"kling_2_6"` |
+| Veo 3 | `video_from_image` | `"veo_3"` |
+| Veo 3.1 | `video_from_image` | `"veo_3_1"` |
+| Sora 2 | `video_from_image` | `"sora_2"` |
+| Seedance Lite | `video_from_image` | `"seedance_lite"` |
+| Seedance Pro | `video_from_image` | `"seedance_pro"` |
+| Seedance Pro 1.5 | `video_from_image` | `"seedance_pro_1_5"` |
 
 ---
 
@@ -53,13 +51,13 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | See [Models](#models) table above. |
-| `data.image` | object | Yes | Starting frame image. Object with `"value"` key containing the image URL. |
-| `data.image_tail` | object | No | End frame image. Same format as `image`. The model will animate between the two frames. |
+| `generation_type` | string | Yes | `"video_from_image"`. |
+| `data.image_resource_id` | string | Yes | Starting frame image content resource ID. |
+| `data.image_tail_resource_id` | string | No | Optional end frame image content resource ID. |
 | `data.prompt` | string | No | Text description of the desired motion or scene. Supports `{{variable_name}}` syntax. |
 | `data.negative_prompt` | string | No | What to avoid in the generated video. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
-| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. |
 | `data.duration` | integer | No | Video duration in seconds. |
 | `data.image_var` | string | No | Variable name to map the image value from a column. |
 | `data.image_tail_var` | string | No | Variable name to map the end frame image from a column. |
@@ -88,15 +86,13 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3200/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "kling_img2video",
+    "generation_type": "video_from_image",
     "data": {
-      "image": {
-        "value": "https://cdn.gen.pro/uploads/product_hero.jpg"
-      },
+      "image_resource_id": "image_res_123",
       "prompt": "Camera slowly zooms in while the product rotates, soft studio lighting",
       "negative_prompt": "blurry, distorted, text overlay",
-      "model": "kling-v2-6",
-      "aspect_ratio": "576:1024",
+      "model": "kling_2_6",
+      "aspect_ratio": "9:16",
       "duration": 5
     }
   }'
@@ -138,7 +134,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3200/generate?a
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling-v1-6"`, `"kling-v2-1"`, `"kling-v2-6"`, `"sora2_video_generation"`, `"seedance-1.0-lite"`, `"seedance-1.0-pro"`, `"veo-3"`, etc. |
+| `model` | string | Default model: `"kling_2_1"`, `"kling_2_6"`, `"veo_3"`, `"veo_3_1"`, `"sora_2"`, `"seedance_lite"`, `"seedance_pro"`, etc. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

@@ -73,7 +73,7 @@ curl "https://api.gen.pro/v1/content_resources?agent_id=42&type=image&page=2" \
 
 ## Create content resource
 
-Uploads a new file as a content resource. The file must be sent as a multipart form upload. Optionally attach the resource to a project or place it in an asset folder.
+Uploads a new file as a content resource. The file must be sent as a multipart form upload. Optionally place the resource in an asset folder.
 
 ```
 POST /v1/content_resources
@@ -85,7 +85,6 @@ POST /v1/content_resources
 |-----------|------|----------|-------------|
 | `agent_id` | integer | Yes | The agent to create the resource under. |
 | `content_resource[file]` | file | Yes | The file to upload (multipart). Accepted types: images, videos, audio, zip, safetensors. |
-| `project_node[project_id]` | integer | No | Attach the resource to this project. |
 | `asset_folder[id]` | integer | No | Place the resource inside this asset folder. |
 
 ### Response
@@ -99,9 +98,6 @@ POST /v1/content_resources
     "file_name": "banner.png",
     "content_type": "image/png"
   },
-  "project_node": {
-    "id": null
-  },
   "generator": null
 }
 ```
@@ -113,11 +109,10 @@ curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -F "content_resource[file]=@/path/to/banner.png"
 
-# With project and folder attachment
+# With folder attachment
 curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -F "content_resource[file]=@/path/to/banner.png" \
-  -F "project_node[project_id]=100" \
   -F "asset_folder[id]=15"
 ```
 
@@ -157,13 +152,10 @@ GET /v1/content_resources/:id
     "file_name": "product-hero.png",
     "content_type": "image/png"
   },
-  "project_node": {
-    "id": 830
-  },
   "generator": {
     "id": 2001,
     "status": "completed",
-    "type": "gemini_image_generation"
+    "type": "image_from_text"
   }
 }
 ```

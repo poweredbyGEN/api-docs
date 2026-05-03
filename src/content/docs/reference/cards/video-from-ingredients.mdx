@@ -5,7 +5,7 @@ description: Generate video from a prompt combined with uploaded assets using Pi
 
 import { Aside } from '@astrojs/starlight/components';
 
-Generate video by combining a text prompt with uploaded assets (images, clips, logos). Reference your assets in the prompt and pass their IDs via `content_resource_ids` — the model will incorporate them into the generated video.
+Generate video by combining a text prompt with uploaded assets (images, clips, logos). Reference your assets in the prompt and pass their IDs via `asset_resource_ids`.
 
 <Aside type="caution">
   Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
@@ -36,11 +36,11 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
-| Pika | `pika` | -- |
-| Kling 1.6 | `kling` | `"kling-v1-6"` |
-| Seedance Lite | `seedance_video_generation` | `"seedance-1.0-lite"` |
-| Veo 3.1 | `gemini_video_generation` | `"veo3-1"` |
-| Veo 3.1 Fast | `gemini_video_generation` | `"veo3-1-fast"` |
+| Pika | `video_from_ingredients` | `"pika"` |
+| Kling 1.6 | `video_from_ingredients` | `"kling_1_6"` |
+| Seedance Lite | `video_from_ingredients` | `"seedance_lite"` |
+| Veo 3.1 | `video_from_ingredients` | `"veo_3_1"` |
+| Veo 3.1 Fast | `video_from_ingredients` | `"veo_3_1_fast"` |
 
 ---
 
@@ -48,17 +48,17 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | See [Models](#models) table above. |
+| `generation_type` | string | Yes | `"video_from_ingredients"`. |
 | `data.prompt` | string | Yes | Text description that references the uploaded assets. Supports `{{variable_name}}` syntax. |
-| `data.content_resource_ids` | array | No | Array of content resource IDs (uploaded assets) to include in the generation. |
+| `data.asset_resource_ids` | array | Yes | Array of content resource IDs to include in the generation. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
-| `data.aspect_ratio` | string | No | Video dimensions (e.g., `"1024:1024"`, `"576:1024"`, `"1024:576"`). |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. |
 | `data.duration` | integer | No | Video duration in seconds. |
 | `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
 | `data.content_resource_vars` | array | No | Variable names to map content resource IDs from columns. |
 
 <Aside type="tip">
-  Upload assets first using the content resources endpoints, then pass their IDs in `content_resource_ids`. The model will blend these assets into the generated video based on your prompt.
+  Upload assets first using the content resources endpoints, then pass their IDs in `asset_resource_ids`.
 </Aside>
 
 ---
@@ -83,11 +83,12 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "pika",
+    "generation_type": "video_from_ingredients",
     "data": {
       "prompt": "A dynamic product showcase video featuring the uploaded product image, camera orbiting around it with particle effects and dramatic lighting",
-      "content_resource_ids": [501, 502],
-      "aspect_ratio": "1024:576",
+      "model": "pika",
+      "asset_resource_ids": [501, 502],
+      "aspect_ratio": "16:9",
       "duration": 5
     }
   }'
@@ -125,7 +126,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?a
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling-v1-6"`, `"seedance-1.0-lite"`, `"pika"`, `"veo-3.1"`. |
+| `model` | string | Default model: `"kling_1_6"`, `"seedance_lite"`, `"pika"`, `"veo_3_1"`, or `"veo_3_1_fast"`. |
 | `ratio` | string | Default aspect ratio. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

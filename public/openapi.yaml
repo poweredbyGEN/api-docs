@@ -1226,7 +1226,7 @@ paths:
                     The type of AI generation to run. Canonical names:
                     text, image_from_text, video_from_text, video_from_image,
                     video_from_ingredients, speech_from_text, lipsync, captions, media.
-                    Legacy names also accepted (text_generation, gemini_image_generation, etc.)
+                    Use canonical names for new integrations.
                   enum:
                     - text
                     - image_from_text
@@ -2062,7 +2062,7 @@ paths:
       operationId: createContentResource
       x-phase: edit
       summary: Upload a content resource
-      description: Upload a file as a content resource. Optionally assign to a project or asset folder.
+      description: Upload a file as a content resource. Optionally assign to an asset folder.
       tags: [Content Resources]
       parameters:
         - $ref: '#/components/parameters/AgentId'
@@ -2078,9 +2078,6 @@ paths:
                   type: string
                   format: binary
                   description: The file to upload.
-                "project_node[project_id]":
-                  type: string
-                  description: Optional project (engine) ID.
                 "asset_folder[id]":
                   type: string
                   description: Optional asset folder ID.
@@ -2094,12 +2091,6 @@ paths:
                 properties:
                   content_resource:
                     $ref: '#/components/schemas/ContentResource'
-                  project_node:
-                    type: object
-                    nullable: true
-                    properties:
-                      id:
-                        type: string
                   generator:
                     type: object
                     nullable: true
@@ -2139,12 +2130,6 @@ paths:
                 properties:
                   content_resource:
                     $ref: '#/components/schemas/ContentResource'
-                  project_node:
-                    type: object
-                    nullable: true
-                    properties:
-                      id:
-                        type: string
                   generator:
                     type: object
                     nullable: true
@@ -2579,7 +2564,7 @@ paths:
       summary: Start an agent run
       description: |
         Sends a message to the agent and starts a new run. Returns immediately with a run ID.
-        Poll `GET /agent/runs/{run_id}` for status and messages, or listen via the Firebase path.
+        Poll `GET /agent/runs/{run_id}` for status and messages, or use the returned progress path for live updates.
 
         **Base URL:** `https://agent.gen.pro/v1`
       tags: [Agent Chat]
@@ -2629,7 +2614,7 @@ paths:
                     example: "running"
                   firebase_path:
                     type: string
-                    description: Firebase Realtime Database path for live streaming.
+                    description: Run-specific progress path for live updates.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -2669,7 +2654,7 @@ paths:
                     type: string
                   status:
                     type: string
-                    enum: [running, completed, failed, requires_action]
+                    enum: [running, completed, failed, awaiting_approval]
                   messages:
                     type: array
                     items:
@@ -2690,9 +2675,10 @@ paths:
     post:
       operationId: approveAgentAction
       x-phase: ideas
-      summary: Approve a pending agent action
+      summary: Approve or reject a pending agent action
       description: |
-        When a run has status `requires_action`, approve the proposed action to continue.
+        When a run has status `awaiting_approval`, approve the proposed action to continue.
+        Send `approved: false` to reject the action and fail the run.
 
         **Base URL:** `https://agent.gen.pro/v1`
       tags: [Agent Chat]
@@ -2702,9 +2688,20 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approved]
+              properties:
+                approved:
+                  type: boolean
+                  description: "`true` approves and continues the run; `false` rejects the pending action."
       responses:
         '200':
-          description: Action approved, run continues
+          description: Action decision accepted
           content:
             application/json:
               schema:
@@ -2714,48 +2711,11 @@ paths:
                     type: string
                   status:
                     type: string
-                    example: "running"
+                    enum: [running, failed]
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
-          description: Run not in requires_action state
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /agent/runs/{run_id}/reject:
-    post:
-      operationId: rejectAgentAction
-      x-phase: ideas
-      summary: Reject a pending agent action
-      description: |
-        When a run has status `requires_action`, reject the proposed action.
-
-        **Base URL:** `https://agent.gen.pro/v1`
-      tags: [Agent Chat]
-      parameters:
-        - name: run_id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Action rejected
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  run_id:
-                    type: string
-                  status:
-                    type: string
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          description: Run not in requires_action state
+          description: Run not in awaiting_approval state
           content:
             application/json:
               schema:
@@ -2943,7 +2903,7 @@ paths:
                       type: string
                     status:
                       type: string
-                      enum: [running, completed, failed, requires_action]
+                      enum: [running, completed, failed, awaiting_approval]
                     created_at:
                       type: string
                       format: date-time
@@ -2966,7 +2926,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [new, approved, rejected, in_progress, completed]
+            enum: [generated, approve_to_create, ready_for_review, change_idea, change_video, rejected, approved_to_post, posted]
           description: Filter by idea status.
       responses:
         '200':
@@ -3027,7 +2987,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [new, approved, rejected, in_progress, completed]
+            enum: [generated, approve_to_create, ready_for_review, change_idea, change_video, rejected, approved_to_post, posted]
       responses:
         '200':
           description: Status set
@@ -3049,11 +3009,12 @@ paths:
     post:
       operationId: runResearch
       x-phase: ideas
-      summary: Research a topic
+      summary: Start research for a topic
       description: |
-        Runs standalone research across 8+ sources — Reddit, X, YouTube, TikTok, Instagram, Hacker News, Perplexity, and Gemini — and returns structured findings with source counts, engagement totals, citations, and a summary markdown.
+        Starts standalone research across multiple public sources and returns an async run.
+        Poll `GET /v1/agent/runs/{run_id}` for completion and messages.
 
-        Depths: `quick` (~10s, surface), `default` (~30-45s), `deep` (~90s, thorough). A paid operation (~35 credits per call at default depth).
+        Depths: `quick`, `default`, `deep`. This is a paid operation.
 
         **Base URL:** `https://agent.gen.pro/v1`
       tags: [Agent Chat]
@@ -3075,46 +3036,24 @@ paths:
                 agent_id:
                   type: string
       responses:
-        '200':
-          description: Research findings
+        '202':
+          description: Research run accepted
           content:
             application/json:
               schema:
                 type: object
+                required: [run_id, conversation_id, status]
                 properties:
-                  topic:
+                  run_id:
                     type: string
-                  depth:
+                  conversation_id:
                     type: string
-                  researched_at:
+                  status:
                     type: string
-                    format: date-time
-                  sources:
-                    type: object
-                    description: Per-source counts and engagement totals.
-                  perplexity:
-                    type: object
-                    properties:
-                      text:
-                        type: string
-                      citations:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            url:
-                              type: string
-                            title:
-                              type: string
-                  gemini:
-                    type: object
-                    properties:
-                      text:
-                        type: string
-                      grounded:
-                        type: boolean
-                  summary_markdown:
+                    example: running
+                  firebase_path:
                     type: string
+                    description: Run-specific progress path for live updates.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -4102,7 +4041,7 @@ components:
           nullable: true
         status:
           type: string
-          enum: [new, approved, rejected, in_progress, completed]
+          enum: [generated, approve_to_create, ready_for_review, change_idea, change_video, rejected, approved_to_post, posted]
         agent_id:
           type: string
         created_at:
@@ -4124,8 +4063,7 @@ components:
           description: Machine-readable error code.
 
     # ── Agent Core schemas ──────────────────────────────────
-    # Flat schema — every field name mirrors what the GEN Setup canvas FE
-    # saves. See api/reference/agent-core for the full storage map.
+    # Flat schema — every field name mirrors the public Agent Core setup fields.
     AgentCore:
       type: object
       description: Full agent setup as returned by GET /agents/{id}/core.
@@ -4156,7 +4094,7 @@ components:
         personality:
           type: string
           nullable: true
-          description: Full persona text. Canonical source is the Rails `project_nodes` row with `node_type='personality'`.
+          description: Full persona text for the agent.
         default_user_voice:
           $ref: '#/components/schemas/VoiceRef'
 
@@ -4200,7 +4138,7 @@ components:
         personality:
           type: string
           maxLength: 20000
-          description: Full persona text. Written to Rails `project_nodes` where `node_type='personality'`.
+          description: Full persona text for the agent.
         default_user_voice:
           $ref: '#/components/schemas/VoiceRef'
 

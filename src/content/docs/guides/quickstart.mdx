@@ -170,7 +170,7 @@ curl -s -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CEL
 curl -s -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"generation_type": "text_generation", "data": {"model": "gemini", "prompt": "..."}}' | jq
+  -d '{"generation_type": "text", "data": {"model": "gemini", "prompt": "..."}}' | jq
 
 # e. poll the generation until complete
 curl -s https://api.gen.pro/v1/generations/GENERATION_ID \
