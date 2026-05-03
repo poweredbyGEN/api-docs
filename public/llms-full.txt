@@ -880,7 +880,7 @@ Status flow: `pending → processing → completed | failed`. On `completed`, `r
 # Integrations
 
 - MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env `GEN_API_KEY`)
-- TypeScript SDK: `npm install @poweredbygen/autocontentengine-sdk`
+- TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
 - Full Docs (5-step journey): https://api.gen.pro
