@@ -32,7 +32,7 @@ console.log(agents);
 const engine = await client.getEngine(agents[0].id, engineId);
 
 // Generate content and wait for completion
-const gen = await client.generateContent(agentId, engineId, cellId, 'text_generation', {
+const gen = await client.generateContent(agentId, engineId, cellId, 'text', {
   model: 'gemini',
   prompt: 'Write a 30-second script about morning routines',
 });
@@ -129,14 +129,14 @@ Pass these as the `type` parameter to `generateContent()`:
 
 | Content | Type | Example data |
 |---------|------|-------------|
-| Text | `text_generation` | `{ model: 'gemini', prompt: '...' }` |
-| Image | `gemini_image_generation` | `{ prompt: '...', model: 'gemini_pro', aspect_ratio: '1024:1024' }` |
-| Image | `midjourney` | `{ prompt: '...' }` |
-| Video | `gemini_video_generation` | `{ prompt: '...', model: 'veo3', duration: 8 }` |
-| Video | `kling` | `{ prompt: '...', model: 'kling-v1-6', duration: 5 }` |
-| Speech | `eleven_labs` | `{ voice_id: '...', script: '...' }` |
-| Lipsync | `lipsync` | `{ model: 'sync.so', video_content_resource_id: 123, audio_content_resource_id: 456 }` |
-| Captions | `captions` | `{ audio_content_resource_id: 123 }` |
+| Text | `text` | `{ model: 'gemini', prompt: '...' }` |
+| Image | `image_from_text` | `{ prompt: '...', model: 'gemini_pro_image', aspect_ratio: '1:1' }` |
+| Video | `video_from_text` | `{ prompt: '...', model: 'veo_3', duration: 10 }` |
+| Video from image | `video_from_image` | `{ prompt: '...', model: 'kling_2_1', image_resource_id: 123 }` |
+| Video from ingredients | `video_from_ingredients` | `{ prompt: '...', model: 'pika', asset_resource_ids: [123, 456] }` |
+| Speech | `speech_from_text` | `{ voice_method: 'my_voices', voice_id: '...', script: '...' }` |
+| Lipsync | `lipsync` | `{ model: 'sync_so', video_resource_id: 123, audio_resource_id: 456 }` |
+| Captions | `captions` | `{ source_resource_id: 123 }` |
 
 See [Creation Cards](/reference/creation-cards/) for full parameter details.
 
@@ -146,7 +146,7 @@ See [Creation Cards](/reference/creation-cards/) for full parameter details.
 import { GenClient, GenApiError } from '@poweredbygen/autocontentengine-sdk';
 
 try {
-  await client.generateContent(agentId, engineId, cellId, 'text_generation', {
+  await client.generateContent(agentId, engineId, cellId, 'text', {
     model: 'gemini',
     prompt: 'Write a hook',
   });

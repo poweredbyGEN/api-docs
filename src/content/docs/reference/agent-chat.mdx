@@ -44,7 +44,7 @@ Start an agent run (generate ideas, refine, chat).
   "run_id": "uuid",
   "conversation_id": "uuid",
   "status": "running",
-  "firebase_path": "/agent_runs/:user_id/:run_id/"
+  "firebase_path": "..."
 }
 ```
 
@@ -66,11 +66,16 @@ Poll run status. Poll every 5 seconds until `status` is `"completed"`.
 
 ### POST /v1/agent/runs/:run_id/approve
 
-Approve a pending action gate.
+Approve or reject a pending action gate.
 
-### POST /v1/agent/runs/:run_id/reject
+**Request:**
+```json
+{
+  "approved": true
+}
+```
 
-Reject a pending action gate.
+Use `{ "approved": false }` to reject the pending action.
 
 ## Conversations
 
@@ -116,7 +121,7 @@ List content ideas for an agent.
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `agent_id` | Yes | The agent ID |
-| `status` | No | Filter: `generated`, `approve_to_create`, `ready_for_review`, `approved`, `published` |
+| `status` | No | Filter: `generated`, `approve_to_create`, `ready_for_review`, `change_idea`, `change_video`, `rejected`, `approved_to_post`, `posted` |
 
 **Response:**
 ```json
@@ -147,8 +152,10 @@ Set an explicit status value.
 
 **Status flow:**
 ```
-generated → approve_to_create → ready_for_review → approved → published
+generated → approve_to_create → ready_for_review → approved_to_post → posted
 ```
+
+Ideas can also be moved to `change_idea`, `change_video`, or `rejected` when they need edits or should not move forward.
 
 ## Agent Profile
 
@@ -197,13 +204,9 @@ Update profile. Send only the fields you want to change. Array fields (`keywords
 
 Reset the agent's brand config only. Agent identity and voice settings are preserved.
 
-## Firebase Streaming
+## Real-Time Progress
 
-<Aside>
-Firebase streaming is publicly readable — no authentication needed.
-</Aside>
-
-The `firebase_path` returned by `POST /v1/agent/run` points to a Firebase RTDB node with real-time progress:
+The `firebase_path` returned by `POST /v1/agent/run` points to a run-specific stream with real-time progress:
 
 | Key | Description |
 |-----|-------------|
@@ -211,6 +214,3 @@ The `firebase_path` returned by `POST /v1/agent/run` points to a Firebase RTDB n
 | `plan` | Numbered checklist of agent steps |
 | `thinking` | Progress/reasoning messages |
 | `messages` | Final output when complete |
-
-**Firebase project:** `proven-fort-442703-q1`
-**DB URL:** `https://proven-fort-442703-q1-default-rtdb.firebaseio.com`

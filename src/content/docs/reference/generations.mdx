@@ -17,7 +17,7 @@ Generations are AI jobs that produce content for cells and layers. Trigger a gen
 {
   "id": 9000,
   "status": "completed",
-  "user_job_type": "text_generation",
+  "user_job_type": "text",
   "result": "Here is the generated script text...",
   "failed_reason": null,
   "output_resources": [
@@ -86,7 +86,7 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
-  -d '{"generation_type": "text_generation", "data": {}}'
+  -d '{"generation_type": "text", "data": {}}'
 ```
 
 ```typescript
@@ -99,7 +99,7 @@ const response = await fetch(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      generation_type: "text_generation",
+      generation_type: "text",
       data: {},
     }),
   }

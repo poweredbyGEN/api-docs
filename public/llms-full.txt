@@ -328,12 +328,11 @@ Message patterns:
 GET /v1/agent/runs/{run_id}
 → { run_id, conversation_id, status: "running" | "completed" | "failed", messages: [{ role, content, data }] }
 
-POST /v1/agent/runs/{run_id}/approve         — approve a pending action in a run
-POST /v1/agent/runs/{run_id}/reject          — reject a pending action in a run
+POST /v1/agent/runs/{run_id}/approve         — approve or reject a pending action. Body: { approved: true|false }
 ```
 
-Firebase streaming (no auth required to subscribe):
-- Path: `/agent_runs/{user_id}/{run_id}/`
+Live progress:
+- Use the `firebase_path` returned by `POST /v1/agent/run` as the run-specific progress path.
 - Keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
 
 ## Conversations
@@ -377,7 +376,9 @@ POST /v1/agent/ideas/{id}/status                       — cycle to next status
 PUT  /v1/agent/ideas/{id}/status/{status}              — set explicit status
 ```
 
-Status flow: `generated → approve_to_create → ready_for_review → approved → published`
+Status flow: `generated → approve_to_create → ready_for_review → approved_to_post → posted`
+
+Edit/rejection statuses: `change_idea`, `change_video`, `rejected`.
 
 Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven, 5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit`.
 
@@ -386,25 +387,12 @@ Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driv
 ```
 POST /v1/research
 Body: { topic, depth: "quick" | "default" | "deep", agent_id }
-→ {
-  topic, depth, researched_at,
-  sources: {
-    reddit:     { count, total_upvotes },
-    x:          { count, total_likes },
-    youtube:    { count, total_views },
-    tiktok:     { count, total_views },
-    instagram:  { count, total_likes },
-    hackernews: { count },
-    perplexity: { citations },
-    gemini:     { grounded }
-  },
-  perplexity: { text, citations: [{ url, title }] },
-  gemini:     { text, grounded },
-  summary_markdown: "..."
-}
+→ { run_id, conversation_id, status: "running", firebase_path }
 ```
 
-Depth notes: `quick` ≈ 10s, `default` ≈ 30-45s, `deep` ≈ 90s.
+Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. Completed messages contain the structured research findings and summary.
+
+Depths: `quick`, `default`, `deep`.
 
 ## Research topics (daily background research)
 
@@ -450,7 +438,7 @@ Per video/post: $0.015. Per comment (when enabled): $0.002.
 ### Reading scraped data
 
 No raw data dump endpoint — query through the agent:
-- **Agent Chat**: `POST /v1/agent_chats` with natural-language questions
+- **Agent Chat**: `POST /v1/agent/run` with natural-language questions
 - **Automation Pipelines**: scheduled prompts that populate vidsheet rows with results
 
 Status flow: `pending → processing → completed` (one-time) or stays `processing` (monitoring). Poll `GET /v1/user_jobs/{id}?agent_id={id}`.
@@ -681,12 +669,12 @@ GET /v1/content_resources?agent_id={id}&type={image|video|audio|zip|safe_tensors
 → [{ id, url, thumbnail_url, file_name, content_type }]          (20/page, page starts at 0)
 
 POST /v1/content_resources?agent_id={id}
-Body (multipart): content_resource[file] (required), project_node[project_id]?, asset_folder[id]?
-→ { content_resource: {...}, project_node: { id }, generator: null }
+Body (multipart): content_resource[file] (required), asset_folder[id]?
+→ { content_resource: {...}, generator: null }
 Errors: 403 forbidden, 422 content_resource_creation_failed
 
 GET    /v1/content_resources/{id}?agent_id={id}
-→ { content_resource: {...}, project_node: { id }, generator: { id, status, type } | null }
+→ { content_resource: {...}, generator: { id, status, type } | null }
    generator is null for manual uploads; populated for AI-generated resources.
 
 PATCH  /v1/content_resources/{id}?agent_id={id}    Body: { content_resource: { filename } }

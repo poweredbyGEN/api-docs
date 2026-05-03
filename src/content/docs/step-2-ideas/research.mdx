@@ -5,7 +5,7 @@ description: Standalone research across Reddit, X, YouTube, TikTok, Instagram, H
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Ideas Engine uses research under the hood, but you can also call it directly. `POST /v1/research` gathers signals from 8+ sources, synthesizes them, and returns structured findings.
+The Ideas Engine uses research under the hood, but you can also call it directly. `POST /v1/research` starts an async research run; poll the returned `run_id` until it completes.
 
 **Base URL:** `https://agent.gen.pro/v1`
 
@@ -30,41 +30,23 @@ curl -X POST "https://agent.gen.pro/v1/research" \
 | `topic` | string | Yes | The subject to research. |
 | `depth` | string | No | `quick` (fast, surface-level), `default`, or `deep` (slower, thorough). Defaults to `default`. |
 
-## Response
+## Response (202)
 
 ```json
 {
-  "topic": "tariffs on beauty imports 2026",
-  "depth": "default",
-  "researched_at": "2026-04-18T10:00:00Z",
-  "sources": {
-    "reddit":      { "count": 18, "total_upvotes": 4120 },
-    "x":           { "count": 42, "total_likes": 9810 },
-    "youtube":     { "count": 12, "total_views": 2100000 },
-    "tiktok":      { "count": 24, "total_views": 8900000 },
-    "instagram":   { "count": 15, "total_likes": 124000 },
-    "hackernews":  { "count": 3 },
-    "perplexity":  { "citations": 14 },
-    "gemini":      { "grounded": true }
-  },
-  "perplexity": {
-    "text": "...",
-    "citations": [
-      { "url": "https://...", "title": "..." }
-    ]
-  },
-  "gemini": {
-    "text": "...",
-    "grounded": true
-  },
-  "summary_markdown": "## Key findings\\n\\n- ..."
+  "run_id": "run_abc",
+  "conversation_id": "conv_xyz",
+  "status": "running",
+  "firebase_path": "..."
 }
 ```
 
+Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. The completed run messages contain the structured research findings and summary.
+
 ## When to call research directly
 
-- You want the raw data to drive your own idea generation pipeline
-- You need sources for a specific claim (Perplexity returns citations)
+- You want fresh source signals to drive your own idea generation pipeline
+- You need sources for a specific claim
 - You want to build a research digest email or Slack post
 
 <Aside type="note">

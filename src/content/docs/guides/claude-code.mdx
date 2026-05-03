@@ -110,14 +110,12 @@ When Claude triggers content generation, it uses these `generation_type` values:
 
 | Content | generation_type | Models |
 |---------|----------------|--------|
-| **Text** | `text_generation` | Gemini, OpenAI |
-| **Image** | `gemini_image_generation` | Gemini, Gemini Pro |
-| **Image** | `midjourney` | Midjourney |
-| **Video** | `gemini_video_generation` | Veo 3, Veo 3.1 |
-| **Video** | `sora2_video_generation` | Sora 2 |
-| **Video** | `kling` | Kling 1.6 |
-| **Video** | `seedance_video_generation` | Seedance Pro |
-| **Speech** | `eleven_labs` | ElevenLabs |
+| **Text** | `text` | Gemini, OpenAI |
+| **Image** | `image_from_text` | Gemini Image, Gemini Pro Image, Midjourney |
+| **Video** | `video_from_text` | Veo, Sora, Kling, Seedance |
+| **Video from image** | `video_from_image` | Kling, Veo, Sora, Seedance |
+| **Video from ingredients** | `video_from_ingredients` | Pika, Kling, Seedance, Veo |
+| **Speech** | `speech_from_text` | My voices, designed voices, cloned voices |
 | **Lipsync** | `lipsync` | sync.so, gen |
 | **Captions** | `captions` | Gemini |
 

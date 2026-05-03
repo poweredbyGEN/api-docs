@@ -36,9 +36,9 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
-| Gemini | `gemini_image_generation` | `"gemini"` |
-| Gemini Pro | `gemini_image_generation` | `"gemini_pro"` |
-| Midjourney | `midjourney` | -- |
+| Standard image | `image_from_text` | `"gemini_image"` |
+| Pro image | `image_from_text` | `"gemini_pro_image"` |
+| Midjourney | `image_from_text` | `"midjourney"` |
 
 ---
 
@@ -46,10 +46,10 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | `gemini_image_generation` or `midjourney`. |
+| `generation_type` | string | Yes | `"image_from_text"`. |
 | `data.prompt` | string | Yes | Text description of the image to generate. Supports `{{variable_name}}` syntax. |
-| `data.model` | string | No | `"gemini"` or `"gemini_pro"`. Only for `gemini_image_generation`. |
-| `data.aspect_ratio` | string | No | Image dimensions. `"1024:1024"` (1:1), `"576:1024"` (9:16), or `"1024:576"` (16:9). |
+| `data.model` | string | No | `"gemini_image"`, `"gemini_pro_image"`, or `"midjourney"`. |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, `"16:9"`, `"4:3"`, or `"3:4"`. |
 | `data.number_of_images` | integer | No | Number of images to generate. Default `1`. |
 | `data.content_resource_ids` | array | No | Array of content resource IDs to use as reference images. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
@@ -80,11 +80,11 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3050/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "gemini_image_generation",
+    "generation_type": "image_from_text",
     "data": {
       "prompt": "A futuristic cityscape at sunset with neon lights reflecting off glass buildings, cinematic style",
-      "model": "gemini_pro",
-      "aspect_ratio": "1024:576",
+      "model": "gemini_pro_image",
+      "aspect_ratio": "16:9",
       "number_of_images": 2
     }
   }'
@@ -129,6 +129,6 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3050/generate?a
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"gemini"`, `"gemini_pro"`, or `"midjourney"`. |
+| `model` | string | Default model: `"gemini_image"`, `"gemini_pro_image"`, or `"midjourney"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, or `"16:9"`. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

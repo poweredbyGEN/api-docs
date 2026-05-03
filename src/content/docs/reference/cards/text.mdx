@@ -32,12 +32,9 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 ---
 
-## Generation types
+## Generation Type
 
-| Model | `generation_type` value |
-|-------|------------------------|
-| Gemini | `gemini_content_generation` |
-| OpenAI | `openai_content_generation` |
+Use canonical `generation_type: "text"` for new integrations.
 
 ---
 
@@ -45,9 +42,9 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `generation_type` | string | Yes | `gemini_content_generation` or `openai_content_generation`. |
+| `generation_type` | string | Yes | `"text"`. |
 | `data.prompt` | string | Yes | The text prompt. Supports `{{variable_name}}` template syntax. |
-| `data.model` | string | No | `"gemini"` or `"openai"`. Defaults to match `generation_type`. |
+| `data.model` | string | No | `gemini_2_0_flash`, `gemini_2_5_pro`, `gpt_4o`, `gpt_4o_mini`, `o3_mini`, `o4_mini`, or `claude_sonnet_4`. |
 | `data.temperature` | float | No | Controls randomness. Default `0.2`. Range `0.0` - `1.0`. |
 | `data.max_length` | integer | No | Maximum output length in tokens. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
@@ -78,10 +75,10 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "generation_type": "gemini_content_generation",
+    "generation_type": "text",
     "data": {
       "prompt": "Write a 60-second video script about {{product_name}}. Keep it energetic and include a call to action.",
-      "model": "gemini",
+      "model": "gemini_2_5_pro",
       "temperature": 0.3,
       "max_length": 500
     }
@@ -94,7 +91,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
 {
   "id": 9000,
   "status": "completed",
-  "user_job_type": "text_generation",
+  "user_job_type": "text",
   "result": "Hey everyone! Let me tell you about...",
   "failed_reason": null,
   "output_resources": [],

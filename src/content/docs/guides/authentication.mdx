@@ -170,4 +170,4 @@ The [Agent Chat API](/reference/agent-chat) at `agent.gen.pro` accepts the same 
 - `X-API-Key` header with your PAT
 - `Authorization: Bearer` header with a JWT
 
-Firebase real-time streaming is **unauthenticated** — anyone with the `firebase_path` can read progress updates.
+Real-time progress streams are addressed by the run-specific `firebase_path` returned from `POST /v1/agent/run`. Treat that path as sensitive application data.
