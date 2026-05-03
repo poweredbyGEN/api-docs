@@ -150,18 +150,18 @@ Claude: Generation started (id: 9001). Checking status...
 For programmatic access from TypeScript/JavaScript applications:
 
 ```bash
-npm install @poweredbygen/autocontentengine-sdk
+npm install @poweredbygen/gen-sdk
 ```
 
 ```typescript
-import { GenClient } from '@poweredbygen/autocontentengine-sdk';
+import { GenClient } from '@poweredbygen/gen-sdk';
 
 const client = new GenClient({ apiKey: process.env.GEN_API_KEY });
 const agents = await client.listAgents();
 const engine = await client.getEngine(agents[0].id, engineId);
 ```
 
-Full documentation: [github.com/poweredbyGEN/autocontentengine-typescript-sdk](https://github.com/poweredbyGEN/autocontentengine-typescript-sdk)
+Full documentation: [github.com/poweredbyGEN/autocontentengine-sdk](https://github.com/poweredbyGEN/autocontentengine-sdk)
 
 ## Using the API directly (without MCP)
 
