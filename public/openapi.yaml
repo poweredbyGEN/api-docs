@@ -49,6 +49,8 @@ servers:
     description: Auto Content Engine API
   - url: https://agent.gen.pro/v1
     description: Agent Chat API
+  - url: https://agent-core.gen.pro/v1
+    description: Agent Core API (watchlists)
 
 security:
   - apiKey: []
@@ -102,6 +104,18 @@ tags:
   - name: Agent Chat
     description: |
       Conversational AI agent interface. All endpoints use base URL `https://agent.gen.pro/v1`.
+  - name: Watchlists
+    description: |
+      Named collections of monitoring sources (accounts, hashtags, keywords) per
+      agent. Base URL `https://agent-core.gen.pro/v1`. Scraped data feeds back
+      into agent chat and content idea generation. CRUD operations are free;
+      downstream scrapes bill normally.
+  - name: Recurring Jobs
+    description: |
+      Scheduled agent runs ("daily tasks"). Base URL
+      `https://agent.gen.pro/v1`. Each scheduled run is gated by available
+      credits: a job remains configured if credits run out and resumes when
+      they return.
 
 paths:
   # ── Discovery ──────────────────────────────────────────────
@@ -3457,6 +3471,355 @@ paths:
         '200':
           description: User job record
 
+  # ── Watchlists (agent-core.gen.pro) ───────────────────────────────────────
+  /agents/{agent_id}/watchlists:
+    get:
+      operationId: listWatchlists
+      x-phase: monitoring
+      summary: List active watchlists for an agent
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Active watchlists, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Watchlist' }
+    post:
+      operationId: createWatchlist
+      x-phase: monitoring
+      summary: Create a watchlist (idempotent on name)
+      description: |
+        Create a new watchlist with optional initial sources. Idempotent on
+        `name` (case-insensitive): if a watchlist with the same name already
+        exists for this agent, the provided sources are merged into the
+        existing watchlist instead of creating a duplicate.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchlistCreateRequest' }
+      responses:
+        '201':
+          description: Watchlist created or merged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}:
+    get:
+      operationId: getWatchlist
+      x-phase: monitoring
+      summary: Get a single watchlist with sources
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Watchlist record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateWatchlist
+      x-phase: monitoring
+      summary: Update a watchlist (also used for pause/resume)
+      description: |
+        Update mutable fields. Set `intent_active=false` to pause monitoring
+        without deleting the watchlist; `true` to resume. Only fields you
+        send are updated.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchlistUpdateRequest' }
+      responses:
+        '200':
+          description: Updated watchlist
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteWatchlist
+      x-phase: monitoring
+      summary: Soft-delete a watchlist
+      description: |
+        Marks the watchlist and all its sources inactive and deleted. The
+        rows are retained in the database. Use PATCH with `intent_active=false`
+        for a reversible pause.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Watchlist deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  deleted: { type: boolean }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}/sources:
+    post:
+      operationId: addWatchlistSource
+      x-phase: monitoring
+      summary: Add or restore a source on a watchlist
+      description: |
+        Idempotent on (platform, target_type, target_value). Re-adding the
+        same source returns the existing row (restored if it had been
+        soft-deleted).
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchSourceInput' }
+      responses:
+        '201':
+          description: Source added or restored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WatchSource' }
+    delete:
+      operationId: removeWatchlistSourceByKey
+      x-phase: monitoring
+      summary: Remove a source by (platform, target_type, target_value)
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+        - { name: platform, in: query, required: true, schema: { type: string } }
+        - { name: target_type, in: query, required: true, schema: { type: string, enum: [account, hashtag, keyword] } }
+        - { name: target_value, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Source removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: boolean }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}:
+    delete:
+      operationId: removeWatchlistSource
+      x-phase: monitoring
+      summary: Remove a source by id
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+        - { name: source_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Source removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: boolean }
+
+  # ── Recurring Jobs / Daily Tasks (agent.gen.pro) ──────────────────────────
+  /agents/{agent_id}/recurring-jobs:
+    get:
+      operationId: listRecurringJobs
+      x-phase: monitoring
+      summary: List recurring jobs (daily tasks) for an agent
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Recurring jobs, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recurring_jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/RecurringJob' }
+    post:
+      operationId: createRecurringJob
+      x-phase: monitoring
+      summary: Create a recurring agent job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringJobCreate' }
+      responses:
+        '201':
+          description: Created recurring job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
+  /agents/{agent_id}/recurring-jobs/defaults:
+    post:
+      operationId: ensureDefaultRecurringJob
+      x-phase: monitoring
+      summary: Idempotently ensure the default daily content-ideas job
+      description: |
+        Returns the agent's existing default content-ideas recurring job if
+        one exists, otherwise creates it with the standard prompt, daily
+        cadence at 09:00 UTC, and `chat_only` delivery. The response `created`
+        boolean indicates whether a new job was created.
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '201':
+          description: Default job ensured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recurring_jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/RecurringJob' }
+                  created: { type: boolean }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}:
+    get:
+      operationId: getRecurringJob
+      x-phase: monitoring
+      summary: Get one recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Recurring job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateRecurringJob
+      x-phase: monitoring
+      summary: Update a recurring job's mutable fields
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringJobUpdate' }
+      responses:
+        '200':
+          description: Updated job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteRecurringJob
+      x-phase: monitoring
+      summary: Soft-delete a recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204':
+          description: Deleted (no content)
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}/pause:
+    post:
+      operationId: pauseRecurringJob
+      x-phase: monitoring
+      summary: Pause a recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Paused job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}/resume:
+    post:
+      operationId: resumeRecurringJob
+      x-phase: monitoring
+      summary: Resume a paused recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Resumed job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
 components:
   securitySchemes:
     apiKey:
@@ -4212,6 +4575,130 @@ components:
         name: { type: string, nullable: true }
         source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
         preview_url: { type: string, nullable: true }
+
+    # ── Watchlists ──────────────────────────────────────────────────────────
+    WatchSourceInput:
+      type: object
+      required: [platform, target_type, target_value]
+      properties:
+        platform: { type: string, description: 'e.g. "tiktok", "instagram", "youtube"' }
+        target_type: { type: string, enum: [account, hashtag, keyword] }
+        target_value: { type: string, description: '@handle, hashtag name (no #), or keyword text' }
+        original_display_value:
+          type: string
+          nullable: true
+          description: Optional original display form (e.g. "#glassskin" or "@drunkelephant")
+
+    WatchSource:
+      allOf:
+        - $ref: '#/components/schemas/WatchSourceInput'
+        - type: object
+          required: [id, watchlist_id, agent_id, intent_active]
+          properties:
+            id: { type: string }
+            watchlist_id: { type: string }
+            agent_id: { type: string }
+            intent_active: { type: boolean }
+            created_at: { type: string, format: date-time, nullable: true }
+            updated_at: { type: string, format: date-time, nullable: true }
+
+    WatchlistCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200, description: 'Display name. Idempotent: same name reuses existing watchlist.' }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/WatchSourceInput' }
+        project_id:
+          oneOf: [{ type: string }, { type: integer }]
+          nullable: true
+        conversation_id: { type: string, nullable: true }
+        created_by_run_id: { type: string, nullable: true }
+
+    WatchlistUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        intent_active: { type: boolean, description: 'Set false to pause monitoring; true to resume.' }
+        project_id:
+          oneOf: [{ type: string }, { type: integer }]
+          nullable: true
+        rails_project_error: { type: string, nullable: true, maxLength: 1000 }
+
+    Watchlist:
+      type: object
+      required: [id, user_id, agent_id, name, intent_active, sources]
+      properties:
+        id: { type: string }
+        user_id: { type: string }
+        agent_id: { type: string }
+        name: { type: string }
+        intent_active: { type: boolean }
+        project_id: { type: string, nullable: true }
+        rails_project_error: { type: string, nullable: true }
+        conversation_id: { type: string, nullable: true }
+        created_by_run_id: { type: string, nullable: true }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/WatchSource' }
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+
+    # ── Recurring Jobs (Daily Tasks) ───────────────────────────────────────
+    RecurringJobSchedule:
+      type: object
+      required: [cadence, timezone]
+      properties:
+        cadence: { type: string, enum: [daily, weekly, hourly] }
+        timezone: { type: string, description: 'IANA timezone (e.g. "UTC", "America/Los_Angeles")' }
+        time_of_day:
+          type: string
+          description: 'Local clock time "HH:MM" (24h). Required for daily/weekly cadences.'
+
+    RecurringJobDelivery:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [chat_only, email] }
+
+    RecurringJob:
+      type: object
+      required: [id, user_id, agent_id, name, job_type, prompt, schedule, delivery, status, created_at, updated_at]
+      properties:
+        id: { type: string }
+        user_id: { type: integer }
+        agent_id: { type: string }
+        name: { type: string }
+        job_type: { type: string, description: 'e.g. "generate_content_ideas"' }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        status: { type: string, enum: [active, paused, deleted] }
+        next_run_at: { type: string, format: date-time, nullable: true }
+        last_run_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    RecurringJobCreate:
+      type: object
+      required: [job_type, prompt, schedule, delivery]
+      properties:
+        name: { type: string, description: 'Optional. Defaults to first 80 chars of prompt.' }
+        job_type: { type: string }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        next_run_at: { type: string, format: date-time }
+
+    RecurringJobUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        next_run_at: { type: string, format: date-time }
 
   responses:
     Unauthorized:

@@ -634,6 +634,99 @@ Use canonical generation type names for new integrations.
 
 ---
 
+## Monitoring & Automation (long-running, cross-cuts the journey)
+
+Two long-lived resources let an agent watch the world and act on a schedule. Both are CRUD-only here — the management calls are free; downstream scrapes and scheduled runs bill normally.
+
+### Watchlists
+
+A **Watchlist** is a named collection of `(platform, target_type, target_value)` sources you want continuously monitored. `target_type ∈ {account, hashtag, keyword}`. Scraped results feed back into agent chat and content idea generation; query them through chat, not directly here.
+
+**Base URL:** `https://agent-core.gen.pro/v1`
+
+```bash
+# create with sources (idempotent on name — same name merges sources)
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "crypto watch",
+    "sources": [
+      {"platform": "tiktok", "target_type": "keyword", "target_value": "btc"},
+      {"platform": "tiktok", "target_type": "keyword", "target_value": "sui"}
+    ]
+  }'
+
+# add another source later
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/sources" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"platform": "tiktok", "target_type": "hashtag", "target_value": "ethereum"}'
+
+# pause without deleting (resume with intent_active=true)
+curl -X PATCH "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"intent_active": false}'
+```
+
+**Watchlist endpoints:**
+
+```
+GET    /v1/agents/:agent_id/watchlists                              — list active
+POST   /v1/agents/:agent_id/watchlists                              — create (idempotent on name)
+GET    /v1/agents/:agent_id/watchlists/:id                          — get one
+PATCH  /v1/agents/:agent_id/watchlists/:id                          — update / pause / resume
+DELETE /v1/agents/:agent_id/watchlists/:id                          — soft-delete
+POST   /v1/agents/:agent_id/watchlists/:id/sources                  — add or restore source
+DELETE /v1/agents/:agent_id/watchlists/:id/sources/:source_id       — remove source by id
+DELETE /v1/agents/:agent_id/watchlists/:id/sources?platform=&target_type=&target_value=
+```
+
+### Recurring Jobs (Daily Tasks)
+
+A **Recurring Job** runs a prompt on a schedule, optionally delivering results by email. `schedule.cadence ∈ {daily, weekly, hourly}`. `delivery.type ∈ {chat_only, email}`. `status ∈ {active, paused, deleted}`. Each scheduled run is credit-gated: the job stays configured if credits run out and resumes when they return.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+```bash
+# fastest: ensure the default "generate content ideas" daily job
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/defaults" \
+  -H "X-API-Key: $GEN_API_KEY"
+# → { "recurring_jobs": [{...}], "created": true | false }
+
+# custom recurring job
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "weekly retention digest",
+    "job_type": "generate_content_ideas",
+    "prompt": "Give me 5 retention-focused hook patterns trending this week",
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00" },
+    "delivery": { "type": "email" }
+  }'
+
+# pause / resume (does not delete)
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/pause" -H "X-API-Key: $GEN_API_KEY"
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/resume" -H "X-API-Key: $GEN_API_KEY"
+```
+
+**Recurring-job endpoints:**
+
+```
+GET    /v1/agents/:agent_id/recurring-jobs                  — list non-deleted
+POST   /v1/agents/:agent_id/recurring-jobs                  — create
+POST   /v1/agents/:agent_id/recurring-jobs/defaults         — idempotent default
+GET    /v1/agents/:agent_id/recurring-jobs/:id              — get one
+PATCH  /v1/agents/:agent_id/recurring-jobs/:id              — update (name, prompt, schedule, delivery, next_run_at)
+DELETE /v1/agents/:agent_id/recurring-jobs/:id              — soft-delete
+POST   /v1/agents/:agent_id/recurring-jobs/:id/pause        — status=paused
+POST   /v1/agents/:agent_id/recurring-jobs/:id/resume       — status=active
+```
+
+---
+
 ## Error Format
 
 ```json

@@ -877,6 +877,204 @@ Status flow: `pending → processing → completed | failed`. On `completed`, `r
 
 ---
 
+# Monitoring & Automation (Watchlists + Recurring Jobs)
+
+Two long-running primitives let an agent watch the world and act on a
+schedule. Both are CRUD-only here; downstream scrapes and scheduled runs bill
+normally. Management calls (create/read/update/delete/pause/resume) are
+**free**.
+
+## Watchlists (`https://agent-core.gen.pro/v1`)
+
+A `Watchlist` is a named collection of `(platform, target_type, target_value)`
+sources. `target_type` is one of:
+
+- `account` — a username/handle (e.g. `drunkelephant`)
+- `hashtag` — a tag name (without `#`)
+- `keyword` — free-text search phrase
+
+Scraped results from these sources feed back into agent chat and content idea
+generation. Query the results through the chat interface, not directly here.
+
+### Watchlist endpoints
+
+```
+GET    /v1/agents/{agent_id}/watchlists
+POST   /v1/agents/{agent_id}/watchlists
+GET    /v1/agents/{agent_id}/watchlists/{watchlist_id}
+PATCH  /v1/agents/{agent_id}/watchlists/{watchlist_id}
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}
+POST   /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_type=&target_value=
+```
+
+### Watchlist shapes
+
+`WatchlistCreateRequest`:
+
+```json
+{
+  "name": "crypto watch",
+  "sources": [
+    { "platform": "tiktok", "target_type": "keyword", "target_value": "btc" }
+  ],
+  "project_id": null,
+  "conversation_id": null,
+  "created_by_run_id": null
+}
+```
+
+`Watchlist` response:
+
+```json
+{
+  "id": "uuid",
+  "user_id": "string",
+  "agent_id": "uuid",
+  "name": "crypto watch",
+  "intent_active": true,
+  "project_id": null,
+  "rails_project_error": null,
+  "conversation_id": null,
+  "created_by_run_id": null,
+  "sources": [
+    {
+      "id": "uuid",
+      "watchlist_id": "uuid",
+      "agent_id": "uuid",
+      "platform": "tiktok",
+      "target_type": "keyword",
+      "target_value": "btc",
+      "original_display_value": null,
+      "intent_active": true,
+      "created_at": "2026-05-27T19:00:00Z",
+      "updated_at": "2026-05-27T19:00:00Z"
+    }
+  ],
+  "created_at": "2026-05-27T19:00:00Z",
+  "updated_at": "2026-05-27T19:00:00Z"
+}
+```
+
+### Watchlist semantics
+
+- **`POST /watchlists` is idempotent on `name`** (case-insensitive within an
+  agent). Re-posting the same name merges new sources into the existing
+  watchlist instead of creating a duplicate.
+- **Sources are unique by (`platform`, `target_type`, `target_value`)** within
+  a watchlist. Re-adding an existing source returns the existing row,
+  restoring it if it had been soft-deleted.
+- **`PATCH /watchlists/:id` with `{"intent_active": false}`** is the pause
+  primitive; `true` resumes. Use `DELETE` only to permanently retire.
+- **`DELETE`** is a soft delete: rows are marked inactive and `deleted_at`
+  is set; nothing is returned by subsequent `GET`/`list`.
+
+## Recurring Jobs / Daily Tasks (`https://agent.gen.pro/v1`)
+
+A `RecurringJob` runs a prompt on a schedule, optionally delivering results by
+email. Lifecycle: `active` ↔ `paused`, terminal `deleted`. Each scheduled
+run is gated by available credits — a job remains configured if the workspace
+runs out of credits and resumes when credits return.
+
+### Recurring-job endpoints
+
+```
+GET    /v1/agents/{agent_id}/recurring-jobs
+POST   /v1/agents/{agent_id}/recurring-jobs
+POST   /v1/agents/{agent_id}/recurring-jobs/defaults
+GET    /v1/agents/{agent_id}/recurring-jobs/{job_id}
+PATCH  /v1/agents/{agent_id}/recurring-jobs/{job_id}
+DELETE /v1/agents/{agent_id}/recurring-jobs/{job_id}
+POST   /v1/agents/{agent_id}/recurring-jobs/{job_id}/pause
+POST   /v1/agents/{agent_id}/recurring-jobs/{job_id}/resume
+```
+
+### Recurring-job shapes
+
+`RecurringJobCreate`:
+
+```json
+{
+  "name": "weekly retention digest",
+  "job_type": "generate_content_ideas",
+  "prompt": "Give me 5 retention-focused hook patterns this week",
+  "schedule": {
+    "cadence": "weekly",
+    "timezone": "America/Los_Angeles",
+    "time_of_day": "09:00"
+  },
+  "delivery": { "type": "email" },
+  "next_run_at": "2026-06-03T16:00:00Z"
+}
+```
+
+Fields:
+
+- `name` — optional. Defaults to first 80 chars of `prompt`.
+- `job_type` — `"generate_content_ideas"` is the default pipeline.
+- `prompt` — natural-language instruction the agent runs each cycle.
+- `schedule.cadence` ∈ `daily | weekly | hourly`.
+- `schedule.timezone` — IANA timezone string.
+- `schedule.time_of_day` — `"HH:MM"` 24h local time; required for
+  `daily`/`weekly` cadences.
+- `delivery.type` ∈ `chat_only | email`.
+- `next_run_at` — ISO-8601 to schedule the first run explicitly; otherwise
+  derived from cadence + time_of_day.
+
+`RecurringJob` response:
+
+```json
+{
+  "id": "uuid",
+  "user_id": 11,
+  "agent_id": "uuid",
+  "name": "weekly retention digest",
+  "job_type": "generate_content_ideas",
+  "prompt": "Give me 5 retention-focused hook patterns this week",
+  "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00" },
+  "delivery": { "type": "email" },
+  "status": "active",
+  "next_run_at": "2026-06-03T16:00:00Z",
+  "last_run_at": null,
+  "created_at": "2026-05-27T19:00:00Z",
+  "updated_at": "2026-05-27T19:00:00Z"
+}
+```
+
+### Defaults endpoint
+
+`POST /v1/agents/{agent_id}/recurring-jobs/defaults` is idempotent: returns
+the agent's existing default "Generate content ideas" job if one exists,
+otherwise creates it with daily cadence at 09:00 UTC and `chat_only`
+delivery.
+
+```json
+{
+  "recurring_jobs": [ { ...RecurringJob } ],
+  "created": true
+}
+```
+
+### Pause / resume / delete
+
+- `POST /recurring-jobs/:id/pause` → `status = "paused"`, scheduler stops
+  queueing new runs. History and configuration preserved.
+- `POST /recurring-jobs/:id/resume` → `status = "active"`.
+- `DELETE /recurring-jobs/:id` → `status = "deleted"`, returns 204. Use
+  pause for reversible stops.
+
+### Credit semantics
+
+The job *intention* is free to keep configured. Each scheduled *run* is
+billed at execution time against existing `user_jobs` pricing for the
+relevant `job_type`. If the workspace has no credits at fire time, the run
+is skipped and the job remains scheduled — no automatic deletion, no email
+delivered for that cycle. Credits returning resumes normal execution at the
+next cadence tick.
+
+---
+
 # Integrations
 
 - MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env `GEN_API_KEY`)
