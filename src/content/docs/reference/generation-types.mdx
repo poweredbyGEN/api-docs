@@ -201,7 +201,7 @@ No AI generation — just attaches an uploaded asset to the cell. Useful for bac
 ## Render (composite)
 
 ```
-POST /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=
+POST /v1/vidsheet/:id/cells/:cell_id/render?agent_id=
 ```
 
 No `generation_type` in the body — the render endpoint is dedicated. It composites **all layers** on the cell in order into one final video. Output lives in the cell's `output_resources`.

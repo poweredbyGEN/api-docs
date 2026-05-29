@@ -34,7 +34,7 @@ info:
 
     ## Credits
 
-    All `/v1/autocontentengine/` endpoints require an active GEN credit balance.
+    All `/v1/vidsheet/` endpoints require an active GEN credit balance.
     If your organization has no usable credits, requests return `422` with error code `usable_gen_credit_required`.
 
   version: 1.0.0
@@ -581,7 +581,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   # ── Sheets ─────────────────────────────────────────────────
-  /autocontentengine:
+  /vidsheet:
     post:
       operationId: createSheet
       x-phase: convert
@@ -619,7 +619,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}:
+  /vidsheet/{sheet_id}:
     get:
       operationId: getSheet
       x-phase: convert
@@ -650,7 +650,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}/clone:
+  /vidsheet/{sheet_id}/clone:
     post:
       operationId: cloneSheet
       x-phase: convert
@@ -682,7 +682,7 @@ paths:
           $ref: '#/components/responses/CreditRequired'
 
   # ── Rows ───────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/rows:
+  /vidsheet/{sheet_id}/rows:
     get:
       operationId: listRows
       x-phase: edit
@@ -733,7 +733,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}:
+  /vidsheet/{sheet_id}/rows/{row_id}:
     get:
       operationId: getRow
       x-phase: edit
@@ -755,7 +755,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}/duplicate:
+  /vidsheet/{sheet_id}/rows/{row_id}/duplicate:
     post:
       operationId: duplicateRow
       x-phase: edit
@@ -776,7 +776,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/update_positions:
+  /vidsheet/{sheet_id}/rows/update_positions:
     put:
       operationId: updateRowPositions
       x-phase: edit
@@ -813,7 +813,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Row'
 
-  /autocontentengine/{sheet_id}/rows/mass_update:
+  /vidsheet/{sheet_id}/rows/mass_update:
     put:
       operationId: massUpdateRows
       x-phase: edit
@@ -840,7 +840,7 @@ paths:
                   $ref: '#/components/schemas/Row'
 
   # ── Columns ────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/columns:
+  /vidsheet/{sheet_id}/columns:
     get:
       operationId: listColumns
       x-phase: edit
@@ -892,7 +892,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/{column_id}/duplicate:
+  /vidsheet/{sheet_id}/columns/{column_id}/duplicate:
     post:
       operationId: duplicateColumn
       x-phase: edit
@@ -914,7 +914,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/update_positions:
+  /vidsheet/{sheet_id}/columns/update_positions:
     patch:
       operationId: updateColumnPositions
       x-phase: edit
@@ -945,7 +945,7 @@ paths:
         '200':
           description: Updated columns
 
-  /autocontentengine/{sheet_id}/columns/mass_update:
+  /vidsheet/{sheet_id}/columns/mass_update:
     put:
       operationId: massUpdateColumns
       x-phase: edit
@@ -965,7 +965,7 @@ paths:
           description: Updated columns
 
   # ── Cells ──────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}:
     get:
       operationId: getCell
       x-phase: edit
@@ -1014,7 +1014,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cell'
 
-  /autocontentengine/{sheet_id}/cells/mass_update:
+  /vidsheet/{sheet_id}/cells/mass_update:
     put:
       operationId: massUpdateCells
       x-phase: edit
@@ -1033,7 +1033,7 @@ paths:
         '200':
           description: Updated cells
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/set_default_user_job:
+  /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job:
     patch:
       operationId: setDefaultUserJob
       x-phase: edit
@@ -1060,7 +1060,7 @@ paths:
           description: Updated cell
 
   # ── Layers ─────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers:
     post:
       operationId: createLayer
       x-phase: edit
@@ -1097,7 +1097,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
     get:
       operationId: getLayer
       x-phase: edit
@@ -1161,7 +1161,7 @@ paths:
         '204':
           description: Layer deleted
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
       operationId: duplicateLayer
       x-phase: edit
@@ -1180,7 +1180,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/update_positions:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions:
     put:
       operationId: updateLayerPositions
       x-phase: edit
@@ -1213,7 +1213,7 @@ paths:
           description: Updated layers
 
   # ── Generations ────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/generate:
     post:
       operationId: generateCellContent
       x-phase: edit
@@ -1280,7 +1280,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
     post:
       operationId: generateLayerContent
       x-phase: edit
@@ -1398,7 +1398,7 @@ paths:
                     example: "pending"
 
   # ── Render ────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/render:
+  /vidsheet/{sheet_id}/cells/{cell_id}/render:
     post:
       operationId: renderVideo
       x-phase: export
@@ -1436,7 +1436,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # ── Variables ──────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/global_variables:
+  /vidsheet/{sheet_id}/global_variables:
     get:
       operationId: getGlobalVariables
       x-phase: edit
@@ -1454,7 +1454,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/{sheet_id}/import_global_variables:
+  /vidsheet/{sheet_id}/import_global_variables:
     post:
       operationId: importGlobalVariables
       x-phase: edit
@@ -1484,7 +1484,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/global_variables_template:
+  /vidsheet/global_variables_template:
     get:
       operationId: downloadVariablesTemplate
       x-phase: edit

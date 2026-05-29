@@ -14,7 +14,7 @@ Generate video by combining a text prompt with uploaded assets (images, clips, l
 ## Endpoint
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -79,7 +79,7 @@ Once complete, the generated video is available in `output_resources`. Poll with
 ## Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3300/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -121,7 +121,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3300/generate?a
 ## Cell configuration
 
 <Aside type="tip">
-  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+  Cell configuration is set via `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
 </Aside>
 
 | Field | Type | Description |

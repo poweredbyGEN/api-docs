@@ -13,7 +13,7 @@ Auth on both surfaces:
 - `X-API-Key: <your-PAT>` — recommended; create via `POST /v1/persisted_tokens` or in the GEN dashboard
 - `Authorization: Bearer <jwt>` — for browser-login apps
 
-All `/autocontentengine/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
+All `/vidsheet/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
 
 ## OpenAPI
 
@@ -477,14 +477,14 @@ Cloning is **free** — no credits consumed.
 If no template matches, build manually.
 
 ```
-POST /v1/autocontentengine?agent_id={id}
+POST /v1/vidsheet?agent_id={id}
 Body: { spreadsheet: { title, is_default? } }
 → full engine with empty columns / rows
 
-GET /v1/autocontentengine/{id}?agent_id={id}&with_execution_cost=true
+GET /v1/vidsheet/{id}?agent_id={id}&with_execution_cost=true
 → full engine with nested spreadsheet_columns, spreadsheet_rows (each with spreadsheet_cells), global_variables_sheet
 
-POST /v1/autocontentengine/{id}/clone?agent_id={id}
+POST /v1/vidsheet/{id}/clone?agent_id={id}
 Body: { target_agent_id? }
 → new engine, optionally under a different agent
 ```
@@ -498,12 +498,12 @@ Everything related to filling the vidsheet: cells, layers, creation cards, gener
 ## Rows
 
 ```
-GET    /v1/autocontentengine/{id}/rows?agent_id={id}
-POST   /v1/autocontentengine/{id}/rows?agent_id={id}                Body: { spreadsheet_row: { position? } }
-GET    /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id}
-POST   /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id}
-PUT    /v1/autocontentengine/{id}/rows/update_positions?agent_id={id}   Body: { rows: [{ id, position }] }
-PUT    /v1/autocontentengine/{id}/rows/mass_update?agent_id={id}
+GET    /v1/vidsheet/{id}/rows?agent_id={id}
+POST   /v1/vidsheet/{id}/rows?agent_id={id}                Body: { spreadsheet_row: { position? } }
+GET    /v1/vidsheet/{id}/rows/{row_id}?agent_id={id}
+POST   /v1/vidsheet/{id}/rows/{row_id}/duplicate?agent_id={id}
+PUT    /v1/vidsheet/{id}/rows/update_positions?agent_id={id}   Body: { rows: [{ id, position }] }
+PUT    /v1/vidsheet/{id}/rows/mass_update?agent_id={id}
 ```
 
 ## Columns
@@ -513,20 +513,20 @@ Only `ingredient` role columns can be created / updated / deleted by users. Syst
 Types: `text`, `image`, `video`, `audio`.
 
 ```
-GET    /v1/autocontentengine/{id}/columns?agent_id={id}
-POST   /v1/autocontentengine/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
-POST   /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
-PUT    /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
+GET    /v1/vidsheet/{id}/columns?agent_id={id}
+POST   /v1/vidsheet/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
+POST   /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={id}
+PATCH  /v1/vidsheet/{id}/columns/update_positions?agent_id={id}
+PUT    /v1/vidsheet/{id}/columns/mass_update?agent_id={id}
 ```
 
 ## Cells
 
 ```
-GET    /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}       Body: { spreadsheet_cell: { value } }
-PUT    /v1/autocontentengine/{id}/cells/mass_update?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}   Body: { user_job_id }
+GET    /v1/vidsheet/{id}/cells/{cell_id}?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}?agent_id={id}       Body: { spreadsheet_cell: { value } }
+PUT    /v1/vidsheet/{id}/cells/mass_update?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}   Body: { user_job_id }
 ```
 
 ## Layers
@@ -534,10 +534,10 @@ PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id=
 Per-cell timeline elements. `position` is z-index.
 
 ```
-POST   /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id}       Body: { video_layer: { name, type, position? } }
-GET    /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+POST   /v1/vidsheet/{id}/cells/{cell_id}/layers?agent_id={id}       Body: { video_layer: { name, type, position? } }
+GET    /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+DELETE /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
 POST   .../layers/{layer_id}/duplicate?agent_id={id}
 PUT    .../layers/update_positions?agent_id={id}
 ```
@@ -545,11 +545,11 @@ PUT    .../layers/update_positions?agent_id={id}
 ## Generations (trigger + poll)
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={id}
 Body: { generation_type, data: { ... } }
 → { generation_id, status: "pending" }
 
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
 Body: { generation_type, data: { ... } }
 → { generation_id, status: "pending" }
 
@@ -658,9 +658,9 @@ See Phase 5 — it's the export step.
 Template substitution for `{{variable_name}}` across prompts and cells.
 
 ```
-GET  /v1/autocontentengine/{id}/global_variables?agent_id={id}
-POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}      (multipart XLSX upload)
-GET  /v1/autocontentengine/global_variables_template                        (XLSX template download)
+GET  /v1/vidsheet/{id}/global_variables?agent_id={id}
+POST /v1/vidsheet/{id}/import_global_variables?agent_id={id}      (multipart XLSX upload)
+GET  /v1/vidsheet/global_variables_template                        (XLSX template download)
 ```
 
 ## Content Resources (upload and manage assets)
@@ -738,7 +738,7 @@ Render the final composite, poll to completion, download the MP4, optionally pub
 Render is an async generation — same polling pattern as every other generation.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/render?agent_id={id}
 → { generation_id, status: "pending" }
 ```
 
@@ -1117,7 +1117,7 @@ next cadence tick.
 
 # Integrations
 
-- MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env `GEN_API_KEY`)
+- MCP Server: `npx @poweredbygen/vidsheet-mcp-server@latest` (env `GEN_API_KEY`)
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

@@ -109,7 +109,7 @@ The in-flight generation's pre-charge is refunded; subsequent `POST /generate` c
 Pre-charge endpoints accept an `Idempotency-Key` header. If you retry a request with the same key within 24 hours, you get the same response without double-charging. Services that integrate GEN and need at-most-once guarantees should derive the key deterministically from their own request ID.
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$EID/cells/$CID/generate?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$EID/cells/$CID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Idempotency-Key: myapp-request-abc123" \
   -H "Content-Type: application/json" \

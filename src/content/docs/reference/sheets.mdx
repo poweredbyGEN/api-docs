@@ -24,7 +24,7 @@ An Auto Content Engine is the top-level workspace that contains everything neede
   "id": 100,
   "slug": "my-first-engine",
   "title": "March Campaign",
-  "project_type": "autocontentengine",
+  "project_type": "spreadsheet_v2",
   "is_default": false,
   "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "status": "active",
@@ -46,7 +46,7 @@ The `spreadsheet_columns` and `spreadsheet_rows` arrays are populated when fetch
 Creates a new Auto Content Engine for the specified agent.
 
 ```
-POST /v1/autocontentengine?agent_id={agent_id}
+POST /v1/vidsheet?agent_id={agent_id}
 ```
 
 ### Request body
@@ -63,7 +63,7 @@ Returns the created engine object.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"spreadsheet": {"title": "March Campaign"}}'
@@ -74,7 +74,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
   "id": 101,
   "slug": "march-campaign",
   "title": "March Campaign",
-  "project_type": "autocontentengine",
+  "project_type": "spreadsheet_v2",
   "is_default": false,
   "uuid": "f1e2d3c4-b5a6-7890-fedc-ba0987654321",
   "status": "active",
@@ -101,7 +101,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
 Returns a single Auto Content Engine with all its columns, rows, cells, and layers.
 
 ```
-GET /v1/autocontentengine/{id}?agent_id={agent_id}
+GET /v1/vidsheet/{id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -124,7 +124,7 @@ Returns the full engine object including nested `spreadsheet_columns`, `spreadsh
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101?agent_id=42&with_execution_cost=true" \
+curl "https://api.gen.pro/v1/vidsheet/101?agent_id=42&with_execution_cost=true" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -135,7 +135,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101?agent_id=42&with_execution_co
 Creates a copy of an existing Auto Content Engine. Optionally clone into a different agent.
 
 ```
-POST /v1/autocontentengine/{id}/clone?agent_id={agent_id}
+POST /v1/vidsheet/{id}/clone?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -158,11 +158,11 @@ Returns the newly created engine object.
 
 ```bash
 # Clone within the same agent
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/clone?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
   -H "X-API-Key: your-api-key"
 
 # Clone into a different agent
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/clone?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"target_agent_id": 87}'

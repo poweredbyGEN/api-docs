@@ -37,7 +37,7 @@ The `default_user_job` is the currently selected generation output. The `user_jo
 Returns a single cell with its layers and generation history.
 
 ```
-GET /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+GET /v1/vidsheet/{id}/cells/{cell_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -54,7 +54,7 @@ Returns the full cell object.
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/cells/3000?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -65,7 +65,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
 Updates the value of a single cell.
 
 ```
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/cells/{cell_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -88,7 +88,7 @@ Returns the updated cell.
 ### Example
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"spreadsheet_cell": {"value": "Updated script text goes here..."}}'
@@ -96,7 +96,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=
 
 ```typescript
 const response = await fetch(
-  "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42",
+  "https://api.gen.pro/v1/vidsheet/101/cells/3000?agent_id=42",
   {
     method: "PATCH",
     headers: {
@@ -118,7 +118,7 @@ const cell = await response.json();
 Updates multiple cells in a single request.
 
 ```
-PUT /v1/autocontentengine/{id}/cells/mass_update?agent_id={agent_id}
+PUT /v1/vidsheet/{id}/cells/mass_update?agent_id={agent_id}
 ```
 
 ### Request body
@@ -128,7 +128,7 @@ Accepts an array of cell objects with `id` and the fields to update.
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/cells/mass_update?agent_id=42" \
+curl -X PUT "https://api.gen.pro/v1/vidsheet/101/cells/mass_update?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"cells": [{"id": 3000, "value": "Script for video 1"}, {"id": 3001, "value": "Script for video 2"}]}'
@@ -141,7 +141,7 @@ curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/cells/mass_update?agen
 Sets the default (active) generation output for a cell.
 
 ```
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/cells/{cell_id}/set_default_user_job?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -168,7 +168,7 @@ Returns the updated cell.
 ### Example
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/set_default_user_job?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/set_default_user_job?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"user_job_id": 789}'

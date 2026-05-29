@@ -16,7 +16,7 @@ The Media card holds static images or videos. Unlike other card types, media doe
 Set the cell value to the URL of your image or video.
 
 ```
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/cells/{cell_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -35,7 +35,7 @@ PATCH /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -69,11 +69,11 @@ You can also add media to a layer within a video cell. This is useful for adding
 Update the layer value the same way:
 
 ```
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
 ```
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"name": "B-Roll", "type": "video"}}'
@@ -101,7 +101,7 @@ When building templates for batch video creation, use [variables](/reference/var
 ## Cell configuration
 
 <Aside type="tip">
-  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+  Cell configuration is set via `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
 </Aside>
 
 | Field | Type | Description |

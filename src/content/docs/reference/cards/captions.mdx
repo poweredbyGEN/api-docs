@@ -14,7 +14,7 @@ The Captions card transcribes audio or video into timestamped captions using Gem
 ## Generate captions
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -39,7 +39,7 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,7 +54,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
 You can also generate captions on a layer:
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
 ```
 
 ---
@@ -91,7 +91,7 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 ## Cell configuration
 
 <Aside type="tip">
-  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+  Cell configuration is set via `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
 </Aside>
 
 | Field | Type | Description |

@@ -293,7 +293,7 @@ Returns a new engine `id`. Cloning is **free** — no credits consumed.
 **If you really need a custom engine** (rare):
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "spreadsheet": { "title": "Custom campaign" } }'
@@ -307,9 +307,9 @@ GET    /v1/templates/projects                        — list templates (paginat
 GET    /v1/templates/projects/:slug                  — template details
 POST   /v1/templates/spreadsheets/:slug/clone        — clone into agent
 
-POST   /v1/autocontentengine?agent_id=               — create blank engine
-GET    /v1/autocontentengine/:id?agent_id=           — read engine with all nested data
-POST   /v1/autocontentengine/:id/clone?agent_id=     — clone engine (same or diff agent)
+POST   /v1/vidsheet?agent_id=               — create blank engine
+GET    /v1/vidsheet/:id?agent_id=           — read engine with all nested data
+POST   /v1/vidsheet/:id/clone?agent_id=     — clone engine (same or diff agent)
 ```
 
 ---
@@ -323,7 +323,7 @@ POST   /v1/autocontentengine/:id/clone?agent_id=     — clone engine (same or d
 **Read the full engine:**
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID?agent_id=$AGENT_ID" \
+curl "https://api.gen.pro/v1/vidsheet/$ENGINE_ID?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 # includes spreadsheet_columns, spreadsheet_rows, spreadsheet_cells, layers
 ```
@@ -331,7 +331,7 @@ curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID?agent_id=$AGENT_ID" \
 **Drop text into a cell:**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "spreadsheet_cell": { "value": "The $2 taco at 2am saved my life." } }'
@@ -340,7 +340,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_I
 **Trigger a cell generation:**
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -395,45 +395,45 @@ Checksum = `openssl md5 -binary hero.mp4 | base64`. Max 1 GB.
 
 ```
 # Rows
-GET    /v1/autocontentengine/:id/rows?agent_id=
-POST   /v1/autocontentengine/:id/rows?agent_id=
-GET    /v1/autocontentengine/:id/rows/:row_id?agent_id=
-POST   /v1/autocontentengine/:id/rows/:row_id/duplicate?agent_id=
-PUT    /v1/autocontentengine/:id/rows/update_positions?agent_id=
-PUT    /v1/autocontentengine/:id/rows/mass_update?agent_id=
+GET    /v1/vidsheet/:id/rows?agent_id=
+POST   /v1/vidsheet/:id/rows?agent_id=
+GET    /v1/vidsheet/:id/rows/:row_id?agent_id=
+POST   /v1/vidsheet/:id/rows/:row_id/duplicate?agent_id=
+PUT    /v1/vidsheet/:id/rows/update_positions?agent_id=
+PUT    /v1/vidsheet/:id/rows/mass_update?agent_id=
 
 # Columns (ingredient role only; system roles are read-only)
-GET    /v1/autocontentengine/:id/columns?agent_id=
-POST   /v1/autocontentengine/:id/columns?agent_id=
-POST   /v1/autocontentengine/:id/columns/:col_id/duplicate?agent_id=
-PATCH  /v1/autocontentengine/:id/columns/update_positions?agent_id=
-PUT    /v1/autocontentengine/:id/columns/mass_update?agent_id=
+GET    /v1/vidsheet/:id/columns?agent_id=
+POST   /v1/vidsheet/:id/columns?agent_id=
+POST   /v1/vidsheet/:id/columns/:col_id/duplicate?agent_id=
+PATCH  /v1/vidsheet/:id/columns/update_positions?agent_id=
+PUT    /v1/vidsheet/:id/columns/mass_update?agent_id=
 
 # Cells
-GET    /v1/autocontentengine/:id/cells/:cell_id?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id?agent_id=
-PUT    /v1/autocontentengine/:id/cells/mass_update?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id/set_default_user_job?agent_id=
+GET    /v1/vidsheet/:id/cells/:cell_id?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id?agent_id=
+PUT    /v1/vidsheet/:id/cells/mass_update?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id/set_default_user_job?agent_id=
 
 # Layers
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers?agent_id=
-GET    /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-DELETE /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/duplicate?agent_id=
-PUT    /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers?agent_id=
+GET    /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+DELETE /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/duplicate?agent_id=
+PUT    /v1/vidsheet/:id/cells/:cell_id/layers/update_positions?agent_id=
 
 # Generations
-POST   /v1/autocontentengine/:id/cells/:cell_id/generate?agent_id=
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/generate?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/generate?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/generate?agent_id=
 GET    /v1/generations/:id
 POST   /v1/generations/:id/stop
 POST   /v1/generations/:id/continue
 
 # Variables
-GET    /v1/autocontentengine/:id/global_variables?agent_id=
-POST   /v1/autocontentengine/:id/import_global_variables?agent_id=     (XLSX)
-GET    /v1/autocontentengine/global_variables_template                 (download template)
+GET    /v1/vidsheet/:id/global_variables?agent_id=
+POST   /v1/vidsheet/:id/import_global_variables?agent_id=     (XLSX)
+GET    /v1/vidsheet/global_variables_template                 (download template)
 
 # Content Resources & Assets
 GET    /v1/content_resources?agent_id=&type=&page=
@@ -469,7 +469,7 @@ Only `ingredient` role columns can be created / updated / deleted.
 **Render:**
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 # → { "generation_id": 56789, "status": "pending" }
 ```
@@ -536,7 +536,7 @@ curl "https://api.gen.pro/v1/user_jobs/138860?agent_id=$AGENT_ID" \
 ### Step 5 endpoints
 
 ```
-POST   /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=   — kick off render
+POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=   — kick off render
 GET    /v1/generations/:id                                          — poll render
 POST   /v1/user_jobs?agent_id= (publish_content)                    — publish now / schedule
 GET    /v1/user_jobs/:id?agent_id=                                  — poll publish job
@@ -554,7 +554,7 @@ Clone one of these via `POST /v1/templates/spreadsheets/:slug/clone`:
 - `tiktok-text-driven` — kinetic text + music, no avatar. Best for list posts, "3 reasons why", quotes.
 - `tiktok-split-screen` — side-by-side reaction / comparison. Best for reviews, before/after, duets.
 
-If none match, build custom with `POST /v1/autocontentengine` and add columns / layers by hand — but template cloning handles 90% of production use cases.
+If none match, build custom with `POST /v1/vidsheet` and add columns / layers by hand — but template cloning handles 90% of production use cases.
 
 ---
 
@@ -626,7 +626,7 @@ No AI — just attaches an uploaded resource to the cell.
 
 ### render (composite)
 ```
-POST /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=
+POST /v1/vidsheet/:id/cells/:cell_id/render?agent_id=
 ```
 No `generation_type` in body. Composites all layers into one final video.
 
@@ -761,7 +761,7 @@ Common codes:
 
 ## Integrations
 
-- MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env: `GEN_API_KEY`)
+- MCP Server: `npx @poweredbygen/vidsheet-mcp-server@latest` (env: `GEN_API_KEY`)
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)

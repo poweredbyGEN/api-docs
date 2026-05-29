@@ -12,7 +12,7 @@ The first generation on a cell is rarely the final one. You'll iterate — swap 
 If you want to swap models or tweak the prompt, just POST a new generation with the updated `data`:
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -85,7 +85,7 @@ Response includes `available_credit: { generic, aura }`. If generic credits are 
 A cell tracks all its generations, not just the latest. To see the history:
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+curl "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 

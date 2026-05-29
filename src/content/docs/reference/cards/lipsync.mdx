@@ -25,7 +25,7 @@ The Lipsync card takes a video and an audio track, then re-renders the video so 
 Lipsync is typically applied to a **layer** within a cell, not the cell itself, since it composites audio onto an existing video layer.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -52,7 +52,7 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -68,7 +68,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/400
 You can also generate on the cell directly if it holds the video:
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ```
 
 The request body is identical.
@@ -106,7 +106,7 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 ## Cell configuration
 
 <Aside type="tip">
-  Cell configuration is set via `PATCH /v1/autocontentengine/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+  Cell configuration is set via `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
 </Aside>
 
 | Field | Type | Description |

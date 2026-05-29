@@ -18,7 +18,7 @@ All cells are filled from [Step 4](/step-4-edit/overview/). Now you turn the vid
 ## Render the final video
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 

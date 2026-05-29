@@ -34,7 +34,7 @@ The `execution_cost` field is only present when `with_execution_cost=true` is pa
 Returns all rows in a sheet.
 
 ```
-GET /v1/autocontentengine/{id}/rows?agent_id={agent_id}
+GET /v1/vidsheet/{id}/rows?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -61,7 +61,7 @@ GET /v1/autocontentengine/{id}/rows?agent_id={agent_id}
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/rows?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -72,7 +72,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
 Adds a new row to the sheet. A cell is automatically created for each existing column.
 
 ```
-POST /v1/autocontentengine/{id}/rows?agent_id={agent_id}
+POST /v1/vidsheet/{id}/rows?agent_id={agent_id}
 ```
 
 ### Request body
@@ -88,7 +88,7 @@ Returns the created row with its cells.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/rows?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"spreadsheet_row": {"position": 1}}'
@@ -101,7 +101,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows?agent_id=42" \
 Returns a single row with its cells.
 
 ```
-GET /v1/autocontentengine/{id}/rows/{row_id}?agent_id={agent_id}
+GET /v1/vidsheet/{id}/rows/{row_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -118,7 +118,7 @@ Returns the row object with `spreadsheet_cells`.
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/rows/500?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/rows/500?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -129,7 +129,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/rows/500?agent_id=42" \
 Creates a copy of a row, including all cell values.
 
 ```
-POST /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/rows/{row_id}/duplicate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -146,7 +146,7 @@ Returns the newly created row.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows/500/duplicate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/rows/500/duplicate?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -157,7 +157,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/rows/500/duplicate?ag
 Reorders rows within a sheet.
 
 ```
-PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={agent_id}
+PUT /v1/vidsheet/{id}/rows/update_positions?agent_id={agent_id}
 ```
 
 ### Request body
@@ -169,7 +169,7 @@ PUT /v1/autocontentengine/{id}/rows/update_positions?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/rows/update_positions?agent_id=42" \
+curl -X PUT "https://api.gen.pro/v1/vidsheet/101/rows/update_positions?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"rows": [{"id": 500, "position": 2}, {"id": 501, "position": 1}]}'
@@ -186,7 +186,7 @@ Returns the updated rows.
 Updates multiple rows in a single request.
 
 ```
-PUT /v1/autocontentengine/{id}/rows/mass_update?agent_id={agent_id}
+PUT /v1/vidsheet/{id}/rows/mass_update?agent_id={agent_id}
 ```
 
 ### Request body
@@ -196,7 +196,7 @@ Accepts an array of row objects with the fields to update.
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/rows/mass_update?agent_id=42" \
+curl -X PUT "https://api.gen.pro/v1/vidsheet/101/rows/mass_update?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"rows": [{"id": 500, "additional_attributes": {"label": "hero"}}, {"id": 501, "additional_attributes": {"label": "intro"}}]}'

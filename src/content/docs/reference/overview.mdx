@@ -46,10 +46,10 @@ You can also create and manage API keys programmatically via the [API Keys endpo
 
 ## Agent scoping
 
-All `/autocontentengine/` endpoints require an `agent_id` query parameter. This scopes every request to a specific GEN agent. The authenticated user must have access to the agent, and the agent's workspace must have active GEN credits.
+All `/vidsheet/` endpoints require an `agent_id` query parameter. This scopes every request to a specific GEN agent. The authenticated user must have access to the agent, and the agent's workspace must have active GEN credits.
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 

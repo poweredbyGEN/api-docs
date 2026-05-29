@@ -8,7 +8,7 @@ import { Aside } from '@astrojs/starlight/components';
 Generations are AI jobs that produce content for cells and layers. Trigger a generation, poll for completion, and retrieve the output — scripts, voiceovers, images, video clips, and more.
 
 <Aside>
-  Generation endpoints under `/autocontentengine/` require the `agent_id` query parameter. The standalone `/generations/` endpoints do not.
+  Generation endpoints under `/vidsheet/` require the `agent_id` query parameter. The standalone `/generations/` endpoints do not.
 </Aside>
 
 ## Generation schema
@@ -50,7 +50,7 @@ Generations are AI jobs that produce content for cells and layers. Trigger a gen
 Triggers an AI generation on a cell.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -83,7 +83,7 @@ POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"generation_type": "text", "data": {}}'
@@ -91,7 +91,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?a
 
 ```typescript
 const response = await fetch(
-  "https://api.gen.pro/v1/autocontentengine/101/cells/3000/generate?agent_id=42",
+  "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42",
   {
     method: "POST",
     headers: {
@@ -114,7 +114,7 @@ const { generation_id, status } = await response.json();
 Triggers an AI generation on a specific layer within a cell.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -141,7 +141,7 @@ Same as [Generate on cell](#generate-on-cell).
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"generation_type": "audio_generation", "data": {}}'

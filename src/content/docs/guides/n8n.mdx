@@ -47,7 +47,7 @@ This workflow checks a content engine for empty script cells every hour and trig
    Fetch the content engine to find rows that need scripts.
 
    ```
-   GET https://api.gen.pro/v1/autocontentengine/{sheet_id}?agent_id={agent_id}
+   GET https://api.gen.pro/v1/vidsheet/{sheet_id}?agent_id={agent_id}
    ```
 
    Use the Header Auth credential you created above.
@@ -78,7 +78,7 @@ This workflow checks a content engine for empty script cells every hour and trig
    For each empty cell, trigger AI generation:
 
    ```
-   POST https://api.gen.pro/v1/autocontentengine/{sheet_id}/cells/{{ $json.cell_id }}/generate?agent_id={{ $vars.GEN_AGENT_ID }}
+   POST https://api.gen.pro/v1/vidsheet/{sheet_id}/cells/{{ $json.cell_id }}/generate?agent_id={{ $vars.GEN_AGENT_ID }}
    ```
 
    Body (JSON):
