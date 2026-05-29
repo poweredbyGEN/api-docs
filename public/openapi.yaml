@@ -2581,6 +2581,23 @@ paths:
         Poll `GET /agent/runs/{run_id}` for status and messages, or use the returned progress path for live updates.
 
         **Base URL:** `https://agent.gen.pro/v1`
+
+        **Querying a watchlist with typed filters.** The SDK `queryWatchlist` and
+        MCP `gen_query_watchlist` primitives are typed wrappers over this
+        endpoint: they reference a watchlist by id with a `@list:<watchlist_id>`
+        token in `message` and let you pass structured filters instead of
+        hand-building a prompt. Example message:
+        `"top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"`.
+        The chat layer parses the filters, fans out one Data Warehouse call per
+        watchlist source with byte-identical filters, and returns a `run_id` whose
+        completed answer carries a video grid plus a summary. Supported typed
+        filters: `question` (analysis kind — top videos / top hooks / top creators
+        / trending music / comment themes), `days` (1-365), `limit` (1-1000),
+        `sort_by` (`engagement_rate`, `watch_count`, `like_count`, `comment_count`,
+        `share_count`, `save_count`, `posted_at`, `trending_score`),
+        `min_engagement_rate` (0.0-1.0), and `return_all`. No silent caps: every
+        stated filter is honored across the fan-out; omitted filters fall to one
+        default policy (`limit` → 100); out-of-range values return a clarifier.
       tags: [Agent Chat]
       requestBody:
         required: true

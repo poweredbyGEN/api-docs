@@ -970,6 +970,45 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
 - **`DELETE`** is a soft delete: rows are marked inactive and `deleted_at`
   is set; nothing is returned by subsequent `GET`/`list`.
 
+### Querying a watchlist with typed filters (`https://agent.gen.pro/v1`)
+
+Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
+The SDK and MCP both ship a `queryWatchlist` primitive that wraps the chat
+path with a typed parameter object so you don't hand-build a prompt. Under the
+hood it posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference; the
+chat layer's typed extractor parses the filters, fans out one Data Warehouse
+call per watchlist source with byte-identical filters, and returns a `run_id`.
+Poll the run until `status == "completed"`; the final answer payload carries a
+video-grid block plus a natural-language summary that respects every filter.
+
+```bash
+# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {
+#   question: "top videos", limit: 30, days: 90, sort_by: "engagement_rate" })
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
+# → { "run_id": "run_abc", "status": "running", ... }
+```
+
+`queryWatchlist` typed fields (all optional except `question`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `question` | string (required) | Drives the analysis kind: `top videos` → trend_videos, `top hooks` → top_hooks, `top creators` → top_creators, `trending music` → top_sounds, `comment themes` → comment_themes, `stats` → engagement_summary. |
+| `days` | int 1-365 | Time window. Out-of-range → chat clarifier, not a silent drop. |
+| `limit` | int 1-1000 | Result count. Out-of-range → chat clarifier. |
+| `sort_by` | `engagement_rate \| watch_count \| like_count \| comment_count \| share_count \| save_count \| posted_at \| trending_score` | Sort key. Omit for the backend's default ranking. |
+| `min_engagement_rate` | number 0.0-1.0 | Fractional threshold (`0.05` = above 5%). |
+| `return_all` | boolean | Walk every matching row up to the DW hard cap of 1000. With no explicit `limit`, lifts the per-call ceiling; with `limit=N`, the explicit cap wins. |
+
+**Filter semantics — no silent caps:** every stated filter is honored
+byte-identically across the fan-out. Omitted filters fall to a single default
+policy applied in one place (`limit` → 100; `days` / `sort_by` /
+`min_engagement_rate` stay unset so the backend's own behavior shows through).
+Out-of-range values surface a chat clarifier rather than being silently
+clamped or dropped.
+
 ## Recurring Jobs / Daily Tasks (`https://agent.gen.pro/v1`)
 
 A `RecurringJob` runs a prompt on a schedule, optionally delivering results by

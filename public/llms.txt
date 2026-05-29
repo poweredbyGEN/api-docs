@@ -683,6 +683,18 @@ DELETE /v1/agents/:agent_id/watchlists/:id/sources/:source_id       — remove s
 DELETE /v1/agents/:agent_id/watchlists/:id/sources?platform=&target_type=&target_value=
 ```
 
+**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the SDK and MCP ship a `queryWatchlist` primitive so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
+
+```bash
+# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {...})
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
+```
+
+Typed fields (all optional except `question`): `question` (drives the analysis kind — top videos / top hooks / top creators / trending music / comment themes), `days` (1-365), `limit` (1-1000), `sort_by` (`engagement_rate | watch_count | like_count | comment_count | share_count | save_count | posted_at | trending_score`), `min_engagement_rate` (0.0-1.0), `return_all` (walk up to the 1000-row DW cap). No silent caps: every stated filter is honored byte-identically across the fan-out; omitted filters fall to one default policy (`limit` → 100); out-of-range values return a chat clarifier rather than being dropped.
+
 ### Recurring Jobs (Daily Tasks)
 
 A **Recurring Job** runs a prompt on a schedule, optionally delivering results by email. `schedule.cadence ∈ {daily, weekly, hourly}`. `delivery.type ∈ {chat_only, email}`. `status ∈ {active, paused, deleted}`. Each scheduled run is credit-gated: the job stays configured if credits run out and resumes when they return.
