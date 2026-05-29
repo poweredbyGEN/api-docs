@@ -5,7 +5,7 @@ description: Let the agent propose videos grounded in real trending data from 10
 
 import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
 
-With the agent set up in [Step 1](/step-1-setup/overview/), you can now ask it to **propose videos grounded in real trending data**. The Ideas Engine pulls trending content from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News, Perplexity, Gemini, and more), matches it to the agent's configured `keywords` and `monitored` sources, and returns video ideas complete with hooks, full scripts, selected assets, and a project manifest.
+With the agent set up in [Step 1](/step-1-setup/overview/), you can now ask it to **propose videos grounded in real trending data**. The Ideas Engine pulls trending content from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News, and more) plus web and AI research sources, matches it to the agent's configured `keywords` and `monitored` sources, and returns video ideas complete with hooks, full scripts, selected assets, and a project manifest.
 
 **Base URL:** `https://agent.gen.pro/v1` (same `X-API-Key` PAT)
 
@@ -43,7 +43,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
   "run_id": "run_abc123",
   "conversation_id": "conv_def456",
   "status": "running",
-  "firebase_path": "/agent_runs/11/run_abc123/"
+  "progress_stream_url": "..."
 }
 ```
 
@@ -54,7 +54,7 @@ curl "https://agent.gen.pro/v1/agent/runs/run_abc123" \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 
-Poll every 5 seconds until `status` is `"completed"`. For real-time streaming, subscribe to the `firebase_path` directly — no auth needed.
+Poll every 5 seconds until `status` is `"completed"`. For real-time streaming, use the `progress_stream_url` returned by the run — treat it as an opaque, sensitive URL scoped to that one run.
 
 ## Three layers of control
 
@@ -99,7 +99,7 @@ The `project_manifest` is a full production spec — timeline layers, asset usag
   <LinkCard title="Ideas Engine (full flow)" href="/guides/content-ideas/" description="curl examples, live progress, MCP tools." />
   <LinkCard title="Refine Ideas" href="/step-2-ideas/refine/" description="Iterate on specific ideas in conversation context." />
   <LinkCard title="Trending Data" href="/reference/content-monitoring/" description="Scrape TikTok / IG / YouTube into the agent's knowledge base." />
-  <LinkCard title="Research" href="/step-2-ideas/research/" description="Standalone research endpoint across Reddit, X, YouTube, TikTok, IG, HN, Perplexity, Gemini." />
+  <LinkCard title="Research" href="/step-2-ideas/research/" description="Standalone research endpoint across Reddit, X, YouTube, TikTok, IG, HN, plus web and AI research sources." />
   <LinkCard title="Preferences" href="/step-2-ideas/preferences/" description="Persistent rules that apply to every future generation." />
   <LinkCard title="Conversations" href="/step-2-ideas/conversations/" description="List, read, pin, rename, delete idea conversations." />
 </CardGrid>

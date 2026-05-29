@@ -2588,15 +2588,15 @@ paths:
         token in `message` and let you pass structured filters instead of
         hand-building a prompt. Example message:
         `"top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"`.
-        The chat layer parses the filters, fans out one Data Warehouse call per
-        watchlist source with byte-identical filters, and returns a `run_id` whose
+        The chat layer parses the filters and applies them byte-identically
+        across all of the watchlist's sources, and returns a `run_id` whose
         completed answer carries a video grid plus a summary. Supported typed
         filters: `question` (analysis kind — top videos / top hooks / top creators
         / trending music / comment themes), `days` (1-365), `limit` (1-1000),
         `sort_by` (`engagement_rate`, `watch_count`, `like_count`, `comment_count`,
         `share_count`, `save_count`, `posted_at`, `trending_score`),
         `min_engagement_rate` (0.0-1.0), and `return_all`. No silent caps: every
-        stated filter is honored across the fan-out; omitted filters fall to one
+        stated filter is honored across every source; omitted filters fall to one
         default policy (`limit` → 100); out-of-range values return a clarifier.
       tags: [Agent Chat]
       requestBody:
@@ -2643,9 +2643,9 @@ paths:
                   status:
                     type: string
                     example: "running"
-                  firebase_path:
+                  progress_stream_url:
                     type: string
-                    description: Run-specific progress path for live updates.
+                    description: Opaque, run-specific URL for live progress updates. Treat as sensitive; or poll GET /agent/runs/{run_id} for an authenticated status path.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -3082,9 +3082,9 @@ paths:
                   status:
                     type: string
                     example: running
-                  firebase_path:
+                  progress_stream_url:
                     type: string
-                    description: Run-specific progress path for live updates.
+                    description: Opaque, run-specific URL for live progress updates. Treat as sensitive; or poll GET /agent/runs/{run_id} for an authenticated status path.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -3848,7 +3848,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Clerk/Dynamic XYZ JWT token.
+      description: Bearer JWT issued by the GEN dashboard sign-in.
 
   parameters:
     AgentId:
@@ -4559,7 +4559,7 @@ components:
         voice_id: { type: string, minLength: 1, maxLength: 200 }
         source:
           type: string
-          enum: [public, user_designed, user_trained, user_elevenlabs, eleven_labs]
+          enum: [public, user_designed, user_trained, user_elevenlabs]
         name: { type: string, maxLength: 200 }
 
     AgentCorePatchResult:
@@ -4641,7 +4641,6 @@ components:
         project_id:
           oneOf: [{ type: string }, { type: integer }]
           nullable: true
-        rails_project_error: { type: string, nullable: true, maxLength: 1000 }
 
     Watchlist:
       type: object
@@ -4653,7 +4652,7 @@ components:
         name: { type: string }
         intent_active: { type: boolean }
         project_id: { type: string, nullable: true }
-        rails_project_error: { type: string, nullable: true }
+        project_error: { type: string, nullable: true, description: 'Read-only. Last project-link sync error, if any.' }
         conversation_id: { type: string, nullable: true }
         created_by_run_id: { type: string, nullable: true }
         sources:

@@ -10,7 +10,7 @@ info:
     All endpoints require authentication via one of:
 
     - **API Key** (recommended): Pass your API key in the `X-API-Key` header. Create keys in Settings > API Keys.
-    - **JWT**: Pass a Clerk/Dynamic XYZ JWT in the `Authorization: Bearer <token>` header.
+    - **JWT**: Pass a Bearer JWT issued by the GEN dashboard sign-in in the `Authorization: Bearer <token>` header.
 
     ## Base URL
 
@@ -1196,7 +1196,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Clerk/Dynamic XYZ JWT token.
+      description: Bearer JWT issued by the GEN dashboard sign-in.
 
   parameters:
     AgentId:

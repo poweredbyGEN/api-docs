@@ -81,7 +81,7 @@ const watchlist = await sdk.monitoring.createWatchlist(agentId, {
 |---|---|---|---|
 | `name` | string (1-200) | yes | Display name. Re-using the same name within an agent merges sources into the existing watchlist. |
 | `sources` | array | no | Initial sources to monitor. See WatchSource schema below. |
-| `project_id` | string \| integer | no | Optional Rails project shell to link this watchlist to. |
+| `project_id` | string \| integer | no | Optional project to link this watchlist to. |
 | `conversation_id` | string | no | Optional chat conversation that triggered creation (attribution). |
 | `created_by_run_id` | string | no | Optional agent_run that triggered creation (attribution). |
 
@@ -109,7 +109,7 @@ await sdk.monitoring.resumeWatchlist(agentId, watchlistId);
 await sdk.monitoring.updateWatchlist(agentId, watchlistId, { name: "crypto watch v2" });
 ```
 
-**Updatable fields:** `name`, `intent_active`, `project_id`, `rails_project_error`.
+**Updatable fields:** `name`, `intent_active`, `project_id`.
 
 ### DELETE /v1/agents/:agent_id/watchlists/:watchlist_id
 
@@ -179,7 +179,7 @@ await sdk.monitoring.removeWatchlistSource(agentId, watchlistId, {
   "name": "crypto watch",
   "intent_active": true,
   "project_id": null,
-  "rails_project_error": null,
+  "project_error": null,
   "conversation_id": null,
   "created_by_run_id": null,
   "sources": [
@@ -246,14 +246,14 @@ const run = await sdk.monitoring.queryWatchlist(agentId, watchlistId, {
 | `limit` | integer 1-1000 | How many results to return. Out-of-range values clarify. |
 | `sort_by` | `engagement_rate \| watch_count \| like_count \| comment_count \| share_count \| save_count \| posted_at \| trending_score` | Sort key. Omit for backend default ranking. |
 | `min_engagement_rate` | number 0.0-1.0 | Threshold as a fraction. `0.05` filters to videos with engagement rate above 5%. |
-| `return_all` | boolean | Walk every matching row up to the DW hard cap (1000). Without an explicit limit, lifts the per-call ceiling. |
+| `return_all` | boolean | Walk every matching row up to the maximum of 1000 results. Without an explicit limit, lifts the per-call ceiling. |
 
 **Response:** a run record with a `run_id`. Poll the run with `getRunStatus` until `status === "completed"`; the final answer payload contains a video grid block plus a natural-language summary that respects the filters.
 
 **Filter semantics — no silent caps:**
 
-- Every filter you state is honored byte-identically across the fan-out (one DW call per watchlist source).
+- Every filter you state is honored byte-identically across all of the watchlist's sources.
 - If you omit a filter, the chat-side default policy applies in exactly one place — `limit` defaults to 100; `days` / `sort_by` / `min_engagement_rate` stay unset so the backend's own behavior shows through.
-- When `return_all=true` is set without an explicit `limit`, the request walks up to the DW hard cap of 1000 rows.
+- When `return_all=true` is set without an explicit `limit`, the request walks up to the maximum of 1000 rows.
 - Stating both `return_all=true` and `limit=N` honors the explicit cap.
 - Stating values outside the schema's allowed range surfaces a chat clarifier instead of silently dropping the filter.

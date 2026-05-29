@@ -170,4 +170,4 @@ The [Agent Chat API](/reference/agent-chat) at `agent.gen.pro` accepts the same 
 - `X-API-Key` header with your PAT
 - `Authorization: Bearer` header with a JWT
 
-Real-time progress streams are addressed by the run-specific `firebase_path` returned from `POST /v1/agent/run`. Treat that path as sensitive application data.
+Real-time progress streams are addressed by the run-specific `progress_stream_url` returned from `POST /v1/agent/run`. Treat that URL as sensitive application data — it's an opaque channel scoped to a single run. For a fully authenticated path, poll `GET /v1/agent/runs/{run_id}` with your API key instead.

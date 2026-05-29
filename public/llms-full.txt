@@ -314,7 +314,7 @@ Body: {
   context?: { vidsheet_id? },
   debug?
 }
-→ { run_id, conversation_id, status: "running", firebase_path }
+→ { run_id, conversation_id, status: "running", progress_stream_url }
 ```
 
 Message patterns:
@@ -332,8 +332,9 @@ POST /v1/agent/runs/{run_id}/approve         — approve or reject a pending act
 ```
 
 Live progress:
-- Use the `firebase_path` returned by `POST /v1/agent/run` as the run-specific progress path.
-- Keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
+- Use the `progress_stream_url` returned by `POST /v1/agent/run` as the run-specific progress channel. Treat it as an opaque, sensitive URL — do not share it; it carries that run's live updates.
+- Channel keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
+- Or poll `GET /v1/agent/runs/{run_id}` until `status == "completed"` for a fully authenticated path.
 
 ## Conversations
 
@@ -387,7 +388,7 @@ Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driv
 ```
 POST /v1/research
 Body: { topic, depth: "quick" | "default" | "deep", agent_id }
-→ { run_id, conversation_id, status: "running", firebase_path }
+→ { run_id, conversation_id, status: "running", progress_stream_url }
 ```
 
 Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. Completed messages contain the structured research findings and summary.
@@ -935,7 +936,7 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
   "name": "crypto watch",
   "intent_active": true,
   "project_id": null,
-  "rails_project_error": null,
+  "project_error": null,
   "conversation_id": null,
   "created_by_run_id": null,
   "sources": [
@@ -976,10 +977,10 @@ Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
 The SDK and MCP both ship a `queryWatchlist` primitive that wraps the chat
 path with a typed parameter object so you don't hand-build a prompt. Under the
 hood it posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference; the
-chat layer's typed extractor parses the filters, fans out one Data Warehouse
-call per watchlist source with byte-identical filters, and returns a `run_id`.
-Poll the run until `status == "completed"`; the final answer payload carries a
-video-grid block plus a natural-language summary that respects every filter.
+chat layer parses the filters and applies them byte-identically across all of
+the watchlist's sources, and returns a `run_id`. Poll the run until
+`status == "completed"`; the final answer payload carries a video-grid block
+plus a natural-language summary that respects every filter.
 
 ```bash
 # Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {
@@ -1000,10 +1001,10 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
 | `limit` | int 1-1000 | Result count. Out-of-range → chat clarifier. |
 | `sort_by` | `engagement_rate \| watch_count \| like_count \| comment_count \| share_count \| save_count \| posted_at \| trending_score` | Sort key. Omit for the backend's default ranking. |
 | `min_engagement_rate` | number 0.0-1.0 | Fractional threshold (`0.05` = above 5%). |
-| `return_all` | boolean | Walk every matching row up to the DW hard cap of 1000. With no explicit `limit`, lifts the per-call ceiling; with `limit=N`, the explicit cap wins. |
+| `return_all` | boolean | Walk every matching row up to the maximum of 1000. With no explicit `limit`, lifts the per-call ceiling; with `limit=N`, the explicit cap wins. |
 
 **Filter semantics — no silent caps:** every stated filter is honored
-byte-identically across the fan-out. Omitted filters fall to a single default
+byte-identically across all of the watchlist's sources. Omitted filters fall to a single default
 policy applied in one place (`limit` → 100; `days` / `sort_by` /
 `min_engagement_rate` stay unset so the backend's own behavior shows through).
 Out-of-range values surface a chat clarifier rather than being silently

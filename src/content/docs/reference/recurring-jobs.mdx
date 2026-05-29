@@ -27,7 +27,7 @@ Agent ── RecurringJob "daily ideas" (status=active)
 - `schedule.cadence` ∈ `daily`, `weekly`, `hourly`.
 - `delivery.type` ∈ `chat_only`, `email`.
 - `status` ∈ `active`, `paused`, `deleted`.
-- **Management calls are free.** Each scheduled run bills at execution time against existing `user_jobs` pricing for the relevant `job_type`. If the workspace has no credits when a run fires, the run is skipped and the job remains scheduled — no deletion, no email — and execution resumes automatically when credits return.
+- **Management calls are free.** Each scheduled run bills at execution time using standard per-job pricing for the relevant `job_type`. If the workspace has no credits when a run fires, the run is skipped and the job remains scheduled — no deletion, no email — and execution resumes automatically when credits return.
 
 ## Endpoints
 

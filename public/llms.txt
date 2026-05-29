@@ -123,7 +123,7 @@ DELETE /v1/persisted_tokens/revoke_all           — revoke all
 
 ## Step 2 — Generate Content Ideas
 
-**What it is.** Ask the agent to propose videos. The Ideas Engine pulls trending data from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News, Perplexity, Gemini), matches it to the agent's configured keywords and inspiration, and returns complete video specs — hook, full script, video type, selected assets, project manifest, rationale.
+**What it is.** Ask the agent to propose videos. The Ideas Engine pulls trending data from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News) plus web and AI research sources, matches it to the agent's configured keywords and inspiration, and returns complete video specs — hook, full script, video type, selected assets, project manifest, rationale.
 
 **Mental model.** Calls are async. POST a natural-language message, get back a `run_id` and `conversation_id`, poll until complete, then read the ideas from the conversation. Refining existing ideas is just another message with the same `conversation_id`. Long-term preferences (applied to all future runs) are set via another message that starts with "remember:".
 
@@ -137,7 +137,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
     "agent_id": "'"$AGENT_ID"'",
     "message": "Generate 5 content ideas grounded in this week trends"
   }'
-# → { "run_id": "run_abc", "conversation_id": "conv_xyz", "status": "running", "firebase_path": "..." }
+# → { "run_id": "run_abc", "conversation_id": "conv_xyz", "status": "running" }
 ```
 
 **Poll until done:**
@@ -560,7 +560,7 @@ If none match, build custom with `POST /v1/autocontentengine` and add columns / 
 
 ## Creation Card Types (all 9)
 
-Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server and SDK map them to internal Rails names automatically.
+Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server and SDK map them to the platform's internal model identifiers automatically.
 
 ### text
 ```json
@@ -693,7 +693,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
 ```
 
-Typed fields (all optional except `question`): `question` (drives the analysis kind — top videos / top hooks / top creators / trending music / comment themes), `days` (1-365), `limit` (1-1000), `sort_by` (`engagement_rate | watch_count | like_count | comment_count | share_count | save_count | posted_at | trending_score`), `min_engagement_rate` (0.0-1.0), `return_all` (walk up to the 1000-row DW cap). No silent caps: every stated filter is honored byte-identically across the fan-out; omitted filters fall to one default policy (`limit` → 100); out-of-range values return a chat clarifier rather than being dropped.
+Typed fields (all optional except `question`): `question` (drives the analysis kind — top videos / top hooks / top creators / trending music / comment themes), `days` (1-365), `limit` (1-1000), `sort_by` (`engagement_rate | watch_count | like_count | comment_count | share_count | save_count | posted_at | trending_score`), `min_engagement_rate` (0.0-1.0), `return_all` (walk up to the maximum of 1000 rows). No silent caps: every stated filter is honored byte-identically across all of the watchlist's sources; omitted filters fall to one default policy (`limit` → 100); out-of-range values return a chat clarifier rather than being dropped.
 
 ### Recurring Jobs (Daily Tasks)
 
