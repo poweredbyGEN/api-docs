@@ -2859,6 +2859,99 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /agent/conversations/{id}/session-preferences:
+    get:
+      operationId: getSessionPreferences
+      x-phase: ideas
+      summary: Get session preferences
+      description: |
+        Returns the per-conversation session preferences — temporary creative
+        rules scoped to this one conversation, distinct from the agent's
+        long-term preferences. `preferences` is null if none are set.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current session preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preferences: { type: string, nullable: true }
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateSessionPreferences
+      x-phase: ideas
+      summary: Update session preferences
+      description: |
+        Sets the per-conversation session preferences (applied only within this
+        conversation; does not change the agent's saved long-term preferences).
+        Replaces the existing value.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preferences]
+              properties:
+                preferences: { type: string }
+      responses:
+        '200':
+          description: Updated session preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preferences: { type: string, nullable: true }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ideas/{idea_id}/expand:
+    post:
+      operationId: expandIdea
+      x-phase: ideas
+      summary: Expand an idea into a project manifest
+      description: |
+        Expands a single content idea into a full `project_manifest` (the
+        structured layer/scene plan a vidsheet is built from). Use before
+        cloning an idea into a vidsheet when it was generated without a
+        manifest. Idempotent — returns the cached manifest if already expanded.
+        Note: the path has no `/agent/` segment.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: idea_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Idea expanded (project_manifest in the response)
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /agent/conversations/{id}/messages:
     get:
       operationId: listConversationMessages

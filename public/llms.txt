@@ -228,10 +228,13 @@ PATCH  /v1/agent/conversations/:id                — rename / pin
 DELETE /v1/agent/conversations/:id                — delete
 GET    /v1/agent/conversations/:id/messages       — list messages
 GET    /v1/agent/conversations/:id/runs           — list runs
+GET    /v1/agent/conversations/:id/session-preferences   — read per-conversation preferences
+PATCH  /v1/agent/conversations/:id/session-preferences   — set per-conversation preferences
 
 GET    /v1/agent/ideas?agent_id=&status=          — list ideas
 POST   /v1/agent/ideas/:id/status                 — cycle to next status
 PUT    /v1/agent/ideas/:id/status/:status         — set explicit status
+POST   /v1/ideas/:id/expand                       — expand idea → project_manifest (no /agent/ segment)
 
 POST   /v1/research                               — standalone research
 
