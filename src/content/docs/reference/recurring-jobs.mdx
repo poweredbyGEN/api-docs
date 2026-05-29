@@ -24,8 +24,10 @@ Agent ── RecurringJob "daily ideas" (status=active)
           └── runs at next_run_at → bills against credits → updates last_run_at
 ```
 
-- `schedule.cadence` ∈ `daily`, `weekly`, `hourly`.
+- `schedule.cadence` ∈ `daily`, `weekly`.
+- `schedule.days_of_week` — array of `0`–`6` (0=Mon … 6=Sun). **Required** when `cadence` is `weekly`; omit for `daily`.
 - `delivery.type` ∈ `chat_only`, `email`.
+- `delivery.email` — recipient address. **Required** when `type` is `email`; omit for `chat_only`.
 - `status` ∈ `active`, `paused`, `deleted`.
 - **Management calls are free.** Each scheduled run bills at execution time using standard per-job pricing for the relevant `job_type`. If the workspace has no credits when a run fires, the run is skipped and the job remains scheduled — no deletion, no email — and execution resumes automatically when credits return.
 
@@ -79,8 +81,8 @@ curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
     "name": "weekly retention digest",
     "job_type": "generate_content_ideas",
     "prompt": "Give me 5 retention-focused hook patterns trending this week",
-    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00" },
-    "delivery": { "type": "email" }
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00", "days_of_week": [0] },
+    "delivery": { "type": "email", "email": "you@example.com" }
   }'
 ```
 
@@ -89,8 +91,8 @@ const job = await sdk.monitoring.createRecurringJob(agentId, {
   name: "weekly retention digest",
   job_type: "generate_content_ideas",
   prompt: "Give me 5 retention-focused hook patterns trending this week",
-  schedule: { cadence: "weekly", timezone: "America/Los_Angeles", time_of_day: "09:00" },
-  delivery: { type: "email" },
+  schedule: { cadence: "weekly", timezone: "America/Los_Angeles", time_of_day: "09:00", days_of_week: [0] },
+  delivery: { type: "email", email: "you@example.com" },
 });
 ```
 
@@ -101,10 +103,12 @@ const job = await sdk.monitoring.createRecurringJob(agentId, {
 | `name` | string | no | Display name. Defaults to first 80 chars of `prompt`. |
 | `job_type` | string | yes | Job type. `"generate_content_ideas"` is the standard default. |
 | `prompt` | string | yes | Natural-language instruction the agent runs each cycle. |
-| `schedule.cadence` | `"daily" \| "weekly" \| "hourly"` | yes | How often to run. |
+| `schedule.cadence` | `"daily" \| "weekly"` | yes | How often to run. |
 | `schedule.timezone` | string | yes | IANA timezone (e.g. `"UTC"`, `"America/Los_Angeles"`). |
 | `schedule.time_of_day` | string | conditional | `"HH:MM"` 24h local time. Required for daily/weekly cadences. |
+| `schedule.days_of_week` | integer[] | conditional | Days to run, `0`–`6` (0=Mon … 6=Sun). **Required** when `cadence` is `"weekly"`; must be omitted for `"daily"`. No duplicates. |
 | `delivery.type` | `"chat_only" \| "email"` | yes | Where to send results. |
+| `delivery.email` | string | conditional | Recipient address. **Required** when `type` is `"email"`; must be omitted for `"chat_only"`. |
 | `next_run_at` | ISO-8601 | no | Override the first-run timestamp. |
 
 ### GET /v1/agents/:agent_id/recurring-jobs/:job_id
@@ -121,7 +125,7 @@ curl -X PATCH "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID"
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Give me 10 hook patterns instead of 5",
-    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "08:00" }
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "08:00", "days_of_week": [0] }
   }'
 ```
 
@@ -165,9 +169,10 @@ Returns `204 No Content` on success.
   "schedule": {
     "cadence": "weekly",
     "timezone": "America/Los_Angeles",
-    "time_of_day": "09:00"
+    "time_of_day": "09:00",
+    "days_of_week": [0]
   },
-  "delivery": { "type": "email" },
+  "delivery": { "type": "email", "email": "you@example.com" },
   "status": "active",
   "next_run_at": "2026-06-03T16:00:00Z",
   "last_run_at": null,

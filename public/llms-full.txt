@@ -1042,9 +1042,10 @@ POST   /v1/agents/{agent_id}/recurring-jobs/{job_id}/resume
   "schedule": {
     "cadence": "weekly",
     "timezone": "America/Los_Angeles",
-    "time_of_day": "09:00"
+    "time_of_day": "09:00",
+    "days_of_week": [0]
   },
-  "delivery": { "type": "email" },
+  "delivery": { "type": "email", "email": "you@example.com" },
   "next_run_at": "2026-06-03T16:00:00Z"
 }
 ```
@@ -1054,11 +1055,15 @@ Fields:
 - `name` — optional. Defaults to first 80 chars of `prompt`.
 - `job_type` — `"generate_content_ideas"` is the default pipeline.
 - `prompt` — natural-language instruction the agent runs each cycle.
-- `schedule.cadence` ∈ `daily | weekly | hourly`.
+- `schedule.cadence` ∈ `daily | weekly`.
 - `schedule.timezone` — IANA timezone string.
 - `schedule.time_of_day` — `"HH:MM"` 24h local time; required for
   `daily`/`weekly` cadences.
+- `schedule.days_of_week` — array of ints 0-6 (0=Mon … 6=Sun). REQUIRED when
+  `cadence` is `weekly`; must be omitted when `daily`. No duplicates.
 - `delivery.type` ∈ `chat_only | email`.
+- `delivery.email` — recipient address; REQUIRED when `type` is `email`, must
+  be omitted when `chat_only`.
 - `next_run_at` — ISO-8601 to schedule the first run explicitly; otherwise
   derived from cadence + time_of_day.
 
@@ -1072,8 +1077,8 @@ Fields:
   "name": "weekly retention digest",
   "job_type": "generate_content_ideas",
   "prompt": "Give me 5 retention-focused hook patterns this week",
-  "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00" },
-  "delivery": { "type": "email" },
+  "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00", "days_of_week": [0] },
+  "delivery": { "type": "email", "email": "you@example.com" },
   "status": "active",
   "next_run_at": "2026-06-03T16:00:00Z",
   "last_run_at": null,

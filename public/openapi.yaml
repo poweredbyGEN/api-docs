@@ -4666,17 +4666,24 @@ components:
       type: object
       required: [cadence, timezone]
       properties:
-        cadence: { type: string, enum: [daily, weekly, hourly] }
+        cadence: { type: string, enum: [daily, weekly] }
         timezone: { type: string, description: 'IANA timezone (e.g. "UTC", "America/Los_Angeles")' }
         time_of_day:
           type: string
           description: 'Local clock time "HH:MM" (24h). Required for daily/weekly cadences.'
+        days_of_week:
+          type: array
+          items: { type: integer, minimum: 0, maximum: 6 }
+          description: 'Days to run (0=Mon … 6=Sun). REQUIRED when cadence="weekly"; must be omitted when cadence="daily". No duplicates.'
 
     RecurringJobDelivery:
       type: object
       required: [type]
       properties:
         type: { type: string, enum: [chat_only, email] }
+        email:
+          type: string
+          description: 'Recipient email. REQUIRED when type="email"; must be omitted when type="chat_only".'
 
     RecurringJob:
       type: object

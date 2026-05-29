@@ -697,7 +697,7 @@ Typed fields (all optional except `question`): `question` (drives the analysis k
 
 ### Recurring Jobs (Daily Tasks)
 
-A **Recurring Job** runs a prompt on a schedule, optionally delivering results by email. `schedule.cadence ∈ {daily, weekly, hourly}`. `delivery.type ∈ {chat_only, email}`. `status ∈ {active, paused, deleted}`. Each scheduled run is credit-gated: the job stays configured if credits run out and resumes when they return.
+A **Recurring Job** runs a prompt on a schedule, optionally delivering results by email. `schedule.cadence ∈ {daily, weekly}`. For weekly, `schedule.days_of_week` (array of 0-6, 0=Mon … 6=Sun) is REQUIRED; for daily it must be omitted. `delivery.type ∈ {chat_only, email}`; when `type=email`, `delivery.email` is REQUIRED. `status ∈ {active, paused, deleted}`. Each scheduled run is credit-gated: the job stays configured if credits run out and resumes when they return.
 
 **Base URL:** `https://agent.gen.pro/v1`
 
