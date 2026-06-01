@@ -41,7 +41,7 @@ const run = await client.agent.generateIdeas(agentId, {
   "run_id": "abc-123",
   "conversation_id": "def-456",
   "status": "running",
-  "firebase_path": "/agent_runs/11/abc-123/"
+  "progress_stream_url": "..."
 }
 ```
 
@@ -115,12 +115,17 @@ curl -X PUT "https://agent.gen.pro/v1/agent/ideas/123/status/approve_to_create" 
 
 ## Real-Time Progress
 
-The `firebase_path` from the run response points to a run-specific progress stream:
+The `progress_stream_url` from the run response is an opaque, run-specific
+progress channel (treat it as sensitive — it's scoped to that one run). It
+streams:
 
 - `status` — "running", "completed", or "failed"
 - `plan` — numbered checklist of what the agent is doing
 - `thinking` — progress messages
 - `messages` — output when complete
+
+If you'd rather not consume the stream, poll `GET /v1/agent/runs/{run_id}`
+with your API key until `status` is `"completed"`.
 
 ## MCP Server
 

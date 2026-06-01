@@ -496,9 +496,9 @@ POST /v1/direct_upload
   "content_type": "video/mp4",
   "byte_size": 52428800,
   "checksum": "x8F1TrG7p+mAWjK7Yv3QZA==",
-  "signed_id": "eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaH...",
+  "signed_id": "<signed-id>",
   "direct_upload": {
-    "url": "https://s3.amazonaws.com/gen-uploads/abcdef123456?X-Amz-Signature=...",
+    "url": "https://uploads.gen.pro/abcdef123456?X-Amz-Signature=...",
     "headers": {
       "Content-Type": "video/mp4",
       "Content-MD5": "x8F1TrG7p+mAWjK7Yv3QZA=="
@@ -523,8 +523,8 @@ curl -X POST https://api.gen.pro/v1/direct_upload \
     }
   }'
 
-# Step 2: Upload the file directly to S3
-curl -X PUT "https://s3.amazonaws.com/gen-uploads/abcdef123456?X-Amz-Signature=..." \
+# Step 2: Upload the file directly to the pre-signed URL
+curl -X PUT "https://uploads.gen.pro/abcdef123456?X-Amz-Signature=..." \
   -H "Content-Type: video/mp4" \
   -H "Content-MD5: x8F1TrG7p+mAWjK7Yv3QZA==" \
   --data-binary @hero-video.mp4
@@ -533,7 +533,7 @@ curl -X PUT "https://s3.amazonaws.com/gen-uploads/abcdef123456?X-Amz-Signature=.
 curl -X POST "https://api.gen.pro/v1/content_resources?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
-  -d '{"content_resource": {"file": "eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaH..."}}'
+  -d '{"content_resource": {"file": "<signed-id>"}}'
 ```
 
 <Aside type="tip">

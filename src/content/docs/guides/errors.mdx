@@ -112,7 +112,7 @@ Not all errors should be retried.
 
     // Example
     const sheet = await withRetry(() =>
-      genRequest(`/autocontentengine/sheet_123?agent_id=agent_456`)
+      genRequest(`/vidsheet/sheet_123?agent_id=agent_456`)
     );
     ```
   </TabItem>
@@ -174,7 +174,7 @@ Not all errors should be retried.
     sheet = with_retry(
         lambda: gen_request(
             "GET",
-            "/autocontentengine/sheet_123",
+            "/vidsheet/sheet_123",
             params={"agent_id": "agent_456"},
         )
     )

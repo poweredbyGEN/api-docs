@@ -27,7 +27,7 @@ Returns a fully configured engine with columns for script, voice, video, and fin
 If no template matches your idea, build an engine from scratch:
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "spreadsheet": { "title": "Custom campaign" } }'

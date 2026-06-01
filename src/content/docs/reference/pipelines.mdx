@@ -16,7 +16,7 @@ While [Automation Config](/reference/automation/) is configured per-agent (conne
 ## Create a pipeline
 
 ```
-POST /v1/autocontentengine/{sheet_id}/pipelines
+POST /v1/vidsheet/{sheet_id}/pipelines
 ```
 
 | Parameter | In | Type | Required | Description |
@@ -27,25 +27,25 @@ POST /v1/autocontentengine/{sheet_id}/pipelines
 ## List pipelines
 
 ```
-GET /v1/autocontentengine/{sheet_id}/pipelines
+GET /v1/vidsheet/{sheet_id}/pipelines
 ```
 
 ## Get a pipeline
 
 ```
-GET /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+GET /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}
 ```
 
 ## Update a pipeline
 
 ```
-PATCH /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+PATCH /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}
 ```
 
 ## Delete a pipeline
 
 ```
-DELETE /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
+DELETE /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}
 ```
 
 ## Run test prompt
@@ -53,7 +53,7 @@ DELETE /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}
 Test a pipeline's prompt without executing the full workflow.
 
 ```
-POST /v1/autocontentengine/{sheet_id}/pipelines/run_test_prompt
+POST /v1/vidsheet/{sheet_id}/pipelines/run_test_prompt
 ```
 
 ---
@@ -65,25 +65,25 @@ Actions are the individual steps within a pipeline.
 ### Create an action
 
 ```
-POST /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions
+POST /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}/actions
 ```
 
 ### Get an action
 
 ```
-GET /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+GET /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
 ```
 
 ### Update an action
 
 ```
-PATCH /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+PATCH /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
 ```
 
 ### Delete an action
 
 ```
-DELETE /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
+DELETE /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}/actions/{action_id}
 ```
 
 ---
@@ -95,7 +95,7 @@ Trigger a pipeline execution manually.
 ### Create a run
 
 ```
-POST /v1/autocontentengine/{sheet_id}/pipelines/{pipeline_id}/runs
+POST /v1/vidsheet/{sheet_id}/pipelines/{pipeline_id}/runs
 ```
 
 ---

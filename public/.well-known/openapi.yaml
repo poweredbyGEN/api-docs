@@ -10,7 +10,7 @@ info:
     All endpoints require authentication via one of:
 
     - **API Key** (recommended): Pass your API key in the `X-API-Key` header. Create keys in Settings > API Keys.
-    - **JWT**: Pass a Clerk/Dynamic XYZ JWT in the `Authorization: Bearer <token>` header.
+    - **JWT**: Pass a Bearer JWT issued by the GEN dashboard sign-in in the `Authorization: Bearer <token>` header.
 
     ## Base URL
 
@@ -20,7 +20,7 @@ info:
 
     ## Credits
 
-    All `/v1/autocontentengine/` endpoints require an active GEN credit balance.
+    All `/v1/vidsheet/` endpoints require an active GEN credit balance.
     If your organization has no usable credits, requests return `422` with error code `usable_gen_credit_required`.
 
   version: 1.0.0
@@ -254,7 +254,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   # ── Sheets ─────────────────────────────────────────────────
-  /autocontentengine:
+  /vidsheet:
     post:
       operationId: createSheet
       summary: Create a sheet
@@ -291,7 +291,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}:
+  /vidsheet/{sheet_id}:
     get:
       operationId: getSheet
       summary: Get a sheet
@@ -321,7 +321,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}/clone:
+  /vidsheet/{sheet_id}/clone:
     post:
       operationId: cloneSheet
       summary: Clone a sheet
@@ -352,7 +352,7 @@ paths:
           $ref: '#/components/responses/CreditRequired'
 
   # ── Rows ───────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/rows:
+  /vidsheet/{sheet_id}/rows:
     get:
       operationId: listRows
       summary: List rows
@@ -401,7 +401,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}:
+  /vidsheet/{sheet_id}/rows/{row_id}:
     get:
       operationId: getRow
       summary: Get a row
@@ -422,7 +422,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}/duplicate:
+  /vidsheet/{sheet_id}/rows/{row_id}/duplicate:
     post:
       operationId: duplicateRow
       summary: Duplicate a row
@@ -442,7 +442,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/update_positions:
+  /vidsheet/{sheet_id}/rows/update_positions:
     put:
       operationId: updateRowPositions
       summary: Reorder rows
@@ -478,7 +478,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Row'
 
-  /autocontentengine/{sheet_id}/rows/mass_update:
+  /vidsheet/{sheet_id}/rows/mass_update:
     put:
       operationId: massUpdateRows
       summary: Bulk update rows
@@ -504,7 +504,7 @@ paths:
                   $ref: '#/components/schemas/Row'
 
   # ── Columns ────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/columns:
+  /vidsheet/{sheet_id}/columns:
     get:
       operationId: listColumns
       summary: List columns
@@ -554,7 +554,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/{column_id}/duplicate:
+  /vidsheet/{sheet_id}/columns/{column_id}/duplicate:
     post:
       operationId: duplicateColumn
       summary: Duplicate a column
@@ -575,7 +575,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/update_positions:
+  /vidsheet/{sheet_id}/columns/update_positions:
     patch:
       operationId: updateColumnPositions
       summary: Reorder columns
@@ -605,7 +605,7 @@ paths:
         '200':
           description: Updated columns
 
-  /autocontentengine/{sheet_id}/columns/mass_update:
+  /vidsheet/{sheet_id}/columns/mass_update:
     put:
       operationId: massUpdateColumns
       summary: Bulk update columns
@@ -624,7 +624,7 @@ paths:
           description: Updated columns
 
   # ── Cells ──────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}:
     get:
       operationId: getCell
       summary: Get a cell
@@ -671,7 +671,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cell'
 
-  /autocontentengine/{sheet_id}/cells/mass_update:
+  /vidsheet/{sheet_id}/cells/mass_update:
     put:
       operationId: massUpdateCells
       summary: Bulk update cells
@@ -689,7 +689,7 @@ paths:
         '200':
           description: Updated cells
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/set_default_user_job:
+  /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job:
     patch:
       operationId: setDefaultUserJob
       summary: Set default generation for a cell
@@ -715,7 +715,7 @@ paths:
           description: Updated cell
 
   # ── Layers ─────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers:
     post:
       operationId: createLayer
       summary: Create a layer
@@ -751,7 +751,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
     get:
       operationId: getLayer
       summary: Get a layer
@@ -812,7 +812,7 @@ paths:
         '204':
           description: Layer deleted
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
       operationId: duplicateLayer
       summary: Duplicate a layer
@@ -830,7 +830,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/update_positions:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions:
     put:
       operationId: updateLayerPositions
       summary: Reorder layers
@@ -862,7 +862,7 @@ paths:
           description: Updated layers
 
   # ── Generations ────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/generate:
     post:
       operationId: generateCellContent
       summary: Generate content for a cell
@@ -913,7 +913,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
     post:
       operationId: generateLayerContent
       summary: Generate content for a layer
@@ -1026,7 +1026,7 @@ paths:
                     example: "pending"
 
   # ── Variables ──────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/global_variables:
+  /vidsheet/{sheet_id}/global_variables:
     get:
       operationId: getGlobalVariables
       summary: Get global variables
@@ -1043,7 +1043,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/{sheet_id}/import_global_variables:
+  /vidsheet/{sheet_id}/import_global_variables:
     post:
       operationId: importGlobalVariables
       summary: Import global variables from XLSX
@@ -1072,7 +1072,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/global_variables_template:
+  /vidsheet/global_variables_template:
     get:
       operationId: downloadVariablesTemplate
       summary: Download variables template
@@ -1196,7 +1196,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Clerk/Dynamic XYZ JWT token.
+      description: Bearer JWT issued by the GEN dashboard sign-in.
 
   parameters:
     AgentId:

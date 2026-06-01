@@ -34,7 +34,7 @@ info:
 
     ## Credits
 
-    All `/v1/autocontentengine/` endpoints require an active GEN credit balance.
+    All `/v1/vidsheet/` endpoints require an active GEN credit balance.
     If your organization has no usable credits, requests return `422` with error code `usable_gen_credit_required`.
 
   version: 1.0.0
@@ -49,6 +49,8 @@ servers:
     description: Auto Content Engine API
   - url: https://agent.gen.pro/v1
     description: Agent Chat API
+  - url: https://agent-core.gen.pro/v1
+    description: Agent Core API (watchlists)
 
 security:
   - apiKey: []
@@ -102,6 +104,18 @@ tags:
   - name: Agent Chat
     description: |
       Conversational AI agent interface. All endpoints use base URL `https://agent.gen.pro/v1`.
+  - name: Watchlists
+    description: |
+      Named collections of monitoring sources (accounts, hashtags, keywords) per
+      agent. Base URL `https://agent-core.gen.pro/v1`. Scraped data feeds back
+      into agent chat and content idea generation. CRUD operations are free;
+      downstream scrapes bill normally.
+  - name: Recurring Jobs
+    description: |
+      Scheduled agent runs ("daily tasks"). Base URL
+      `https://agent.gen.pro/v1`. Each scheduled run is gated by available
+      credits: a job remains configured if credits run out and resumes when
+      they return.
 
 paths:
   # ── Discovery ──────────────────────────────────────────────
@@ -567,7 +581,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   # ── Sheets ─────────────────────────────────────────────────
-  /autocontentengine:
+  /vidsheet:
     post:
       operationId: createSheet
       x-phase: convert
@@ -605,7 +619,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}:
+  /vidsheet/{sheet_id}:
     get:
       operationId: getSheet
       x-phase: convert
@@ -636,7 +650,7 @@ paths:
         '422':
           $ref: '#/components/responses/CreditRequired'
 
-  /autocontentengine/{sheet_id}/clone:
+  /vidsheet/{sheet_id}/clone:
     post:
       operationId: cloneSheet
       x-phase: convert
@@ -668,7 +682,7 @@ paths:
           $ref: '#/components/responses/CreditRequired'
 
   # ── Rows ───────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/rows:
+  /vidsheet/{sheet_id}/rows:
     get:
       operationId: listRows
       x-phase: edit
@@ -719,7 +733,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}:
+  /vidsheet/{sheet_id}/rows/{row_id}:
     get:
       operationId: getRow
       x-phase: edit
@@ -741,7 +755,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /autocontentengine/{sheet_id}/rows/{row_id}/duplicate:
+  /vidsheet/{sheet_id}/rows/{row_id}/duplicate:
     post:
       operationId: duplicateRow
       x-phase: edit
@@ -762,7 +776,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /autocontentengine/{sheet_id}/rows/update_positions:
+  /vidsheet/{sheet_id}/rows/update_positions:
     put:
       operationId: updateRowPositions
       x-phase: edit
@@ -799,7 +813,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Row'
 
-  /autocontentengine/{sheet_id}/rows/mass_update:
+  /vidsheet/{sheet_id}/rows/mass_update:
     put:
       operationId: massUpdateRows
       x-phase: edit
@@ -826,7 +840,7 @@ paths:
                   $ref: '#/components/schemas/Row'
 
   # ── Columns ────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/columns:
+  /vidsheet/{sheet_id}/columns:
     get:
       operationId: listColumns
       x-phase: edit
@@ -878,7 +892,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/{column_id}/duplicate:
+  /vidsheet/{sheet_id}/columns/{column_id}/duplicate:
     post:
       operationId: duplicateColumn
       x-phase: edit
@@ -900,7 +914,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
-  /autocontentengine/{sheet_id}/columns/update_positions:
+  /vidsheet/{sheet_id}/columns/update_positions:
     patch:
       operationId: updateColumnPositions
       x-phase: edit
@@ -931,7 +945,7 @@ paths:
         '200':
           description: Updated columns
 
-  /autocontentengine/{sheet_id}/columns/mass_update:
+  /vidsheet/{sheet_id}/columns/mass_update:
     put:
       operationId: massUpdateColumns
       x-phase: edit
@@ -951,7 +965,7 @@ paths:
           description: Updated columns
 
   # ── Cells ──────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}:
     get:
       operationId: getCell
       x-phase: edit
@@ -1000,7 +1014,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cell'
 
-  /autocontentengine/{sheet_id}/cells/mass_update:
+  /vidsheet/{sheet_id}/cells/mass_update:
     put:
       operationId: massUpdateCells
       x-phase: edit
@@ -1019,7 +1033,7 @@ paths:
         '200':
           description: Updated cells
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/set_default_user_job:
+  /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job:
     patch:
       operationId: setDefaultUserJob
       x-phase: edit
@@ -1046,7 +1060,7 @@ paths:
           description: Updated cell
 
   # ── Layers ─────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers:
     post:
       operationId: createLayer
       x-phase: edit
@@ -1083,7 +1097,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
     get:
       operationId: getLayer
       x-phase: edit
@@ -1147,7 +1161,7 @@ paths:
         '204':
           description: Layer deleted
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
       operationId: duplicateLayer
       x-phase: edit
@@ -1166,7 +1180,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Layer'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/update_positions:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions:
     put:
       operationId: updateLayerPositions
       x-phase: edit
@@ -1199,7 +1213,7 @@ paths:
           description: Updated layers
 
   # ── Generations ────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/generate:
     post:
       operationId: generateCellContent
       x-phase: edit
@@ -1266,7 +1280,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /autocontentengine/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
+  /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate:
     post:
       operationId: generateLayerContent
       x-phase: edit
@@ -1384,7 +1398,7 @@ paths:
                     example: "pending"
 
   # ── Render ────────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/cells/{cell_id}/render:
+  /vidsheet/{sheet_id}/cells/{cell_id}/render:
     post:
       operationId: renderVideo
       x-phase: export
@@ -1422,7 +1436,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # ── Variables ──────────────────────────────────────────────
-  /autocontentengine/{sheet_id}/global_variables:
+  /vidsheet/{sheet_id}/global_variables:
     get:
       operationId: getGlobalVariables
       x-phase: edit
@@ -1440,7 +1454,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/{sheet_id}/import_global_variables:
+  /vidsheet/{sheet_id}/import_global_variables:
     post:
       operationId: importGlobalVariables
       x-phase: edit
@@ -1470,7 +1484,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Sheet'
 
-  /autocontentengine/global_variables_template:
+  /vidsheet/global_variables_template:
     get:
       operationId: downloadVariablesTemplate
       x-phase: edit
@@ -2567,6 +2581,23 @@ paths:
         Poll `GET /agent/runs/{run_id}` for status and messages, or use the returned progress path for live updates.
 
         **Base URL:** `https://agent.gen.pro/v1`
+
+        **Querying a watchlist with typed filters.** The SDK `queryWatchlist` and
+        MCP `gen_query_watchlist` primitives are typed wrappers over this
+        endpoint: they reference a watchlist by id with a `@list:<watchlist_id>`
+        token in `message` and let you pass structured filters instead of
+        hand-building a prompt. Example message:
+        `"top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"`.
+        The chat layer parses the filters and applies them byte-identically
+        across all of the watchlist's sources, and returns a `run_id` whose
+        completed answer carries a video grid plus a summary. Supported typed
+        filters: `question` (analysis kind — top videos / top hooks / top creators
+        / trending music / comment themes), `days` (1-365), `limit` (1-1000),
+        `sort_by` (`engagement_rate`, `watch_count`, `like_count`, `comment_count`,
+        `share_count`, `save_count`, `posted_at`, `trending_score`),
+        `min_engagement_rate` (0.0-1.0), and `return_all`. No silent caps: every
+        stated filter is honored across every source; omitted filters fall to one
+        default policy (`limit` → 100); out-of-range values return a clarifier.
       tags: [Agent Chat]
       requestBody:
         required: true
@@ -2612,9 +2643,9 @@ paths:
                   status:
                     type: string
                     example: "running"
-                  firebase_path:
+                  progress_stream_url:
                     type: string
-                    description: Run-specific progress path for live updates.
+                    description: Opaque, run-specific URL for live progress updates. Treat as sensitive; or poll GET /agent/runs/{run_id} for an authenticated status path.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -2825,6 +2856,99 @@ paths:
       responses:
         '200':
           description: Conversation deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agent/conversations/{id}/session-preferences:
+    get:
+      operationId: getSessionPreferences
+      x-phase: ideas
+      summary: Get session preferences
+      description: |
+        Returns the per-conversation session preferences — temporary creative
+        rules scoped to this one conversation, distinct from the agent's
+        long-term preferences. `preferences` is null if none are set.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current session preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preferences: { type: string, nullable: true }
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateSessionPreferences
+      x-phase: ideas
+      summary: Update session preferences
+      description: |
+        Sets the per-conversation session preferences (applied only within this
+        conversation; does not change the agent's saved long-term preferences).
+        Replaces the existing value.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preferences]
+              properties:
+                preferences: { type: string }
+      responses:
+        '200':
+          description: Updated session preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preferences: { type: string, nullable: true }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ideas/{idea_id}/expand:
+    post:
+      operationId: expandIdea
+      x-phase: ideas
+      summary: Expand an idea into a project manifest
+      description: |
+        Expands a single content idea into a full `project_manifest` (the
+        structured layer/scene plan a vidsheet is built from). Use before
+        cloning an idea into a vidsheet when it was generated without a
+        manifest. Idempotent — returns the cached manifest if already expanded.
+        Note: the path has no `/agent/` segment.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+      tags: [Agent Chat]
+      parameters:
+        - name: idea_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Idea expanded (project_manifest in the response)
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -3051,9 +3175,9 @@ paths:
                   status:
                     type: string
                     example: running
-                  firebase_path:
+                  progress_stream_url:
                     type: string
-                    description: Run-specific progress path for live updates.
+                    description: Opaque, run-specific URL for live progress updates. Treat as sensitive; or poll GET /agent/runs/{run_id} for an authenticated status path.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -3457,6 +3581,355 @@ paths:
         '200':
           description: User job record
 
+  # ── Watchlists (agent-core.gen.pro) ───────────────────────────────────────
+  /agents/{agent_id}/watchlists:
+    get:
+      operationId: listWatchlists
+      x-phase: monitoring
+      summary: List active watchlists for an agent
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Active watchlists, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Watchlist' }
+    post:
+      operationId: createWatchlist
+      x-phase: monitoring
+      summary: Create a watchlist (idempotent on name)
+      description: |
+        Create a new watchlist with optional initial sources. Idempotent on
+        `name` (case-insensitive): if a watchlist with the same name already
+        exists for this agent, the provided sources are merged into the
+        existing watchlist instead of creating a duplicate.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchlistCreateRequest' }
+      responses:
+        '201':
+          description: Watchlist created or merged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}:
+    get:
+      operationId: getWatchlist
+      x-phase: monitoring
+      summary: Get a single watchlist with sources
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Watchlist record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateWatchlist
+      x-phase: monitoring
+      summary: Update a watchlist (also used for pause/resume)
+      description: |
+        Update mutable fields. Set `intent_active=false` to pause monitoring
+        without deleting the watchlist; `true` to resume. Only fields you
+        send are updated.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchlistUpdateRequest' }
+      responses:
+        '200':
+          description: Updated watchlist
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Watchlist' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteWatchlist
+      x-phase: monitoring
+      summary: Soft-delete a watchlist
+      description: |
+        Marks the watchlist and all its sources inactive and deleted. The
+        rows are retained in the database. Use PATCH with `intent_active=false`
+        for a reversible pause.
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Watchlist deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  deleted: { type: boolean }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}/sources:
+    post:
+      operationId: addWatchlistSource
+      x-phase: monitoring
+      summary: Add or restore a source on a watchlist
+      description: |
+        Idempotent on (platform, target_type, target_value). Re-adding the
+        same source returns the existing row (restored if it had been
+        soft-deleted).
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WatchSourceInput' }
+      responses:
+        '201':
+          description: Source added or restored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WatchSource' }
+    delete:
+      operationId: removeWatchlistSourceByKey
+      x-phase: monitoring
+      summary: Remove a source by (platform, target_type, target_value)
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+        - { name: platform, in: query, required: true, schema: { type: string } }
+        - { name: target_type, in: query, required: true, schema: { type: string, enum: [account, hashtag, keyword] } }
+        - { name: target_value, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Source removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: boolean }
+
+  /agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}:
+    delete:
+      operationId: removeWatchlistSource
+      x-phase: monitoring
+      summary: Remove a source by id
+      tags: [Watchlists]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: watchlist_id, in: path, required: true, schema: { type: string } }
+        - { name: source_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Source removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  removed: { type: boolean }
+
+  # ── Recurring Jobs / Daily Tasks (agent.gen.pro) ──────────────────────────
+  /agents/{agent_id}/recurring-jobs:
+    get:
+      operationId: listRecurringJobs
+      x-phase: monitoring
+      summary: List recurring jobs (daily tasks) for an agent
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Recurring jobs, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recurring_jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/RecurringJob' }
+    post:
+      operationId: createRecurringJob
+      x-phase: monitoring
+      summary: Create a recurring agent job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringJobCreate' }
+      responses:
+        '201':
+          description: Created recurring job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
+  /agents/{agent_id}/recurring-jobs/defaults:
+    post:
+      operationId: ensureDefaultRecurringJob
+      x-phase: monitoring
+      summary: Idempotently ensure the default daily content-ideas job
+      description: |
+        Returns the agent's existing default content-ideas recurring job if
+        one exists, otherwise creates it with the standard prompt, daily
+        cadence at 09:00 UTC, and `chat_only` delivery. The response `created`
+        boolean indicates whether a new job was created.
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '201':
+          description: Default job ensured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recurring_jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/RecurringJob' }
+                  created: { type: boolean }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}:
+    get:
+      operationId: getRecurringJob
+      x-phase: monitoring
+      summary: Get one recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Recurring job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateRecurringJob
+      x-phase: monitoring
+      summary: Update a recurring job's mutable fields
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringJobUpdate' }
+      responses:
+        '200':
+          description: Updated job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteRecurringJob
+      x-phase: monitoring
+      summary: Soft-delete a recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204':
+          description: Deleted (no content)
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}/pause:
+    post:
+      operationId: pauseRecurringJob
+      x-phase: monitoring
+      summary: Pause a recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Paused job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}/resume:
+    post:
+      operationId: resumeRecurringJob
+      x-phase: monitoring
+      summary: Resume a paused recurring job
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Resumed job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecurringJob' }
+
 components:
   securitySchemes:
     apiKey:
@@ -3468,7 +3941,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Clerk/Dynamic XYZ JWT token.
+      description: Bearer JWT issued by the GEN dashboard sign-in.
 
   parameters:
     AgentId:
@@ -4179,7 +4652,7 @@ components:
         voice_id: { type: string, minLength: 1, maxLength: 200 }
         source:
           type: string
-          enum: [public, user_designed, user_trained, user_elevenlabs, eleven_labs]
+          enum: [public, user_designed, user_trained, user_elevenlabs]
         name: { type: string, maxLength: 200 }
 
     AgentCorePatchResult:
@@ -4212,6 +4685,136 @@ components:
         name: { type: string, nullable: true }
         source: { type: string, enum: [public, user_designed, user_trained, user_elevenlabs] }
         preview_url: { type: string, nullable: true }
+
+    # ── Watchlists ──────────────────────────────────────────────────────────
+    WatchSourceInput:
+      type: object
+      required: [platform, target_type, target_value]
+      properties:
+        platform: { type: string, description: 'e.g. "tiktok", "instagram", "youtube"' }
+        target_type: { type: string, enum: [account, hashtag, keyword] }
+        target_value: { type: string, description: '@handle, hashtag name (no #), or keyword text' }
+        original_display_value:
+          type: string
+          nullable: true
+          description: Optional original display form (e.g. "#glassskin" or "@drunkelephant")
+
+    WatchSource:
+      allOf:
+        - $ref: '#/components/schemas/WatchSourceInput'
+        - type: object
+          required: [id, watchlist_id, agent_id, intent_active]
+          properties:
+            id: { type: string }
+            watchlist_id: { type: string }
+            agent_id: { type: string }
+            intent_active: { type: boolean }
+            created_at: { type: string, format: date-time, nullable: true }
+            updated_at: { type: string, format: date-time, nullable: true }
+
+    WatchlistCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200, description: 'Display name. Idempotent: same name reuses existing watchlist.' }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/WatchSourceInput' }
+        project_id:
+          oneOf: [{ type: string }, { type: integer }]
+          nullable: true
+        conversation_id: { type: string, nullable: true }
+        created_by_run_id: { type: string, nullable: true }
+
+    WatchlistUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        intent_active: { type: boolean, description: 'Set false to pause monitoring; true to resume.' }
+        project_id:
+          oneOf: [{ type: string }, { type: integer }]
+          nullable: true
+
+    Watchlist:
+      type: object
+      required: [id, user_id, agent_id, name, intent_active, sources]
+      properties:
+        id: { type: string }
+        user_id: { type: string }
+        agent_id: { type: string }
+        name: { type: string }
+        intent_active: { type: boolean }
+        project_id: { type: string, nullable: true }
+        project_error: { type: string, nullable: true, description: 'Read-only. Last project-link sync error, if any.' }
+        conversation_id: { type: string, nullable: true }
+        created_by_run_id: { type: string, nullable: true }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/WatchSource' }
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+
+    # ── Recurring Jobs (Daily Tasks) ───────────────────────────────────────
+    RecurringJobSchedule:
+      type: object
+      required: [cadence, timezone]
+      properties:
+        cadence: { type: string, enum: [daily, weekly] }
+        timezone: { type: string, description: 'IANA timezone (e.g. "UTC", "America/Los_Angeles")' }
+        time_of_day:
+          type: string
+          description: 'Local clock time "HH:MM" (24h). Required for daily/weekly cadences.'
+        days_of_week:
+          type: array
+          items: { type: integer, minimum: 0, maximum: 6 }
+          description: 'Days to run (0=Mon … 6=Sun). REQUIRED when cadence="weekly"; must be omitted when cadence="daily". No duplicates.'
+
+    RecurringJobDelivery:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [chat_only, email] }
+        email:
+          type: string
+          description: 'Recipient email. REQUIRED when type="email"; must be omitted when type="chat_only".'
+
+    RecurringJob:
+      type: object
+      required: [id, user_id, agent_id, name, job_type, prompt, schedule, delivery, status, created_at, updated_at]
+      properties:
+        id: { type: string }
+        user_id: { type: integer }
+        agent_id: { type: string }
+        name: { type: string }
+        job_type: { type: string, description: 'e.g. "generate_content_ideas"' }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        status: { type: string, enum: [active, paused, deleted] }
+        next_run_at: { type: string, format: date-time, nullable: true }
+        last_run_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    RecurringJobCreate:
+      type: object
+      required: [job_type, prompt, schedule, delivery]
+      properties:
+        name: { type: string, description: 'Optional. Defaults to first 80 chars of prompt.' }
+        job_type: { type: string }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        next_run_at: { type: string, format: date-time }
+
+    RecurringJobUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        prompt: { type: string }
+        schedule: { $ref: '#/components/schemas/RecurringJobSchedule' }
+        delivery: { $ref: '#/components/schemas/RecurringJobDelivery' }
+        next_run_at: { type: string, format: date-time }
 
   responses:
     Unauthorized:

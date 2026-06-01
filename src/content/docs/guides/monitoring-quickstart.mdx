@@ -1,0 +1,154 @@
+---
+title: Monitoring Quickstart
+description: Create a watchlist to keep tabs on competitors, hashtags, or keywords — and schedule a recurring job so the agent surfaces fresh ideas every day.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This guide shows two long-running primitives that let an agent watch the world and act on a schedule:
+
+- **Watchlists** — named collections of social-media sources (creators, hashtags, keywords) the agent monitors continuously.
+- **Recurring Jobs** ("daily tasks") — scheduled prompts the agent runs on a cadence, with optional email delivery.
+
+The CRUD calls below are **free**. Downstream scrapes (for watchlists) and scheduled runs (for recurring jobs) bill normally against your workspace credits.
+
+You'll need an agent and an API key — see [Quick Start](/guides/quickstart) if you don't have those yet.
+
+```bash
+export GEN_API_KEY="ref_..."         # your PAT
+export AGENT_ID="<your-agent-uuid>"
+```
+
+## 1. Create a watchlist
+
+The fastest path: one POST with all your initial sources.
+
+```bash
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "crypto watch",
+    "sources": [
+      { "platform": "tiktok", "target_type": "keyword", "target_value": "crypto" },
+      { "platform": "tiktok", "target_type": "keyword", "target_value": "btc" },
+      { "platform": "tiktok", "target_type": "keyword", "target_value": "sui" }
+    ]
+  }'
+```
+
+```typescript
+import { gen } from "@poweredbygen/gen-sdk";
+const { sdk } = gen({ apiKey: process.env.GEN_API_KEY! });
+
+const watchlist = await sdk.monitoring.createWatchlist(process.env.AGENT_ID!, {
+  name: "crypto watch",
+  sources: [
+    { platform: "tiktok", target_type: "keyword", target_value: "crypto" },
+    { platform: "tiktok", target_type: "keyword", target_value: "btc" },
+    { platform: "tiktok", target_type: "keyword", target_value: "sui" },
+  ],
+});
+```
+
+The response is the full watchlist with its sources. Re-posting the same `name` for the same agent **merges** new sources into the existing watchlist instead of creating a duplicate, so this call is safe to retry.
+
+## 2. Evolve the watchlist over time
+
+Add or remove sources individually:
+
+```bash
+# add a hashtag
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/sources" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "platform": "tiktok", "target_type": "hashtag", "target_value": "ethereum" }'
+
+# remove a keyword by key
+curl -X DELETE "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/sources?platform=tiktok&target_type=keyword&target_value=btc" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+## 3. Pause without deleting
+
+Pause when you want monitoring to stop temporarily — the watchlist and its sources are preserved:
+
+```bash
+curl -X PATCH "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "intent_active": false }'
+```
+
+Send `{ "intent_active": true }` to resume. Use `DELETE` only when you want the watchlist permanently retired.
+
+## 4. Query the results
+
+Watchlist data feeds back into the agent's chat. To pull results, ask the agent:
+
+```
+give me the top hooks from my "crypto watch" watchlist
+```
+
+The chat agent resolves the watchlist's sources and returns ranked findings. The CRUD endpoints here are intentionally just the configuration surface — analysis lives in chat.
+
+## 5. Ship a daily recurring job
+
+Want the agent to email you 5 fresh content ideas every morning? The fastest path is the defaults endpoint:
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/defaults" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+```typescript
+const { recurring_jobs, created } = await sdk.monitoring.ensureDefaultRecurringJob(
+  process.env.AGENT_ID!,
+);
+```
+
+This is idempotent — it returns the existing default job if one exists, otherwise creates it (daily @ 09:00 UTC, chat-only delivery).
+
+For a custom schedule or email delivery, post a full job spec:
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "morning crypto digest",
+    "job_type": "generate_content_ideas",
+    "prompt": "5 content ideas inspired by today'\''s top crypto-watchlist hits",
+    "schedule": { "cadence": "daily", "timezone": "America/Los_Angeles", "time_of_day": "07:00" },
+    "delivery": { "type": "email" }
+  }'
+```
+
+## 6. Pause / resume / delete the job
+
+Pause and resume the job as your workflow shifts:
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/pause" \
+  -H "X-API-Key: $GEN_API_KEY"
+
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/resume" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+To remove it entirely:
+
+```bash
+curl -X DELETE "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+<Aside type="tip">
+**Credit semantics, one more time.** A job stays configured even if the workspace runs out of credits. The next scheduled run is skipped (no email sent for that cycle), and execution resumes automatically when credits return.
+</Aside>
+
+## Full reference
+
+- [Watchlists API reference](/reference/watchlists)
+- [Recurring Jobs API reference](/reference/recurring-jobs)
+- [Authentication](/guides/authentication)

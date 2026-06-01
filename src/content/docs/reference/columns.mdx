@@ -55,7 +55,7 @@ Only columns with the `ingredient` role can be created, updated, or deleted by A
 Returns all columns in a sheet.
 
 ```
-GET /v1/autocontentengine/{id}/columns?agent_id={agent_id}
+GET /v1/vidsheet/{id}/columns?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -86,7 +86,7 @@ GET /v1/autocontentengine/{id}/columns?agent_id={agent_id}
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/columns?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -97,7 +97,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" \
 Adds a new column to the sheet. A new cell is automatically created in every existing row.
 
 ```
-POST /v1/autocontentengine/{id}/columns?agent_id={agent_id}
+POST /v1/vidsheet/{id}/columns?agent_id={agent_id}
 ```
 
 ### Request body
@@ -115,7 +115,7 @@ Returns the created column.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/columns?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"spreadsheet_column": {"title": "Voiceover", "type": "audio"}}'
@@ -128,7 +128,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns?agent_id=42" 
 Creates a copy of a column and all its cell values.
 
 ```
-POST /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -145,7 +145,7 @@ Returns the newly created column.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns/200/duplicate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/columns/200/duplicate?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -156,7 +156,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/columns/200/duplicate
 Reorders columns within a sheet.
 
 ```
-PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/columns/update_positions?agent_id={agent_id}
 ```
 
 ### Request body
@@ -168,7 +168,7 @@ PATCH /v1/autocontentengine/{id}/columns/update_positions?agent_id={agent_id}
 ### Example
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/columns/update_positions?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/columns/update_positions?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"columns": [{"id": 200, "position": 2}, {"id": 201, "position": 1}]}'
@@ -185,7 +185,7 @@ Returns the updated columns.
 Updates multiple columns in a single request.
 
 ```
-PUT /v1/autocontentengine/{id}/columns/mass_update?agent_id={agent_id}
+PUT /v1/vidsheet/{id}/columns/mass_update?agent_id={agent_id}
 ```
 
 ### Request body
@@ -195,7 +195,7 @@ Accepts an array of column objects with the fields to update.
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/columns/mass_update?agent_id=42" \
+curl -X PUT "https://api.gen.pro/v1/vidsheet/101/columns/mass_update?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"columns": [{"id": 200, "title": "Main Script"}, {"id": 201, "description": "Background music track"}]}'

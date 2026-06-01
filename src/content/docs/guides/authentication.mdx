@@ -113,7 +113,7 @@ Your API key inherits the permissions of the user who created it. Here's what de
 |-------------|---------------|
 | **Workspace credits** | Auto Content Engine endpoints require active GEN credits on the workspace. No credits → `422 usable_gen_credit_required`. |
 | **Owner or Manager role** | You can only access agents in workspaces where you are an **owner** or **manager**. Viewer and editor roles cannot use the API. |
-| **Agent scope** | All `/v1/autocontentengine/` requests require an `agent_id` parameter. You can only use agents you have access to. |
+| **Agent scope** | All `/v1/vidsheet/` requests require an `agent_id` parameter. You can only use agents you have access to. |
 
 <Aside type="caution">
   If you get `403 forbidden` or `422 agent_not_found`, check that your account has the right role on the workspace that owns the agent.
@@ -170,4 +170,4 @@ The [Agent Chat API](/reference/agent-chat) at `agent.gen.pro` accepts the same 
 - `X-API-Key` header with your PAT
 - `Authorization: Bearer` header with a JWT
 
-Real-time progress streams are addressed by the run-specific `firebase_path` returned from `POST /v1/agent/run`. Treat that path as sensitive application data.
+Real-time progress streams are addressed by the run-specific `progress_stream_url` returned from `POST /v1/agent/run`. Treat that URL as sensitive application data — it's an opaque channel scoped to a single run. For a fully authenticated path, poll `GET /v1/agent/runs/{run_id}` with your API key instead.

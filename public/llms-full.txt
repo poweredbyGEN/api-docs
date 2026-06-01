@@ -13,7 +13,7 @@ Auth on both surfaces:
 - `X-API-Key: <your-PAT>` — recommended; create via `POST /v1/persisted_tokens` or in the GEN dashboard
 - `Authorization: Bearer <jwt>` — for browser-login apps
 
-All `/autocontentengine/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
+All `/vidsheet/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
 
 ## OpenAPI
 
@@ -314,7 +314,7 @@ Body: {
   context?: { vidsheet_id? },
   debug?
 }
-→ { run_id, conversation_id, status: "running", firebase_path }
+→ { run_id, conversation_id, status: "running", progress_stream_url }
 ```
 
 Message patterns:
@@ -332,8 +332,9 @@ POST /v1/agent/runs/{run_id}/approve         — approve or reject a pending act
 ```
 
 Live progress:
-- Use the `firebase_path` returned by `POST /v1/agent/run` as the run-specific progress path.
-- Keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
+- Use the `progress_stream_url` returned by `POST /v1/agent/run` as the run-specific progress channel. Treat it as an opaque, sensitive URL — do not share it; it carries that run's live updates.
+- Channel keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
+- Or poll `GET /v1/agent/runs/{run_id}` until `status == "completed"` for a fully authenticated path.
 
 ## Conversations
 
@@ -344,6 +345,8 @@ GET    /v1/agent/conversations?agent_id={id}
 GET    /v1/agent/conversations/{id}                    — conversation metadata
 GET    /v1/agent/conversations/{id}/messages           — all messages (chronological)
 GET    /v1/agent/conversations/{id}/runs               — all runs in the conversation
+GET    /v1/agent/conversations/{id}/session-preferences  — read per-conversation prefs → { preferences }
+PATCH  /v1/agent/conversations/{id}/session-preferences  — set per-conversation prefs; Body: { preferences }
 PATCH  /v1/agent/conversations/{id}                    — Body: { title?, pinned? }
 DELETE /v1/agent/conversations/{id}                    — deletes conversation, runs, messages
 ```
@@ -374,6 +377,7 @@ GET /v1/agent/ideas?agent_id={id}&status={status}
 
 POST /v1/agent/ideas/{id}/status                       — cycle to next status
 PUT  /v1/agent/ideas/{id}/status/{status}              — set explicit status
+POST /v1/ideas/{id}/expand                             — expand idea into a project_manifest (idempotent; note: no /agent/ segment)
 ```
 
 Status flow: `generated → approve_to_create → ready_for_review → approved_to_post → posted`
@@ -387,7 +391,7 @@ Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driv
 ```
 POST /v1/research
 Body: { topic, depth: "quick" | "default" | "deep", agent_id }
-→ { run_id, conversation_id, status: "running", firebase_path }
+→ { run_id, conversation_id, status: "running", progress_stream_url }
 ```
 
 Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. Completed messages contain the structured research findings and summary.
@@ -476,14 +480,14 @@ Cloning is **free** — no credits consumed.
 If no template matches, build manually.
 
 ```
-POST /v1/autocontentengine?agent_id={id}
+POST /v1/vidsheet?agent_id={id}
 Body: { spreadsheet: { title, is_default? } }
 → full engine with empty columns / rows
 
-GET /v1/autocontentengine/{id}?agent_id={id}&with_execution_cost=true
+GET /v1/vidsheet/{id}?agent_id={id}&with_execution_cost=true
 → full engine with nested spreadsheet_columns, spreadsheet_rows (each with spreadsheet_cells), global_variables_sheet
 
-POST /v1/autocontentengine/{id}/clone?agent_id={id}
+POST /v1/vidsheet/{id}/clone?agent_id={id}
 Body: { target_agent_id? }
 → new engine, optionally under a different agent
 ```
@@ -497,12 +501,12 @@ Everything related to filling the vidsheet: cells, layers, creation cards, gener
 ## Rows
 
 ```
-GET    /v1/autocontentengine/{id}/rows?agent_id={id}
-POST   /v1/autocontentengine/{id}/rows?agent_id={id}                Body: { spreadsheet_row: { position? } }
-GET    /v1/autocontentengine/{id}/rows/{row_id}?agent_id={id}
-POST   /v1/autocontentengine/{id}/rows/{row_id}/duplicate?agent_id={id}
-PUT    /v1/autocontentengine/{id}/rows/update_positions?agent_id={id}   Body: { rows: [{ id, position }] }
-PUT    /v1/autocontentengine/{id}/rows/mass_update?agent_id={id}
+GET    /v1/vidsheet/{id}/rows?agent_id={id}
+POST   /v1/vidsheet/{id}/rows?agent_id={id}                Body: { spreadsheet_row: { position? } }
+GET    /v1/vidsheet/{id}/rows/{row_id}?agent_id={id}
+POST   /v1/vidsheet/{id}/rows/{row_id}/duplicate?agent_id={id}
+PUT    /v1/vidsheet/{id}/rows/update_positions?agent_id={id}   Body: { rows: [{ id, position }] }
+PUT    /v1/vidsheet/{id}/rows/mass_update?agent_id={id}
 ```
 
 ## Columns
@@ -512,20 +516,20 @@ Only `ingredient` role columns can be created / updated / deleted by users. Syst
 Types: `text`, `image`, `video`, `audio`.
 
 ```
-GET    /v1/autocontentengine/{id}/columns?agent_id={id}
-POST   /v1/autocontentengine/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
-POST   /v1/autocontentengine/{id}/columns/{col_id}/duplicate?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/columns/update_positions?agent_id={id}
-PUT    /v1/autocontentengine/{id}/columns/mass_update?agent_id={id}
+GET    /v1/vidsheet/{id}/columns?agent_id={id}
+POST   /v1/vidsheet/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
+POST   /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={id}
+PATCH  /v1/vidsheet/{id}/columns/update_positions?agent_id={id}
+PUT    /v1/vidsheet/{id}/columns/mass_update?agent_id={id}
 ```
 
 ## Cells
 
 ```
-GET    /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}?agent_id={id}       Body: { spreadsheet_cell: { value } }
-PUT    /v1/autocontentengine/{id}/cells/mass_update?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}   Body: { user_job_id }
+GET    /v1/vidsheet/{id}/cells/{cell_id}?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}?agent_id={id}       Body: { spreadsheet_cell: { value } }
+PUT    /v1/vidsheet/{id}/cells/mass_update?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}/set_default_user_job?agent_id={id}   Body: { user_job_id }
 ```
 
 ## Layers
@@ -533,10 +537,10 @@ PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/set_default_user_job?agent_id=
 Per-cell timeline elements. `position` is z-index.
 
 ```
-POST   /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={id}       Body: { video_layer: { name, type, position? } }
-GET    /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-PATCH  /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
-DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+POST   /v1/vidsheet/{id}/cells/{cell_id}/layers?agent_id={id}       Body: { video_layer: { name, type, position? } }
+GET    /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+PATCH  /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
+DELETE /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={id}
 POST   .../layers/{layer_id}/duplicate?agent_id={id}
 PUT    .../layers/update_positions?agent_id={id}
 ```
@@ -544,11 +548,11 @@ PUT    .../layers/update_positions?agent_id={id}
 ## Generations (trigger + poll)
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/generate?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={id}
 Body: { generation_type, data: { ... } }
 → { generation_id, status: "pending" }
 
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={id}
 Body: { generation_type, data: { ... } }
 → { generation_id, status: "pending" }
 
@@ -657,9 +661,9 @@ See Phase 5 — it's the export step.
 Template substitution for `{{variable_name}}` across prompts and cells.
 
 ```
-GET  /v1/autocontentengine/{id}/global_variables?agent_id={id}
-POST /v1/autocontentengine/{id}/import_global_variables?agent_id={id}      (multipart XLSX upload)
-GET  /v1/autocontentengine/global_variables_template                        (XLSX template download)
+GET  /v1/vidsheet/{id}/global_variables?agent_id={id}
+POST /v1/vidsheet/{id}/import_global_variables?agent_id={id}      (multipart XLSX upload)
+GET  /v1/vidsheet/global_variables_template                        (XLSX template download)
 ```
 
 ## Content Resources (upload and manage assets)
@@ -737,7 +741,7 @@ Render the final composite, poll to completion, download the MP4, optionally pub
 Render is an async generation — same polling pattern as every other generation.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/render?agent_id={id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/render?agent_id={id}
 → { generation_id, status: "pending" }
 ```
 
@@ -877,9 +881,251 @@ Status flow: `pending → processing → completed | failed`. On `completed`, `r
 
 ---
 
+# Monitoring & Automation (Watchlists + Recurring Jobs)
+
+Two long-running primitives let an agent watch the world and act on a
+schedule. Both are CRUD-only here; downstream scrapes and scheduled runs bill
+normally. Management calls (create/read/update/delete/pause/resume) are
+**free**.
+
+## Watchlists (`https://agent-core.gen.pro/v1`)
+
+A `Watchlist` is a named collection of `(platform, target_type, target_value)`
+sources. `target_type` is one of:
+
+- `account` — a username/handle (e.g. `drunkelephant`)
+- `hashtag` — a tag name (without `#`)
+- `keyword` — free-text search phrase
+
+Scraped results from these sources feed back into agent chat and content idea
+generation. Query the results through the chat interface, not directly here.
+
+### Watchlist endpoints
+
+```
+GET    /v1/agents/{agent_id}/watchlists
+POST   /v1/agents/{agent_id}/watchlists
+GET    /v1/agents/{agent_id}/watchlists/{watchlist_id}
+PATCH  /v1/agents/{agent_id}/watchlists/{watchlist_id}
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}
+POST   /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}
+DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_type=&target_value=
+```
+
+### Watchlist shapes
+
+`WatchlistCreateRequest`:
+
+```json
+{
+  "name": "crypto watch",
+  "sources": [
+    { "platform": "tiktok", "target_type": "keyword", "target_value": "btc" }
+  ],
+  "project_id": null,
+  "conversation_id": null,
+  "created_by_run_id": null
+}
+```
+
+`Watchlist` response:
+
+```json
+{
+  "id": "uuid",
+  "user_id": "string",
+  "agent_id": "uuid",
+  "name": "crypto watch",
+  "intent_active": true,
+  "project_id": null,
+  "project_error": null,
+  "conversation_id": null,
+  "created_by_run_id": null,
+  "sources": [
+    {
+      "id": "uuid",
+      "watchlist_id": "uuid",
+      "agent_id": "uuid",
+      "platform": "tiktok",
+      "target_type": "keyword",
+      "target_value": "btc",
+      "original_display_value": null,
+      "intent_active": true,
+      "created_at": "2026-05-27T19:00:00Z",
+      "updated_at": "2026-05-27T19:00:00Z"
+    }
+  ],
+  "created_at": "2026-05-27T19:00:00Z",
+  "updated_at": "2026-05-27T19:00:00Z"
+}
+```
+
+### Watchlist semantics
+
+- **`POST /watchlists` is idempotent on `name`** (case-insensitive within an
+  agent). Re-posting the same name merges new sources into the existing
+  watchlist instead of creating a duplicate.
+- **Sources are unique by (`platform`, `target_type`, `target_value`)** within
+  a watchlist. Re-adding an existing source returns the existing row,
+  restoring it if it had been soft-deleted.
+- **`PATCH /watchlists/:id` with `{"intent_active": false}`** is the pause
+  primitive; `true` resumes. Use `DELETE` only to permanently retire.
+- **`DELETE`** is a soft delete: rows are marked inactive and `deleted_at`
+  is set; nothing is returned by subsequent `GET`/`list`.
+
+### Querying a watchlist with typed filters (`https://agent.gen.pro/v1`)
+
+Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
+The SDK and MCP both ship a `queryWatchlist` primitive that wraps the chat
+path with a typed parameter object so you don't hand-build a prompt. Under the
+hood it posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference; the
+chat layer parses the filters and applies them byte-identically across all of
+the watchlist's sources, and returns a `run_id`. Poll the run until
+`status == "completed"`; the final answer payload carries a video-grid block
+plus a natural-language summary that respects every filter.
+
+```bash
+# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {
+#   question: "top videos", limit: 30, days: 90, sort_by: "engagement_rate" })
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
+# → { "run_id": "run_abc", "status": "running", ... }
+```
+
+`queryWatchlist` typed fields (all optional except `question`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `question` | string (required) | Drives the analysis kind: `top videos` → trend_videos, `top hooks` → top_hooks, `top creators` → top_creators, `trending music` → top_sounds, `comment themes` → comment_themes, `stats` → engagement_summary. |
+| `days` | int 1-365 | Time window. Out-of-range → chat clarifier, not a silent drop. |
+| `limit` | int 1-1000 | Result count. Out-of-range → chat clarifier. |
+| `sort_by` | `engagement_rate \| watch_count \| like_count \| comment_count \| share_count \| save_count \| posted_at \| trending_score` | Sort key. Omit for the backend's default ranking. |
+| `min_engagement_rate` | number 0.0-1.0 | Fractional threshold (`0.05` = above 5%). |
+| `return_all` | boolean | Walk every matching row up to the maximum of 1000. With no explicit `limit`, lifts the per-call ceiling; with `limit=N`, the explicit cap wins. |
+
+**Filter semantics — no silent caps:** every stated filter is honored
+byte-identically across all of the watchlist's sources. Omitted filters fall to a single default
+policy applied in one place (`limit` → 100; `days` / `sort_by` /
+`min_engagement_rate` stay unset so the backend's own behavior shows through).
+Out-of-range values surface a chat clarifier rather than being silently
+clamped or dropped.
+
+## Recurring Jobs / Daily Tasks (`https://agent.gen.pro/v1`)
+
+A `RecurringJob` runs a prompt on a schedule, optionally delivering results by
+email. Lifecycle: `active` ↔ `paused`, terminal `deleted`. Each scheduled
+run is gated by available credits — a job remains configured if the workspace
+runs out of credits and resumes when credits return.
+
+### Recurring-job endpoints
+
+```
+GET    /v1/agents/{agent_id}/recurring-jobs
+POST   /v1/agents/{agent_id}/recurring-jobs
+POST   /v1/agents/{agent_id}/recurring-jobs/defaults
+GET    /v1/agents/{agent_id}/recurring-jobs/{job_id}
+PATCH  /v1/agents/{agent_id}/recurring-jobs/{job_id}
+DELETE /v1/agents/{agent_id}/recurring-jobs/{job_id}
+POST   /v1/agents/{agent_id}/recurring-jobs/{job_id}/pause
+POST   /v1/agents/{agent_id}/recurring-jobs/{job_id}/resume
+```
+
+### Recurring-job shapes
+
+`RecurringJobCreate`:
+
+```json
+{
+  "name": "weekly retention digest",
+  "job_type": "generate_content_ideas",
+  "prompt": "Give me 5 retention-focused hook patterns this week",
+  "schedule": {
+    "cadence": "weekly",
+    "timezone": "America/Los_Angeles",
+    "time_of_day": "09:00",
+    "days_of_week": [0]
+  },
+  "delivery": { "type": "email", "email": "you@example.com" },
+  "next_run_at": "2026-06-03T16:00:00Z"
+}
+```
+
+Fields:
+
+- `name` — optional. Defaults to first 80 chars of `prompt`.
+- `job_type` — `"generate_content_ideas"` is the default pipeline.
+- `prompt` — natural-language instruction the agent runs each cycle.
+- `schedule.cadence` ∈ `daily | weekly`.
+- `schedule.timezone` — IANA timezone string.
+- `schedule.time_of_day` — `"HH:MM"` 24h local time; required for
+  `daily`/`weekly` cadences.
+- `schedule.days_of_week` — array of ints 0-6 (0=Mon … 6=Sun). REQUIRED when
+  `cadence` is `weekly`; must be omitted when `daily`. No duplicates.
+- `delivery.type` ∈ `chat_only | email`.
+- `delivery.email` — recipient address; REQUIRED when `type` is `email`, must
+  be omitted when `chat_only`.
+- `next_run_at` — ISO-8601 to schedule the first run explicitly; otherwise
+  derived from cadence + time_of_day.
+
+`RecurringJob` response:
+
+```json
+{
+  "id": "uuid",
+  "user_id": 11,
+  "agent_id": "uuid",
+  "name": "weekly retention digest",
+  "job_type": "generate_content_ideas",
+  "prompt": "Give me 5 retention-focused hook patterns this week",
+  "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00", "days_of_week": [0] },
+  "delivery": { "type": "email", "email": "you@example.com" },
+  "status": "active",
+  "next_run_at": "2026-06-03T16:00:00Z",
+  "last_run_at": null,
+  "created_at": "2026-05-27T19:00:00Z",
+  "updated_at": "2026-05-27T19:00:00Z"
+}
+```
+
+### Defaults endpoint
+
+`POST /v1/agents/{agent_id}/recurring-jobs/defaults` is idempotent: returns
+the agent's existing default "Generate content ideas" job if one exists,
+otherwise creates it with daily cadence at 09:00 UTC and `chat_only`
+delivery.
+
+```json
+{
+  "recurring_jobs": [ { ...RecurringJob } ],
+  "created": true
+}
+```
+
+### Pause / resume / delete
+
+- `POST /recurring-jobs/:id/pause` → `status = "paused"`, scheduler stops
+  queueing new runs. History and configuration preserved.
+- `POST /recurring-jobs/:id/resume` → `status = "active"`.
+- `DELETE /recurring-jobs/:id` → `status = "deleted"`, returns 204. Use
+  pause for reversible stops.
+
+### Credit semantics
+
+The job *intention* is free to keep configured. Each scheduled *run* is
+billed at execution time against existing `user_jobs` pricing for the
+relevant `job_type`. If the workspace has no credits at fire time, the run
+is skipped and the job remains scheduled — no automatic deletion, no email
+delivered for that cycle. Credits returning resumes normal execution at the
+next cadence tick.
+
+---
+
 # Integrations
 
-- MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env `GEN_API_KEY`)
+- MCP Server: `npx @poweredbygen/vidsheet-mcp-server@latest` (env `GEN_API_KEY`)
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

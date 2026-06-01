@@ -44,7 +44,7 @@ Start an agent run (generate ideas, refine, chat).
   "run_id": "uuid",
   "conversation_id": "uuid",
   "status": "running",
-  "firebase_path": "..."
+  "progress_stream_url": "..."
 }
 ```
 
@@ -206,7 +206,10 @@ Reset the agent's brand config only. Agent identity and voice settings are prese
 
 ## Real-Time Progress
 
-The `firebase_path` returned by `POST /v1/agent/run` points to a run-specific stream with real-time progress:
+The `progress_stream_url` returned by `POST /v1/agent/run` is an opaque,
+run-specific channel with real-time progress (treat it as sensitive — it's
+scoped to that one run). Or poll `GET /v1/agent/runs/{run_id}` with your API
+key for an authenticated status path. The channel streams:
 
 | Key | Description |
 |-----|-------------|

@@ -41,7 +41,7 @@ Repeat for each cell you want to fill. For a typical 3-column video engine (scri
 ## Trigger a generation
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

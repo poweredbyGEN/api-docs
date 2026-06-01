@@ -123,7 +123,7 @@ DELETE /v1/persisted_tokens/revoke_all           — revoke all
 
 ## Step 2 — Generate Content Ideas
 
-**What it is.** Ask the agent to propose videos. The Ideas Engine pulls trending data from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News, Perplexity, Gemini), matches it to the agent's configured keywords and inspiration, and returns complete video specs — hook, full script, video type, selected assets, project manifest, rationale.
+**What it is.** Ask the agent to propose videos. The Ideas Engine pulls trending data from 10+ platforms (TikTok, Instagram, YouTube, Reddit, X, Hacker News) plus web and AI research sources, matches it to the agent's configured keywords and inspiration, and returns complete video specs — hook, full script, video type, selected assets, project manifest, rationale.
 
 **Mental model.** Calls are async. POST a natural-language message, get back a `run_id` and `conversation_id`, poll until complete, then read the ideas from the conversation. Refining existing ideas is just another message with the same `conversation_id`. Long-term preferences (applied to all future runs) are set via another message that starts with "remember:".
 
@@ -137,7 +137,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
     "agent_id": "'"$AGENT_ID"'",
     "message": "Generate 5 content ideas grounded in this week trends"
   }'
-# → { "run_id": "run_abc", "conversation_id": "conv_xyz", "status": "running", "firebase_path": "..." }
+# → { "run_id": "run_abc", "conversation_id": "conv_xyz", "status": "running" }
 ```
 
 **Poll until done:**
@@ -228,10 +228,13 @@ PATCH  /v1/agent/conversations/:id                — rename / pin
 DELETE /v1/agent/conversations/:id                — delete
 GET    /v1/agent/conversations/:id/messages       — list messages
 GET    /v1/agent/conversations/:id/runs           — list runs
+GET    /v1/agent/conversations/:id/session-preferences   — read per-conversation preferences
+PATCH  /v1/agent/conversations/:id/session-preferences   — set per-conversation preferences
 
 GET    /v1/agent/ideas?agent_id=&status=          — list ideas
 POST   /v1/agent/ideas/:id/status                 — cycle to next status
 PUT    /v1/agent/ideas/:id/status/:status         — set explicit status
+POST   /v1/ideas/:id/expand                       — expand idea → project_manifest (no /agent/ segment)
 
 POST   /v1/research                               — standalone research
 
@@ -293,7 +296,7 @@ Returns a new engine `id`. Cloning is **free** — no credits consumed.
 **If you really need a custom engine** (rare):
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "spreadsheet": { "title": "Custom campaign" } }'
@@ -307,9 +310,9 @@ GET    /v1/templates/projects                        — list templates (paginat
 GET    /v1/templates/projects/:slug                  — template details
 POST   /v1/templates/spreadsheets/:slug/clone        — clone into agent
 
-POST   /v1/autocontentengine?agent_id=               — create blank engine
-GET    /v1/autocontentengine/:id?agent_id=           — read engine with all nested data
-POST   /v1/autocontentengine/:id/clone?agent_id=     — clone engine (same or diff agent)
+POST   /v1/vidsheet?agent_id=               — create blank engine
+GET    /v1/vidsheet/:id?agent_id=           — read engine with all nested data
+POST   /v1/vidsheet/:id/clone?agent_id=     — clone engine (same or diff agent)
 ```
 
 ---
@@ -323,7 +326,7 @@ POST   /v1/autocontentengine/:id/clone?agent_id=     — clone engine (same or d
 **Read the full engine:**
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID?agent_id=$AGENT_ID" \
+curl "https://api.gen.pro/v1/vidsheet/$ENGINE_ID?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 # includes spreadsheet_columns, spreadsheet_rows, spreadsheet_cells, layers
 ```
@@ -331,7 +334,7 @@ curl "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID?agent_id=$AGENT_ID" \
 **Drop text into a cell:**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "spreadsheet_cell": { "value": "The $2 taco at 2am saved my life." } }'
@@ -340,7 +343,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_I
 **Trigger a cell generation:**
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID/generate?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -395,45 +398,45 @@ Checksum = `openssl md5 -binary hero.mp4 | base64`. Max 1 GB.
 
 ```
 # Rows
-GET    /v1/autocontentengine/:id/rows?agent_id=
-POST   /v1/autocontentengine/:id/rows?agent_id=
-GET    /v1/autocontentengine/:id/rows/:row_id?agent_id=
-POST   /v1/autocontentengine/:id/rows/:row_id/duplicate?agent_id=
-PUT    /v1/autocontentengine/:id/rows/update_positions?agent_id=
-PUT    /v1/autocontentengine/:id/rows/mass_update?agent_id=
+GET    /v1/vidsheet/:id/rows?agent_id=
+POST   /v1/vidsheet/:id/rows?agent_id=
+GET    /v1/vidsheet/:id/rows/:row_id?agent_id=
+POST   /v1/vidsheet/:id/rows/:row_id/duplicate?agent_id=
+PUT    /v1/vidsheet/:id/rows/update_positions?agent_id=
+PUT    /v1/vidsheet/:id/rows/mass_update?agent_id=
 
 # Columns (ingredient role only; system roles are read-only)
-GET    /v1/autocontentengine/:id/columns?agent_id=
-POST   /v1/autocontentengine/:id/columns?agent_id=
-POST   /v1/autocontentengine/:id/columns/:col_id/duplicate?agent_id=
-PATCH  /v1/autocontentengine/:id/columns/update_positions?agent_id=
-PUT    /v1/autocontentengine/:id/columns/mass_update?agent_id=
+GET    /v1/vidsheet/:id/columns?agent_id=
+POST   /v1/vidsheet/:id/columns?agent_id=
+POST   /v1/vidsheet/:id/columns/:col_id/duplicate?agent_id=
+PATCH  /v1/vidsheet/:id/columns/update_positions?agent_id=
+PUT    /v1/vidsheet/:id/columns/mass_update?agent_id=
 
 # Cells
-GET    /v1/autocontentengine/:id/cells/:cell_id?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id?agent_id=
-PUT    /v1/autocontentengine/:id/cells/mass_update?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id/set_default_user_job?agent_id=
+GET    /v1/vidsheet/:id/cells/:cell_id?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id?agent_id=
+PUT    /v1/vidsheet/:id/cells/mass_update?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id/set_default_user_job?agent_id=
 
 # Layers
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers?agent_id=
-GET    /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-PATCH  /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-DELETE /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id?agent_id=
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/duplicate?agent_id=
-PUT    /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers?agent_id=
+GET    /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+PATCH  /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+DELETE /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/duplicate?agent_id=
+PUT    /v1/vidsheet/:id/cells/:cell_id/layers/update_positions?agent_id=
 
 # Generations
-POST   /v1/autocontentengine/:id/cells/:cell_id/generate?agent_id=
-POST   /v1/autocontentengine/:id/cells/:cell_id/layers/:layer_id/generate?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/generate?agent_id=
+POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/generate?agent_id=
 GET    /v1/generations/:id
 POST   /v1/generations/:id/stop
 POST   /v1/generations/:id/continue
 
 # Variables
-GET    /v1/autocontentengine/:id/global_variables?agent_id=
-POST   /v1/autocontentengine/:id/import_global_variables?agent_id=     (XLSX)
-GET    /v1/autocontentengine/global_variables_template                 (download template)
+GET    /v1/vidsheet/:id/global_variables?agent_id=
+POST   /v1/vidsheet/:id/import_global_variables?agent_id=     (XLSX)
+GET    /v1/vidsheet/global_variables_template                 (download template)
 
 # Content Resources & Assets
 GET    /v1/content_resources?agent_id=&type=&page=
@@ -469,7 +472,7 @@ Only `ingredient` role columns can be created / updated / deleted.
 **Render:**
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$FINAL_VIDEO_CELL_ID/render?agent_id=$AGENT_ID" \
   -H "X-API-Key: $GEN_API_KEY"
 # → { "generation_id": 56789, "status": "pending" }
 ```
@@ -536,7 +539,7 @@ curl "https://api.gen.pro/v1/user_jobs/138860?agent_id=$AGENT_ID" \
 ### Step 5 endpoints
 
 ```
-POST   /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=   — kick off render
+POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=   — kick off render
 GET    /v1/generations/:id                                          — poll render
 POST   /v1/user_jobs?agent_id= (publish_content)                    — publish now / schedule
 GET    /v1/user_jobs/:id?agent_id=                                  — poll publish job
@@ -554,13 +557,13 @@ Clone one of these via `POST /v1/templates/spreadsheets/:slug/clone`:
 - `tiktok-text-driven` — kinetic text + music, no avatar. Best for list posts, "3 reasons why", quotes.
 - `tiktok-split-screen` — side-by-side reaction / comparison. Best for reviews, before/after, duets.
 
-If none match, build custom with `POST /v1/autocontentengine` and add columns / layers by hand — but template cloning handles 90% of production use cases.
+If none match, build custom with `POST /v1/vidsheet` and add columns / layers by hand — but template cloning handles 90% of production use cases.
 
 ---
 
 ## Creation Card Types (all 9)
 
-Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server and SDK map them to internal Rails names automatically.
+Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server and SDK map them to the platform's internal model identifiers automatically.
 
 ### text
 ```json
@@ -626,11 +629,116 @@ No AI — just attaches an uploaded resource to the cell.
 
 ### render (composite)
 ```
-POST /v1/autocontentengine/:id/cells/:cell_id/render?agent_id=
+POST /v1/vidsheet/:id/cells/:cell_id/render?agent_id=
 ```
 No `generation_type` in body. Composites all layers into one final video.
 
 Use canonical generation type names for new integrations.
+
+---
+
+## Monitoring & Automation (long-running, cross-cuts the journey)
+
+Two long-lived resources let an agent watch the world and act on a schedule. Both are CRUD-only here — the management calls are free; downstream scrapes and scheduled runs bill normally.
+
+### Watchlists
+
+A **Watchlist** is a named collection of `(platform, target_type, target_value)` sources you want continuously monitored. `target_type ∈ {account, hashtag, keyword}`. Scraped results feed back into agent chat and content idea generation; query them through chat, not directly here.
+
+**Base URL:** `https://agent-core.gen.pro/v1`
+
+```bash
+# create with sources (idempotent on name — same name merges sources)
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "crypto watch",
+    "sources": [
+      {"platform": "tiktok", "target_type": "keyword", "target_value": "btc"},
+      {"platform": "tiktok", "target_type": "keyword", "target_value": "sui"}
+    ]
+  }'
+
+# add another source later
+curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/sources" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"platform": "tiktok", "target_type": "hashtag", "target_value": "ethereum"}'
+
+# pause without deleting (resume with intent_active=true)
+curl -X PATCH "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"intent_active": false}'
+```
+
+**Watchlist endpoints:**
+
+```
+GET    /v1/agents/:agent_id/watchlists                              — list active
+POST   /v1/agents/:agent_id/watchlists                              — create (idempotent on name)
+GET    /v1/agents/:agent_id/watchlists/:id                          — get one
+PATCH  /v1/agents/:agent_id/watchlists/:id                          — update / pause / resume
+DELETE /v1/agents/:agent_id/watchlists/:id                          — soft-delete
+POST   /v1/agents/:agent_id/watchlists/:id/sources                  — add or restore source
+DELETE /v1/agents/:agent_id/watchlists/:id/sources/:source_id       — remove source by id
+DELETE /v1/agents/:agent_id/watchlists/:id/sources?platform=&target_type=&target_value=
+```
+
+**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the SDK and MCP ship a `queryWatchlist` primitive so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
+
+```bash
+# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {...})
+curl -X POST "https://agent.gen.pro/v1/agent/run" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
+```
+
+Typed fields (all optional except `question`): `question` (drives the analysis kind — top videos / top hooks / top creators / trending music / comment themes), `days` (1-365), `limit` (1-1000), `sort_by` (`engagement_rate | watch_count | like_count | comment_count | share_count | save_count | posted_at | trending_score`), `min_engagement_rate` (0.0-1.0), `return_all` (walk up to the maximum of 1000 rows). No silent caps: every stated filter is honored byte-identically across all of the watchlist's sources; omitted filters fall to one default policy (`limit` → 100); out-of-range values return a chat clarifier rather than being dropped.
+
+### Recurring Jobs (Daily Tasks)
+
+A **Recurring Job** runs a prompt on a schedule, optionally delivering results by email. `schedule.cadence ∈ {daily, weekly}`. For weekly, `schedule.days_of_week` (array of 0-6, 0=Mon … 6=Sun) is REQUIRED; for daily it must be omitted. `delivery.type ∈ {chat_only, email}`; when `type=email`, `delivery.email` is REQUIRED. `status ∈ {active, paused, deleted}`. Each scheduled run is credit-gated: the job stays configured if credits run out and resumes when they return.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+```bash
+# fastest: ensure the default "generate content ideas" daily job
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/defaults" \
+  -H "X-API-Key: $GEN_API_KEY"
+# → { "recurring_jobs": [{...}], "created": true | false }
+
+# custom recurring job
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "weekly retention digest",
+    "job_type": "generate_content_ideas",
+    "prompt": "Give me 5 retention-focused hook patterns trending this week",
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00" },
+    "delivery": { "type": "email" }
+  }'
+
+# pause / resume (does not delete)
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/pause" -H "X-API-Key: $GEN_API_KEY"
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/resume" -H "X-API-Key: $GEN_API_KEY"
+```
+
+**Recurring-job endpoints:**
+
+```
+GET    /v1/agents/:agent_id/recurring-jobs                  — list non-deleted
+POST   /v1/agents/:agent_id/recurring-jobs                  — create
+POST   /v1/agents/:agent_id/recurring-jobs/defaults         — idempotent default
+GET    /v1/agents/:agent_id/recurring-jobs/:id              — get one
+PATCH  /v1/agents/:agent_id/recurring-jobs/:id              — update (name, prompt, schedule, delivery, next_run_at)
+DELETE /v1/agents/:agent_id/recurring-jobs/:id              — soft-delete
+POST   /v1/agents/:agent_id/recurring-jobs/:id/pause        — status=paused
+POST   /v1/agents/:agent_id/recurring-jobs/:id/resume       — status=active
+```
 
 ---
 
@@ -656,7 +764,7 @@ Common codes:
 
 ## Integrations
 
-- MCP Server: `npx @poweredbygen/autocontentengine-mcp-server@latest` (env: `GEN_API_KEY`)
+- MCP Server: `npx @poweredbygen/vidsheet-mcp-server@latest` (env: `GEN_API_KEY`)
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)

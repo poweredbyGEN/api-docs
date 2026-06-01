@@ -18,7 +18,7 @@ Global variables are reusable values — brand name, tone, CTA, target audience 
 Returns the global variables sheet for a given sheet.
 
 ```
-GET /v1/autocontentengine/{id}/global_variables?agent_id={agent_id}
+GET /v1/vidsheet/{id}/global_variables?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -45,7 +45,7 @@ Returns the variables sheet object, or `null` if no variables have been imported
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/global_variables?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/global_variables?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -56,7 +56,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/global_variables?agent_id=42"
 Uploads an XLSX file to set (or replace) the global variables for a sheet. Use `multipart/form-data` with the file in the `file` field.
 
 ```
-POST /v1/autocontentengine/{id}/import_global_variables?agent_id={agent_id}
+POST /v1/vidsheet/{id}/import_global_variables?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -82,7 +82,7 @@ Returns the updated variables sheet.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/import_global_variables?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/import_global_variables?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -F "file=@variables.xlsx"
 ```
@@ -100,7 +100,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/import_global_variabl
 Returns a blank XLSX template with the expected column headers. Use this as a starting point for your variables file.
 
 ```
-GET /v1/autocontentengine/global_variables_template
+GET /v1/vidsheet/global_variables_template
 ```
 
 <Aside type="tip">
@@ -114,6 +114,6 @@ Returns the XLSX file as a binary download (`Content-Type: application/vnd.openx
 ### Example
 
 ```bash
-curl -o template.xlsx "https://api.gen.pro/v1/autocontentengine/global_variables_template" \
+curl -o template.xlsx "https://api.gen.pro/v1/vidsheet/global_variables_template" \
   -H "X-API-Key: your-api-key"
 ```

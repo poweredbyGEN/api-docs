@@ -1,0 +1,195 @@
+---
+title: Recurring Jobs (Daily Tasks)
+description: Schedule the agent to run a prompt on a recurring cadence with optional email delivery. Each run is credit-gated; jobs survive credit gaps and resume automatically.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+A **Recurring Job** ("daily task") runs a prompt on a schedule, optionally delivering results by email. Use it to keep a daily content-ideas digest flowing, schedule weekly competitor scans, or any other prompt you'd otherwise type into chat each day.
+
+**Base URL:** `https://agent.gen.pro/v1`
+
+## Authentication
+
+Same as the rest of the API: pass your API key in the `X-API-Key` header. JWT authentication (`Authorization: Bearer <token>`) is also supported. See [Authentication](/guides/authentication) for how to mint an API key.
+
+## Mental model
+
+```
+Agent ── RecurringJob "daily ideas" (status=active)
+          ├── job_type:  generate_content_ideas
+          ├── prompt:    "Generate 5 content ideas"
+          ├── schedule:  daily @ 09:00 UTC
+          ├── delivery:  chat_only
+          └── runs at next_run_at → bills against credits → updates last_run_at
+```
+
+- `schedule.cadence` ∈ `daily`, `weekly`.
+- `schedule.days_of_week` — array of `0`–`6` (0=Mon … 6=Sun). **Required** when `cadence` is `weekly`; omit for `daily`.
+- `delivery.type` ∈ `chat_only`, `email`.
+- `delivery.email` — recipient address. **Required** when `type` is `email`; omit for `chat_only`.
+- `status` ∈ `active`, `paused`, `deleted`.
+- **Management calls are free.** Each scheduled run bills at execution time using standard per-job pricing for the relevant `job_type`. If the workspace has no credits when a run fires, the run is skipped and the job remains scheduled — no deletion, no email — and execution resumes automatically when credits return.
+
+## Endpoints
+
+### GET /v1/agents/:agent_id/recurring-jobs
+
+List the agent's non-deleted recurring jobs (active + paused), newest first.
+
+```bash
+curl "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+```typescript
+import { gen } from "@poweredbygen/gen-sdk";
+const { sdk } = gen({ apiKey: process.env.GEN_API_KEY! });
+const { recurring_jobs } = await sdk.monitoring.listRecurringJobs(agentId);
+```
+
+### POST /v1/agents/:agent_id/recurring-jobs/defaults
+
+Idempotently ensure the agent has the default daily content-ideas job. Returns the existing one if present, otherwise creates it (daily @ 09:00 UTC, `chat_only`).
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/defaults" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+```typescript
+const { recurring_jobs, created } = await sdk.monitoring.ensureDefaultRecurringJob(agentId);
+```
+
+**Response:**
+
+```json
+{ "recurring_jobs": [ { ...RecurringJob } ], "created": true }
+```
+
+`created` is `true` for a fresh job, `false` if an existing default job was returned.
+
+### POST /v1/agents/:agent_id/recurring-jobs
+
+Create a custom recurring job.
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "weekly retention digest",
+    "job_type": "generate_content_ideas",
+    "prompt": "Give me 5 retention-focused hook patterns trending this week",
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00", "days_of_week": [0] },
+    "delivery": { "type": "email", "email": "you@example.com" }
+  }'
+```
+
+```typescript
+const job = await sdk.monitoring.createRecurringJob(agentId, {
+  name: "weekly retention digest",
+  job_type: "generate_content_ideas",
+  prompt: "Give me 5 retention-focused hook patterns trending this week",
+  schedule: { cadence: "weekly", timezone: "America/Los_Angeles", time_of_day: "09:00", days_of_week: [0] },
+  delivery: { type: "email", email: "you@example.com" },
+});
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | no | Display name. Defaults to first 80 chars of `prompt`. |
+| `job_type` | string | yes | Job type. `"generate_content_ideas"` is the standard default. |
+| `prompt` | string | yes | Natural-language instruction the agent runs each cycle. |
+| `schedule.cadence` | `"daily" \| "weekly"` | yes | How often to run. |
+| `schedule.timezone` | string | yes | IANA timezone (e.g. `"UTC"`, `"America/Los_Angeles"`). |
+| `schedule.time_of_day` | string | conditional | `"HH:MM"` 24h local time. Required for daily/weekly cadences. |
+| `schedule.days_of_week` | integer[] | conditional | Days to run, `0`–`6` (0=Mon … 6=Sun). **Required** when `cadence` is `"weekly"`; must be omitted for `"daily"`. No duplicates. |
+| `delivery.type` | `"chat_only" \| "email"` | yes | Where to send results. |
+| `delivery.email` | string | conditional | Recipient address. **Required** when `type` is `"email"`; must be omitted for `"chat_only"`. |
+| `next_run_at` | ISO-8601 | no | Override the first-run timestamp. |
+
+### GET /v1/agents/:agent_id/recurring-jobs/:job_id
+
+Fetch one recurring job by id. Returns 404 if deleted.
+
+### PATCH /v1/agents/:agent_id/recurring-jobs/:job_id
+
+Update mutable fields. Pass `schedule` or `delivery` as a full object — it replaces the existing value.
+
+```bash
+curl -X PATCH "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Give me 10 hook patterns instead of 5",
+    "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "08:00", "days_of_week": [0] }
+  }'
+```
+
+**Updatable fields:** `name`, `prompt`, `schedule`, `delivery`, `next_run_at`. Use the pause/resume endpoints to change status.
+
+### POST /v1/agents/:agent_id/recurring-jobs/:job_id/pause
+
+Pause the job. `status → "paused"`. The scheduler stops queueing runs; history and configuration are preserved.
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/pause" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+```typescript
+await sdk.monitoring.pauseRecurringJob(agentId, jobId);
+```
+
+### POST /v1/agents/:agent_id/recurring-jobs/:job_id/resume
+
+Resume the job. `status → "active"`.
+
+### DELETE /v1/agents/:agent_id/recurring-jobs/:job_id
+
+Soft-delete. `status → "deleted"`. Use pause for reversible stops.
+
+Returns `204 No Content` on success.
+
+## Schemas
+
+### RecurringJob
+
+```json
+{
+  "id": "uuid",
+  "user_id": 11,
+  "agent_id": "uuid",
+  "name": "weekly retention digest",
+  "job_type": "generate_content_ideas",
+  "prompt": "Give me 5 retention-focused hook patterns trending this week",
+  "schedule": {
+    "cadence": "weekly",
+    "timezone": "America/Los_Angeles",
+    "time_of_day": "09:00",
+    "days_of_week": [0]
+  },
+  "delivery": { "type": "email", "email": "you@example.com" },
+  "status": "active",
+  "next_run_at": "2026-06-03T16:00:00Z",
+  "last_run_at": null,
+  "created_at": "2026-05-27T19:00:00Z",
+  "updated_at": "2026-05-27T19:00:00Z"
+}
+```
+
+## Errors
+
+| Status | Code | Description |
+|---|---|---|
+| 401 | `unauthorized` | Missing or invalid API key |
+| 404 | `not_found` | Agent or recurring job not found / deleted |
+| 422 | `validation_error` | Request body failed validation |
+
+<Aside type="caution">
+Each scheduled run is billed when it fires. To avoid surprise charges, prefer
+pausing jobs you don't need; deletion is a soft-delete (no recovery via API).
+</Aside>

@@ -115,7 +115,7 @@ This is a freeform JSON field that stores the layer's composition settings. All 
 Adds a new layer to a cell.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -140,7 +140,7 @@ Returns the created layer.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"name": "Background Music", "type": "audio"}}'
@@ -153,7 +153,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers?age
 Returns a single layer with its generation history.
 
 ```
-GET /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+GET /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -171,7 +171,7 @@ Returns the full layer object.
 ### Example
 
 ```bash
-curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+curl "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -182,7 +182,7 @@ curl "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_
 Updates a layer's name, type, or composition attributes (volume, trim, position, styles, etc.).
 
 ```
-PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+PATCH /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -206,7 +206,7 @@ PATCH /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={age
 **Rename a layer:**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"name": "Intro Music"}}'
@@ -215,7 +215,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/40
 **Set volume to 50%:**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"additional_attributes": {"styles": {"volume": 0.5}}}}'
@@ -224,7 +224,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/40
 **Trim a clip (start at frame 60, show for 150 frames):**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4001?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4001?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"additional_attributes": {"from": 60, "durationInFrames": 150}}}'
@@ -233,7 +233,7 @@ curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/40
 **Move a text overlay and change its style:**
 
 ```bash
-curl -X PATCH "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4002?agent_id=42" \
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4002?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"video_layer": {"additional_attributes": {"left": 50, "top": 400, "styles": {"fontSize": "64px", "color": "#ffffff", "fontWeight": "700"}}}}'
@@ -250,7 +250,7 @@ Returns the updated layer.
 Removes a layer from a cell.
 
 ```
-DELETE /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
+DELETE /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -268,7 +268,7 @@ No content.
 ### Example
 
 ```bash
-curl -X DELETE "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000?agent_id=42" \
+curl -X DELETE "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -279,7 +279,7 @@ curl -X DELETE "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4
 Creates a copy of a layer.
 
 ```
-POST /v1/autocontentengine/{id}/cells/{cell_id}/layers/{layer_id}/duplicate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/duplicate?agent_id={agent_id}
 ```
 
 ### Path parameters
@@ -297,7 +297,7 @@ Returns the newly created layer.
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/4000/duplicate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000/duplicate?agent_id=42" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -308,7 +308,7 @@ curl -X POST "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/400
 Reorders layers within a cell.
 
 ```
-PUT /v1/autocontentengine/{id}/cells/{cell_id}/layers/update_positions?agent_id={agent_id}
+PUT /v1/vidsheet/{id}/cells/{cell_id}/layers/update_positions?agent_id={agent_id}
 ```
 
 ### Request body
@@ -320,7 +320,7 @@ PUT /v1/autocontentengine/{id}/cells/{cell_id}/layers/update_positions?agent_id=
 ### Example
 
 ```bash
-curl -X PUT "https://api.gen.pro/v1/autocontentengine/101/cells/3000/layers/update_positions?agent_id=42" \
+curl -X PUT "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/update_positions?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{"layers": [{"id": 4000, "position": 2}, {"id": 4001, "position": 1}]}'

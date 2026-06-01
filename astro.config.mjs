@@ -132,6 +132,15 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Monitoring & Automation',
+					collapsed: false,
+					items: [
+						{ label: 'Monitoring Quickstart', slug: 'guides/monitoring-quickstart' },
+						{ label: 'Watchlists', slug: 'reference/watchlists' },
+						{ label: 'Recurring Jobs (Daily Tasks)', slug: 'reference/recurring-jobs' },
+					],
+				},
+				{
 					label: 'Reference',
 					collapsed: true,
 					items: [

@@ -25,9 +25,9 @@ A vidsheet (Auto Content Engine) has two sides that produce one thing: **a final
 
 Each row is one video. If you want 20 videos in a batch, create 20 rows.
 
-- `POST /v1/autocontentengine/:id/rows?agent_id=` — create
-- `POST /v1/autocontentengine/:id/rows/:row_id/duplicate` — clone a row
-- `PUT /v1/autocontentengine/:id/rows/mass_update` — bulk update
+- `POST /v1/vidsheet/:id/rows?agent_id=` — create
+- `POST /v1/vidsheet/:id/rows/:row_id/duplicate` — clone a row
+- `PUT /v1/vidsheet/:id/rows/mass_update` — bulk update
 
 ## Columns — one per content type
 
@@ -58,7 +58,7 @@ A cell is one piece of content for one row / column pair. Cells hold:
 - Zero or more layers (if the column is `video` role)
 
 ```
-PATCH /v1/autocontentengine/:id/cells/:cell_id?agent_id=
+PATCH /v1/vidsheet/:id/cells/:cell_id?agent_id=
   body: { "spreadsheet_cell": { "value": "the script text" } }
 ```
 
@@ -116,14 +116,14 @@ z=4  text overlay    (CTA, watermark)
 Create a layer:
 
 ```
-POST /v1/autocontentengine/:id/cells/:cell_id/layers?agent_id=
+POST /v1/vidsheet/:id/cells/:cell_id/layers?agent_id=
   body: { "video_layer": { "name": "captions", "type": "captions", "position": 3 } }
 ```
 
 Reorder by updating positions:
 
 ```
-PUT /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions?agent_id=
+PUT /v1/vidsheet/:id/cells/:cell_id/layers/update_positions?agent_id=
   body: { "layers": [{ "id": 1, "position": 0 }, { "id": 2, "position": 1 }] }
 ```
 
@@ -132,8 +132,8 @@ PUT /v1/autocontentengine/:id/cells/:cell_id/layers/update_positions?agent_id=
 Global variables live on the engine and substitute into any prompt containing `{{variable_name}}`. Use them for brand name, CTA, tone, color, aspect ratio preferences, anything reused across cells.
 
 ```
-GET /v1/autocontentengine/:id/global_variables?agent_id=
-POST /v1/autocontentengine/:id/import_global_variables   (XLSX upload)
+GET /v1/vidsheet/:id/global_variables?agent_id=
+POST /v1/vidsheet/:id/import_global_variables   (XLSX upload)
 ```
 
 See [Variables](/reference/variables/) for the full flow.
