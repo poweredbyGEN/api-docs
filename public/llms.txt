@@ -60,6 +60,9 @@ curl -X PATCH "https://api.gen.pro/v1/agents/$AGENT_ID/core" \
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_sa", "platform": "tiktok" }
     ],
+    "proof_of_genesis_enabled": true,
+    "proof_of_genesis_auto_backup_sources": ["downloaded", "published"],
+    "proof_of_genesis_auto_backup_asset_types": ["video", "image"],
     "personality": "Santiago grew up eating at his tia taco stand in south San Antonio...",
     "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
@@ -73,6 +76,8 @@ Returns `200 OK` on full success, `207 Multi-Status` if some sections fail.
 - `keywords` sent without `monitored` auto-mirrors keywords into monitored with item_type="keyword".
 
 **Voice design.** Agent Core accepts a `default_user_voice` pointing at any voice in the library. To create new voices, use the 4-step prompt-based design flow or clone from an audio sample. See Step 1 endpoints below.
+
+**Proof of Genesis settings.** Agent Core also stores Backup to Blockchain preferences for the assets page and vidsheet workflows. Set `proof_of_genesis_enabled`, `proof_of_genesis_auto_backup_sources` (`downloaded`, `published` by default; `generated` and `uploaded` are also supported), and `proof_of_genesis_auto_backup_asset_types` (`video`, `image`). These settings do not upload by themselves; eligible asset events call the Proof of Genesis backup endpoint.
 
 **This call feeds Step 2.** The Ideas Engine reads `keywords`, `monitored`, `research_topics`, and `personality` every run. Configure once, ideas stay on-brand forever.
 
@@ -449,6 +454,13 @@ POST   /v1/asset_folders?agent_id=
 PATCH  /v1/asset_folders/:id?agent_id=
 DELETE /v1/asset_folders/:id?agent_id=
 POST   /v1/direct_upload                                                (large files)
+
+# Proof of Genesis / Backup to Blockchain (agent-core.gen.pro)
+GET    /v1/agents/:agent_id/proof-of-genesis/backups?include_removed=false
+POST   /v1/agents/:agent_id/proof-of-genesis/backups
+DELETE /v1/agents/:agent_id/proof-of-genesis/backups/:backup_id
+
+Backups are monthly by default: Agent Core stores Walrus blobs for two epochs (~28 days), charges Rails operation `backup_to_blockchain` with GB-month usage units after upload/readback verification, and sets renewal due three days before expiry.
 
 # Automation
 GET    /v1/agents/:agent_id/automation_config

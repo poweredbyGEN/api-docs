@@ -718,6 +718,104 @@ Workflow:
 Compute checksum: openssl md5 -binary file | base64
 ```
 
+## Proof of Genesis / Backup to Blockchain (`https://agent-core.gen.pro/v1`)
+
+Proof of Genesis backs up assets from the GEN assets page or vidsheet workflows to Walrus and records proof metadata. It supports manual add/remove and automatic backup of selected asset events.
+
+Privacy rule: Walrus blobs are public by default and blob IDs are not secrets. Public assets can be uploaded raw. Private assets must be encrypted before upload; raw private requests are rejected before billing or Walrus work.
+
+Agent Core auto-backup fields:
+
+```
+proof_of_genesis_enabled: boolean
+proof_of_genesis_auto_backup_sources: ["generated"|"uploaded"|"downloaded"|"published"]
+proof_of_genesis_auto_backup_asset_types: ["video"|"image"]
+```
+
+Default auto-backup sources are `downloaded` and `published` when the paid feature is enabled.
+
+Endpoints:
+
+```
+GET    /v1/agents/{agent_id}/proof-of-genesis/backups?include_removed=false
+POST   /v1/agents/{agent_id}/proof-of-genesis/backups
+DELETE /v1/agents/{agent_id}/proof-of-genesis/backups/{backup_id}
+```
+
+`ProofOfGenesisBackupRequest`:
+
+```json
+{
+  "asset_url": "https://assets.gen.pro/final.mp4",
+  "video_url": null,
+  "asset_type": "video",
+  "visibility": "public",
+  "encrypted": false,
+  "encryption_scheme": null,
+  "encryption_key_id": null,
+  "source_event": "manual",
+  "content_type": "video/mp4",
+  "idempotency_key": "content-resource-4821-v1",
+  "metadata": {
+    "content_resource_id": 4821,
+    "vidsheet_id": "vs_123",
+    "row_id": "row_456"
+  }
+}
+```
+
+Enums:
+
+- `asset_type`: `video`, `image`
+- `visibility`: `private`, `public`
+- `source_event`: `manual`, `generated`, `uploaded`, `downloaded`, `published`
+- `encrypted`: required as `true` with `encryption_scheme` when `visibility` is `private`
+
+`ProofOfGenesisBackup` response:
+
+```json
+{
+  "id": 101,
+  "agent_id": "agent_123",
+  "status": "synced",
+  "source_event": "manual",
+  "source_url": "https://assets.gen.pro/final.mp4",
+  "asset_type": "video",
+  "visibility": "public",
+  "encrypted": false,
+  "encryption_scheme": null,
+  "encryption_key_id": null,
+  "content_sha256": "5ab58f4c35444f46c7df3788c49edd5fed2c97a57326ad2f32e4f45ace643842",
+  "size_bytes": 4556,
+  "content_type": "video/mp4",
+  "walrus_blob_id": "PqwnXdU4n3cHGsbShjuPm9aGldSHCuXoovhi42IY-X8",
+  "walrus_blob_object_id": "0x9afe196fbd99a3928875e7991...",
+  "walrus_storage_id": "0xe2b5917464b74191f59d0bb1...",
+  "walrus_end_epoch": 420,
+  "walrus_encoded_length_bytes": 66034000,
+  "verification_status": "verified",
+  "billing_operation": "backup_to_blockchain",
+  "billing_charge_id": 42,
+  "billing_outboxed": false,
+  "expires_at": "2026-07-03T16:00:08Z",
+  "renewal_due_at": "2026-06-30T16:00:08Z",
+  "renewal_status": "not_due",
+  "renewal_attempts": 0,
+  "last_renewed_at": null,
+  "removed_at": null,
+  "created_at": "2026-06-05T16:00:00Z",
+  "completed_at": "2026-06-05T16:00:08Z"
+}
+```
+
+Semantics:
+
+- `POST` rejects raw private assets before billing, checks Rails credit balance before Walrus work, and charges operation `backup_to_blockchain` after successful upload/readback verification.
+- Storage is monthly by default: new blobs are written for two Walrus epochs (~28 days), Rails billing receives GB-month usage units, and renewal is due three days before `expires_at`.
+- Use `idempotency_key` for retries so the same asset event does not double upload or double bill.
+- `GET` hides rows with `removed_at` unless `include_removed=true`.
+- `DELETE` sets `removed_at` and hides the row from the default assets-page view; it does not guarantee deletion from Walrus or Sui.
+
 ## Automation
 
 ```

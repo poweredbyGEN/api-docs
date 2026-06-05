@@ -34,6 +34,12 @@ Don't mix them. Putting a competitor's TikTok URL in `linked_accounts` will even
 
 If you try to put a 3000-character persona into `description`, the API returns a 422. This is intentional.
 
+**Proof of Genesis settings** control automatic asset backup. They do not upload anything by themselves; vidsheet and assets-page workflows read these settings and call the Proof of Genesis backup endpoint when an eligible asset event happens.
+
+- `proof_of_genesis_enabled` = master switch.
+- `proof_of_genesis_auto_backup_sources` = defaults to `downloaded`, `published`; also accepts `generated`, `uploaded`.
+- `proof_of_genesis_auto_backup_asset_types` = any of `video`, `image`.
+
 ## Get the full agent setup
 
 ```
@@ -73,7 +79,10 @@ Returns every field as a flat object. Fields that haven't been set return `null`
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "name": "Rachel",
     "source": "public"
-  }
+  },
+  "proof_of_genesis_enabled": true,
+  "proof_of_genesis_auto_backup_sources": ["downloaded", "published"],
+  "proof_of_genesis_auto_backup_asset_types": ["video", "image"]
 }
 ```
 
@@ -96,6 +105,9 @@ Flat merge-patch body. Send only the fields you want to change — omitted field
 | `research_topics` | **Replace the full list** — topics you don't send are deleted. Max 20 items. |
 | `linked_accounts` | **Replace the full list** — rows you don't send are deleted. Rows with `id` are updated in place; rows without `id` are inserted. |
 | `default_user_voice` | Replace |
+| `proof_of_genesis_enabled` | Replace |
+| `proof_of_genesis_auto_backup_sources` | Replace with any of `generated`, `uploaded`, `downloaded`, `published`. Defaults to `downloaded`, `published`; empty means no automatic backup. |
+| `proof_of_genesis_auto_backup_asset_types` | Replace with any of `video`, `image`. |
 
 To add a single `monitored` item or `linked_account` without touching others, `GET /core` first, append, then `PATCH` with the full list.
 
@@ -155,6 +167,9 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
     "linked_accounts": [
       { "url": "https://tiktok.com/@santiago_real", "platform": "tiktok", "display_name": "Santiago" }
     ],
+    "proof_of_genesis_enabled": true,
+    "proof_of_genesis_auto_backup_sources": ["downloaded", "published"],
+    "proof_of_genesis_auto_backup_asset_types": ["video", "image"],
     "personality": "Santiago grew up eating at his tía'\''s taco stand in south San Antonio. He'\''s 28, easy-going, trusts his tongue over reviews, and will fight anyone who says Austin has better tacos.",
     "default_user_voice": { "voice_id": "21m00Tcm4TlvDq8ikWAM", "source": "public" }
   }'
