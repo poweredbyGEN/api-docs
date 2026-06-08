@@ -129,6 +129,7 @@ Request fields:
 | `encrypted` | boolean | no | Whether the bytes at `asset_url` are already encrypted before Walrus upload. Required for private backups. |
 | `encryption_scheme` | string | conditional | Required when `visibility` is `private`, e.g. `seal/v1`. |
 | `encryption_key_id` | string | no | Optional key policy/version identifier for private proof metadata. |
+| `owner_sui_address` | string | no | Customer Sui wallet address that should own the Walrus object. Server-triggered auto-backup can resolve this from the user's Dynamic Sui wallet. |
 | `source_event` | enum | no | `manual`, `generated`, `uploaded`, `downloaded`, or `published`. Defaults to `manual`. |
 | `content_type` | string | no | MIME type if already known. |
 | `idempotency_key` | string | recommended | Stable key for retries. Use the asset/content-resource id plus version. |
@@ -148,6 +149,9 @@ Success response:
   "encrypted": false,
   "encryption_scheme": null,
   "encryption_key_id": null,
+  "owner_sui_address": "0x0e2f1e8a66445cfecff32e1e3ea3f8632c89aef4808e49acf318247850498f38",
+  "custody_mode": "customer_wallet",
+  "walrus_object_recipient_address": "0x0e2f1e8a66445cfecff32e1e3ea3f8632c89aef4808e49acf318247850498f38",
   "content_sha256": "5ab58f4c35444f46c7df3788c49edd5fed2c97a57326ad2f32e4f45ace643842",
   "size_bytes": 4556,
   "content_type": "video/mp4",
@@ -184,10 +188,11 @@ Execution flow:
 
 1. Agent Core checks pricing and available credits before upload.
 2. If the agent has insufficient credits, backup fails before Walrus work.
-3. On successful Walrus upload and readback verification, Agent Core charges operation `backup_to_blockchain` for the measured GB-month units.
-4. If Rails is temporarily unavailable after success, the charge can be outboxed for retry.
+3. If `owner_sui_address` is present, Agent Core passes it to the Walrus publisher so the created Walrus object is transferred to the customer wallet.
+4. On successful Walrus upload and readback verification, Agent Core charges operation `backup_to_blockchain` for the measured GB-month units.
+5. If Rails is temporarily unavailable after success, the charge can be outboxed for retry.
 
-Backups are monthly by default. Agent Core stores new blobs for two Walrus epochs, approximately 28 days, records `expires_at`, and sets `renewal_due_at` three days before expiry. Monthly renewals should re-check credits before spending WAL and charge the same `backup_to_blockchain` operation after the renewal succeeds.
+Backups are monthly by default. Agent Core stores new blobs for two Walrus epochs, approximately 28 days, records `expires_at`, and sets `renewal_due_at` three days before expiry. Customer-wallet backups are marked `owner_signature_required` for renewal because the customer owns the Walrus object; GEN-custody backups can be renewed by the GEN publisher wallet after credits are checked.
 
 ## Error behavior
 
@@ -209,9 +214,10 @@ Recommended event mapping:
 
 | Vidsheet/assets event | `source_event` | `asset_type` |
 |---|---|---|
-| final render generated | `generated` | `video` |
+| final render completed | `published` | `video` |
 | image generated or uploaded | `generated` or `uploaded` | `image` |
 | user downloads an export | `downloaded` | `video` |
 | social publish succeeds | `published` | `video` |
 
 Use a stable `idempotency_key` so retries do not double upload or double bill.
+Server-side automatic backup resolves the customer's Dynamic Sui wallet through Agent Core when `owner_sui_address` is not provided.
