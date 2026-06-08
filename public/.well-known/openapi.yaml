@@ -4778,6 +4778,10 @@ components:
           nullable: true
           maxLength: 256
           description: Optional key policy/version identifier for private proof metadata.
+        owner_sui_address:
+          type: string
+          nullable: true
+          description: Optional customer Sui wallet address that should own the Walrus object. Server-triggered auto-backup can resolve this from the user's Dynamic Sui wallet.
         source_event:
           type: string
           enum: [manual, generated, uploaded, downloaded, published]
@@ -4808,6 +4812,16 @@ components:
         encrypted: { type: boolean }
         encryption_scheme: { type: string, nullable: true }
         encryption_key_id: { type: string, nullable: true }
+        owner_sui_address: { type: string, nullable: true }
+        custody_mode:
+          type: string
+          nullable: true
+          enum: [gen_custody, customer_wallet, null]
+          description: Whether GEN or the customer's Sui wallet owns the Walrus object.
+        walrus_object_recipient_address:
+          type: string
+          nullable: true
+          description: Sui address passed to Walrus send_object_to for customer-owned object transfer.
         content_sha256: { type: string, nullable: true }
         size_bytes: { type: integer, nullable: true }
         content_type: { type: string, nullable: true }

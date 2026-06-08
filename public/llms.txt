@@ -460,7 +460,7 @@ GET    /v1/agents/:agent_id/proof-of-genesis/backups?include_removed=false
 POST   /v1/agents/:agent_id/proof-of-genesis/backups
 DELETE /v1/agents/:agent_id/proof-of-genesis/backups/:backup_id
 
-Backups are monthly by default: Agent Core stores Walrus blobs for two epochs (~28 days), charges Rails operation `backup_to_blockchain` with GB-month usage units after upload/readback verification, and sets renewal due three days before expiry.
+Backups are monthly by default: Agent Core stores Walrus blobs for two epochs (~28 days), charges Rails operation `backup_to_blockchain` with GB-month usage units after upload/readback verification, and sets renewal due three days before expiry. Pass `owner_sui_address` to transfer the Walrus object to a customer's Sui wallet; server-side auto-backup can resolve the user's Dynamic Sui wallet and response rows expose `custody_mode`.
 
 # Automation
 GET    /v1/agents/:agent_id/automation_config

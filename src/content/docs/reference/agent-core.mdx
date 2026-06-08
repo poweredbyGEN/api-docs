@@ -40,6 +40,8 @@ If you try to put a 3000-character persona into `description`, the API returns a
 - `proof_of_genesis_auto_backup_sources` = defaults to `downloaded`, `published`; also accepts `generated`, `uploaded`.
 - `proof_of_genesis_auto_backup_asset_types` = any of `video`, `image`.
 
+Server-triggered automatic backups can resolve the user's Dynamic Sui wallet and create customer-owned Walrus objects. Manual callers can pass `owner_sui_address` to the Proof of Genesis backup endpoint for the same custody behavior.
+
 ## Get the full agent setup
 
 ```

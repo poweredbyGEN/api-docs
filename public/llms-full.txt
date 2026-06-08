@@ -753,6 +753,7 @@ DELETE /v1/agents/{agent_id}/proof-of-genesis/backups/{backup_id}
   "encrypted": false,
   "encryption_scheme": null,
   "encryption_key_id": null,
+  "owner_sui_address": "0x0e2f1e8a66445cfecff32e1e3ea3f8632c89aef4808e49acf318247850498f38",
   "source_event": "manual",
   "content_type": "video/mp4",
   "idempotency_key": "content-resource-4821-v1",
@@ -770,6 +771,7 @@ Enums:
 - `visibility`: `private`, `public`
 - `source_event`: `manual`, `generated`, `uploaded`, `downloaded`, `published`
 - `encrypted`: required as `true` with `encryption_scheme` when `visibility` is `private`
+- `owner_sui_address`: optional customer Sui wallet address that should own the Walrus object. Server-triggered auto-backup can resolve this from the user's Dynamic Sui wallet.
 
 `ProofOfGenesisBackup` response:
 
@@ -785,6 +787,9 @@ Enums:
   "encrypted": false,
   "encryption_scheme": null,
   "encryption_key_id": null,
+  "owner_sui_address": "0x0e2f1e8a66445cfecff32e1e3ea3f8632c89aef4808e49acf318247850498f38",
+  "custody_mode": "customer_wallet",
+  "walrus_object_recipient_address": "0x0e2f1e8a66445cfecff32e1e3ea3f8632c89aef4808e49acf318247850498f38",
   "content_sha256": "5ab58f4c35444f46c7df3788c49edd5fed2c97a57326ad2f32e4f45ace643842",
   "size_bytes": 4556,
   "content_type": "video/mp4",
@@ -811,6 +816,7 @@ Enums:
 Semantics:
 
 - `POST` rejects raw private assets before billing, checks Rails credit balance before Walrus work, and charges operation `backup_to_blockchain` after successful upload/readback verification.
+- If `owner_sui_address` is present, Agent Core asks the GEN Walrus publisher to transfer the Walrus object to that customer Sui wallet. Response rows expose `custody_mode` and `walrus_object_recipient_address`.
 - Storage is monthly by default: new blobs are written for two Walrus epochs (~28 days), Rails billing receives GB-month usage units, and renewal is due three days before `expires_at`.
 - Use `idempotency_key` for retries so the same asset event does not double upload or double bill.
 - `GET` hides rows with `removed_at` unless `include_removed=true`.
