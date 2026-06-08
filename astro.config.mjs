@@ -116,6 +116,7 @@ export default defineConfig({
 						{ label: 'Layers', slug: 'reference/layers' },
 						{ label: 'Variables', slug: 'reference/variables' },
 						{ label: 'Assets & Content Resources', slug: 'reference/content-resources' },
+						{ label: 'Proof of Genesis Backups', slug: 'reference/proof-of-genesis' },
 						{ label: 'Trigger + Poll a Generation', slug: 'reference/generations' },
 						{ label: 'Regenerate Workflow', slug: 'step-4-edit/regenerate' },
 					],

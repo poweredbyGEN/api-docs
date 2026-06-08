@@ -98,6 +98,10 @@ tags:
   - name: Agent Core
     description: |
       **Preferred** single-endpoint read/write for the agent setup canvas. One flat PATCH updates every brand field, personality, and default voice in a single call. Field names mirror what the FE Setup canvas saves, so developers and the FE speak the same language.
+  - name: Proof of Genesis
+    description: |
+      Back up GEN assets to Walrus with verifiable hashes. Base URL `https://agent-core.gen.pro/v1`. Public assets may be uploaded raw; private assets must be encrypted before upload because Walrus blobs are public by default. Default automatic sources are downloaded and published assets; generated/uploaded sources are supported for opt-in or manual flows.
+      Storage is monthly: Agent Core writes Walrus blobs for two epochs (~28 days), charges Rails operation `backup_to_blockchain` in GB-month units after upload/readback verification, and marks renewal due three days before expiry.
   - name: Agent Voice
     description: |
       Voice library, ElevenLabs integration, prompt-based design (4-step flow), audio-sample cloning, async TTS preview.
@@ -3276,6 +3280,102 @@ paths:
               schema: { $ref: '#/components/schemas/Error' }
 
   # ── Agent Voice ───────────────────────────────────────────
+  /agents/{agent_id}/proof-of-genesis/backups:
+    get:
+      operationId: listProofOfGenesisBackups
+      x-phase: edit
+      summary: List Proof of Genesis backups for an agent
+      description: |
+        Returns Proof of Genesis backup rows newest first. Removed rows are
+        hidden by default; pass `include_removed=true` for audit views.
+      tags: [Proof of Genesis]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - name: include_removed
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Backup list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofOfGenesisBackupList'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: createProofOfGenesisBackup
+      x-phase: edit
+      summary: Back up an asset to Walrus
+      description: |
+        Creates a manual or event-triggered Proof of Genesis backup for an
+        image or video asset. Agent Core checks credits before Walrus work and
+        charges operation `backup_to_blockchain` after successful upload and
+        readback verification.
+
+        Walrus blobs are public by default. Public assets may be uploaded raw.
+        Private assets must be encrypted before upload. Raw private requests
+        are rejected before billing or Walrus work.
+      tags: [Proof of Genesis]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProofOfGenesisBackupCreate'
+      responses:
+        '201':
+          description: Backup created or existing idempotent backup returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofOfGenesisBackup'
+        '402':
+          description: Insufficient credits or charge rejected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: Proof of Genesis disabled or pricing not configured
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /agents/{agent_id}/proof-of-genesis/backups/{backup_id}:
+    delete:
+      operationId: removeProofOfGenesisBackup
+      x-phase: edit
+      summary: Remove a Proof of Genesis backup from the default asset view
+      description: |
+        Soft-removes a backup row by setting `removed_at`. This hides it from
+        the default assets-page list but does not guarantee deletion from Walrus
+        or Sui.
+      tags: [Proof of Genesis]
+      servers:
+        - url: https://agent-core.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: backup_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: Removed backup row
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofOfGenesisBackup'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Agent Voice ───────────────────────────────────────────
   /agents/{agent_id}/voice/library:
     get:
       operationId: listAgentVoices
@@ -4570,6 +4670,21 @@ components:
           description: Full persona text for the agent.
         default_user_voice:
           $ref: '#/components/schemas/VoiceRef'
+        proof_of_genesis_enabled:
+          type: boolean
+          description: Master switch for automatic Backup to Blockchain from asset/vidsheet events.
+        proof_of_genesis_auto_backup_sources:
+          type: array
+          description: Asset events that should trigger automatic Proof of Genesis backups.
+          items:
+            type: string
+            enum: [generated, uploaded, downloaded, published]
+        proof_of_genesis_auto_backup_asset_types:
+          type: array
+          description: Asset types eligible for automatic Proof of Genesis backup.
+          items:
+            type: string
+            enum: [video, image]
 
     AgentCorePatch:
       type: object
@@ -4614,6 +4729,136 @@ components:
           description: Full persona text for the agent.
         default_user_voice:
           $ref: '#/components/schemas/VoiceRef'
+        proof_of_genesis_enabled:
+          type: boolean
+          description: Master switch for automatic Backup to Blockchain from asset/vidsheet events.
+        proof_of_genesis_auto_backup_sources:
+          type: array
+          description: Replace the list of asset events that should trigger automatic Proof of Genesis backups. Empty means no automatic backup.
+          items:
+            type: string
+            enum: [generated, uploaded, downloaded, published]
+        proof_of_genesis_auto_backup_asset_types:
+          type: array
+          description: Replace the list of asset types eligible for automatic Proof of Genesis backup.
+          items:
+            type: string
+            enum: [video, image]
+
+    ProofOfGenesisBackupCreate:
+      type: object
+      description: Manual or event-triggered request to back up a GEN asset to Walrus.
+      properties:
+        asset_url:
+          type: string
+          description: GEN asset URL to back up. Preferred field.
+        video_url:
+          type: string
+          description: Legacy alias for asset_url.
+        asset_type:
+          type: string
+          enum: [video, image]
+          default: video
+        visibility:
+          type: string
+          enum: [private, public]
+          default: private
+          description: Private assets must be encrypted before upload. Raw private requests are rejected before billing or Walrus work.
+        encrypted:
+          type: boolean
+          default: false
+          description: Whether the asset bytes are already encrypted before Walrus upload. Required with encryption_scheme for private assets.
+        encryption_scheme:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: Required when visibility is private, e.g. seal/v1.
+        encryption_key_id:
+          type: string
+          nullable: true
+          maxLength: 256
+          description: Optional key policy/version identifier for private proof metadata.
+        source_event:
+          type: string
+          enum: [manual, generated, uploaded, downloaded, published]
+          default: manual
+        content_type:
+          type: string
+          nullable: true
+        idempotency_key:
+          type: string
+          description: Stable retry key, e.g. content-resource id plus version.
+        metadata:
+          type: object
+          additionalProperties: true
+      anyOf:
+        - required: [asset_url]
+        - required: [video_url]
+
+    ProofOfGenesisBackup:
+      type: object
+      properties:
+        id: { type: integer }
+        agent_id: { type: string }
+        status: { type: string, enum: [uploading, synced, failed, billing_failed] }
+        source_event: { type: string, enum: [manual, generated, uploaded, downloaded, published] }
+        source_url: { type: string }
+        asset_type: { type: string, enum: [video, image] }
+        visibility: { type: string, enum: [private, public] }
+        encrypted: { type: boolean }
+        encryption_scheme: { type: string, nullable: true }
+        encryption_key_id: { type: string, nullable: true }
+        content_sha256: { type: string, nullable: true }
+        size_bytes: { type: integer, nullable: true }
+        content_type: { type: string, nullable: true }
+        walrus_blob_id: { type: string, nullable: true }
+        walrus_blob_object_id: { type: string, nullable: true }
+        walrus_storage_id: { type: string, nullable: true }
+        walrus_start_epoch: { type: integer, nullable: true }
+        walrus_end_epoch: { type: integer, nullable: true }
+        walrus_encoded_length_bytes: { type: integer, nullable: true }
+        walrus_cost_wal: { type: integer, nullable: true }
+        verification_status: { type: string, nullable: true, enum: [verified, skipped, null] }
+        billing_operation: { type: string, example: backup_to_blockchain }
+        billing_charge_id: { type: integer, nullable: true }
+        billing_amount_charged: { type: string, nullable: true }
+        billing_new_balance: { type: string, nullable: true }
+        billing_outboxed: { type: boolean }
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Approximate Walrus expiry for the current monthly storage period.
+        renewal_due_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When Agent Core should attempt monthly renewal, currently three days before expires_at.
+        renewal_status:
+          type: string
+          description: Monthly renewal state for this backup.
+          enum: [not_due, due, renewing, renewed, renewal_blocked, renewal_failed]
+        renewal_attempts:
+          type: integer
+          description: Number of renewal attempts recorded by Agent Core.
+        last_renewed_at:
+          type: string
+          format: date-time
+          nullable: true
+        failure_code: { type: string, nullable: true }
+        failure_message: { type: string, nullable: true }
+        removed_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        completed_at: { type: string, format: date-time, nullable: true }
+
+    ProofOfGenesisBackupList:
+      type: object
+      required: [backups]
+      properties:
+        backups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProofOfGenesisBackup'
 
     MonitoredItem:
       type: object
