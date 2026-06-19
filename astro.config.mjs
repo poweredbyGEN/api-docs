@@ -19,6 +19,12 @@ export default defineConfig({
 					content: `if (!localStorage.getItem('starlight-theme')) { localStorage.setItem('starlight-theme', 'dark'); }`,
 				},
 				{
+					// Animated aurora background (4 drifting blobs) injected as the first
+					// body child, behind all content — matches the gen.pro homepage.
+					tag: 'script',
+					content: `document.addEventListener('DOMContentLoaded',function(){if(document.querySelector('.gen-aurora'))return;var a=document.createElement('div');a.className='gen-aurora';a.setAttribute('aria-hidden','true');['b1','b2','b3','b4'].forEach(function(c){var s=document.createElement('span');s.className=c;a.appendChild(s);});document.body.insertBefore(a,document.body.firstChild);});`,
+				},
+				{
 					tag: 'link',
 					attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'LLM-readable API reference' },
 				},
@@ -35,6 +41,8 @@ export default defineConfig({
 			components: {
 				// GEN homepage-style pill header with the doc sections as top nav.
 				Header: './src/components/Header.astro',
+				// Left rail = search on top of the "On this page" TOC.
+				Sidebar: './src/components/Sidebar.astro',
 				// Theme toggle + social icons live in the footer.
 				Footer: './src/components/Footer.astro',
 			},
