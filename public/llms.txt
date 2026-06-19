@@ -617,7 +617,7 @@ Models: `pika`, `kling_1_6`, `seedance_lite`, `veo_3_1`, `veo_3_1_fast`.
 { "generation_type": "speech_from_text",
   "data": { "script": "...", "voice_method": "my_voices", "voice_id": "21m00...", "enhance_voice": true, "speed": 1.0 } }
 ```
-Voice methods: `my_voices` (saved voice), `design_voice` (generate from gender/language description), `clone_voice` (use audio sample: pass `audio_resource_id`).
+Voice methods: `my_voices` (saved voice), `design_voice` (generate from gender/language description), `clone_voice` (use audio sample: pass `audio_resource_id`). For `design_voice` and `clone_voice`, optional `voice_model_provider` defaults to `supertonic_3`; pass `qwen3_voice_design` for Qwen.
 
 ### lipsync
 ```json
