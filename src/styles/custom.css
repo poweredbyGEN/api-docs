@@ -1,93 +1,224 @@
-/* GEN brand accent — light mode */
+/* ───────────────────────────────────────────────────────────────────────────
+   GEN API docs — themed to match the /aura-enterprise + /managed design kit.
+
+   Starlight is themed entirely through its --sl-* custom properties. We repoint
+   the dark theme onto the GEN surface (#0c1520), set Manrope as the doc font,
+   map the gray scale to GEN reading-grays, add the drifting purple aurora, and
+   give the sidebar/cards the glass + hairline treatment. Light mode keeps the
+   GEN purple accent but stays readable.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Manrope — the standalone marketing-page font (aura-enterprise / managed). */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
 :root {
-	--sl-color-accent-low: #e8e6ff;
-	--sl-color-accent: #524caf;
-	--sl-color-accent-high: #2e2971;
+  /* GEN brand accent — light mode */
+  --sl-color-accent-low: #e8e6ff;
+  --sl-color-accent: #524caf;
+  --sl-color-accent-high: #2e2971;
+
+  /* Manrope everywhere (headings + body). */
+  --sl-font: "Manrope", ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  /* GEN brand tokens reused below */
+  --gen-purple-start: #524caf;
+  --gen-purple-end: #a29cff;
+  --gen-peach: #ffdbbb;
+  --gen-pink: #f170fd;
+  --gen-glass: linear-gradient(
+    180deg,
+    rgba(30, 37, 52, 0.85) 0%,
+    rgba(16, 22, 34, 0.92) 100%
+  );
+  --gen-hairline: rgba(255, 255, 255, 0.1);
 }
 
-/* GEN brand accent — dark mode */
-:root[data-theme='dark'] {
-	--sl-color-accent-low: #352f7e;
-	--sl-color-accent: #524caf;
-	--sl-color-accent-high: #a29cff;
+/* ── Dark theme → the GEN surface (#0c1520 family) ── */
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #352f7e;
+  --sl-color-accent: #6a63d6; /* a touch brighter so links read on #0c1520 */
+  --sl-color-accent-high: #a29cff;
+
+  /* Surfaces */
+  --sl-color-bg: #0c1520; /* page */
+  --sl-color-bg-nav: rgba(12, 21, 32, 0.82); /* top nav (glassy) */
+  --sl-color-bg-sidebar: #0c1520;
+  --sl-color-black: #0c1520;
+  --sl-color-white: #f6f7f9; /* "white" text role */
+
+  /* Reading grays — body is a mid reading-gray, headings near-white.
+     (Starlight's --sl-color-text defaults to gray-2.) */
+  --sl-color-gray-1: #e7e9ee;
+  --sl-color-gray-2: #aab1bd; /* body copy */
+  --sl-color-gray-3: #818a95; /* muted / captions */
+  --sl-color-gray-4: #5b6472;
+  --sl-color-gray-5: #2a3242;
+  --sl-color-gray-6: #1a2231; /* card / inline-code bg */
+  --sl-color-gray-7: #131b27;
+  --sl-color-text: #aab1bd;
+  --sl-color-text-accent: var(--gen-purple-end);
+
+  --sl-color-hairline-light: var(--gen-hairline);
+  --sl-color-hairline-shade: rgba(255, 255, 255, 0.06);
+  --sl-color-bg-inline-code: #1a2231;
 }
 
-/* ── Hero overrides for splash page ── */
+/* ── Aurora background (verbatim from /managed) — fixed, blurred, drifting ── */
+:root[data-theme="dark"] body::before {
+  content: "";
+  position: fixed;
+  top: -340px;
+  left: -10%;
+  right: -10%;
+  height: 760px;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(72px) saturate(135%);
+  opacity: 0.5;
+  background:
+    radial-gradient(420px 420px at 22% 8%, rgba(82, 76, 175, 0.85), transparent 66%),
+    radial-gradient(420px 420px at 50% 0%, rgba(162, 156, 255, 0.7), transparent 64%),
+    radial-gradient(380px 380px at 74% 10%, rgba(241, 112, 253, 0.45), transparent 66%),
+    radial-gradient(360px 360px at 8% 4%, rgba(255, 219, 187, 0.35), transparent 64%);
+  animation: gen-aurora-drift 26s ease-in-out infinite alternate;
+}
+@keyframes gen-aurora-drift {
+  0% { transform: translate(-3%, 0) scale(1); opacity: 0.45; }
+  100% { transform: translate(3%, 14px) scale(1.06); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] body::before { animation: none; }
+}
+/* keep real content above the aurora */
+:root[data-theme="dark"] .page { position: relative; z-index: 1; }
 
+/* ── Top nav + sidebar — glassy, hairline, sits on the aurora ── */
+:root[data-theme="dark"] .header {
+  background: var(--sl-color-bg-nav) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gen-hairline);
+}
+:root[data-theme="dark"] .sidebar {
+  background: transparent;
+}
+:root[data-theme="dark"] nav.sidebar-pane,
+:root[data-theme="dark"] .right-sidebar {
+  border-color: var(--gen-hairline) !important;
+}
+
+/* Sidebar active link — purple accent pill */
+:root[data-theme="dark"] .sidebar a[aria-current="page"] {
+  background: linear-gradient(
+    90deg,
+    rgba(82, 76, 175, 0.25),
+    rgba(162, 156, 255, 0.12)
+  );
+  color: #fff;
+  border-radius: 8px;
+}
+
+/* ── Headings near-white + tight tracking; bold body brighter ── */
+:root[data-theme="dark"] .sl-markdown-content :is(h1, h2, h3, h4) {
+  color: #f6f7f9;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+:root[data-theme="dark"] .sl-markdown-content :is(strong, b) {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Links — lavender, on-brand */
+:root[data-theme="dark"] .sl-markdown-content a {
+  color: var(--gen-purple-end);
+  text-underline-offset: 2px;
+}
+:root[data-theme="dark"] .sl-markdown-content a:hover {
+  color: var(--gen-peach);
+}
+
+/* ── Hero overrides for the splash page ── */
 [data-has-hero] .hero > img {
-	display: none;
+  display: none;
 }
-
-/* Hero title */
 [data-has-hero] .hero h1 {
-	font-weight: 800;
-	letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
-
-/* Tagline styling */
 [data-has-hero] .hero .tagline {
-	font-size: 1.15rem;
-	max-width: 42ch;
+  font-size: 1.15rem;
+  max-width: 42ch;
 }
 
-/* Primary CTA button — gradient pill */
+/* Primary CTA — the GEN pill gradient */
 [data-has-hero] .hero .action.primary a {
-	background: linear-gradient(135deg, #524caf, #a29cff);
-	border: none;
-	color: #fff !important;
-	font-weight: 600;
-	padding: 0.75rem 1.75rem;
-	border-radius: 999px;
-	transition: opacity 0.2s, transform 0.2s;
+  background: linear-gradient(
+    90deg,
+    var(--gen-purple-start),
+    var(--gen-purple-end)
+  );
+  border: 0.5px solid rgba(255, 255, 255, 0.26);
+  color: #fff !important;
+  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 24px rgba(162, 156, 255, 0.3);
+  transition: box-shadow 0.25s, transform 0.2s;
 }
 [data-has-hero] .hero .action.primary a:hover {
-	opacity: 0.9;
-	transform: translateY(-1px);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 30px rgba(162, 156, 255, 0.5);
 }
-
-/* Minimal CTA */
 [data-has-hero] .hero .action.minimal a {
-	border-radius: 999px;
-	padding: 0.75rem 1.75rem;
-	font-weight: 600;
+  border-radius: 999px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
 }
 
-/* ── Card grid on splash ── */
+/* Hero title near-white, tagline muted-gray on dark. */
+:root[data-theme="dark"] [data-has-hero] .hero h1 { color: #f6f7f9; }
+:root[data-theme="dark"] [data-has-hero] .hero .tagline { color: #aab1bd; }
 
+/* ── Card grid on splash — the kit's glass card ── */
 .sl-markdown-content .card {
-	border-radius: 12px;
-	transition: border-color 0.2s, transform 0.2s;
+  border-radius: 16px;
+  transition:
+    border-color 0.3s,
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.3s;
 }
 .sl-markdown-content .card:hover {
-	transform: translateY(-2px);
+  transform: translateY(-6px);
 }
-
-:root[data-theme='dark'] .sl-markdown-content .card {
-	border-color: rgba(255, 255, 255, 0.08);
+:root[data-theme="dark"] .sl-markdown-content .card {
+  background: var(--gen-glass);
+  border-color: var(--gen-hairline);
 }
-:root[data-theme='dark'] .sl-markdown-content .card:hover {
-	border-color: rgba(162, 156, 255, 0.3);
+:root[data-theme="dark"] .sl-markdown-content .card:hover {
+  border-color: rgba(162, 156, 255, 0.45);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.5);
 }
-
-/* ── Subtle top glow on dark hero ── */
-
-:root[data-theme='dark'] [data-has-hero] .page {
-	background:
-		radial-gradient(ellipse 60% 40% at 50% -5%, rgba(82, 76, 175, 0.15) 0%, transparent 70%),
-		var(--sl-color-bg);
-}
-
-/* ── Card icons — remove colored box, just show the icon ── */
-
 .card .icon {
-	border: none !important;
-	background: none !important;
-	padding: 0 !important;
-	border-radius: 0 !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: var(--gen-purple-end);
 }
 
-/* ── Code block accent ── */
+/* ── Code blocks — hairline frame on the dark surface ── */
+:root[data-theme="dark"] .expressive-code .frame {
+  border-color: var(--gen-hairline);
+}
+:root[data-theme="dark"] .sl-markdown-content :not(pre) > code {
+  background: #1a2231;
+  border: 1px solid var(--gen-hairline);
+  color: var(--gen-purple-end);
+}
 
-:root[data-theme='dark'] .expressive-code .frame {
-	border-color: rgba(255, 255, 255, 0.06);
+/* ── Selection ── */
+:root[data-theme="dark"] ::selection {
+  background: var(--gen-purple-end);
+  color: #0c1520;
 }
