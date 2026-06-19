@@ -32,6 +32,11 @@ export default defineConfig({
 				},
 			],
 			customCss: ['./src/styles/custom.css'],
+			components: {
+				// GEN floating-pill header (logo + search); theme/social moved to footer.
+				Header: './src/components/Header.astro',
+				Footer: './src/components/Footer.astro',
+			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/poweredbyGEN' },
 				{ icon: 'x.com', label: 'X', href: 'https://x.com/gendotpro' },
