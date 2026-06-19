@@ -44,13 +44,11 @@ const API_PREFIXES = [
   '/auth',
 ];
 
-// Rails origin. Use an UNPROXIED DNS record (grey-cloud) for the backend so the
-// Worker can reach it without re-entering the api.gen.pro/* route.
-//   Recommended: create  origin-api.gen.pro  -> 5.161.246.2  (DNS only, grey cloud)
-//   Cloudflare's fetch() will validate its edge cert normally for that hostname.
-// If you instead front the box with a CF Origin Certificate on api.gen.pro,
-// you can keep RAILS_ORIGIN = 'https://origin-api.gen.pro'.
-const RAILS_ORIGIN = 'https://origin-api.gen.pro';
+// Rails origin. Uses the existing UNPROXIED (grey-cloud) backend hostname
+// `origin-app1.gen.pro` (-> 5.161.246.2) so the Worker reaches Rails directly
+// without re-entering the api.gen.pro/* route. (`api.gen.pro` itself is a proxied
+// CNAME to this same host.)
+const RAILS_ORIGIN = 'https://origin-app1.gen.pro';
 
 // GitHub Pages docs origin + project base path.
 const DOCS_ORIGIN = 'https://poweredbygen.github.io';
