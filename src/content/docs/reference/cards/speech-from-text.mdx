@@ -1,11 +1,11 @@
 ---
 title: "Speech from Text"
-description: Convert text to speech using ElevenLabs with custom or cloned voices.
+description: Convert text to speech using saved, designed, or cloned voices.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Speech from Text card converts written text into spoken audio using ElevenLabs. You can use an existing voice, design a new one from a description, or clone a voice from an audio sample.
+The Speech from Text card converts written text into spoken audio. You can use an existing voice, design a new one from a description, or clone a voice from an audio sample. New design/clone flows default to `voice_model_provider: "supertonic_3"`; pass `"qwen3_voice_design"` to use Qwen instead.
 
 <Aside>
   All generation endpoints require the `agent_id` query parameter.
@@ -78,6 +78,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.name` | string | Yes | A name for the new voice. |
 | `data.language` | string | Yes | Language code (e.g., `"en"`). |
 | `data.gender` | string | Yes | `"male"` or `"female"`. |
+| `data.voice_model_provider` | string | No | `"supertonic_3"` (default) or `"qwen3_voice_design"`. |
 | `data.voice_prompt` | string | Yes | A description of the voice characteristics (e.g., `"warm, friendly narrator with a slight British accent"`). |
 
 ### Example
@@ -94,6 +95,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=4
       "name": "Friendly Narrator",
       "language": "en",
       "gender": "male",
+      "voice_model_provider": "supertonic_3",
       "voice_prompt": "warm, friendly narrator with a slight British accent"
     }
   }'
@@ -120,6 +122,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.audio_resource_id` | string | Yes | Content resource ID for the voice sample. |
 | `data.language` | string | Yes | Language code (e.g., `"en"`). |
 | `data.gender` | string | Yes | `"male"` or `"female"`. |
+| `data.voice_model_provider` | string | No | `"supertonic_3"` (default) or `"qwen3_voice_design"`. |
 
 <Aside type="caution">
   The voice sample must be at least 30 seconds long for reliable cloning results.
@@ -139,7 +142,8 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=4
       "name": "My Custom Voice",
       "audio_resource_id": "audio_res_123",
       "language": "en",
-      "gender": "male"
+      "gender": "male",
+      "voice_model_provider": "supertonic_3"
     }
   }'
 ```
@@ -153,6 +157,7 @@ These options can be added to the `data` object for any voice method:
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `enhance_voice` | boolean | `false` | Apply post-processing to enhance audio clarity. |
+| `voice_model_provider` | string | `supertonic_3` | Applies to `design_voice` and `clone_voice`. Supertonic 3 supports 31 languages; Qwen supports Mandarin/Cantonese/Chinese dialect options in addition to the shared language list. |
 
 ---
 

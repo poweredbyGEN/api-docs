@@ -621,8 +621,9 @@ Output: video content resource
 generation_type: "speech_from_text"
 Voice methods: my_voices | design_voice | clone_voice
 data (my_voices):    { script, voice_method: "my_voices",    voice_id, enhance_voice?, speed?, language? }
-data (design_voice): { script, voice_method: "design_voice", language, gender, enhance_voice? }
-data (clone_voice):  { script, voice_method: "clone_voice",  audio_resource_id }
+data (design_voice): { script, voice_method: "design_voice", language, gender, voice_model_provider?: "supertonic_3"|"qwen3_voice_design", enhance_voice? }
+data (clone_voice):  { script, voice_method: "clone_voice",  audio_resource_id, voice_model_provider?: "supertonic_3"|"qwen3_voice_design" }
+Default voice_model_provider for design/clone is "supertonic_3".
 Output: audio content resource
 ```
 

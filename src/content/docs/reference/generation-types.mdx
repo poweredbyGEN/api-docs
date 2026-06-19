@@ -138,6 +138,7 @@ Three voice methods:
     "voice_method": "design_voice",
     "language": "en",
     "gender": "male",
+    "voice_model_provider": "supertonic_3",
     "enhance_voice": true
   }
 }
@@ -151,10 +152,13 @@ Three voice methods:
   "data": {
     "script": "Welcome to Santiago's taco tour...",
     "voice_method": "clone_voice",
+    "voice_model_provider": "supertonic_3",
     "audio_resource_id": 5921
   }
 }
 ```
+
+`voice_model_provider` is optional for `design_voice` and `clone_voice`. It defaults to `supertonic_3`; use `qwen3_voice_design` for Qwen.
 
 ## Lipsync
 
