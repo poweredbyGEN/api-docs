@@ -1,9 +1,49 @@
 ---
-title: Introduction
-description: What is the Auto Content Engine API and what can you build with it.
+title: GEN API & MCP
+description: Drive GEN from your code or from Claude Code. Mint an API token, connect the MCP server, and automate the whole content workflow.
+template: splash
+hero:
+  tagline: Drive GEN from your own code — or straight from Claude Code. Mint an API token, connect the MCP server, and automate the whole content workflow in minutes.
+  actions:
+    - text: Mint your API token
+      link: /guides/authentication/
+      icon: right-arrow
+      variant: primary
+    - text: Connect Claude Code / MCP
+      link: /guides/claude-code/
+      icon: external
+      variant: secondary
+    - text: TypeScript SDK
+      link: /guides/typescript-sdk/
+      icon: seti:typescript
+      variant: minimal
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Get started in two steps
+
+<CardGrid>
+  <LinkCard
+    title="1 · Mint your API token"
+    href="/guides/authentication/"
+    description="Create a Personal Access Token in the GEN dashboard and authenticate every request with a Bearer header."
+  />
+  <LinkCard
+    title="2 · Connect Claude Code / MCP"
+    href="/guides/claude-code/"
+    description="Install the GEN MCP server and drive the entire workflow with natural language — 60+ tools, no glue code."
+  />
+</CardGrid>
+
+```bash
+# Authenticate every request with your token
+curl https://api.gen.pro/v1/agents \
+  -H "Authorization: Bearer gen_pat_xxxxxxxx"
+
+# …or skip the HTTP entirely and let Claude Code drive it
+npx @poweredbygen/gen-mcp-server@latest
+```
 
 ## What is GEN?
 

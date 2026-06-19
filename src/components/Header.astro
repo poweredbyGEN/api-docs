@@ -1,49 +1,172 @@
 ---
 /**
- * Override of Starlight's Header — GEN floating-pill nav.
- * Keeps the site title (logo) + search; the theme toggle, social icons and
- * language select are moved to the footer (see Footer.astro override) so the
- * header reads as the gen.pro homepage's clean glass pill.
+ * Override of Starlight's Header — mirrors the gen.pro homepage nav 1:1.
+ *
+ * A fixed, centered floating glass PILL (exact homepage gradient + border +
+ * blur) holding: logo (left) · the doc section groups as horizontal nav links
+ * (center) · an "Open app" gradient pill button → gen.pro (right).
+ *
+ * Section groups come from the Starlight sidebar config, so the top nav stays
+ * in sync. Each link points at the first page of its group; the active group is
+ * derived from the current URL. Search lives in the left rail (Sidebar.astro);
+ * theme toggle + socials live in the footer (Footer.astro).
  */
 import config from 'virtual:starlight/user-config';
-import Search from 'virtual:starlight/components/Search';
-import SiteTitle from 'virtual:starlight/components/SiteTitle';
 
-const shouldRenderSearch =
-	config.pagefind ||
-	config.components.Search !== '@astrojs/starlight/components/Search.astro';
+const pathname = Astro.url.pathname;
+
+type NavGroup = { label: string; href: string; slugs: string[] };
+
+/** Sidebar entries use `link` (explicit) or `slug` (internal docs). */
+function entryHref(entry: any): string | null {
+	if (typeof entry?.link === 'string') return entry.link;
+	if (typeof entry?.slug === 'string') return '/' + entry.slug; // '' → '/'
+	return null;
+}
+function collectHrefs(entry: any, out: string[]): void {
+	const h = entryHref(entry);
+	if (h) out.push(h);
+	if (Array.isArray(entry?.items)) for (const c of entry.items) collectHrefs(c, out);
+}
+
+// Short top-nav labels — the full sidebar labels ("Step 1 — Set Up Your Agent")
+// are too long for a pill; map them to concise nav words.
+const SHORT_LABELS: Record<string, string> = {
+	'Start Here': 'Start',
+	'Step 1 — Set Up Your Agent': 'Setup',
+	'Step 2 — Generate Content Ideas': 'Ideas',
+	'Step 3 — Convert Idea to Vidsheet': 'Vidsheet',
+	'Step 4 — Edit & Generate': 'Generate',
+	'Step 5 — Export & Publish': 'Publish',
+	'Monitoring & Automation': 'Automation',
+	Reference: 'Reference',
+};
+
+const groups: NavGroup[] = [];
+const sidebar = (config.sidebar ?? []) as any[];
+for (const entry of sidebar) {
+	const hrefs: string[] = [];
+	collectHrefs(entry, hrefs);
+	if (!hrefs.length) continue;
+	const slugs = hrefs.map((h) => h.replace(/\/+$/, '') || '/');
+	const full = entry.label ?? '';
+	groups.push({ label: SHORT_LABELS[full] ?? full, href: hrefs[0], slugs });
+}
+
+const here = pathname.replace(/\/+$/, '') || '/';
+function isActive(g: NavGroup): boolean {
+	return g.slugs.some((s) => s === here || (s !== '/' && here.startsWith(s + '/')));
+}
 ---
 
-<div class="header gen-pill-header">
-	<div class="title-wrapper sl-flex">
-		<SiteTitle />
+<header class="gen-header" data-debug-groups={groups.length}>
+	<div class="gen-pill">
+		<a href="/" class="gen-pill-logo" aria-label="GEN API home">
+			<img src="/logo.svg" alt="GEN" />
+		</a>
+
+		<nav class="gen-pill-nav" aria-label="Sections">
+			{
+				groups.map((g) => (
+					<a
+						href={g.href}
+						class:list={['gen-pill-link', { 'is-active': isActive(g) }]}
+					>
+						{g.label}
+					</a>
+				))
+			}
+		</nav>
+
+		<a href="https://gen.pro" class="gen-pill-cta" target="_blank" rel="noopener">
+			Open app
+		</a>
 	</div>
-	<div class="sl-flex print:hidden gen-search-slot">
-		{shouldRenderSearch && <Search />}
-	</div>
-</div>
+</header>
 
 <style>
-	@layer starlight.core {
-		.header {
-			display: flex;
-			gap: var(--sl-nav-gap);
-			justify-content: space-between;
-			align-items: center;
-			height: 100%;
-		}
-		.title-wrapper {
-			overflow: clip;
-			padding: 0.25rem;
-			margin: -0.25rem;
-			min-width: 0;
-		}
-		@media (min-width: 50rem) {
-			.header {
-				display: grid;
-				grid-template-columns: auto 1fr;
-				align-content: center;
-			}
-		}
+	.gen-header {
+		position: fixed;
+		inset-inline: 0;
+		top: 0;
+		z-index: var(--sl-z-index-navbar, 50);
+		padding: 1.5rem 1.5rem 0;
+		pointer-events: none;
+	}
+	.gen-pill {
+		pointer-events: auto;
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+		height: 3rem;
+		max-width: 1240px;
+		margin: 0 auto;
+		padding: 0 0.5rem 0 1rem;
+		border-radius: 9999px;
+		border: 0.5px solid #ffffff3d;
+		backdrop-filter: blur(8px);
+		background: radial-gradient(
+			49.97% 85.77% at 51% 5.12%,
+			rgba(218, 166, 255, 0.08) 0%,
+			rgba(53, 59, 75, 0.08) 45.83%,
+			rgba(88, 91, 99, 0.04) 100%
+		);
+	}
+	.gen-pill-logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
+	.gen-pill-logo img { height: 1.5rem; width: auto; display: block; }
+	.gen-pill-nav {
+		display: flex;
+		align-items: center;
+		gap: 1.4rem;
+		margin-inline: auto;
+		min-width: 0;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	.gen-pill-nav::-webkit-scrollbar { display: none; }
+	.gen-pill-link {
+		position: relative;
+		white-space: nowrap;
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: #b9bcc1;
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+	.gen-pill-link:hover,
+	.gen-pill-link.is-active { color: #fff; }
+	.gen-pill-link.is-active::after {
+		content: '';
+		position: absolute;
+		inset-inline: 0;
+		bottom: -0.5rem;
+		height: 1px;
+		background: linear-gradient(90deg, rgba(5, 5, 5, 0) 0%, #fff 50%, rgba(5, 5, 5, 0) 100%);
+	}
+	.gen-pill-cta {
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 2.25rem;
+		padding: 0 1.25rem;
+		border-radius: 9999px;
+		border: 0.5px solid #ffffff42;
+		background-image: linear-gradient(to right, #524caf 0%, #a29cff 50%, #524caf 100%);
+		background-size: 200% auto;
+		background-position: left;
+		color: #fff;
+		font-size: 0.875rem;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		text-decoration: none;
+		transition: background-position 0.6s ease;
+	}
+	.gen-pill-cta:hover { background-position: right; }
+
+	@media (max-width: 50rem) {
+		.gen-header { padding: 0.75rem 0.75rem 0; }
+		.gen-pill-nav { display: none; }
 	}
 </style>
