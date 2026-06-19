@@ -1,0 +1,44 @@
+---
+/**
+ * Override of Starlight's left Sidebar.
+ *
+ * The page tree lives in the top nav (Header.astro), so the LEFT rail holds a
+ * search box on top of the "On this page" table of contents. The default
+ * right-hand TOC pane is hidden in custom.css.
+ */
+import Search from 'virtual:starlight/components/Search';
+import TableOfContents from 'virtual:starlight/components/TableOfContents';
+---
+
+<div class="gen-left-rail">
+	<div class="gen-left-search">
+		<Search />
+	</div>
+	<div class="gen-left-toc">
+		<TableOfContents />
+	</div>
+</div>
+
+<style>
+	.gen-left-rail {
+		display: flex;
+		flex-direction: column;
+		gap: 1.75rem;
+		padding-block-start: 0.5rem;
+		padding-inline-end: 1rem;
+	}
+	.gen-left-search :global(button[data-open-modal]),
+	.gen-left-search :global(button) {
+		width: 100%;
+	}
+	.gen-left-toc :global(h2) {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--sl-color-gray-3);
+		margin-bottom: 0.85rem;
+	}
+	@media (max-width: 50rem) {
+		.gen-left-toc { display: none; }
+	}
+</style>
