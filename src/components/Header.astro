@@ -1,0 +1,49 @@
+---
+/**
+ * Override of Starlight's Header — GEN floating-pill nav.
+ * Keeps the site title (logo) + search; the theme toggle, social icons and
+ * language select are moved to the footer (see Footer.astro override) so the
+ * header reads as the gen.pro homepage's clean glass pill.
+ */
+import config from 'virtual:starlight/user-config';
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+
+const shouldRenderSearch =
+	config.pagefind ||
+	config.components.Search !== '@astrojs/starlight/components/Search.astro';
+---
+
+<div class="header gen-pill-header">
+	<div class="title-wrapper sl-flex">
+		<SiteTitle />
+	</div>
+	<div class="sl-flex print:hidden gen-search-slot">
+		{shouldRenderSearch && <Search />}
+	</div>
+</div>
+
+<style>
+	@layer starlight.core {
+		.header {
+			display: flex;
+			gap: var(--sl-nav-gap);
+			justify-content: space-between;
+			align-items: center;
+			height: 100%;
+		}
+		.title-wrapper {
+			overflow: clip;
+			padding: 0.25rem;
+			margin: -0.25rem;
+			min-width: 0;
+		}
+		@media (min-width: 50rem) {
+			.header {
+				display: grid;
+				grid-template-columns: auto 1fr;
+				align-content: center;
+			}
+		}
+	}
+</style>
