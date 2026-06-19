@@ -1,86 +1,48 @@
 ---
 /**
- * Override of Starlight's Header — mirrors the gen.pro homepage nav 1:1.
+ * Override of Starlight's Header — mirrors the gen.pro homepage nav.
  *
- * A fixed, centered floating glass PILL (exact homepage gradient + border +
- * blur) holding: logo (left) · the doc section groups as horizontal nav links
- * (center) · an "Open app" gradient pill button → gen.pro (right).
- *
- * Section groups come from the Starlight sidebar config, so the top nav stays
- * in sync. Each link points at the first page of its group; the active group is
- * derived from the current URL. Search lives in the left rail (Sidebar.astro);
- * theme toggle + socials live in the footer (Footer.astro).
+ * A fixed, centered floating glass PILL (the exact homepage gradient + 0.5px
+ * hairline + blur) holding: GEN logo (left) · the homepage nav links
+ * Home / Managed / Pricing pointing back to gen.pro (center) · an "Open app"
+ * gradient pill button (right). Search lives in Starlight's normal place; the
+ * standard left page-tree sidebar is restored. Theme toggle + socials are in
+ * the footer (Footer.astro).
  */
-import config from 'virtual:starlight/user-config';
+import Search from 'virtual:starlight/components/Search';
 
-const pathname = Astro.url.pathname;
-
-type NavGroup = { label: string; href: string; slugs: string[] };
-
-/** Sidebar entries use `link` (explicit) or `slug` (internal docs). */
-function entryHref(entry: any): string | null {
-	if (typeof entry?.link === 'string') return entry.link;
-	if (typeof entry?.slug === 'string') return '/' + entry.slug; // '' → '/'
-	return null;
-}
-function collectHrefs(entry: any, out: string[]): void {
-	const h = entryHref(entry);
-	if (h) out.push(h);
-	if (Array.isArray(entry?.items)) for (const c of entry.items) collectHrefs(c, out);
-}
-
-// Short top-nav labels — the full sidebar labels ("Step 1 — Set Up Your Agent")
-// are too long for a pill; map them to concise nav words.
-const SHORT_LABELS: Record<string, string> = {
-	'Start Here': 'Start',
-	'Step 1 — Set Up Your Agent': 'Setup',
-	'Step 2 — Generate Content Ideas': 'Ideas',
-	'Step 3 — Convert Idea to Vidsheet': 'Vidsheet',
-	'Step 4 — Edit & Generate': 'Generate',
-	'Step 5 — Export & Publish': 'Publish',
-	'Monitoring & Automation': 'Automation',
-	Reference: 'Reference',
-};
-
-const groups: NavGroup[] = [];
-const sidebar = (config.sidebar ?? []) as any[];
-for (const entry of sidebar) {
-	const hrefs: string[] = [];
-	collectHrefs(entry, hrefs);
-	if (!hrefs.length) continue;
-	const slugs = hrefs.map((h) => h.replace(/\/+$/, '') || '/');
-	const full = entry.label ?? '';
-	groups.push({ label: SHORT_LABELS[full] ?? full, href: hrefs[0], slugs });
-}
-
-const here = pathname.replace(/\/+$/, '') || '/';
-function isActive(g: NavGroup): boolean {
-	return g.slugs.some((s) => s === here || (s !== '/' && here.startsWith(s + '/')));
-}
+const NAV = [
+	{ label: 'Home', href: 'https://gen.pro/' },
+	{ label: 'Managed', href: 'https://gen.pro/managed' },
+	{ label: 'Pricing', href: 'https://gen.pro/pricing' },
+	{ label: 'API', href: '/', active: true },
+];
 ---
 
-<header class="gen-header" data-debug-groups={groups.length}>
+<header class="gen-header">
 	<div class="gen-pill">
-		<a href="/" class="gen-pill-logo" aria-label="GEN API home">
+		<a href="https://gen.pro/" class="gen-pill-logo" aria-label="GEN home">
 			<img src="/logo.svg" alt="GEN" />
 		</a>
 
-		<nav class="gen-pill-nav" aria-label="Sections">
+		<nav class="gen-pill-nav" aria-label="Main">
 			{
-				groups.map((g) => (
-					<a
-						href={g.href}
-						class:list={['gen-pill-link', { 'is-active': isActive(g) }]}
-					>
-						{g.label}
+				NAV.map((n) => (
+					<a href={n.href} class:list={['gen-pill-link', { 'is-active': n.active }]}>
+						{n.label}
 					</a>
 				))
 			}
 		</nav>
 
-		<a href="https://gen.pro" class="gen-pill-cta" target="_blank" rel="noopener">
-			Open app
-		</a>
+		<div class="gen-pill-right">
+			<div class="gen-pill-search">
+				<Search />
+			</div>
+			<a href="https://app.gen.pro" class="gen-pill-cta" target="_blank" rel="noopener">
+				Open app
+			</a>
+		</div>
 	</div>
 </header>
 
@@ -97,11 +59,11 @@ function isActive(g: NavGroup): boolean {
 		pointer-events: auto;
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
+		gap: 1rem;
 		height: 3rem;
-		max-width: 1240px;
+		max-width: 1180px;
 		margin: 0 auto;
-		padding: 0 0.5rem 0 1rem;
+		padding: 0 0.5rem 0 0.875rem;
 		border-radius: 9999px;
 		border: 0.5px solid #ffffff3d;
 		backdrop-filter: blur(8px);
@@ -113,18 +75,14 @@ function isActive(g: NavGroup): boolean {
 		);
 	}
 	.gen-pill-logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
-	.gen-pill-logo img { height: 1.5rem; width: auto; display: block; }
+	.gen-pill-logo img { height: 1.4rem; width: auto; display: block; }
+
 	.gen-pill-nav {
 		display: flex;
 		align-items: center;
-		gap: 1.4rem;
+		gap: 1.5rem;
 		margin-inline: auto;
-		min-width: 0;
-		overflow-x: auto;
-		scrollbar-width: none;
-		-ms-overflow-style: none;
 	}
-	.gen-pill-nav::-webkit-scrollbar { display: none; }
 	.gen-pill-link {
 		position: relative;
 		white-space: nowrap;
@@ -140,12 +98,20 @@ function isActive(g: NavGroup): boolean {
 		content: '';
 		position: absolute;
 		inset-inline: 0;
-		bottom: -0.5rem;
+		bottom: -0.55rem;
 		height: 1px;
 		background: linear-gradient(90deg, rgba(5, 5, 5, 0) 0%, #fff 50%, rgba(5, 5, 5, 0) 100%);
 	}
+
+	.gen-pill-right { display: flex; align-items: center; gap: 0.75rem; flex: 0 0 auto; }
+	/* Compact the Starlight search trigger to sit inside the pill. */
+	.gen-pill-search :global(button[data-open-modal]) {
+		background: rgba(255, 255, 255, 0.05) !important;
+		border: 1px solid rgba(255, 255, 255, 0.1) !important;
+		border-radius: 9999px !important;
+		height: 2.1rem;
+	}
 	.gen-pill-cta {
-		flex: 0 0 auto;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -168,5 +134,6 @@ function isActive(g: NavGroup): boolean {
 	@media (max-width: 50rem) {
 		.gen-header { padding: 0.75rem 0.75rem 0; }
 		.gen-pill-nav { display: none; }
+		.gen-pill-search { display: none; }
 	}
 </style>

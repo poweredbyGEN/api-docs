@@ -101,38 +101,9 @@
 /* keep real content above the aurora */
 :root[data-theme="dark"] .page { position: relative; z-index: 1; }
 
-/* ── Floating glass-pill header (matches the gen.pro homepage nav) ──
- * The Starlight top bar becomes a rounded capsule: hairline border, glass
- * blur, logo left + search filling the rest. Theme toggle + socials live in
- * the footer now (component overrides). */
-.header {
-  height: 3rem !important;
-  margin: 0.75rem auto 0;
-  max-width: calc(100% - 2rem);
-  padding: 0 0.5rem 0 1rem !important;
-  border: 0.5px solid #ffffff3d !important;
-  border-radius: 9999px !important;
-  background: rgba(12, 21, 32, 0.7) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: none !important;
-}
-/* the outer fixed nav band that holds the header — transparent so only the
- * pill shows, no full-width bar / bottom divider cutting the page. */
-.page > header,
-header.header-wrapper,
-.header-wrapper {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-/* search box inside the pill — compact, glassy */
-.gen-search-slot { width: 100%; max-width: 28rem; margin-inline-start: auto; }
-.gen-search-slot :global(button[aria-label]),
-.header [data-open-modal] {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid var(--gen-hairline) !important;
-  border-radius: 9999px !important;
-}
+/* The pill header is fully defined in Header.astro (.gen-header / .gen-pill).
+ * Reserve space below the fixed pill so the page content + sidebar clear it. */
+:root { --sl-nav-height: 5.5rem; }
 
 :root[data-theme="dark"] .sidebar { background: transparent; }
 
@@ -327,12 +298,8 @@ nav.sidebar-pane,
   margin: 2.5rem 0;
 }
 
-/* Right "On this page" TOC pane — HIDDEN. The TOC now lives in the left rail
-   (Sidebar.astro); the content column uses the freed width. */
-.right-sidebar-container,
-.right-sidebar {
-  display: none !important;
-}
+/* Right "On this page" TOC pane stays — standard docs layout (left page-tree,
+   center content, right TOC). */
 
 /* ── Left rail = search on top of the "On this page" TOC ──
    The page tree moved to the top nav, so the left sidebar holds search + TOC.

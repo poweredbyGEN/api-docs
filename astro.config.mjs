@@ -39,10 +39,8 @@ export default defineConfig({
 			],
 			customCss: ['./src/styles/custom.css'],
 			components: {
-				// GEN homepage-style pill header with the doc sections as top nav.
+				// GEN homepage pill header (logo + Home/Managed/Pricing + Open app).
 				Header: './src/components/Header.astro',
-				// Left rail = search on top of the "On this page" TOC.
-				Sidebar: './src/components/Sidebar.astro',
 				// Theme toggle + social icons live in the footer.
 				Footer: './src/components/Footer.astro',
 			},
@@ -55,7 +53,7 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Start Here',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Introduction', slug: '' },
 						{ label: 'The 5-Step Journey', slug: 'journey' },
@@ -68,7 +66,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Step 1 — Set Up Your Agent',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-1-setup/overview' },
 						{ label: 'Agent Core (one PATCH)', slug: 'reference/agent-core' },
@@ -80,7 +78,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Step 2 — Generate Content Ideas',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-2-ideas/overview' },
 						{ label: 'Ideas Engine', slug: 'guides/content-ideas' },
@@ -93,7 +91,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Step 3 — Convert Idea to Vidsheet',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-3-convert/overview' },
 						{ label: 'Start from a Template (recommended)', slug: 'step-3-convert/start-from-template' },
@@ -104,7 +102,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Step 4 — Edit & Generate',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-4-edit/overview' },
 						{ label: 'Vidsheet Anatomy', slug: 'step-4-edit/anatomy' },
@@ -137,7 +135,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Step 5 — Export & Publish',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-5-export/overview' },
 						{ label: 'Render the Final Video', slug: 'reference/rendering' },
@@ -148,7 +146,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Monitoring & Automation',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'Monitoring Quickstart', slug: 'guides/monitoring-quickstart' },
 						{ label: 'Watchlists', slug: 'reference/watchlists' },
@@ -157,7 +155,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Reference',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{ label: 'API Overview', slug: 'reference/overview' },
 						{ label: 'All Endpoints A–Z', slug: 'reference/endpoints-index' },
