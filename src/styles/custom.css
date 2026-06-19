@@ -185,8 +185,7 @@
   border-radius: 16px;
   transition:
     border-color 0.3s,
-    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
-    box-shadow 0.3s;
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .sl-markdown-content .card:hover {
   transform: translateY(-6px);
@@ -197,7 +196,6 @@
 }
 :root[data-theme="dark"] .sl-markdown-content .card:hover {
   border-color: rgba(162, 156, 255, 0.45);
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.5);
 }
 .card .icon {
   border: none !important;
