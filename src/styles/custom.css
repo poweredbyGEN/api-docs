@@ -69,7 +69,7 @@
  * each blob drifts on its own keyframe, blurred + screen-blended. */
 .gen-aurora {
   position: fixed;
-  top: -340px;
+  top: -440px;   /* lift the bright centre up so the glow peaks at the very top */
   left: -10%;
   right: -10%;
   height: 900px;
@@ -272,9 +272,19 @@
     align-items: flex-start !important;
     /* both columns clear the fixed pill header */
     padding-block-start: var(--sl-nav-height) !important;
+    /* match the nav pill width (1180px) and centre the whole 3-column area */
+    max-width: 1180px !important;
+    margin-inline: auto !important;
+    padding-inline: 1rem !important;
+    column-gap: 1.5rem !important;
   }
   /* header is fixed/full-width — force it onto its own row above the columns */
   .page > .header { flex: 0 0 100% !important; }
+  /* tighter sidebars so all 3 columns fit the 1180px width */
+  :root {
+    --sl-sidebar-width: 15rem;
+    --sl-content-width: 44rem;
+  }
 
   .sidebar-pane {
     position: sticky !important;
@@ -425,3 +435,45 @@ nav.sidebar-pane,
 
 /* Splash content below the hero — breathing room + centered measure. */
 .sl-markdown-content { padding-block-start: 1.5rem; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Tighter docs sizing — match the nav width (1180px) by trimming the type scale
+   and column gaps. Type sizes follow the gen.pro blog article reference:
+   body 17px/1.65, h1 38→44, h2 28→30/600, h3 22/600, all Manrope.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 50rem) {
+  /* page H1 */
+  .sl-markdown-content h1,
+  .content-panel h1 {
+    font-size: 2.25rem !important;   /* ~36px */
+    line-height: 1.12 !important;
+    letter-spacing: -0.03em !important;
+  }
+  /* body copy */
+  .sl-markdown-content p,
+  .sl-markdown-content li,
+  .sl-markdown-content td {
+    font-size: 1.0625rem !important; /* 17px — blog body */
+    line-height: 1.65 !important;
+  }
+  .sl-markdown-content :is(h2) {
+    font-size: 1.625rem !important;  /* ~26px */
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.025em !important;
+  }
+  .sl-markdown-content :is(h3) {
+    font-size: 1.3125rem !important; /* 21px */
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+  }
+  /* sidebar + TOC links a touch smaller so the columns stay narrow */
+  .sidebar-content a,
+  .sidebar-content span,
+  .right-sidebar a {
+    font-size: 0.8125rem !important; /* 13px */
+  }
+  /* trim the content column's inner padding so it sits tight to the columns */
+  .sl-markdown-content { padding-inline: 0 !important; }
+  .main-pane > .sl-container { padding-inline: 0.5rem !important; }
+}
