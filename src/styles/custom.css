@@ -69,17 +69,17 @@
  * each blob drifts on its own keyframe, blurred + screen-blended. */
 .gen-aurora {
   position: fixed;
-  top: -300px;
+  top: -120px;             /* glow starts right at the top of the page */
   left: -5%;
   right: -5%;
-  height: 560px;            /* contained band at the very top */
+  height: 660px;
   z-index: 0;
   pointer-events: none;
-  filter: blur(80px) saturate(135%);
-  opacity: 0.6;
+  filter: blur(75px) saturate(140%);
+  opacity: 0.95;           /* clearly visible glow */
   /* fade the bottom edge so the glow doesn't spill DOWN the page/sidebar */
-  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 48%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 48%, transparent 100%);
 }
 .gen-aurora span {
   position: absolute;
@@ -109,6 +109,16 @@
  * Reserve enough space below the fixed pill so the content AND the left
  * sidebar clear it (the sidebar starts at --sl-nav-height). */
 :root { --sl-nav-height: 7rem; }
+
+/* Kill Starlight's full-width header BAND — its solid dark background + bottom
+ * border are what block the top glow and draw a line between header and body.
+ * Our floating pill (.gen-header) is the only header chrome we want. */
+.header {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
+}
 
 /* Search box pinned to the TOP of the left sidebar (Sidebar.astro override). */
 .gen-sidebar-search {
