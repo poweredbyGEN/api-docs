@@ -9,7 +9,6 @@
  * standard left page-tree sidebar is restored. Theme toggle + socials are in
  * the footer (Footer.astro).
  */
-import Search from 'virtual:starlight/components/Search';
 
 const NAV = [
 	{ label: 'Home', href: 'https://gen.pro/' },
@@ -36,9 +35,6 @@ const NAV = [
 		</nav>
 
 		<div class="gen-pill-right">
-			<div class="gen-pill-search">
-				<Search />
-			</div>
 			<a href="https://app.gen.pro" class="gen-pill-cta" target="_blank" rel="noopener">
 				Open app
 			</a>
@@ -104,13 +100,6 @@ const NAV = [
 	}
 
 	.gen-pill-right { display: flex; align-items: center; gap: 0.75rem; flex: 0 0 auto; }
-	/* Compact the Starlight search trigger to sit inside the pill. */
-	.gen-pill-search :global(button[data-open-modal]) {
-		background: rgba(255, 255, 255, 0.05) !important;
-		border: 1px solid rgba(255, 255, 255, 0.1) !important;
-		border-radius: 9999px !important;
-		height: 2.1rem;
-	}
 	.gen-pill-cta {
 		display: inline-flex;
 		align-items: center;
@@ -134,6 +123,5 @@ const NAV = [
 	@media (max-width: 50rem) {
 		.gen-header { padding: 0.75rem 0.75rem 0; }
 		.gen-pill-nav { display: none; }
-		.gen-pill-search { display: none; }
 	}
 </style>
