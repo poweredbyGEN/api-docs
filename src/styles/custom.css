@@ -272,19 +272,14 @@
     align-items: flex-start !important;
     /* both columns clear the fixed pill header */
     padding-block-start: var(--sl-nav-height) !important;
-    /* match the nav pill width (1180px) and centre the whole 3-column area */
-    max-width: 1180px !important;
+    /* align EXACTLY with the header pill: same 1410px cap + 1.5rem gutter */
+    max-width: 1410px !important;
     margin-inline: auto !important;
-    padding-inline: 1rem !important;
-    column-gap: 1.5rem !important;
+    padding-inline: 1.5rem !important;
+    column-gap: 2rem !important;
   }
   /* header is fixed/full-width — force it onto its own row above the columns */
   .page > .header { flex: 0 0 100% !important; }
-  /* tighter sidebars so all 3 columns fit the 1180px width */
-  :root {
-    --sl-sidebar-width: 15rem;
-    --sl-content-width: 44rem;
-  }
 
   .sidebar-pane {
     position: sticky !important;
@@ -356,9 +351,10 @@ nav.sidebar-pane,
   .sidebar-content { height: auto !important; min-height: 0 !important; overflow: visible !important; }
 }
 
-/* Generous breathing room around the reading column. */
+/* Breathing room around the reading column — modest, no big side padding so
+   the content fills the width of the header (no narrow inset). */
 .main-pane .sl-markdown-content { padding-block: 1.5rem; }
-.sl-container { padding-inline: clamp(1rem, 3vw, 2.5rem); }
+.sl-container { padding-inline: 1.25rem !important; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    Splash landing hero — the branded "API · MCP · Claude Code" landing page.
