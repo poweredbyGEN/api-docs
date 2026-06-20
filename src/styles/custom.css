@@ -69,14 +69,17 @@
  * each blob drifts on its own keyframe, blurred + screen-blended. */
 .gen-aurora {
   position: fixed;
-  top: -340px;
-  left: -10%;
-  right: -10%;
-  height: 900px;
+  top: -300px;
+  left: -5%;
+  right: -5%;
+  height: 560px;            /* contained band at the very top */
   z-index: 0;
   pointer-events: none;
-  filter: blur(70px) saturate(135%);
-  opacity: 0.7;
+  filter: blur(80px) saturate(135%);
+  opacity: 0.6;
+  /* fade the bottom edge so the glow doesn't spill DOWN the page/sidebar */
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
 }
 .gen-aurora span {
   position: absolute;
@@ -84,14 +87,15 @@
   mix-blend-mode: screen;
   will-change: transform, opacity;
 }
-.gen-aurora .b1 { width: 620px; height: 620px; top: 40px; left: 18%;
+/* blobs sit high in the band so the glow reads as a top halo */
+.gen-aurora .b1 { width: 520px; height: 520px; top: 150px; left: 20%;
   background: radial-gradient(circle at center, rgba(82,76,175,.85), transparent 66%); animation: gen-drift1 22s ease-in-out infinite; }
-.gen-aurora .b2 { width: 560px; height: 560px; top: 0; left: 42%;
+.gen-aurora .b2 { width: 480px; height: 480px; top: 120px; left: 44%;
   background: radial-gradient(circle at center, rgba(162,156,255,.8), transparent 64%); animation: gen-drift2 26s ease-in-out infinite; }
-.gen-aurora .b3 { width: 500px; height: 500px; top: 80px; left: 60%;
-  background: radial-gradient(circle at center, rgba(241,112,253,.55), transparent 66%); animation: gen-drift3 30s ease-in-out infinite; }
-.gen-aurora .b4 { width: 460px; height: 460px; top: 30px; left: 8%;
-  background: radial-gradient(circle at center, rgba(255,219,187,.4), transparent 64%); animation: gen-drift4 28s ease-in-out infinite; }
+.gen-aurora .b3 { width: 440px; height: 440px; top: 170px; left: 62%;
+  background: radial-gradient(circle at center, rgba(241,112,253,.5), transparent 66%); animation: gen-drift3 30s ease-in-out infinite; }
+.gen-aurora .b4 { width: 400px; height: 400px; top: 150px; left: 8%;
+  background: radial-gradient(circle at center, rgba(255,219,187,.36), transparent 64%); animation: gen-drift4 28s ease-in-out infinite; }
 @keyframes gen-drift1 { 0%,100% { transform: translate(-12%,0) scale(1); opacity:.85; } 50% { transform: translate(14%,24px) scale(1.12); opacity:1; } }
 @keyframes gen-drift2 { 0%,100% { transform: translate(10%,10px) scale(1.08); opacity:1; } 50% { transform: translate(-14%,-8px) scale(.94); opacity:.8; } }
 @keyframes gen-drift3 { 0%,100% { transform: translate(8%,0) scale(.95); opacity:.7; } 50% { transform: translate(-16%,20px) scale(1.15); opacity:.95; } }
@@ -102,8 +106,23 @@
 :root[data-theme="dark"] .page { position: relative; z-index: 1; }
 
 /* The pill header is fully defined in Header.astro (.gen-header / .gen-pill).
- * Reserve space below the fixed pill so the page content + sidebar clear it. */
-:root { --sl-nav-height: 5.5rem; }
+ * Reserve enough space below the fixed pill so the content AND the left
+ * sidebar clear it (the sidebar starts at --sl-nav-height). */
+:root { --sl-nav-height: 7rem; }
+
+/* Search box pinned to the TOP of the left sidebar (Sidebar.astro override). */
+.gen-sidebar-search {
+  margin: 0 0 1rem;
+  padding-block-start: 0.5rem;
+  padding-inline: var(--sl-sidebar-pad-x, 1rem);
+}
+.gen-sidebar-search :global(button[data-open-modal]),
+.gen-sidebar-search button {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--gen-hairline) !important;
+  border-radius: 10px !important;
+}
 
 :root[data-theme="dark"] .sidebar { background: transparent; }
 
@@ -245,6 +264,8 @@
     flex-direction: row !important;
     flex-wrap: wrap !important;
     align-items: flex-start !important;
+    /* both columns clear the fixed pill header */
+    padding-block-start: var(--sl-nav-height) !important;
   }
   /* header is fixed/full-width — force it onto its own row above the columns */
   .page > .header { flex: 0 0 100% !important; }
@@ -272,6 +293,8 @@
     flex: 1 1 0 !important;
     min-width: 0 !important;
     padding-inline-start: 0 !important;
+    /* .page now provides the top clearance — don't double it. */
+    padding-block-start: 0 !important;
   }
 }
 

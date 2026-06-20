@@ -41,6 +41,8 @@ export default defineConfig({
 			components: {
 				// GEN homepage pill header (logo + Home/Managed/Pricing + Open app).
 				Header: './src/components/Header.astro',
+				// Left sidebar = Search pinned on top of the page tree.
+				Sidebar: './src/components/Sidebar.astro',
 				// Theme toggle + social icons live in the footer.
 				Footer: './src/components/Footer.astro',
 			},
