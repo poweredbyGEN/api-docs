@@ -777,7 +777,36 @@ Common codes:
 
 ## Integrations
 
-- MCP Server: `uvx gen-mcp-server` (Python, PyPI; env: `GEN_API_KEY`). Add to Claude Code: `claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server`
+### MCP Server (Claude Code, Cursor, VS Code)
+
+Package `gen-mcp-server` on PyPI (Python ≥3.10, stdio transport, env var `GEN_API_KEY`). The recommended launcher is `uvx`, which always runs the latest published version.
+
+Install in Claude Code:
+```
+claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server
+```
+
+**`uvx` is required for that command.** It comes from `uv`. If `uv` is not installed, the MCP server will fail to start and the client reports "failed to connect" / "cannot connect" — the binary simply can't be spawned. This is the #1 install failure.
+
+**Self-heal recipe — if the `gen` MCP server fails to connect, do this in order:**
+1. Check whether `uv` is installed: run `uvx --version`. If it errors with "command not found", install `uv`:
+   - macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+   - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+   - Then start a NEW shell so `uv` is on PATH, and retry the `claude mcp add` command.
+2. If `uv` IS installed, the first launch just needs ~30s to download the server. Run `uvx gen-mcp-server` once in a terminal to pre-download (it prints a FastMCP banner when ready), then restart the client.
+3. Prove the server itself works (independent of the client):
+   `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}' | GEN_API_KEY=your-pat uvx gen-mcp-server`
+   A line starting `{"jsonrpc":"2.0","id":1,"result":...}` = healthy server; the problem is the client config or PATH.
+4. No-`uvx` escape hatch: `pip install gen-mcp-server` (or `pipx install gen-mcp-server`), then set `"command": "gen-mcp-server"` (no args needed) in the MCP config. This removes `uvx` from the equation entirely.
+
+Manual config (`~/.claude/mcp.json`, Cursor `mcp.json`, or VS Code):
+```
+{ "mcpServers": { "gen": { "command": "uvx", "args": ["gen-mcp-server"], "env": { "GEN_API_KEY": "your-pat" } } } }
+```
+
+Full install + troubleshooting guide: https://api.gen.pro/guides/claude-code/
+
+### Other integrations
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)
