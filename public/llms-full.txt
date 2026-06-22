@@ -623,8 +623,8 @@ Output: text string in cell value
 
 ```
 generation_type: "image_from_text"
-Models: gemini_image, gemini_pro_image, midjourney
-Aspect ratios: "1:1", "9:16", "16:9", "4:3", "3:4"
+Models: gemini_image, gemini_pro_image, midjourney, grok
+Aspect ratios: "1:1", "9:16", "16:9", "4:3", "3:4"; grok also supports "3:2", "2:3"
 data: { prompt, model, aspect_ratio, variables }
 Output: image content resource
 ```
@@ -633,9 +633,9 @@ Output: image content resource
 
 ```
 generation_type: "video_from_text"
-Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5
-Aspect ratios: "1:1", "9:16", "16:9"
-Durations: 5s, 10s (model-dependent)
+Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok
+Aspect ratios: "1:1", "9:16", "16:9"; grok also supports "4:3", "3:4", "3:2", "2:3"
+Durations: model-dependent
 data: { prompt, negative_prompt?, model, aspect_ratio, duration, variables }
 Output: video content resource
 ```
@@ -644,7 +644,7 @@ Output: video content resource
 
 ```
 generation_type: "video_from_image"
-Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5
+Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok
 data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, duration }
 Output: video content resource
 ```
@@ -653,7 +653,7 @@ Output: video content resource
 
 ```
 generation_type: "video_from_ingredients"
-Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast
+Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast, grok
 data: { prompt, model, asset_resource_ids: [], aspect_ratio, duration }
 Output: video content resource
 ```

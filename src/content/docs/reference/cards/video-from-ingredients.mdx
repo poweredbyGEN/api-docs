@@ -1,6 +1,6 @@
 ---
 title: "Video from Ingredients"
-description: Generate video from a prompt combined with uploaded assets using Pika, Kling, Seedance, or Veo.
+description: Generate video from a prompt combined with uploaded assets using Pika, Kling, Seedance, Veo, or Grok.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -41,6 +41,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Seedance Lite | `video_from_ingredients` | `"seedance_lite"` |
 | Veo 3.1 | `video_from_ingredients` | `"veo_3_1"` |
 | Veo 3.1 Fast | `video_from_ingredients` | `"veo_3_1_fast"` |
+| Grok | `video_from_ingredients` | `"grok"` |
 
 ---
 
@@ -52,7 +53,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.prompt` | string | Yes | Text description that references the uploaded assets. Supports `{{variable_name}}` syntax. |
 | `data.asset_resource_ids` | array | Yes | Array of content resource IDs to include in the generation. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
-| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `data.duration` | integer | No | Video duration in seconds. |
 | `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
 | `data.content_resource_vars` | array | No | Variable names to map content resource IDs from columns. |
@@ -126,7 +127,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3300/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling_1_6"`, `"seedance_lite"`, `"pika"`, `"veo_3_1"`, or `"veo_3_1_fast"`. |
+| `model` | string | Default model: `"kling_1_6"`, `"seedance_lite"`, `"pika"`, `"veo_3_1"`, `"veo_3_1_fast"`, or `"grok"`. |
 | `ratio` | string | Default aspect ratio. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
