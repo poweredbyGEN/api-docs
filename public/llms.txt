@@ -776,7 +776,7 @@ Common codes:
 
 ## Integrations
 
-- MCP Server: `npx @poweredbygen/gen-mcp-server@latest` (env: `GEN_API_KEY`)
+- MCP Server: `uvx gen-mcp-server` (Python, PyPI; env: `GEN_API_KEY`). Add to Claude Code: `claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server`
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)
