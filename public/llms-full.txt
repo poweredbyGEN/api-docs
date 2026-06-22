@@ -336,6 +336,49 @@ Live progress:
 - Channel keys: `status`, `plan` (numbered checklist), `thinking`, `messages`
 - Or poll `GET /v1/agent/runs/{run_id}` until `status == "completed"` for a fully authenticated path.
 
+## Song Mixes
+
+Backend/API-first contract for combining multiple songs into one long DJ-style audio output.
+
+```
+POST /v1/audio/mixes
+Body: {
+  tracks?: [{ title?, artist?, url?, asset_id?, bpm?, key?, mood? }],
+  prompt?,
+  transition_style?,
+  output_format?: "mp3" | "wav",
+  auto_order?: true,
+  desired_duration_seconds?,
+  generate_missing_count?
+}
+→ {
+  job_id,
+  status: "pending_engine" | "pending_song_generation",
+  prompt,
+  tracks,
+  engine: "mixxx_or_compatible",
+  output_format,
+  transition_style,
+  auto_order,
+  desired_duration_seconds,
+  output_url: null,
+  message,
+  next_step
+}
+```
+
+Default prompt:
+
+```text
+Mix these 5 songs in the optimal order for the best flow and energy:
+
+[Your 5 songs]
+
+Analyze BPM, key, and mood, then arrange them for the smoothest possible DJ mix with professional transitions.
+```
+
+The contract is live now. Until the Mixxx-compatible renderer worker is installed, the API returns `pending_engine` and does not fabricate an `output_url`.
+
 ## Conversations
 
 ```

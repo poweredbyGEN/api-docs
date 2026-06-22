@@ -153,6 +153,7 @@ export default defineConfig({
 						{ label: 'Monitoring Quickstart', slug: 'guides/monitoring-quickstart' },
 						{ label: 'Watchlists', slug: 'reference/watchlists' },
 						{ label: 'Recurring Jobs (Daily Tasks)', slug: 'reference/recurring-jobs' },
+						{ label: 'Song Mixes', slug: 'reference/song-mixes' },
 					],
 				},
 				{

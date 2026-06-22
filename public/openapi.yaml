@@ -108,6 +108,9 @@ tags:
   - name: Agent Chat
     description: |
       Conversational AI agent interface. All endpoints use base URL `https://agent.gen.pro/v1`.
+  - name: Song Mixes
+    description: |
+      Backend/API-first DJ-style song mixing. Base URL `https://agent.gen.pro/v1`.
   - name: Watchlists
     description: |
       Named collections of monitoring sources (accounts, hashtags, keywords) per
@@ -2659,6 +2662,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /audio/mixes:
+    post:
+      operationId: createSongMix
+      x-phase: ideas
+      summary: Create a song-mix job
+      description: |
+        Creates a backend song-mix job/status object that combines multiple songs
+        into one long DJ-style audio output. The default prompt asks GEN to mix
+        the songs in optimal order by BPM, key, and mood with professional
+        transitions.
+
+        **Base URL:** `https://agent.gen.pro/v1`
+
+        The contract is live now. Until the Mixxx-compatible renderer worker is
+        installed, responses return `status: pending_engine` and `output_url:
+        null` rather than fabricating a final audio file.
+      tags: [Song Mixes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongMixRequest'
+      responses:
+        '202':
+          description: Song-mix job/status object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongMixJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Invalid song-mix request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /agent/runs/{run_id}:
     get:
       operationId: getAgentRun
@@ -4089,6 +4131,107 @@ components:
         type: string
 
   schemas:
+    SongMixTrack:
+      type: object
+      properties:
+        title:
+          type: string
+          nullable: true
+        artist:
+          type: string
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+        asset_id:
+          type: string
+          nullable: true
+        bpm:
+          type: number
+          minimum: 40
+          maximum: 240
+          nullable: true
+        key:
+          type: string
+          nullable: true
+        mood:
+          type: string
+          nullable: true
+
+    SongMixRequest:
+      type: object
+      properties:
+        tracks:
+          type: array
+          maxItems: 25
+          items:
+            $ref: '#/components/schemas/SongMixTrack'
+        prompt:
+          type: string
+          nullable: true
+        transition_style:
+          type: string
+          nullable: true
+          default: professional
+        output_format:
+          type: string
+          enum: [mp3, wav]
+          default: mp3
+        auto_order:
+          type: boolean
+          default: true
+        desired_duration_seconds:
+          type: integer
+          minimum: 30
+          maximum: 7200
+          nullable: true
+        generate_missing_count:
+          type: integer
+          minimum: 1
+          maximum: 25
+          nullable: true
+
+    SongMixJob:
+      type: object
+      required: [job_id, status, prompt, tracks, engine, output_format, transition_style, auto_order, message, next_step]
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [pending_engine, pending_song_generation]
+        prompt:
+          type: string
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SongMixTrack'
+        engine:
+          type: string
+          example: mixxx_or_compatible
+        output_format:
+          type: string
+          example: mp3
+        transition_style:
+          type: string
+          example: professional
+        auto_order:
+          type: boolean
+          example: true
+        desired_duration_seconds:
+          type: integer
+          nullable: true
+          minimum: 30
+          maximum: 7200
+        output_url:
+          type: string
+          nullable: true
+        message:
+          type: string
+        next_step:
+          type: string
+
     User:
       type: object
       properties:
