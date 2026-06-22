@@ -242,6 +242,7 @@ PUT    /v1/agent/ideas/:id/status/:status         — set explicit status
 POST   /v1/ideas/:id/expand                       — expand idea → project_manifest (no /agent/ segment)
 
 POST   /v1/research                               — standalone research
+POST   /v1/audio/mixes                            — combine multiple songs into one DJ-style mix job; returns pending_engine until renderer is installed
 
 POST   /v1/user_jobs (train_social)               — start scraping (agent.gen.pro → monitoring)
 GET    /v1/user_jobs/:id                          — poll monitoring job
