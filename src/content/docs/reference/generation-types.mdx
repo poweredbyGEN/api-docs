@@ -16,10 +16,10 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 | `generation_type` | Produces | Key models |
 |---|---|---|
 | `text` | text | gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4 |
-| `image_from_text` | image | gemini_image, gemini_pro_image, midjourney |
-| `video_from_text` | video | veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5 |
-| `video_from_image` | video | kling_2_1, kling_2_6, veo_3, veo_3_1, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5 |
-| `video_from_ingredients` | video | pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast |
+| `image_from_text` | image | gemini_image, gemini_pro_image, midjourney, grok |
+| `video_from_text` | video | veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok |
+| `video_from_image` | video | kling_2_1, kling_2_6, veo_3, veo_3_1, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok |
+| `video_from_ingredients` | video | pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast, grok |
 | `speech_from_text` | audio | (voice_method: my_voices, design_voice, clone_voice) |
 | `lipsync` | video | sync_so, gen |
 | `captions` | caption data | gemini |
@@ -55,7 +55,7 @@ Variables substitute `{{key}}` in the prompt. Output lives in the cell's `value`
 }
 ```
 
-Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`. Output is a content resource (image).
+Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2:3`. Output is a content resource (image).
 
 ## Video from Text
 
@@ -72,7 +72,7 @@ Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`. Output is a content resource
 }
 ```
 
-Aspect ratios: `1:1`, `9:16`, `16:9`. Duration: `5` or `10` (model-dependent).
+Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration is model-dependent.
 
 ## Video from Image
 

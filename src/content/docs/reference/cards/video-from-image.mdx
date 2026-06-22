@@ -1,6 +1,6 @@
 ---
 title: "Video from Image"
-description: Generate video from a reference image using Kling, Veo 3, Sora 2, or Seedance.
+description: Generate video from a reference image using Kling, Veo 3, Sora 2, Seedance, or Grok.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -44,6 +44,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Seedance Lite | `video_from_image` | `"seedance_lite"` |
 | Seedance Pro | `video_from_image` | `"seedance_pro"` |
 | Seedance Pro 1.5 | `video_from_image` | `"seedance_pro_1_5"` |
+| Grok | `video_from_image` | `"grok"` |
 
 ---
 
@@ -57,7 +58,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.prompt` | string | No | Text description of the desired motion or scene. Supports `{{variable_name}}` syntax. |
 | `data.negative_prompt` | string | No | What to avoid in the generated video. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
-| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. |
+| `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `data.duration` | integer | No | Video duration in seconds. |
 | `data.image_var` | string | No | Variable name to map the image value from a column. |
 | `data.image_tail_var` | string | No | Variable name to map the end frame image from a column. |
@@ -134,7 +135,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3200/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling_2_1"`, `"kling_2_6"`, `"veo_3"`, `"veo_3_1"`, `"sora_2"`, `"seedance_lite"`, `"seedance_pro"`, etc. |
-| `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. |
+| `model` | string | Default model: `"kling_2_1"`, `"kling_2_6"`, `"veo_3"`, `"veo_3_1"`, `"sora_2"`, `"seedance_lite"`, `"seedance_pro"`, `"grok"`, etc. |
+| `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
