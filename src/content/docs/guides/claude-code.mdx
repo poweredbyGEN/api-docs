@@ -8,18 +8,46 @@ import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's CLI for Claude. It supports **MCP (Model Context Protocol)** servers, which let Claude interact with external APIs through natural language. The Auto Content Engine MCP server gives Claude direct access to your GEN agents, content engines, rows, cells, generations, organizations, and assets.
 
 <Aside type="tip">
-  Published on [PyPI](https://pypi.org/project/gen-mcp-server/) · install with `uvx gen-mcp-server`
+  Published on [PyPI](https://pypi.org/project/gen-mcp-server/) as **`gen-mcp-server`** · works with Claude Code, Cursor, and VS Code.
 </Aside>
 
 ## Quick Install
 
-The fastest way — one command (requires [`uv`](https://docs.astral.sh/uv/)):
+**Two commands. Copy, paste, done.**
+
+**1. Install `uv`** (the runner that fetches and launches the server). Skip this if you already have `uv`.
+
+<Tabs>
+<TabItem label="macOS / Linux">
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+</TabItem>
+<TabItem label="Windows (PowerShell)">
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+</TabItem>
+<TabItem label="Homebrew">
+```bash
+brew install uv
+```
+</TabItem>
+</Tabs>
+
+**Open a new terminal** after installing `uv` so it's on your `PATH`.
+
+**2. Add the server to Claude Code:**
 
 ```bash
 claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server
 ```
 
-`uvx` fetches the latest `gen-mcp-server` from PyPI and runs it; there's nothing to install or keep up to date manually.
+`uvx` fetches the latest `gen-mcp-server` from PyPI and runs it — there's nothing to install or keep up to date manually. The **first launch takes ~30 seconds** while it downloads; after that it's instant.
+
+<Aside type="caution" title="Server won't connect?">
+  Almost always it's because **`uv` isn't installed** or isn't on your `PATH` yet. Run `uvx --version` in a new terminal — if it errors, redo step 1 and open a fresh terminal. See [Troubleshooting](#troubleshooting) below for the full checklist.
+</Aside>
 
 Or follow the manual setup below.
 
@@ -39,9 +67,26 @@ Or follow the manual setup below.
      If you lose your key, revoke it and create a new one. Keys cannot be retrieved after creation.
    </Aside>
 
-2. **Add the MCP server to Claude Code**
+2. **Install `uv`** (one time)
 
-   The server is published on PyPI and runs with [`uv`](https://docs.astral.sh/uv/) — no manual install needed:
+   `uv` is the small, fast runner that fetches and launches the server. If you already have it (`uvx --version` works), skip this.
+
+   <Tabs>
+   <TabItem label="macOS / Linux">
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+   </TabItem>
+   <TabItem label="Windows (PowerShell)">
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+   </TabItem>
+   </Tabs>
+
+   Then **open a new terminal** so `uv` is on your `PATH`.
+
+3. **Add the MCP server to Claude Code**
 
    ```bash
    claude mcp add gen --env GEN_API_KEY=gen_pat_a1b2c3d4e5f6... -- uvx gen-mcp-server
@@ -63,15 +108,68 @@ Or follow the manual setup below.
    }
    ```
 
-   <Aside type="tip">
-     Prefer a global install? `pip install gen-mcp-server` then use `"command": "gen-mcp-server"`.
+   <Aside type="tip" title="Don't want to install uv?">
+     You can install the server globally with `pip` instead and skip `uvx` entirely:
+
+     ```bash
+     pip install gen-mcp-server     # or: pipx install gen-mcp-server
+     ```
+
+     Then use the installed command directly:
+
+     ```json
+     {
+       "mcpServers": {
+         "gen": {
+           "command": "gen-mcp-server",
+           "env": { "GEN_API_KEY": "gen_pat_a1b2c3d4e5f6..." }
+         }
+       }
+     }
+     ```
+
+     With `pip` you update manually (`pip install -U gen-mcp-server`); with `uvx` you always get the latest automatically.
    </Aside>
 
-3. **Restart Claude Code**
+4. **Restart Claude Code**
 
-   The MCP server loads on startup. After restarting, Claude has access to 50+ `gen_*` tools, plus GEN guidance resources and the home-screen Plays as ready-to-run prompts.
+   The MCP server loads on startup. After restarting, Claude has access to 50+ `gen_*` tools, plus GEN guidance resources and the home-screen Plays as ready-to-run prompts. Verify with `claude mcp list` — `gen` should show **connected**.
 
 </Steps>
+
+## One-click install
+
+Pick your editor — these set up the server for you (you still add your API key after). All three need [`uv`](https://docs.astral.sh/uv/) installed first (step 2 above), or swap to the `pip` command.
+
+- **Claude Code** — run in your terminal:
+  ```bash
+  claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server
+  ```
+- **Cursor** — [**➕ Add GEN to Cursor**](cursor://anysphere.cursor-deeplink/mcp/install?name=gen&config=eyJjb21tYW5kIjogInV2eCIsICJhcmdzIjogWyJnZW4tbWNwLXNlcnZlciJdLCAiZW52IjogeyJHRU5fQVBJX0tFWSI6ICJ5b3VyLXBhdCJ9fQ==) (opens Cursor, writes `mcp.json`)
+- **VS Code** — [**➕ Add GEN to VS Code**](vscode:mcp/install?%7B%22name%22%3A%20%22gen%22%2C%20%22type%22%3A%20%22stdio%22%2C%20%22command%22%3A%20%22uvx%22%2C%20%22args%22%3A%20%5B%22gen-mcp-server%22%5D%2C%20%22env%22%3A%20%7B%22GEN_API_KEY%22%3A%20%22%24%7Binput%3Agen-api-key%7D%22%7D%7D) (opens VS Code, prompts for your key)
+
+## What the GEN server gives you
+
+| | |
+|---|---|
+| **Products** | Auto Content Engine · Agent chat · Watchlists · Content ideas & research · Voices · Templates · Recurring tasks |
+| **Runs** | Locally (stdio) — launched by your editor, talks to `api.gen.pro` |
+| **Access** | Read **and** write — create engines, generate video/image/audio, schedule tasks |
+| **Auth** | Personal Access Token (`GEN_API_KEY`) — [get one here](/guides/authentication/) |
+| **Tools** | 50+ `gen_*` tools · 9 home-screen Plays as prompts · live API-reference resource |
+
+## Troubleshooting
+
+**`gen` shows "failed to connect" / "cannot connect" in `claude mcp list`.** This is almost always the runner, not the server. Work down this list:
+
+1. **Is `uv` installed and on your `PATH`?** Open a **new** terminal and run `uvx --version`. If it errors with *command not found*, install `uv` (step 2) and open a fresh terminal — installers add `uv` to your `PATH` only for new shells.
+2. **First launch timing out?** The very first run downloads the server (~30s). Restart your editor once and let it finish; subsequent launches are instant. On a slow network, run `uvx gen-mcp-server` once in a terminal to pre-download (Ctrl-C after the FastMCP banner appears).
+3. **Test the server by hand** — this proves the package works independently of your editor:
+   ```bash
+   echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}' | GEN_API_KEY=your-pat uvx gen-mcp-server
+   ```
+   A JSON line starting with `{"jsonrpc":"2.0","id":1,"result":...}` means the server is healthy — the problem is your editor's config or `PATH`.
+4. **Still stuck?** Use the `pip install gen-mcp-server` path above with `"command": "gen-mcp-server"` — it removes `uvx` from the equation entirely.
 
 ## What you can do
 
