@@ -505,8 +505,11 @@ nav.sidebar ul ul li,
   margin-inline-start: 0 !important;
   padding-inline-start: 0 !important;
 }
-/* Sub-item links: same left padding as the group label → text lines up. */
-.sidebar-content a { padding-inline-start: 1.25rem !important; padding-inline-end: 0.7rem !important; }
+/* Sub-item links: align with the group label via MARGIN (not padding) so the
+   active pill wraps its text with EVEN padding on both sides — not a full-width
+   box with a big empty left gutter. Pill indent = group-label indent (1.25rem)
+   minus the link's own 0.6rem padding, so text still lines up under the logo. */
+.sidebar-content a { padding-inline: 0.6rem !important; margin-inline: 0.65rem 0.4rem !important; }
 /* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
 :root {
   --sl-sidebar-width: 15rem;     /* was 18.75rem */
@@ -519,7 +522,7 @@ nav.sidebar ul ul li,
 .sidebar-content a {
   display: block;
   padding-block: 0.5rem;     /* taller rows so the active pill isn't squished */
-  padding-inline: 0.7rem;
+  /* padding-inline + margin-inline set above (even pill, logo-aligned text) */
   font-size: 0.95rem;        /* up per mav */
   font-weight: 400;
   line-height: 1.5;
