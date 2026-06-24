@@ -485,11 +485,25 @@ nav.sidebar-pane,
 .sidebar-content ul,
 .sidebar-content ul ul,
 .sidebar-content li > ul,
-nav.sidebar ul {
+.sidebar-content li,
+.sidebar-content ul li,
+nav.sidebar ul,
+nav.sidebar li {
   border-inline-start: 0 !important;
   border-inline: 0 !important;
   margin-inline-start: 0 !important;
   padding-inline-start: 0 !important;
+}
+/* THE actual rail line: Starlight scopes it onto the nested <li> via
+   :where(.astro-XXXX). Kill the border on EVERY nested sidebar li/ul regardless
+   of the astro-scope class. */
+.sidebar-content ul ul li,
+.sidebar-content ul ul,
+nav.sidebar ul ul li,
+.sidebar-content [class*="astro-"] ul [class*="astro-"] {
+  border-inline-start: 0 !important;
+  margin-inline-start: 0 !important;
+  padding-inline-start: 0.5rem !important;
 }
 /* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
 :root {
