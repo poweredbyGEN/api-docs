@@ -1,15 +1,15 @@
 ---
 title: GEN API & MCP
-description: Drive GEN from your code or from Claude Code. Mint an API token, connect the MCP server, and automate the whole content workflow.
+description: Drive GEN from your code or an MCP-compatible AI client. Mint an API token, connect the MCP server, and automate the whole content workflow.
 hero:
-  tagline: Drive GEN from your own code — or straight from Claude Code. Mint an API token, connect the MCP server, and automate the whole content workflow in minutes.
+  tagline: Drive GEN from your own code — or straight from any MCP-compatible AI assistant. Mint an API token, connect the MCP server, and automate the whole content workflow in minutes.
   actions:
     - text: Mint your API token
       link: /guides/authentication/
       icon: right-arrow
       variant: primary
-    - text: Connect Claude Code / MCP
-      link: /guides/claude-code/
+    - text: Connect the MCP
+      link: /guides/mcp/
       icon: external
       variant: secondary
     - text: TypeScript SDK
@@ -29,9 +29,9 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
     description="Create a Personal Access Token in the GEN dashboard and authenticate every request with a Bearer header."
   />
   <LinkCard
-    title="2 · Connect Claude Code / MCP"
-    href="/guides/claude-code/"
-    description="Install the GEN MCP server and drive the entire workflow with natural language — 50+ tools plus guidance and ready-to-run Plays, no glue code."
+    title="2 · Connect the MCP"
+    href="/guides/mcp/"
+    description="Use the hosted MCP endpoint or install the downloaded server to drive the entire workflow with natural language."
   />
 </CardGrid>
 
@@ -40,8 +40,8 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 curl https://api.gen.pro/v1/agents \
   -H "Authorization: Bearer gen_pat_xxxxxxxx"
 
-# …or skip the HTTP entirely and let Claude Code drive it
-uvx gen-mcp-server
+# …or let an MCP-compatible assistant drive it
+https://mcp.gen.pro/mcp
 ```
 
 ## What is GEN?
@@ -69,8 +69,8 @@ In the GEN web app, this is the "Vidsheets" interface. The API gives you full pr
 The Auto Content Engine API lets you read, create, and update content engines — and trigger AI generations — without touching the GEN UI.
 
 <CardGrid>
-  <Card title="Claude Code / MCP">
-    Use the official MCP server to manage agents, content engines, and AI generations through natural language. Just talk to Claude — it handles the API calls.
+  <Card title="GEN MCP">
+    Use the official MCP server to manage agents, content engines, and AI generations through natural language. Your assistant handles the API calls.
   </Card>
   <Card title="Workflow automation">
     Connect GEN to n8n, Make, or Zapier. Trigger video creation from RSS feeds, CRM events, or Slack messages.
@@ -108,17 +108,17 @@ If you're an AI agent or LLM, these resources are optimized for you:
 - **[llms.txt](/llms.txt)** — Complete API reference in plain text, designed to teach you how GEN works (concepts, workflows, every generation type with exact payloads)
 - **[llms-full.txt](/llms-full.txt)** — Exhaustive endpoint reference with request/response schemas
 - **[OpenAPI 3.1 Spec](/openapi.yaml)** — Machine-readable specification
-- **[MCP Server](https://pypi.org/project/gen-mcp-server/)** — 50+ tools, GEN guidance resources, and the home-screen Plays as prompts, for Claude Code, Cursor, and VS Code (`uvx gen-mcp-server`)
+- **[MCP Server](/guides/mcp/)** — hosted endpoint plus downloaded local server, with `gen_*` tools, GEN guidance resources, and ready-to-run prompts
 
 ### Install the MCP Server
 
-```bash
-claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server
+```text
+https://mcp.gen.pro/mcp
 ```
 
-`uvx` always runs the latest published `gen-mcp-server` from [PyPI](https://pypi.org/project/gen-mcp-server/) — no manual updates.
+Use the hosted MCP endpoint first when your client supports remote MCP. Use the downloaded `uvx gen-mcp-server` path for local stdio clients.
 
-See the [Claude Code guide](/guides/claude-code/) for manual setup and usage examples.
+See the [MCP install guide](/guides/mcp/) for both setup paths and troubleshooting.
 
 ## Start here
 
@@ -133,6 +133,6 @@ Then clone a template, drop the idea in, and render. The [Quick Start guide](/gu
   <LinkCard title="Quick Start (10 min walkthrough)" href="/guides/quickstart/" description="Configure an agent with a single PATCH, generate ideas from trending data, produce a video." />
   <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="One endpoint for identity, overview, personality, inspiration, voice, look, and accounts." />
   <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="Async runs, conversations, refinement, long-term preferences." />
-  <LinkCard title="Using with Claude Code" href="/guides/claude-code/" description="Install the GEN MCP server and drive the whole workflow with natural language." />
+  <LinkCard title="Install the GEN MCP" href="/guides/mcp/" description="Connect through the hosted MCP endpoint or the downloaded local server." />
   <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
 </CardGrid>

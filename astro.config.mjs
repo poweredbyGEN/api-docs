@@ -5,6 +5,10 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://api.gen.pro',
+	redirects: {
+		'/guides/claude-code/': '/guides/mcp/',
+		'/guides/claude-code.md': '/guides/mcp.md',
+	},
 	integrations: [
 		starlight({
 			title: 'GEN API',
@@ -61,7 +65,7 @@ export default defineConfig({
 						{ label: 'The 5-Step Journey', slug: 'journey' },
 						{ label: 'Quick Start', slug: 'guides/quickstart' },
 						{ label: 'Authentication', slug: 'guides/authentication' },
-						{ label: 'Install the MCP Server', slug: 'guides/claude-code' },
+						{ label: 'Install the MCP Server', slug: 'guides/mcp' },
 						{ label: 'TypeScript SDK', slug: 'guides/typescript-sdk' },
 						{ label: 'Using with n8n', slug: 'guides/n8n' },
 					],
