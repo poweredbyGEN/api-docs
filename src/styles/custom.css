@@ -586,3 +586,35 @@ nav.sidebar-pane,
 @media (min-width: 50rem) {
   .main-pane { --sl-content-margin-inline: 0; }
 }
+
+/* ── z.ai-match polish (CSS only) — subtle callout, no group caret, tighter body ── */
+
+/* Note/callout — z.ai style: faint thin box, no loud 0.25rem accent bar. */
+.sl-markdown-content .starlight-aside {
+  border-inline-start: none !important;
+  border: 1px solid var(--gen-hairline) !important;
+  border-radius: 12px !important;
+  background-color: rgba(255,255,255,0.025) !important;
+  padding: 1rem 1.15rem !important;
+}
+.sl-markdown-content .starlight-aside__title {
+  color: var(--sl-color-gray-2) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+.sl-markdown-content .starlight-aside__content,
+.sl-markdown-content .starlight-aside__content a { color: var(--sl-color-gray-2) !important; }
+
+/* Sidebar group headers — hide the collapse caret/chevron (z.ai has none). */
+.sidebar-content details > summary svg,
+.sidebar-content summary .caret,
+.sidebar-content details > summary::after { display: none !important; }
+.sidebar-content details > summary { list-style: none; cursor: default; }
+.sidebar-content details > summary::-webkit-details-marker { display: none; }
+
+/* Body text — z.ai feel: slightly smaller, lighter, tighter measure. */
+.sl-markdown-content p,
+.sl-markdown-content li {
+  font-size: 0.95rem;
+  color: #aab1bd;
+}
