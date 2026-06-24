@@ -31,7 +31,7 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
   <LinkCard
     title="2 · Connect the MCP"
     href="/guides/mcp/"
-    description="Use the hosted MCP endpoint or install the downloaded server to drive the entire workflow with natural language."
+    description="Use Remote MCP or run the Local MCP server to drive the entire workflow with natural language."
   />
 </CardGrid>
 
@@ -108,7 +108,7 @@ If you're an AI agent or LLM, these resources are optimized for you:
 - **[llms.txt](/llms.txt)** — Complete API reference in plain text, designed to teach you how GEN works (concepts, workflows, every generation type with exact payloads)
 - **[llms-full.txt](/llms-full.txt)** — Exhaustive endpoint reference with request/response schemas
 - **[OpenAPI 3.1 Spec](/openapi.yaml)** — Machine-readable specification
-- **[MCP Server](/guides/mcp/)** — hosted endpoint plus downloaded local server, with `gen_*` tools, GEN guidance resources, and ready-to-run prompts
+- **[MCP Server](/guides/mcp/)** — remote Streamable HTTP server plus local stdio server, with `gen_*` tools, GEN guidance resources, and ready-to-run prompts
 
 ### Install the MCP Server
 
@@ -116,7 +116,7 @@ If you're an AI agent or LLM, these resources are optimized for you:
 https://mcp.gen.pro/mcp
 ```
 
-Use the hosted MCP endpoint first when your client supports remote MCP. Use the downloaded `uvx gen-mcp-server` path for local stdio clients.
+Use Remote MCP first when your client supports Streamable HTTP. Use the local `uvx gen-mcp-server` path for stdio clients.
 
 See the [MCP install guide](/guides/mcp/) for both setup paths and troubleshooting.
 
@@ -133,6 +133,6 @@ Then clone a template, drop the idea in, and render. The [Quick Start guide](/gu
   <LinkCard title="Quick Start (10 min walkthrough)" href="/guides/quickstart/" description="Configure an agent with a single PATCH, generate ideas from trending data, produce a video." />
   <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="One endpoint for identity, overview, personality, inspiration, voice, look, and accounts." />
   <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="Async runs, conversations, refinement, long-term preferences." />
-  <LinkCard title="Install the GEN MCP" href="/guides/mcp/" description="Connect through the hosted MCP endpoint or the downloaded local server." />
+  <LinkCard title="Install the GEN MCP" href="/guides/mcp/" description="Connect through Remote MCP or run the Local MCP server." />
   <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
 </CardGrid>
