@@ -647,3 +647,43 @@ starlight-toc a,
 .right-sidebar li a { font-size: 0.9rem !important; }
 .right-sidebar h2,
 starlight-toc > nav > h2 { font-size: 0.8rem !important; letter-spacing: 0.04em; }
+
+/* MCP guide client compatibility row. */
+.mcp-top-actions {
+  margin-top: 1.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.mcp-client-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.4rem 0 1.4rem;
+}
+
+.mcp-client-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  border: 1px solid var(--gen-hairline);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
+  color: var(--sl-color-gray-2);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.mcp-client-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.09);
+  color: #fff;
+  font-family: var(--sl-font-system-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+}

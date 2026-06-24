@@ -781,12 +781,12 @@ Common codes:
 
 Two connection paths:
 
-Hosted MCP:
+Remote MCP:
 ```json
 { "name": "gen", "url": "https://mcp.gen.pro/mcp", "headers": { "Authorization": "Bearer your-pat" } }
 ```
 
-Downloaded MCP package `gen-mcp-server` on PyPI (Python >=3.10, stdio transport, env var `GEN_API_KEY`):
+Local MCP package `gen-mcp-server` on PyPI (Python >=3.10, stdio transport, env var `GEN_API_KEY`):
 
 Local install example:
 ```

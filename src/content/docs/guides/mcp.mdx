@@ -1,13 +1,23 @@
 ---
 title: Install the GEN MCP
-description: Connect GEN to an MCP-compatible AI client with the hosted endpoint or the downloaded local server.
+description: Connect GEN to an MCP-compatible AI client with the remote server or the local stdio server.
 ---
 
 The **GEN MCP** gives your AI assistant access to GEN's content studio: trend research, content ideas, Vidsheets, AI video, images, voices, songs, assets, scheduling, watchlists, recurring jobs, and credits.
 
-## Hosted MCP
+<div class="mcp-top-actions">
+  <a class="sl-link-button primary" href="https://gen.pro/api" target="_blank" rel="noopener noreferrer">Mint Personal Access Token</a>
+</div>
 
-Use this when your MCP client supports a remote or streamable HTTP server. Copy this into your MCP client:
+<div class="mcp-client-row" aria-label="Compatible MCP clients">
+  <span class="mcp-client-pill"><span class="mcp-client-icon">C</span> Claude</span>
+  <span class="mcp-client-pill"><span class="mcp-client-icon">M</span> Manus</span>
+  <span class="mcp-client-pill"><span class="mcp-client-icon">&gt;_</span> Codex</span>
+</div>
+
+## Remote MCP
+
+Use this when your MCP client supports a remote MCP server over Streamable HTTP. Copy this into your MCP client:
 
 ```json
 {
@@ -21,15 +31,15 @@ Use this when your MCP client supports a remote or streamable HTTP server. Copy 
 
 Replace `gen_pat_your_key_here` with a GEN API key from **Settings -> API Keys** in [gen.pro](https://gen.pro).
 
-## Downloaded MCP
+## Local MCP
 
-Use this when your MCP client runs local stdio servers. Copy this command:
+Use this when your MCP client runs local MCP servers over stdio. Copy this command:
 
 ```bash
 GEN_API_KEY=gen_pat_your_key_here uvx gen-mcp-server
 ```
 
-This downloads and runs the GEN MCP package locally. In clients that use JSON config, set the command to `uvx`, the args to `["gen-mcp-server"]`, and the env var to `GEN_API_KEY`.
+This runs the GEN MCP package locally. In clients that use JSON config, set the command to `uvx`, the args to `["gen-mcp-server"]`, and the env var to `GEN_API_KEY`.
 
 If `uvx` is missing, install `uv` first:
 
@@ -51,4 +61,4 @@ The current GEN MCP exposes **100 tools**, **9 prompts**, and **3 guidance resou
 | **Publish** | Connect social accounts, schedule posts, update schedules, and remove scheduled posts |
 | **Manage account data** | List agents, workspaces, organizations, API keys, avatars, credit balance, usage, and plans |
 
-Start with the hosted MCP when your client supports it. Use the downloaded MCP when your client needs a local command.
+Start with Remote MCP when your client supports it. Use Local MCP when your client needs a local command.
