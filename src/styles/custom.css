@@ -572,8 +572,17 @@ nav.sidebar ul {
 /* 6. Hairline page chrome (no heavy borders). */
 .main-frame { --sl-content-pad-x: 1.5rem; }
 
-/* Sidebar/content divider — make it a faint hairline (or none) so content sits close. */
-.sidebar-pane { border-inline-end: 1px solid var(--gen-hairline) !important; }
+/* NO lines on the sidebar — remove BOTH the right divider and any left edge line. */
+.sidebar-pane,
+nav.sidebar-pane,
+.sidebar-pane:where(.astro-2kn2pk2s),
+.sidebar,
+.sidebar-content {
+  border-inline-end: none !important;   /* right divider — GONE */
+  border-inline-start: none !important; /* left edge line — GONE */
+  border-right: none !important;
+  border-left: none !important;
+}
 @media (min-width: 50rem) {
   .main-pane { --sl-content-margin-inline: 0; }
 }
