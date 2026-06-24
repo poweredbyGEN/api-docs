@@ -120,7 +120,7 @@
 .gen-sidebar-search {
   margin: 0 0 1rem;
   padding-block-start: 0.5rem;
-  padding-inline: 2.4rem 0.5rem; /* align search left edge under the GEN logo */
+  padding-inline: 1.25rem 0.5rem; /* = pill left padding, aligns search with logo */
 }
 .gen-sidebar-search :global(button[data-open-modal]),
 .gen-sidebar-search button {
@@ -506,7 +506,7 @@ nav.sidebar ul ul li,
   padding-inline-start: 0 !important;
 }
 /* Sub-item links: same left padding as the group label → text lines up. */
-.sidebar-content a { padding-inline-start: 2.4rem !important; padding-inline-end: 0.7rem !important; }
+.sidebar-content a { padding-inline-start: 1.25rem !important; padding-inline-end: 0.7rem !important; }
 /* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
 :root {
   --sl-sidebar-width: 15rem;     /* was 18.75rem */
@@ -540,7 +540,7 @@ nav.sidebar ul ul li,
   color: #c5cad3;
   opacity: 1;
   margin-bottom: 0.45rem;
-  padding-inline: 2.4rem 0.7rem;
+  padding-inline: 1.25rem 0.7rem;
 }
 
 /* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
