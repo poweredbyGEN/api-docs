@@ -483,13 +483,23 @@ nav.sidebar-pane,
       Reclaim the width so content centers in the remaining column. */
 .main-frame .main-pane { min-width: 0; }
 
-/* 2. Left nav — z.ai-style spacing: no rail, tight rows, clear group separation. */
-starlight-menu-content .sidebar-content ul ul,
+/* 2. Left nav — z.ai feel: NO rail line, narrower sidebar, content sits close. */
+/* Starlight draws the rail as border-inline-start on the nested <ul>; kill it
+   on every nesting level with high specificity. */
+.sidebar-content ul,
 .sidebar-content ul ul,
-nav.sidebar ul ul {
-  border-inline-start: none !important;
+.sidebar-content li > ul,
+nav.sidebar ul {
+  border-inline-start: 0 !important;
+  border-inline: 0 !important;
   margin-inline-start: 0 !important;
   padding-inline-start: 0 !important;
+}
+/* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
+:root {
+  --sl-sidebar-width: 15rem;     /* was 18.75rem */
+  --sl-content-pad-x: 1.25rem;
+  --sl-nav-gap: 1.25rem;
 }
 .sidebar-content ul { gap: 0 !important; }
 /* sub-item rows: compact, even rhythm */
@@ -553,3 +563,9 @@ nav.sidebar ul ul {
 
 /* 6. Hairline page chrome (no heavy borders). */
 .main-frame { --sl-content-pad-x: 1.5rem; }
+
+/* Sidebar/content divider — make it a faint hairline (or none) so content sits close. */
+.sidebar-pane { border-inline-end: 1px solid var(--gen-hairline) !important; }
+@media (min-width: 50rem) {
+  .main-pane { --sl-content-margin-inline: 0; }
+}
