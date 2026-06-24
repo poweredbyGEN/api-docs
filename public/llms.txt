@@ -777,7 +777,27 @@ Common codes:
 
 ## Integrations
 
-- MCP Server: `uvx gen-mcp-server` (Python, PyPI; env: `GEN_API_KEY`). Add to Claude Code: `claude mcp add gen --env GEN_API_KEY=your-pat -- uvx gen-mcp-server`
+### MCP Server
+
+Two connection paths:
+
+Hosted MCP:
+```json
+{ "name": "gen", "url": "https://mcp.gen.pro/mcp", "headers": { "Authorization": "Bearer your-pat" } }
+```
+
+Downloaded MCP package `gen-mcp-server` on PyPI (Python >=3.10, stdio transport, env var `GEN_API_KEY`):
+
+Local install example:
+```
+GEN_API_KEY=your-pat uvx gen-mcp-server
+```
+
+The current MCP exposes 100 `gen_*` tools, 9 prompts, and 3 guidance resources across chat/research, content ideas, Vidsheets, generation, assets, watchlists, recurring jobs, publishing, credits, agents, and workspaces.
+
+Full install guide: https://api.gen.pro/guides/mcp/
+
+### Other integrations
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)
