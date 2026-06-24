@@ -132,13 +132,9 @@
 
 :root[data-theme="dark"] .sidebar { background: transparent; }
 
-/* Sidebar active link — purple accent pill */
+/* Sidebar active link — neutral light pill (z.ai style; see Left-nav section below). */
 :root[data-theme="dark"] .sidebar a[aria-current="page"] {
-  background: linear-gradient(
-    90deg,
-    rgba(82, 76, 175, 0.25),
-    rgba(162, 156, 255, 0.12)
-  );
+  background: rgba(255, 255, 255, 0.07);
   color: #fff;
   border-radius: 8px;
 }
@@ -501,29 +497,41 @@ nav.sidebar ul {
   --sl-content-pad-x: 1.25rem;
   --sl-nav-gap: 1.25rem;
 }
-.sidebar-content ul { gap: 0 !important; }
-/* sub-item rows: compact, even rhythm */
+.sidebar-content ul { gap: 0.05rem !important; }
+
+/* sub-item rows (z.ai): 14px, muted gray, compact full-width rows. */
 .sidebar-content a {
-  padding-block: 0.3rem;
-  padding-inline: 0.6rem;
-  font-size: 0.875rem;
+  padding-block: 0.36rem;
+  padding-inline: 0.7rem;
+  font-size: 0.875rem;       /* 14px */
+  font-weight: 400;
+  line-height: 1.45;
+  color: #8b93a1;            /* muted gray, like z.ai items */
   border-radius: 8px;
 }
-/* group headers (Get Started / Language Models): more space above, smaller/quieter */
-.sidebar-content > ul > li + li { margin-top: 1.4rem; }
+.sidebar-content a:hover { color: #e7e9ee; background: rgba(255,255,255,0.035); }
+
+/* group headers (z.ai): REGULAR case, ~13px, brighter, clear space above. */
+.sidebar-content > ul > li + li { margin-top: 1.35rem; }
 .sidebar-content .group-label,
-.sidebar-content summary,
+.sidebar-content summary > .group-label,
 .sidebar-content > ul > li > span:first-child {
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.7;
-  margin-bottom: 0.35rem;
-}
-/* active item = subtle filled pill (z.ai), not a bordered box */
-.sidebar-content a[aria-current="page"] {
-  background: var(--sl-color-gray-6, rgba(255,255,255,0.06));
+  font-size: 0.82rem;        /* ~13px */
   font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;      /* z.ai is NOT uppercase */
+  color: #c5cad3;
+  opacity: 1;
+  margin-bottom: 0.45rem;
+  padding-inline: 0.7rem;
+}
+
+/* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
+:root[data-theme="dark"] .sidebar-content a[aria-current="page"],
+.sidebar-content a[aria-current="page"] {
+  background: rgba(255,255,255,0.07) !important;
+  color: #ffffff !important;
+  font-weight: 500;
 }
 
 /* 3. Content column: tighter, code-first reading width + generous padding. */
