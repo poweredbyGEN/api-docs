@@ -8,8 +8,6 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'GEN API',
-			// Remove the right-hand "On this page" TOC column site-wide (mav, 2026-06-24).
-			tableOfContents: false,
 			favicon: '/favicon.png',
 			logo: {
 				src: './src/assets/logo.svg',
