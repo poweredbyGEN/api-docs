@@ -120,7 +120,7 @@
 .gen-sidebar-search {
   margin: 0 0 1rem;
   padding-block-start: 0.5rem;
-  padding-inline: var(--sl-sidebar-pad-x, 1rem);
+  padding-inline: 2.4rem 0.5rem; /* align search left edge under the GEN logo */
 }
 .gen-sidebar-search :global(button[data-open-modal]),
 .gen-sidebar-search button {
@@ -506,7 +506,7 @@ nav.sidebar ul ul li,
   padding-inline-start: 0 !important;
 }
 /* Sub-item links: same left padding as the group label → text lines up. */
-.sidebar-content a { padding-inline-start: 0.7rem !important; }
+.sidebar-content a { padding-inline-start: 2.4rem !important; padding-inline-end: 0.7rem !important; }
 /* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
 :root {
   --sl-sidebar-width: 15rem;     /* was 18.75rem */
@@ -517,11 +517,12 @@ nav.sidebar ul ul li,
 
 /* sub-item rows (z.ai): 14px, muted gray, compact full-width rows. */
 .sidebar-content a {
-  padding-block: 0.36rem;
+  display: block;
+  padding-block: 0.5rem;     /* taller rows so the active pill isn't squished */
   padding-inline: 0.7rem;
-  font-size: 0.875rem;       /* 14px */
+  font-size: 0.95rem;        /* up per mav */
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.5;
   color: #8b93a1;            /* muted gray, like z.ai items */
   border-radius: 8px;
 }
@@ -532,14 +533,14 @@ nav.sidebar ul ul li,
 .sidebar-content .group-label,
 .sidebar-content summary > .group-label,
 .sidebar-content > ul > li > span:first-child {
-  font-size: 0.82rem;        /* ~13px */
+  font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;      /* z.ai is NOT uppercase */
   color: #c5cad3;
   opacity: 1;
   margin-bottom: 0.45rem;
-  padding-inline: 0.7rem;
+  padding-inline: 2.4rem 0.7rem;
 }
 
 /* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
@@ -638,3 +639,11 @@ nav.sidebar-pane,
 /* No underlines on hyperlinks (mav). */
 .sl-markdown-content a,
 .sl-markdown-content a:hover { text-decoration: none !important; }
+
+/* "On this page" TOC — larger, readable text (mav). */
+.right-sidebar a,
+.right-sidebar .sl-link-button,
+starlight-toc a,
+.right-sidebar li a { font-size: 0.9rem !important; }
+.right-sidebar h2,
+starlight-toc > nav > h2 { font-size: 0.8rem !important; letter-spacing: 0.04em; }
