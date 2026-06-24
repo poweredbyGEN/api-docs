@@ -473,3 +473,55 @@ nav.sidebar-pane,
   .sl-markdown-content { padding-inline: 0 !important; }
   .main-pane > .sl-container { padding-inline: 0.5rem !important; }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Clean code-first layout (z.ai / Sakana feel) — 2026-06-24, mav.
+   Spacing + width + de-clutter ONLY. Keeps GEN colors, aurora, and Manrope.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* 1. Right "On this page" TOC removed via config (tableOfContents:false).
+      Reclaim the width so content centers in the remaining column. */
+.main-frame .main-pane { min-width: 0; }
+
+/* 2. Remove the vertical rail/line on the left of each sidebar nav group. */
+starlight-menu-content .sidebar-content ul ul,
+.sidebar-content ul ul,
+nav.sidebar ul ul {
+  border-inline-start: none !important;
+  margin-inline-start: 0 !important;
+  padding-inline-start: 0.25rem !important;
+}
+/* sub-item rows: a touch more breathing room, no rail indent */
+.sidebar-content a { padding-block: 0.34rem; }
+
+/* 3. Content column: tighter, code-first reading width + generous padding. */
+.sl-markdown-content {
+  max-width: 46rem;          /* ~736px — z.ai/Sakana reading column */
+}
+.content-panel + .content-panel { border-top: none; }
+.main-pane > .content-panel {
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
+  padding-block: 1.5rem;
+}
+
+/* 4. Vertical rhythm — generous space between sections, clean headings. */
+.sl-markdown-content :is(h2, h3) {
+  margin-top: 2.25em;
+  margin-bottom: 0.6em;
+}
+.sl-markdown-content > :first-child { margin-top: 0; }
+.sl-markdown-content p,
+.sl-markdown-content li { line-height: 1.7; }
+.sl-markdown-content p { margin-block: 0.85em; }
+
+/* 5. Code blocks — the star of a code-first page. Clear, padded, rounded. */
+.sl-markdown-content .expressive-code,
+.sl-markdown-content pre {
+  margin-block: 1.25em;
+}
+.sl-markdown-content .expressive-code .frame pre {
+  padding-block: 1rem;
+}
+
+/* 6. Hairline page chrome (no heavy borders). */
+.main-frame { --sl-content-pad-x: 1.5rem; }
