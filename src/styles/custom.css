@@ -534,10 +534,12 @@ nav.sidebar ul ul li,
 .sidebar-content:where([class*="astro-"]),
 nav.sidebar-pane:where([class*="astro-"]) { --sl-sidebar-pad-x: 0px !important; padding-inline: 0 !important; }
 
-/* Drive the link padding through Starlight's own variable (this is what the
-   scoped a.astro-* rule actually reads) + offset the whole list left so the
-   pill gutter sits OUTSIDE the nav edge. */
-.sidebar-content { --sl-sidebar-item-padding-inline: var(--gen-pill-pad); }
+/* Link text-left = pane-edge + margin-left + padding-left
+   = pane-edge + (inset - pad) + pad = pane-edge + inset  → always the nav edge,
+   independent of pad. The pill background starts at (inset - pad), so the pill
+   has a `pad`-wide gutter to the LEFT of the text. Group labels use the same
+   `inset` so EVERYTHING (label, link text, active text) shares one left edge,
+   and only the pill background extends left of it. */
 .sidebar-content a {
   padding-inline: var(--gen-pill-pad) !important;
   margin-inline: calc(var(--gen-nav-inset) - var(--gen-pill-pad)) 0.4rem !important;
@@ -575,7 +577,10 @@ nav.sidebar-pane:where([class*="astro-"]) { --sl-sidebar-pad-x: 0px !important; 
   color: #c5cad3;
   opacity: 1;
   margin-bottom: 0.45rem;
-  padding-inline: var(--gen-nav-inset) 0.7rem;
+  /* Match the link TEXT edge: links resolve to pane-edge + nav-inset, but the
+     label sits one DOM level out (no link margin), so it needs the link's full
+     effective inset = nav-inset + the link's own padding-derived offset. */
+  padding-inline: 0.75rem 0.7rem !important;
 }
 
 /* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
