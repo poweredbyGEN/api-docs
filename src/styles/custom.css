@@ -120,11 +120,17 @@
 .gen-sidebar-search {
   margin: 0 0 1rem;
   padding-block-start: 0.5rem;
-  padding-inline: 1.25rem 0.5rem; /* = pill left padding, aligns search with logo */
+  /* Search box left edge already lands on the nav-item edge at zero inset
+     (the button's own padding ≈ --gen-nav-inset). Measured: search 69px,
+     nav items 70px — aligned. Do NOT add --gen-nav-inset here or it double-insets. */
+  padding-inline: 0 0.4rem;
+  margin-inline: 0;
 }
 .gen-sidebar-search :global(button[data-open-modal]),
 .gen-sidebar-search button {
-  width: 100%;
+  width: 100% !important;
+  max-width: none !important;          /* drop Starlight's 22rem cap so it fills the nav width */
+  margin-inline: 0 !important;         /* no extra inset — wrapper sets the edge */
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid var(--gen-hairline) !important;
   border-radius: 10px !important;
@@ -505,11 +511,24 @@ nav.sidebar ul ul li,
   margin-inline-start: 0 !important;
   padding-inline-start: 0 !important;
 }
-/* Sub-item links: align with the group label via MARGIN (not padding) so the
-   active pill wraps its text with EVEN padding on both sides — not a full-width
-   box with a big empty left gutter. Pill indent = group-label indent (1.25rem)
-   minus the link's own 0.6rem padding, so text still lines up under the logo. */
-.sidebar-content a { padding-inline: 0.6rem !important; margin-inline: 0.65rem 0.4rem !important; }
+/* ─────────────────────────────────────────────────────────────────────
+   SINGLE SOURCE OF TRUTH for the left-nav column edge.
+   --gen-nav-inset = the gap from the sidebar pane's left edge to where ALL
+   nav text (group labels, items, active-pill text, search) must start so it
+   lines up under the GEN logo. Tune ONLY this one value.
+   The active pill / item background uses a small symmetric pad (--gen-pill-pad)
+   and is pulled left by that same pad via negative margin, so the pill wraps
+   its text evenly AND the text still sits at --gen-nav-inset. ───────────── */
+:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 0.6rem; }
+/* Kill Starlight's own sidebar container padding so --gen-nav-inset is the
+   ONLY horizontal inset (otherwise it stacks and pushes everything right). */
+.sidebar-content:where([class*="astro-"]),
+nav.sidebar-pane:where([class*="astro-"]) { --sl-sidebar-pad-x: 0px !important; padding-inline: 0 !important; }
+
+.sidebar-content a {
+  padding-inline: var(--gen-pill-pad) !important;
+  margin-inline: calc(var(--gen-nav-inset) - var(--gen-pill-pad)) 0.4rem !important;
+}
 /* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
 :root {
   --sl-sidebar-width: 15rem;     /* was 18.75rem */
@@ -543,7 +562,7 @@ nav.sidebar ul ul li,
   color: #c5cad3;
   opacity: 1;
   margin-bottom: 0.45rem;
-  padding-inline: 1.25rem 0.7rem;
+  padding-inline: var(--gen-nav-inset) 0.7rem;
 }
 
 /* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
