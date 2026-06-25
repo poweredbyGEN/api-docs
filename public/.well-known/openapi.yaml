@@ -1261,10 +1261,18 @@ paths:
                   example: "text"
                 data:
                   type: object
-                  description: Generation parameters (varies by type).
+                  description: |
+                    Generation parameters (varies by type). Video generation card data may include
+                    `aspect_ratio`, `duration`, optional `resolution` (`1080p` or `720p` where
+                    supported), and optional `native_audio` for models that support native audio.
+                    Omitted optional fields use the cell defaults or the closest supported model defaults.
                   example:
-                    prompt: "Write a TikTok script about morning routines"
-                    model: "gemini_2_0_flash"
+                    prompt: "A handheld product demo video"
+                    model: "veo_3"
+                    aspect_ratio: "9:16"
+                    resolution: "1080p"
+                    duration: 10
+                    native_audio: false
       responses:
         '201':
           description: Generation started
