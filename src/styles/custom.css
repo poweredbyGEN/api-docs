@@ -519,7 +519,7 @@ nav.sidebar ul ul li,
    The active pill / item background uses a small symmetric pad (--gen-pill-pad)
    and is pulled left by that same pad via negative margin, so the pill wraps
    its text evenly AND the text still sits at --gen-nav-inset. ───────────── */
-:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 0.6rem; }
+:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 1.25rem; }
 /* Kill Starlight's own sidebar container padding so --gen-nav-inset is the
    ONLY horizontal inset (otherwise it stacks and pushes everything right). */
 .sidebar-content:where([class*="astro-"]),
