@@ -503,10 +503,13 @@ nav.sidebar li {
 /* THE actual rail line: Starlight scopes it onto the nested <li> via
    :where(.astro-XXXX). Kill the border + ALL left indent so sub-items align
    FLUSH with their group title (z.ai). */
+/* IMPORTANT: scope this rail-reset to ul/li ONLY — never to <a> — or it forces
+   padding-inline-start:0 on the link and kills the active-pill left gutter. */
 .sidebar-content ul ul li,
 .sidebar-content ul ul,
 nav.sidebar ul ul li,
-.sidebar-content [class*="astro-"] ul [class*="astro-"] {
+.sidebar-content [class*="astro-"] ul li[class*="astro-"],
+.sidebar-content [class*="astro-"] ul ul[class*="astro-"] {
   border-inline-start: 0 !important;
   margin-inline-start: 0 !important;
   padding-inline-start: 0 !important;
@@ -519,12 +522,22 @@ nav.sidebar ul ul li,
    The active pill / item background uses a small symmetric pad (--gen-pill-pad)
    and is pulled left by that same pad via negative margin, so the pill wraps
    its text evenly AND the text still sits at --gen-nav-inset. ───────────── */
-:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 1.25rem; }
+/* The real sidebar link is `a.astro-gwczggwz` (text in a child <span>); its
+   left padding comes from Starlight's --sl-sidebar-item-padding-inline, and the
+   pill background is drawn on that <a>. So: set the item padding = the gutter we
+   want INSIDE the pill, and pull the whole row LEFT by that same amount with a
+   negative container margin, so the pill bg has a real left gutter before the
+   text WHILE the text still lands on the nav edge under the logo. */
+:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 0.85rem; }
 /* Kill Starlight's own sidebar container padding so --gen-nav-inset is the
    ONLY horizontal inset (otherwise it stacks and pushes everything right). */
 .sidebar-content:where([class*="astro-"]),
 nav.sidebar-pane:where([class*="astro-"]) { --sl-sidebar-pad-x: 0px !important; padding-inline: 0 !important; }
 
+/* Drive the link padding through Starlight's own variable (this is what the
+   scoped a.astro-* rule actually reads) + offset the whole list left so the
+   pill gutter sits OUTSIDE the nav edge. */
+.sidebar-content { --sl-sidebar-item-padding-inline: var(--gen-pill-pad); }
 .sidebar-content a {
   padding-inline: var(--gen-pill-pad) !important;
   margin-inline: calc(var(--gen-nav-inset) - var(--gen-pill-pad)) 0.4rem !important;
