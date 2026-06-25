@@ -120,11 +120,14 @@
 .gen-sidebar-search {
   margin: 0 0 1rem;
   padding-block-start: 0.5rem;
-  /* Search box left edge already lands on the nav-item edge at zero inset
-     (the button's own padding ≈ --gen-nav-inset). Measured: search 69px,
-     nav items 70px — aligned. Do NOT add --gen-nav-inset here or it double-insets. */
+  /* Search box left edge lands on the nav-item TEXT edge at zero inset. To make
+     it line up with the active PILL's left edge instead (the pill extends
+     --gen-pill-pad left of the text), pull the search left by that same amount. */
   padding-inline: 0 0.4rem;
-  margin-inline: 0;
+  /* Align the search box LEFT edge with the active pill's left edge (pill sits
+     at nav-inset − pill-pad). Measured on the real page: this +0.4rem lands the
+     search box on the pill edge. */
+  margin-inline: 0.4rem 0;
 }
 .gen-sidebar-search :global(button[data-open-modal]),
 .gen-sidebar-search button {
