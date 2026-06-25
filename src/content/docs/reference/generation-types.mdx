@@ -66,13 +66,15 @@ Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2
     "prompt": "San Antonio taco truck at golden hour, steam rising, handheld camera",
     "model": "veo_3",
     "aspect_ratio": "9:16",
+    "resolution": "1080p",
     "duration": 10,
+    "native_audio": false,
     "negative_prompt": "no text overlays, no logos"
   }
 }
 ```
 
-Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration is model-dependent.
+Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent. Use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ## Video from Image
 
@@ -85,12 +87,14 @@ Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2
     "prompt": "zoom in slowly, handheld feel",
     "model": "kling_2_6",
     "aspect_ratio": "9:16",
+    "resolution": "1080p",
+    "native_audio": false,
     "duration": 5
   }
 }
 ```
 
-`image_tail_resource_id` optional — provides a target end frame for the video.
+`image_tail_resource_id` optional — provides a target end frame for the video. `resolution` and `native_audio` are optional and model-dependent.
 
 ## Video from Ingredients
 
@@ -102,12 +106,14 @@ Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2
     "model": "pika",
     "asset_resource_ids": [4821, 4822, 4823],
     "aspect_ratio": "9:16",
+    "resolution": "1080p",
+    "native_audio": false,
     "duration": 5
   }
 }
 ```
 
-Use when you want the generator to composite multiple uploaded assets.
+Use when you want the generator to composite multiple uploaded assets. `resolution` and `native_audio` are optional and model-dependent.
 
 ## Speech from Text
 

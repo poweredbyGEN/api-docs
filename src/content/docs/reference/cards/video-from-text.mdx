@@ -57,7 +57,9 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.negative_prompt` | string | No | What to avoid in the generated video. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
 | `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
+| `data.resolution` | string | No | Output resolution. Use `"1080p"` or `"720p"` when supported by the selected model. If omitted, the API uses the cell default or the closest supported model default. |
 | `data.duration` | integer | No | Video duration in seconds. |
+| `data.native_audio` | boolean | No | Request native audio when supported by the selected video model. Defaults to `false` when omitted. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
 | `data.negative_prompt_var` | string | No | Variable name to map the negative prompt from a column. |
 
@@ -85,10 +87,12 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3100/generate?agent_id=4
   -d '{
     "generation_type": "video_from_text",
     "data": {
-      "prompt": "A drone shot flying over a tropical beach at golden hour, waves gently crashing on white sand, cinematic 4K",
+      "prompt": "A drone shot flying over a tropical beach at golden hour, waves gently crashing on white sand, cinematic",
       "negative_prompt": "text, watermark, blurry, low quality",
       "model": "veo_3",
       "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "native_audio": false,
       "duration": 10
     }
   }'
@@ -128,5 +132,6 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3100/generate?agent_id=4
 |-------|------|-------------|
 | `model` | string | Default model: `"veo_3"`, `"veo_3_fast"`, `"veo_3_1"`, `"veo_3_1_fast"`, `"sora_2"`, `"kling_1_6"`, `"seedance_pro"`, `"seedance_pro_1_5"`, or `"grok"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
+| `resolution` | string | Default output resolution for supported video models: `"1080p"` or `"720p"`. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

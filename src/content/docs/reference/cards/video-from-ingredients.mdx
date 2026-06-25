@@ -54,7 +54,9 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.asset_resource_ids` | array | Yes | Array of content resource IDs to include in the generation. |
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
 | `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
+| `data.resolution` | string | No | Output resolution. Use `"1080p"` or `"720p"` when supported by the selected model. If omitted, the API uses the cell default or the closest supported model default. |
 | `data.duration` | integer | No | Video duration in seconds. |
+| `data.native_audio` | boolean | No | Request native audio when supported by the selected video model. Defaults to `false` when omitted. |
 | `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
 | `data.content_resource_vars` | array | No | Variable names to map content resource IDs from columns. |
 
@@ -90,6 +92,8 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3300/generate?agent_id=4
       "model": "pika",
       "asset_resource_ids": [501, 502],
       "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "native_audio": false,
       "duration": 5
     }
   }'
@@ -129,5 +133,6 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3300/generate?agent_id=4
 |-------|------|-------------|
 | `model` | string | Default model: `"kling_1_6"`, `"seedance_lite"`, `"pika"`, `"veo_3_1"`, `"veo_3_1_fast"`, or `"grok"`. |
 | `ratio` | string | Default aspect ratio. |
+| `resolution` | string | Default output resolution for supported video models: `"1080p"` or `"720p"`. |
 | `duration` | number | Default duration in seconds. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
