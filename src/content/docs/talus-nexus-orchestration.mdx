@@ -1,0 +1,160 @@
+---
+title: "Talus Nexus Orchestration"
+description: "Talus keeper/orchestration role and non-load-bearing constraints."
+---
+
+# Talus Nexus Orchestration
+
+Talus Nexus is a candidate decentralized orchestration layer for XEL Living Character runtimes.
+It is a swappable provider slot implementation, not a protocol dependency. It should not be
+described as the raw LLM, the first direct inference provider, or a replacement for the selected
+inference provider. XEL's immediate decentralized direct inference target is Chutes SN64, with
+Verathos SN96 retained as a fallback/alternate.
+
+## Role In XEL
+
+Nexus can be evaluated as a workflow layer around XEL runtime operations. The useful candidate
+shape is:
+
+```text
+memory retrieval -> inference provider call -> payment/metering -> memory write-back -> receipts
+```
+
+In this model, Talus/Nexus coordinates tools and workflow state. The actual inference step is still
+performed by a named model provider such as Verathos, Chutes, GEN runtime, or another provider
+selected by `provider_policy`. Response metadata must keep those identities separate:
+
+| Field | Example value | Meaning |
+|---|---|---|
+| `orchestration_provider` | `talus_nexus` | Workflow coordination layer. |
+| `workflow_ref` | Nexus workflow, tool, or receipt reference. | Proof that orchestration ran. |
+| `inference_provider` | `chutes` | Service that executed the chat completion. |
+| `model_id` | `Qwen/Qwen3-32B-TEE` | Model selected for generation. |
+| `payment_ref` | x402, Sui, Nexus, or provider receipt reference. | Settlement or metering evidence. |
+
+## Candidate Runtime Flow
+
+1. XEL authenticates the caller and verifies the Living Character aNFT, owner/delegate state,
+   pause state, visibility, password/payment access, and spend policy.
+2. XEL runtime resolves the authorized persona artifact, memory snapshot, access policy, and
+   provider policy.
+3. Nexus coordinates a retrieval tool that reads only authorized memory refs or derived retrieval
+   indexes.
+4. Nexus coordinates an inference tool that calls the selected direct provider, initially
+   Chutes for decentralized inference with Verathos as fallback.
+5. Nexus coordinates payment, gas-budget, or metering steps where the configured payment rail
+   supports it.
+6. XEL runtime applies post-processing and owner policy before any durable write-back.
+7. Nexus coordinates write-back to encrypted memory substrate or public/redacted provenance only
+   when XEL policy allows it.
+8. XEL records orchestration, provider, payment, and receipt refs without exposing private prompts,
+   decrypted memory, provider secrets, or user-private content.
+
+## Boundary With XEL Root Protocol
+
+Talus must remain outside XEL's root identity and contract boundary unless a later protocol version
+explicitly adopts a Talus-specific provider capability. Even then, that capability must remain
+replaceable through provider policy and schema-compatible alternatives.
+
+XEL-owned surfaces:
+
+- Living Character aNFT root object;
+- Proof of Genesis records and references;
+- ownership, delegate, pause, migration, and lineage authority;
+- spend-policy authority and wallet bindings;
+- XEL-authored Sui Move contracts, schemas, manifests, and public protocol releases.
+
+Talus/Nexus candidate surfaces:
+
+- workflow DAGs and tool composition;
+- off-chain tool coordination;
+- tool registry and tool monetization;
+- orchestration receipts or workflow references;
+- optional coordination of payment, inference calls, storage actions, and write-back actions.
+- optional keeper/heartbeat participation only as a plain sender of XEL's own permissionless
+  `treasury::heartbeat` transaction.
+
+A Talus Agent Package or Nexus workflow may reference an XEL Living Character, but it should not
+become the source of truth for XEL identity, ownership, lineage, Proof of Genesis, or spend-policy
+authority.
+
+## Trust Assumptions
+
+Before adopting Talus/Nexus as a supported orchestration provider, XEL should document and test
+these assumptions:
+
+- Leader/network trust: what entity executes off-chain tools today, what is decentralized, and
+  what can be independently verified.
+- Tool integrity: how a Nexus tool declares its schema, endpoint, version, owner, pricing, and
+  expected input/output commitments.
+- Secret handling: whether provider API keys, decrypted prompts, memory payloads, and payment
+  credentials are ever visible to Talus-operated infrastructure or third-party tool operators.
+- Access control: how Nexus execution proves that XEL owner/delegate/spend/access policy was
+  checked before retrieval, inference, payment, or write-back.
+- Receipt quality: whether workflow receipts identify each step, provider, model, amount, status,
+  and failure reason with enough stability for XEL reconciliation.
+- Failure semantics: how partial workflow failures roll back, retry, expire, or emit receipts
+  without double-charging or writing unauthorized memory.
+- Data retention: what logs, traces, tool inputs, model outputs, and receipts are retained by
+  Talus, tool providers, and direct inference providers.
+- Upgrade control: who can update a workflow, tool, or package used by an XEL character, and how
+  owners are warned before behavior changes.
+- Economic risk: whether gas budgets, tool fees, token requirements, and payment rails are stable
+  enough for XEL's activation threshold and runtime runway model.
+- Provider-swap risk: whether an owner can remove Talus from provider policy and continue with XEL
+  cron, another orchestrator, another keeper, or self-hosted execution without migrating identity.
+
+## Open Questions
+
+- Can a Nexus workflow call Verathos through an OpenAI-compatible tool while preserving Verathos
+  provider ID, model ID, token usage, and payment metadata?
+- What receipt format does Nexus expose for multi-step workflows, and can XEL map it to existing
+  payment/provider receipt fields without schema churn?
+- Does Nexus support x402 directly, Sui-native payment authorization, or only workflow-local gas
+  and tool budget handling?
+- Can XEL require a workflow to verify aNFT ownership, delegate scope, pause state, and spend
+  policy before execution?
+- Can private persona artifacts and encrypted memory remain outside Talus infrastructure, with
+  only redacted refs and authorized tool inputs passed into workflows?
+- How are workflow upgrades, tool endpoint changes, and package migrations announced and approved?
+- What are the latency and reliability costs of adding Nexus around a simple chat request?
+- Which parts of Nexus are live, audited, open source, or still roadmap-dependent?
+- What conformance tests should XEL require before listing Talus/Nexus as a supported
+  orchestration provider?
+
+## Adoption Criteria
+
+Talus/Nexus should remain a swappable candidate provider until XEL can verify:
+
+- a working workflow for retrieval, Verathos inference, metering/payment, write-back, and receipt
+  capture;
+- clear separation between orchestration metadata and direct inference metadata;
+- no leakage of private prompts, decrypted memory, provider keys, or private receipts;
+- owner-policy enforcement before payment and write-back;
+- stable public docs for workflow/tool schemas, receipt fields, failure handling, and upgrades;
+- acceptable operational latency and retry behavior for interactive chat.
+
+For the heartbeat keeper slot specifically, the accepted launch path is Talus Leader as a
+permissionless transaction sender. The rejected path is adopting Talus Nexus DAG execution, Talus
+gas service, or Talus token rails as part of the character survival path.
+
+## Heartbeat Keeper Adapter
+
+XEL now exposes a concrete runtime adapter interface for the keeper slot in
+`runtime/keepers/talus-leader-heartbeat.mjs`. The interface is intentionally provider-swappable:
+Talus Leader is the launch candidate, but any keeper can use the same unsigned transaction plan if
+it self-funds Sui gas and submits XEL's own Move call:
+
+```text
+<XEL_SUI_PACKAGE_ID>::treasury::heartbeat<T>(
+  character,
+  endowment,
+  net_yield,
+  clock
+)
+```
+
+The adapter plan is not a Nexus workflow and does not ask Talus to hold survival-path authority. It
+requires only object refs for the Living Character, endowment, realized-yield coin, and Sui clock,
+plus a keeper signer that pays its own Sui gas. It rejects Talus Nexus DAG execution, Talus gas
+service, and Talus `$US` token rails for the survival path before building a plan.

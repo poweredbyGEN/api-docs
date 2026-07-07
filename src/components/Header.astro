@@ -1,129 +1,128 @@
 ---
-/**
- * Override of Starlight's Header — mirrors the gen.pro homepage nav.
- *
- * A fixed, centered floating glass PILL (the exact homepage gradient + 0.5px
- * hairline + blur) holding: GEN logo (left) · the homepage nav links
- * Home / Managed / Pricing pointing back to gen.pro (center) · an "Open app"
- * gradient pill button (right). Search lives in Starlight's normal place; the
- * standard left page-tree sidebar is restored. Theme toggle + socials are in
- * the footer (Footer.astro).
- */
-
 const NAV = [
-	{ label: 'Home', href: 'https://gen.pro/' },
-	{ label: 'Managed', href: 'https://gen.pro/managed' },
-	{ label: 'Pricing', href: 'https://gen.pro/pricing' },
-	{ label: 'MCP', href: 'https://gen.pro/mcpapi' },
-	{ label: 'API', href: '/', active: true },
+	{ label: 'Home', href: 'https://xel.xyz/' },
+	{ label: 'Create', href: 'https://xel.xyz/create' },
+	{ label: 'Providers', href: 'https://xel.xyz/providers' },
+	{ label: 'Docs', href: '/', active: true },
 ];
 ---
 
-<header class="gen-header">
-	<div class="gen-pill">
-		<a href="https://gen.pro/" class="gen-pill-logo" aria-label="GEN home">
-			<img src="/logo.svg" alt="GEN" />
+<header class="xel-header">
+	<div class="xel-pill">
+		<a href="https://xel.xyz/" class="xel-pill-logo" aria-label="XEL home">
+			<img src="/logo.svg" alt="XEL" />
 		</a>
 
-		<nav class="gen-pill-nav" aria-label="Main">
+		<nav class="xel-pill-nav" aria-label="Main">
 			{
 				NAV.map((n) => (
-					<a href={n.href} class:list={['gen-pill-link', { 'is-active': n.active }]}>
+					<a href={n.href} class:list={['xel-pill-link', { 'is-active': n.active }]}>
 						{n.label}
 					</a>
 				))
 			}
 		</nav>
 
-		<div class="gen-pill-right">
-			<a href="https://gen.pro/home" class="gen-pill-cta" target="_blank" rel="noopener">
-				Open app
-			</a>
-		</div>
+		<a href="https://xel.xyz/create" class="xel-pill-cta">
+			Create
+		</a>
 	</div>
 </header>
 
 <style>
-	.gen-header {
+	.xel-header {
 		position: fixed;
 		inset-inline: 0;
 		top: 0;
 		z-index: var(--sl-z-index-navbar, 50);
-		/* same outer gutter as the content (1.5rem) so pill + columns align */
-		padding: 1.5rem 1.5rem 0;
+		padding: 1rem clamp(0.75rem, 2vw, 1.5rem) 0;
 		pointer-events: none;
 	}
-	.gen-pill {
+	.xel-pill {
 		pointer-events: auto;
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-		height: 3rem;
-		max-width: 1410px;        /* match the gen.pro homepage nav width */
+		height: 3.25rem;
+		max-width: 1240px;
 		margin: 0 auto;
-		padding: 0 0.5rem 0 1.25rem;
+		padding: 0 0.5rem 0 1.15rem;
+		border: 1px solid hsl(0 0% 100% / 0.12);
 		border-radius: 9999px;
-		border: 0.5px solid #ffffff3d;
-		backdrop-filter: blur(8px);
-		background: radial-gradient(
-			49.97% 85.77% at 51% 5.12%,
-			rgba(218, 166, 255, 0.08) 0%,
-			rgba(53, 59, 75, 0.08) 45.83%,
-			rgba(88, 91, 99, 0.04) 100%
-		);
+		background: hsl(0 0% 7% / 0.78);
+		backdrop-filter: blur(18px);
+		box-shadow: 0 14px 40px hsl(0 0% 0% / 0.28);
 	}
-	.gen-pill-logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
-	.gen-pill-logo img { height: 1.4rem; width: auto; display: block; }
-
-	.gen-pill-nav {
+	.xel-pill-logo {
+		display: inline-flex;
+		align-items: center;
+		color: #fff;
+		flex: 0 0 auto;
+	}
+	.xel-pill-logo img {
+		display: block;
+		width: auto;
+		height: 1.35rem;
+		filter: brightness(0) invert(1);
+	}
+	.xel-pill-nav {
 		display: flex;
 		align-items: center;
-		gap: 1.5rem;
+		gap: clamp(1rem, 2vw, 1.6rem);
 		margin-inline: auto;
 	}
-	.gen-pill-link {
+	.xel-pill-link {
 		position: relative;
-		white-space: nowrap;
-		font-size: 0.9375rem;
-		font-weight: 500;
-		color: #b9bcc1;
+		color: hsl(0 0% 78%);
+		font-size: 0.9rem;
+		font-weight: 600;
 		text-decoration: none;
-		transition: color 0.15s ease;
+		white-space: nowrap;
+		transition: color 0.16s ease;
 	}
-	.gen-pill-link:hover,
-	.gen-pill-link.is-active { color: #fff; }
-	.gen-pill-link.is-active::after {
+	.xel-pill-link:hover,
+	.xel-pill-link.is-active {
+		color: #fff;
+	}
+	.xel-pill-link.is-active::after {
 		content: '';
 		position: absolute;
-		inset-inline: 0;
-		bottom: -0.55rem;
-		height: 1px;
-		background: linear-gradient(90deg, rgba(5, 5, 5, 0) 0%, #fff 50%, rgba(5, 5, 5, 0) 100%);
+		inset-inline: 15%;
+		bottom: -0.62rem;
+		height: 2px;
+		border-radius: 999px;
+		background: linear-gradient(90deg, #ff6ef4, #ffb534, #76ff9a);
 	}
-
-	.gen-pill-right { display: flex; align-items: center; gap: 0.75rem; flex: 0 0 auto; }
-	.gen-pill-cta {
+	.xel-pill-cta {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		height: 2.25rem;
-		padding: 0 1.1rem;
+		padding: 0 1.15rem;
 		border-radius: 9999px;
-		border: 0.5px solid #ffffff42;
-		background-image: linear-gradient(to right, #524caf 0%, #a29cff 50%, #524caf 100%);
-		background-size: 200% auto;
-		background-position: left;
+		background: linear-gradient(135deg, #ff6ef4, #ffb534);
 		color: #fff;
 		font-size: 0.875rem;
-		font-weight: 600;
-		letter-spacing: -0.01em;
+		font-weight: 700;
 		text-decoration: none;
-		transition: background-position 0.6s ease;
+		box-shadow: 0 2px 16px hsl(312 100% 70% / 0.26);
 	}
-	.gen-pill-cta:hover { background-position: right; }
-
+	.xel-pill-cta:hover {
+		filter: brightness(1.06);
+	}
 	@media (max-width: 50rem) {
-		.gen-header { padding: 0.75rem 0.75rem 0; }
-		.gen-pill-nav { display: none; }
+		.xel-header {
+			padding-top: 0.75rem;
+		}
+		.xel-pill {
+			height: 3rem;
+			padding-inline-end: 3.25rem;
+		}
+		.xel-pill-nav {
+			display: none;
+		}
+		.xel-pill-cta {
+			display: none;
+		}
 	}
 </style>

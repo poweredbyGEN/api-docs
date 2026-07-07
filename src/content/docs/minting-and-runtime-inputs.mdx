@@ -1,0 +1,161 @@
+---
+title: "Minting and Runtime Inputs"
+description: "Inputs required to mint and run a Living Character."
+---
+
+# Minting and Runtime Inputs
+
+This document defines the inputs a wallet, app, or provider should gather before minting
+a Living Character and the separate runtime configuration needed to operate it after
+mint. It is descriptive protocol documentation, not a JSON Schema. The canonical
+schemas will live under `schemas/` when that workstream is ready.
+
+## Scope
+
+Minting records the Living Character's durable identity, ownership, persona source, and
+genesis proof. Runtime configuration controls how the character is served, authenticated,
+funded, and updated after mint.
+
+These inputs are intentionally separate:
+
+| Input set | Used for | Mutable after mint |
+|---|---|---|
+| Mint manifest | Creating the aNFT and Proof of Genesis | Only through protocol-defined updates or migrations |
+| Runtime config | Operating the character in apps, agents, and provider runtimes | Yes, by owner/delegate policy |
+
+## Chain and Sign-In Defaults
+
+Sui is the default home chain for XEL Living Characters. Mint manifests should assume
+`home_chain: "sui"` unless the owner explicitly chooses a future supported chain or
+bridge policy.
+
+Immediate wallet sign-in scope is:
+
+- Sui wallet signature login as the default path.
+- Phantom wallet support in the immediate scope.
+
+Solana and Base/EVM sign-in are future linked-wallet options, not current authentication
+requirements. Wallet sign-in authenticates the XEL user; it is separate from the Living
+Character's own owner, delegate, treasury, and runtime wallets.
+
+## Mint Manifest Inputs
+
+A mint manifest is the pre-mint package used to create the Living Character's on-chain
+root object and Proof of Genesis. It should contain enough information for a client,
+indexer, or runtime to understand what was minted without exposing private persona
+material.
+
+Recommended top-level fields:
+
+| Field | Purpose |
+|---|---|
+| `manifest_version` | Version of the mint manifest shape used by the client. |
+| `character` | Public name, handle, description, tags, and public profile assets. |
+| `home_chain` | Default chain for ownership and protocol state. Defaults to `sui`. |
+| `owner` | User wallet and sign-in method that authorizes minting. |
+| `persona_input` | Persona source used at mint. See modes below. |
+| `storage` | Content-addressed references for public assets and encrypted private artifacts. |
+| `authority` | Owner, delegate, update, pause, and migration permissions. |
+| `treasury` | Character funding wallet and spend policy defaults. |
+| `proof_of_genesis` | Hashes, timestamps, source attestations, and creator acknowledgements. |
+
+### Persona Input Modes
+
+Minting must accept either persona path:
+
+1. Direct user-supplied prompt.
+   The user supplies the persona/system prompt or a user-authored persona artifact
+   directly. This is the neutral open-protocol path and does not require GEN.
+
+2. GEN-synthesized classified persona artifact.
+   GEN may synthesize a private, encrypted persona artifact from user inputs, files,
+   social context, or assets. The classified prompt does not need to be visible in the
+   mint manifest. The manifest should reference the encrypted artifact, its digest, and
+   enough provenance to verify that the owner authorized its use.
+
+The protocol must not require GEN synthesis. GEN synthesis is an optional producer of a
+persona artifact that the protocol can accept.
+
+### Direct Prompt Manifest Shape
+
+For direct prompt mode, `persona_input` should identify the input as user-authored and
+include either the prompt body or a content-addressed reference to it.
+
+```json
+{
+  "persona_input": {
+    "mode": "direct_prompt",
+    "visibility": "owner_controlled",
+    "prompt": {
+      "content_type": "text/plain",
+      "text": "You are Aria, a thoughtful music historian..."
+    },
+    "author_wallet": "sui:0x...",
+    "prompt_digest": "sha256:..."
+  }
+}
+```
+
+If the direct prompt is private, store an encrypted artifact and include only the
+reference and digest in the mint manifest.
+
+### GEN-Synthesized Artifact Manifest Shape
+
+For GEN synthesized mode, `persona_input` should reference the classified artifact
+instead of embedding the private prompt.
+
+```json
+{
+  "persona_input": {
+    "mode": "gen_synthesized_classified_artifact",
+    "visibility": "classified_encrypted",
+    "artifact_ref": "walrus://...",
+    "artifact_digest": "sha256:...",
+    "synthesis_provider": "GEN",
+    "owner_authorization": {
+      "wallet": "sui:0x...",
+      "signature": "base64..."
+    }
+  }
+}
+```
+
+The public manifest may include high-level provenance such as source categories,
+creation timestamp, and provider attestation. It should not expose private user files,
+social data, or the synthesized system prompt unless the owner explicitly chooses that
+visibility.
+
+## Runtime Config Inputs
+
+Runtime config is the operating profile for serving the Living Character after mint. It
+can be hosted by GEN, another provider, or a self-hosted runtime.
+
+Recommended top-level fields:
+
+| Field | Purpose |
+|---|---|
+| `runtime_version` | Version of the runtime config shape used by the provider. |
+| `character_ref` | aNFT object ID, home chain, and Proof of Genesis reference. |
+| `auth` | User sign-in and wallet-linking rules. |
+| `persona_resolution` | How the runtime loads direct prompts or encrypted artifacts. |
+| `providers` | Inference, retrieval, storage, encryption, and indexer providers. |
+| `memory` | Memory namespaces, retention, retrieval policy, and owner controls. |
+| `wallets` | Runtime, delegate, and treasury wallet references. |
+| `spend_policy` | Budgets, approvals, payment rails, and disallowed actions. |
+| `safety` | Refusal policy, pause controls, rate limits, and escalation hooks. |
+| `publishing` | XEL.xyz and external app publication settings. |
+
+The runtime should resolve the persona through the declared `persona_input.mode`:
+
+- `direct_prompt`: load the prompt directly or from the referenced encrypted object.
+- `gen_synthesized_classified_artifact`: load and decrypt the classified artifact only
+  when the owner/delegate policy allows it.
+
+## Example Files
+
+- `examples/mint-manifest.direct-prompt.json` shows a Sui-home mint using a direct
+  user-supplied prompt.
+- `examples/mint-manifest.gen-synthesized-artifact.json` shows a Sui-home mint using a
+  GEN-synthesized classified persona artifact.
+- `examples/runtime-config.sui.json` shows a Sui-first runtime config with Sui and
+  Phantom in the immediate sign-in scope.

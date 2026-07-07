@@ -1,0 +1,231 @@
+---
+title: "XEL Architecture Boundaries"
+description: "What belongs to XEL protocol, XEL.xyz, providers, contracts, and GEN services."
+---
+
+# XEL Architecture Boundaries
+
+XEL is an open protocol for Living Characters. GEN can publish into XEL and provide hosted
+services around it, but GEN is not the protocol boundary. This document defines what belongs in
+the open protocol, what lives on-chain, what is delegated to third-party providers, what is
+presented at XEL.xyz, and what remains a GEN-provided service.
+
+## Boundary Principles
+
+- A Living Character must be mintable and runnable without GEN persona synthesis.
+- Protocol artifacts must stay provider-neutral: schemas define required capabilities, not a
+  preferred vendor implementation.
+- GEN-specific services may improve the creation, hosting, monitoring, billing, and support
+  experience, but they are optional product layers unless a schema explicitly marks an input as
+  required.
+- Official packages, contracts, schemas, manifests, and protocol releases should be authored and
+  signed as XEL, not GEN.
+- On-chain contracts enforce identity, ownership, authority, lineage, spend policy, pause, and
+  migration. They do not embed private prompts, provider credentials, or hosted-runtime logic.
+- Existing GEN-4014 x402 wallet ledger and agent-discovery work is an integration input for XEL.
+  XEL should verify and reference that work instead of rebuilding it inside this repo.
+- GEN-4013 persona synthesis is a GEN add-on. XEL defines the persona artifact boundary only and
+  does not duplicate the synthesis implementation.
+
+## Open Source Protocol
+
+The open source protocol is the neutral contract between creators, owners, wallets, runtimes,
+storage systems, and discovery surfaces.
+
+Included:
+
+- Protocol concepts and terminology: Living Character, aNFT, Proof of Genesis, authority,
+  delegates, memory roots, runtime manifests, and migration.
+- JSON schemas for mint manifests, persona artifacts, runtime configuration, provider capability
+  descriptors, discovery metadata, and Proof of Genesis records.
+- Reference interfaces for wallets, storage, encryption, inference, retrieval, payment, discovery,
+  and runtime providers.
+- Invariant and conformance tests that validate protocol behavior independent of any one vendor.
+- Example manifests and reference runtime configs that show valid protocol use without requiring
+  GEN-hosted services.
+- Deployment and migration documentation for open protocol components.
+
+Excluded:
+
+- GEN app implementation details.
+- GEN persona synthesis pipelines, DW social ingestion, `gen.pro/assets` evidence processing, or
+  private classification logic from GEN-4013.
+- Hosted billing, support, monitoring, admin tooling, and provider orchestration.
+- Third-party provider credentials, commercial contracts, or private operational runbooks.
+
+## On-Chain Contracts
+
+The on-chain layer is the source of authority for the aNFT and protocol-enforced rights.
+
+Included:
+
+- Sui Move packages for aNFT identity, ownership, transfer, delegation, lineage, pause, recovery,
+  migration, and spend policy.
+- Proof of Genesis anchoring and references to off-chain content-addressed artifacts.
+- Owner and delegate authority checks for updates that affect character state, provider bindings,
+  treasury policy, or migration.
+- Contract-level events needed by indexers, XEL.xyz, wallets, and third-party runtimes.
+- Invariant tests covering ownership, authorization, pause, migration, lineage integrity, and
+  spend-policy constraints.
+
+Excluded:
+
+- Raw persona text or private system prompts.
+- Provider API keys, runtime secrets, or encrypted payload decryption keys.
+- Hosted inference, storage retrieval, billing execution, moderation queues, or support workflows.
+- Chain-specific wallet login UX for XEL.xyz user accounts; wallet sign-in is an application auth
+  concern separate from a Living Character's ownership and treasury policy.
+
+## Third-Party Providers
+
+Third-party providers supply replaceable infrastructure around the protocol.
+
+Provider categories:
+
+- Storage and retrieval providers such as Walrus or other content-addressed storage systems.
+- Encryption and access-control providers such as Seal or equivalent key-management layers.
+- Sui RPC nodes, indexers, event processors, and wallet adapters.
+- Wallets, including Sui wallet sign-in as the default user-auth path and Phantom support in the
+  immediate scope where applicable.
+- Inference providers, embedding providers, memory stores, and retrieval systems.
+- Payment facilitators, x402-compatible payment services, treasury venues, staking venues, and
+  oracles.
+- Agent-discovery surfaces and metadata registries, using GEN-4014 work as an existing input where
+  it fits the XEL protocol.
+
+Protocol expectations:
+
+- Providers should be swappable behind capability descriptors and runtime configuration.
+- Provider-specific extensions must not become required protocol fields unless adopted through a
+  documented protocol version.
+- Provider failures should be representable in runtime status and observability records without
+  requiring GEN systems.
+- Credentials and commercial terms stay outside the open protocol repository.
+
+## XEL.xyz
+
+XEL.xyz is the public destination for the protocol and for published Living Characters.
+
+Included:
+
+- Public documentation for the protocol, schemas, contracts, provider interfaces, and examples.
+- Published Living Character pages that can display public metadata, provenance, ownership state,
+  lineage, authorized delegates, runtime availability, and Proof of Genesis references.
+- Wallet-based user onboarding and sign-in for public product flows, with Sui as the default path
+  and Phantom support in the immediate scope.
+- Links to reference implementations, contract addresses, conformance status, and provider
+  compatibility notes.
+- Public discovery files and agent metadata generated from protocol artifacts and informed by
+  existing GEN-4014 agent-discovery work where applicable.
+
+Excluded:
+
+- GEN-only admin tooling.
+- Private persona synthesis steps, source evidence, classified prompts, or proprietary scoring.
+- Billing dashboards, support case tooling, provider account management, and operational secrets.
+- Any assumption that using XEL.xyz requires GEN-hosted runtime services.
+
+## GEN-Provided Services
+
+GEN is a product provider and distribution surface for XEL. GEN-provided services may be used by
+creators who want a managed creation and hosting experience, but they are not required for the open
+protocol.
+
+Included:
+
+- GEN app integration and the "Publish to XEL" flow.
+- Optional GEN persona synthesis add-on from GEN-4013, which can transform user inputs, files,
+  socials, and asset evidence into a classified encrypted persona artifact.
+- Hosted runtime/provider services, memory orchestration defaults, inference routing, retrieval,
+  monitoring, billing, support, and admin tools.
+- GEN-specific onboarding, usage analytics, safety operations, and customer-support workflows.
+- Integration with existing GEN-4014 x402 wallet ledger and agent-discovery work after verification
+  against XEL requirements.
+
+Protocol boundary:
+
+- GEN is not the package signer or protocol author for official XEL releases.
+- GEN synthesis may produce a persona artifact accepted by the protocol, but the synthesis process
+  itself is not part of XEL core.
+- Direct prompt mode remains a first-class protocol path.
+- A user-visible prompt is not required when GEN produces a classified encrypted prompt.
+- GEN-hosted runtime defaults must be expressed as replaceable provider bindings whenever they
+  affect protocol artifacts.
+
+## Persona Creation Boundary
+
+XEL supports two persona creation modes.
+
+### Direct Prompt Mode
+
+Direct prompt mode is the neutral open-protocol path. The creator supplies a persona/system prompt
+or equivalent persona artifact directly. The protocol validates artifact structure, references,
+ownership authority, encryption status where applicable, and runtime compatibility.
+
+Direct prompt mode must not depend on GEN services, private GEN datasets, or GEN-managed source
+evidence.
+
+### GEN Synthesized Classified Prompt
+
+GEN synthesized classified prompt mode is an optional GEN service. GEN may ingest user-provided
+materials, DW socials, and `gen.pro/assets` evidence through GEN-4013 workstreams, then produce a
+classified encrypted persona artifact.
+
+XEL's responsibility is limited to:
+
+- Defining the persona artifact schema.
+- Recording whether a persona artifact is direct, encrypted, classified, provider-produced, or
+  user-visible.
+- Defining references required for Proof of Genesis without exposing private prompt contents.
+- Accepting the artifact in mint and runtime manifests when the owner authorizes publication.
+
+XEL must not reimplement the GEN-4013 synthesis pipeline.
+
+## Agent Discovery And x402 Boundary
+
+Agent discovery and x402 payment metadata are integration inputs, not greenfield XEL duplicates.
+GEN-4014 already tracks wallet ledger and agent-discovery work across backend, API docs, static
+agent files, and support drafts.
+
+XEL should:
+
+- Map GEN-4014 discovery fields into XEL provider and character discovery schemas.
+- Reuse compatible x402 wallet ledger concepts for payment capability and spend-policy metadata.
+- Keep protocol schemas vendor-neutral even when GEN-4014 is the first integration source.
+- Document gaps where GEN-4014 does not yet satisfy XEL requirements.
+
+XEL should not:
+
+- Copy GEN-4014 implementation into this repository.
+- Make x402 the only allowed payment mechanism.
+- Require GEN agent-discovery hosting for a Living Character to exist.
+
+## Open Timing
+
+### Open Early
+
+- Terminology, architecture boundaries, and scope documents.
+- Core protocol schemas for persona artifacts, mint manifests, runtime manifests, provider
+  descriptors, discovery metadata, and Proof of Genesis records.
+- Sui Move contract source and invariant tests for identity, ownership, authority, lineage, pause,
+  spend policy, and migration.
+- Reference examples proving direct prompt mode does not require GEN synthesis.
+- Provider interface documentation and conformance expectations.
+- Public XEL.xyz protocol documentation and published-character metadata format.
+
+### Open Later
+
+- Hardened reference runtime implementation once interfaces stabilize.
+- Additional provider adapters after the capability model is proven.
+- Expanded cross-chain wallet linking beyond immediate Sui and Phantom sign-in scope.
+- Advanced migration tooling, indexer packages, dashboards, and operational playbooks that are
+  useful outside GEN.
+- Optional SDKs and CLI tooling after schemas and contracts settle.
+
+### Not Open Core
+
+- GEN-4013 persona synthesis implementation.
+- GEN-hosted billing, support, monitoring, admin, provider-routing, and safety operations.
+- Private prompts, source evidence, user files, social-ingestion results, provider credentials, or
+  customer data.
+- Commercial provider agreements or internal incident runbooks.

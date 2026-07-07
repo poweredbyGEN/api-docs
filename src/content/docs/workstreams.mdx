@@ -1,0 +1,30 @@
+---
+title: "XEL Workstreams"
+description: "Coordinated build surfaces for the XEL Living Character protocol."
+---
+
+# XEL Workstreams
+
+This file coordinates the parallel buildout for XEL. Each workstream owns a bounded surface so agents can work without colliding.
+
+## Completed Parallel Lanes
+
+| Lane | Scope | Primary files |
+|---|---|---|
+| Architecture boundary | Define open protocol, contracts, providers, XEL.xyz, GEN services | `docs/01-architecture-boundaries.md`, `docs/02-open-source-scope.md` |
+| Schemas | Draft provider-neutral JSON schemas | `schemas/` |
+| Smart contracts | Define Sui Move package/module plan and migration model | `contracts/`, `docs/04-smart-contracts.md` |
+| Mint/runtime inputs | Document required mint and runtime inputs with examples | `docs/03-minting-and-runtime-inputs.md`, `examples/` |
+| GEN integration | Define Publish to XEL and GEN provider boundaries | `docs/05-gen-publish-to-xel.md` |
+| Wallet auth / XEL.xyz product | Sui default sign-in, Phantom support, profile/chat UX | `docs/06-wallet-auth-and-xel-product.md` |
+| Memory / inference / storage | Direct prompt vs GEN classified prompt, encrypted state, retrieval/write-back | `docs/07-memory-inference-storage.md` |
+| Payments / treasury / discovery | GEN-4014 reuse, x402, wallets, funding, treasury, provider discovery | `docs/08-payments-treasury-provider-discovery.md` |
+| Security / acceptance | Tests, invariants, audit gates, launch criteria | `docs/09-security-and-acceptance.md`, `tests/README.md` |
+
+## Non-Duplication Rules
+
+- GEN-4013 is an active separate workstream for GEN persona synthesis. XEL should consume its output as an optional classified persona artifact.
+- GEN-4014 already tracks x402 wallet ledger and agent-discovery work. XEL should verify and integrate it before creating replacement work.
+- Sui is the default home chain.
+- Immediate wallet sign-in scope is Sui plus Phantom support.
+- Solana and Base/EVM wallet login are future linked-wallet options, not current auth requirements.

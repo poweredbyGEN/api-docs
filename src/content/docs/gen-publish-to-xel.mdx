@@ -1,0 +1,255 @@
+---
+title: "GEN Publish to XEL Integration"
+description: "The boundary for publishing GEN-created characters into XEL."
+---
+
+# GEN Publish to XEL Integration
+
+## Role
+
+GEN is a provider and distribution surface for XEL, not the protocol itself.
+XEL defines the open Living Character protocol, public schemas, contract
+interfaces, and XEL.xyz destination. GEN can package character source material,
+host runtime services, and expose a product workflow that publishes a Genesis
+Icon into the XEL protocol as a Living Character.
+
+Official XEL packages and protocol releases should be authored and signed as XEL, not GEN. GEN can
+publish into XEL and provide runtime services, but GEN should not be the canonical signer for XEL
+contracts, schemas, packages, or public protocol releases.
+
+This keeps two paths valid:
+
+- A provider-neutral creator can publish a Living Character directly from a
+  prompt/persona artifact that conforms to XEL schemas.
+- A GEN user can use GEN services, including persona synthesis, and then choose
+  **Publish to XEL** to publish the resulting character into the open protocol.
+
+GEN synthesis and GEN hosting are optional provider services. They must not be
+required for minting, operating, indexing, or displaying a Living Character.
+
+GEN should not provide canonical XEL package signing, official XEL protocol authorship,
+GEN-branded Move package authority for XEL contracts, or GEN-owned schema release identity for
+public XEL schemas.
+
+## Publish to XEL Flow
+
+1. The user creates or selects a character in GEN.
+2. GEN collects the exportable character package:
+   - public display profile
+   - media and asset references
+   - creator-selected visibility settings
+   - persona artifact reference or direct persona payload
+   - ownership, delegate, and treasury wallet settings
+   - policy settings needed by the XEL mint/runtime contracts
+3. If the user enables the GEN persona synthesis add-on, GEN calls its upstream
+   synthesis workflow before publication and receives a classified persona
+   artifact reference.
+4. GEN validates the package against XEL schemas and shows the user what will
+   become public, what will remain private, and what will be written on-chain or
+   to permanent storage.
+5. The user signs the required wallet actions.
+6. GEN submits the XEL publication transaction and associated storage writes.
+7. XEL indexes the Living Character, exposes it at XEL.xyz, and emits protocol
+   events for downstream consumers.
+8. GEN stores the provider-side linkage between the GEN character and the XEL
+   Living Character identifier so future GEN actions can reference the published
+   protocol object.
+
+## Active Upstream GEN Add-Ons
+
+### Existing GEN Genesis/Icon, Walrus, and Sui Work
+
+Do not rebuild the legacy GEN Proof of Genesis system inside XEL. Use it as one
+GEN-operated implementation that can produce XEL-compatible artifacts.
+
+In this section, "provider" means an implementation of a concrete capability, not a completed
+provider marketplace. Agent Core can perform storage/mint/renewal jobs for GEN-originated assets,
+but XEL still needs provider discovery, owner selection, runtime routing, health/failover, and
+policy enforcement before arbitrary providers are truly selectable end to end.
+
+Current GEN implementation boundaries:
+
+| GEN system | Existing responsibility | XEL reuse boundary |
+|---|---|---|
+| Agent Core Proof of Genesis | Downloads GEN assets, validates host allowlists, uploads to Walrus, verifies readback, records backup lifecycle, renews GEN-managed blobs, and optionally mints the legacy Icon NFT through configured Sui CLI/package/mint-cap settings. | Treat as a GEN-operated storage/mint implementation. XEL consumes Walrus blob refs, digests, storage metadata, Sui transaction/object IDs, and renewal status as typed artifact refs. |
+| GEN Rails Genesis Icons | Persists Genesis Icon/certificate state, builds `genesis_icon_manifest/v1`, resolves Dynamic Sui wallets, calls Agent Core for manifest/image backups, stores provenance, and exposes public/private certificate resources. | Treat as a legacy GEN character source. XEL imports the public manifest/certificate fields into a Living Character mint bundle and stores GEN IDs only as provider metadata. |
+| GEN Agentic auto-backups | Detects completed generated videos/images and calls Agent Core Proof of Genesis backup APIs when enabled. | Reuse the webhook pattern for “new asset -> storage ref -> lineage/storage update,” but keep canonical XEL state on-chain. |
+
+Concrete implementation references in GEN:
+
+- Agent Core: `app/services/proof_of_genesis.py`, `app/services/icon_nft.py`,
+  `app/models/proof_of_genesis.py`, `app/routers/proof_of_genesis.py`, and
+  `app/tasks/proof_of_genesis.py`.
+- GEN Rails: `app/models/genesis_icon.rb`, `app/services/genesis_icons/sync.rb`,
+  `app/services/genesis_icons/agent_core_client.rb`,
+  `app/services/dynamic_xyz/sui_wallet_resolver.rb`,
+  `app/services/dynamic_xyz/ensure_sui_wallet.rb`,
+  `app/controllers/v1/genesis_icons_controller.rb`, and
+  `app/resources/public_genesis_icon_resource.rb`.
+- GEN Agentic: `src/gen/agent_core_client.py` and the Proof-of-Genesis backup hooks in
+  `src/gen/server.py`.
+
+XEL should not depend on GEN private tables or package IDs at runtime. The import boundary is:
+
+1. GEN exports a public Genesis/Icon manifest or certificate resource.
+2. XEL validates it and converts it into XEL schemas:
+   - `public.primary_image_url` -> public `storage-ref.v1` media ref.
+   - manifest/certificate URL -> metadata/receipt `storage-ref.v1`.
+   - owner Sui wallet -> XEL owner wallet candidate.
+   - GEN icon/agent/org IDs -> provider metadata only.
+   - Walrus IDs, Sui object IDs, and transaction digests -> integrity/provenance metadata.
+3. The owner signs the XEL mint or migration transaction.
+4. XEL emits its own protocol events and indexes them independently.
+
+Known gaps that remain XEL work:
+
+- Provider selection is not fully built yet. XEL has schemas, policy modules, examples, and event
+  surfaces, but still needs the provider registry/discovery service, owner selection API, runtime
+  router, provider health/failover, and concrete adapters for inference, storage renewal, treasury,
+  and payment settlement.
+- XEL on-chain ownership/indexer projection must read Sui events directly instead of relying on
+  Rails provenance events.
+- Customer-owned Walrus renewals need owner/delegate authorization; GEN-managed renewals are not a
+  full open-protocol renewal path.
+- XEL needs its own host allowlist/storage policy for assets published from `xel.xyz` or Walrus
+  Sites, since GEN Agent Core validation is currently GEN-asset oriented.
+- Existing GEN minting shells into a configured legacy Icon package. XEL package publishing and
+  package identity remain XEL-owned.
+
+### GEN-4013 Persona Synthesis
+
+GEN-4013 is an active upstream workstream for persona synthesis using DW
+socials and `gen.pro/assets` evidence. XEL should not duplicate that
+implementation.
+
+For XEL, GEN-4013 is an optional provider add-on that can produce a classified
+persona artifact. The integration boundary is the artifact contract: XEL needs
+to know how to reference, validate, encrypt, authorize, and invoke the artifact;
+it does not need the private GEN synthesis pipeline, scoring logic, prompts, or
+source evidence processing internals.
+
+The GEN-synthesized classified prompt is not assumed to be user-visible by
+default. Publication should disclose that a private persona artifact exists and
+should publish only the public metadata and references required by XEL.
+
+### GEN-4014 x402 and Agent Discovery
+
+GEN-4014 is an existing ready integration asset for XEL verification and reuse.
+It tracks x402 wallet ledger and agent-discovery work across:
+
+- `feature/x402-wallet-ledger`
+- `feature/agent-discovery-docs`
+- `feature/agent-discovery-files`
+- `feature/agent-discovery-support`
+
+XEL should treat this as prior implementation to verify and adapt before
+creating duplicate payment, wallet-ledger, or agent-discovery surfaces. The
+expected reuse boundary is discovery metadata, public agent files, payment or
+wallet-ledger integration contracts, and supporting documentation. Any GEN-only
+operational implementation remains provider-side unless promoted into an open
+XEL interface.
+
+## Proprietary GEN Surface
+
+GEN keeps the following proprietary unless a separate decision explicitly moves
+part of it into the open protocol:
+
+- persona synthesis pipeline internals
+- private prompt construction and classification logic
+- DW social ingestion and evidence scoring logic
+- `gen.pro/assets` processing internals
+- hosted runtime orchestration defaults
+- memory orchestration defaults
+- billing, metering, support, admin, moderation, and monitoring tooling
+- GEN customer records, account state, product analytics, and internal IDs
+- private model/provider routing and fallback policies
+- provider secrets, credentials, and non-public infrastructure configuration
+
+GEN may expose public references or derived artifacts from these systems, but
+the implementation details above are not XEL protocol requirements.
+
+## Published XEL Surface
+
+When GEN publishes to XEL, it publishes only the data needed for a Living
+Character to exist, be discovered, be owned, and be operated through the open
+protocol:
+
+- XEL Living Character identifier
+- public display profile and metadata
+- public asset references and content hashes
+- persona artifact reference, direct persona payload, or encrypted classified
+  persona reference
+- ownership wallet, delegate wallet, and treasury wallet bindings
+- authority, lineage, spend policy, pause, and migration settings required by
+  XEL contracts
+- storage pointers and integrity proofs for public or encrypted artifacts
+- discovery metadata, including compatible agent-discovery files where relevant
+- payment/discovery metadata that can interoperate with the GEN-4014 x402 work
+- Proof of Genesis data required by the protocol
+- protocol event identifiers and transaction references
+
+XEL consumers should be able to use this published surface without depending on
+GEN private APIs.
+
+## API Boundaries
+
+The API boundary between GEN and XEL should be explicit and artifact-oriented.
+GEN calls XEL-facing APIs or contracts to publish protocol artifacts; XEL does
+not call into GEN private synthesis or product internals to define canonical
+state.
+
+Recommended API surfaces:
+
+- `POST /living-characters/drafts` or equivalent draft creation endpoint for
+  schema validation and preflight checks.
+- `POST /living-characters/publish` or contract transaction builder for final
+  publication payloads.
+- `GET /living-characters/{id}` for public protocol state.
+- `GET /living-characters/{id}/discovery` for agent-discovery metadata.
+- `GET /living-characters/{id}/proof` for Proof of Genesis records.
+- Provider callback or webhook endpoint for publication status, if XEL operates
+  an off-chain indexer.
+
+GEN-owned APIs may prepare the package, synthesize persona artifacts, and manage
+provider runtime services. Their outputs should cross into XEL as typed payloads
+or references, not as opaque dependencies on GEN account state.
+
+## Event Boundaries
+
+XEL should emit provider-neutral protocol events. GEN can listen to those events
+and maintain its own product linkage, but event semantics should not depend on
+GEN.
+
+Core events:
+
+- `LivingCharacterDrafted`
+- `LivingCharacterPublished`
+- `ProofOfGenesisRecorded`
+- `PersonaArtifactLinked`
+- `AssetLinked`
+- `OwnershipTransferred`
+- `DelegateUpdated`
+- `TreasuryUpdated`
+- `SpendPolicyUpdated`
+- `CharacterPaused`
+- `CharacterUnpaused`
+- `CharacterMigrated`
+- `DiscoveryMetadataUpdated`
+
+GEN-side events can mirror product workflow state, such as `PublishToXelStarted`,
+`PublishToXelPreflightFailed`, `PublishToXelSubmitted`, and
+`PublishToXelCompleted`. These are provider events, not canonical XEL protocol
+events.
+
+## Integration Rules
+
+- XEL schemas remain provider-neutral.
+- GEN-specific fields must be optional and clearly marked as provider metadata.
+- Direct prompt mode must work without GEN synthesis.
+- GEN synthesized classified prompt mode must work through a private encrypted
+  artifact reference.
+- XEL public state must not require GEN account state to resolve.
+- XEL should reuse and verify GEN-4014 assets before introducing duplicate
+  x402 or agent-discovery interfaces.
+- XEL should track GEN-4013 only as an upstream add-on and artifact boundary,
+  not as in-repo implementation work.

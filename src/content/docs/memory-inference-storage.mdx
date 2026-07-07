@@ -1,0 +1,420 @@
+---
+title: "Memory, Inference, and Storage Architecture"
+description: "Runtime architecture for persona, memory, inference, storage, and public refs."
+---
+
+# Memory, Inference, and Storage Architecture
+
+This document defines how a Living Character runtime should resolve persona
+material, retrieve memory, call inference providers, write back durable state,
+and separate private off-chain execution from public on-chain commitments.
+
+It is protocol documentation, not a schema file. Canonical JSON Schemas and
+contract interfaces belong in their own workstreams. GEN-4013 is an active
+upstream GEN workstream for persona synthesis; XEL consumes its classified
+persona artifact output only and does not reimplement that pipeline here.
+
+## Scope
+
+This document covers:
+
+- direct prompt mode and GEN synthesized classified prompt mode
+- encrypted persona artifacts and access policy
+- Walrus-style storage references for public and encrypted private artifacts
+- Seal-style encryption and decryption authorization
+- the distinction between durable memory substrate and derived retrieval layer
+- inference request and response flow
+- runtime write-back, provenance, and privacy boundaries
+- what runs off-chain and what is committed on-chain
+
+## Runtime Surfaces
+
+A Living Character runtime has four separable surfaces:
+
+| Surface | Responsibility | Protocol status |
+|---|---|---|
+| On-chain authority | aNFT identity, owner/delegate authority, pause, migration, lineage, spend policy, and references to canonical artifacts. | Required protocol surface. |
+| Storage substrate | Content-addressed public assets, encrypted persona artifacts, memory checkpoints, and provenance bundles. | Provider-neutral; Walrus is a reference storage provider. |
+| Access and encryption | Encryption metadata, key release policy, authorized runtime/delegate checks, and audit references. | Provider-neutral; Seal is a reference access-control provider. |
+| Runtime execution | Persona resolution, retrieval, inference, moderation, provider routing, memory write-back, observability, and billing. | Off-chain provider responsibility. |
+
+The protocol should define the artifacts and authorization model that let these
+surfaces interoperate. It should not require GEN-hosted services, GEN persona
+synthesis, a specific inference provider, or a specific retrieval stack.
+
+## Persona Resolution Modes
+
+XEL supports two persona creation and runtime resolution modes.
+
+### Direct Prompt Mode
+
+Direct prompt mode is the neutral open-protocol path. The creator supplies the
+system prompt or persona artifact directly.
+
+Runtime behavior:
+
+1. The runtime reads the mint manifest and confirms `persona_input.mode` is
+   `direct_prompt`.
+2. If the prompt is embedded and owner policy allows the runtime to use it, the
+   runtime places it into the inference system context.
+3. If the prompt is referenced instead of embedded, the runtime fetches the
+   referenced object, verifies its digest, decrypts it if needed, and applies
+   the declared visibility policy.
+4. The runtime records which prompt digest or artifact digest was used for the
+   inference call.
+
+Direct prompt mode must work without GEN services. A direct prompt may still be
+private and encrypted; the important distinction is that the prompt was supplied
+by the creator rather than synthesized by GEN.
+
+### GEN Synthesized Classified Prompt Mode
+
+GEN synthesized classified prompt mode is an optional GEN-provided path. GEN may
+use GEN-4013 to transform user inputs, files, socials, and asset evidence into a
+private encrypted persona artifact.
+
+Runtime behavior:
+
+1. The runtime reads the mint manifest and confirms `persona_input.mode` is
+   `gen_synthesized_classified_artifact`.
+2. The runtime fetches the encrypted artifact from the declared storage
+   reference, such as a `walrus://...` URI.
+3. The runtime verifies the artifact digest and provenance metadata before
+   attempting decryption.
+4. The runtime requests decryption only under the declared access policy, such
+   as a Seal policy that permits the owner or an authorized runtime delegate.
+5. The plaintext classified prompt is held only in runtime memory for the active
+   request or provider-defined secure session. It is not written to public logs,
+   public manifests, chain state, or user-visible pages by default.
+
+XEL's responsibility is the artifact boundary: reference, digest, visibility,
+authorization, provenance, and runtime compatibility. XEL must not duplicate the
+GEN-4013 synthesis implementation, source-evidence processing, classification
+logic, or private prompt construction.
+
+## Encrypted Persona Artifact
+
+An encrypted persona artifact is the private runtime input that contains the
+system prompt, persona policy, and optional structured persona state needed to
+operate a Living Character.
+
+Recommended artifact envelope fields:
+
+| Field | Purpose |
+|---|---|
+| `artifact_version` | Version of the persona artifact envelope. |
+| `mode` | `direct_prompt` or `gen_synthesized_classified_artifact`. |
+| `visibility` | Public, owner-controlled, private encrypted, or classified encrypted. |
+| `ciphertext_ref` | Content-addressed storage reference for the encrypted payload. |
+| `ciphertext_digest` | Digest used to verify fetched bytes before decryption. |
+| `encryption` | Algorithm, key identifier, key provider, and policy reference. |
+| `access_policy_ref` | Reference to the owner/delegate/runtime decryption policy. |
+| `provenance_ref` | Public or private reference to the provenance bundle. |
+| `created_by` | Creator, provider, or service that produced the artifact. |
+| `owner_authorization` | Wallet signature or transaction proving owner authorization. |
+
+The encrypted payload may contain private instructions, traits, examples,
+memory seeds, refusal rules, or provider-specific runtime hints. Public metadata
+should describe what kind of artifact exists without exposing the plaintext.
+
+## Walrus Storage References
+
+Storage references should be content-addressed and digest-verified. Walrus is a
+reference provider for these examples, but the protocol should allow equivalent
+storage providers with the same capabilities.
+
+Common reference categories:
+
+| Category | Example reference | Visibility |
+|---|---|---|
+| Public profile asset | `walrus://public-assets/{character}/profile.json` | Public |
+| Public media asset | `walrus://public-assets/{character}/avatar.png` | Public |
+| Encrypted persona artifact | `walrus://private-artifacts/{character}/persona.enc` | Private encrypted |
+| Memory checkpoint | `walrus://private-memory/{character}/{checkpoint}.enc` | Private encrypted |
+| Provenance bundle | `walrus://proof/{character}/{proof}.json` | Public, redacted, or encrypted |
+
+Every stored object referenced by protocol artifacts should include a digest in
+the manifest or runtime config. The runtime must verify fetched bytes against
+the expected digest before using them for decryption, retrieval, inference, or
+write-back.
+
+Storage references are not authorization by themselves. A public URI may point
+to encrypted bytes. Access is determined by the access policy and key release
+rules, not by possession of the URI.
+
+### Testnet Upload and Renewal Helpers
+
+`runtime/storage/walrus-seal.mjs` keeps storage-reference construction
+offline-safe while also producing live Walrus testnet command plans for upload
+workers and smoke tests.
+
+The upload plan records the exact `walrus store` command, selected context,
+epochs, permanence mode, expected output fields, and live prerequisites. The
+parser accepts common text and JSON output forms and extracts both identifiers
+that XEL needs:
+
+| Identifier | Source | XEL use |
+|---|---|---|
+| Blob ID | `Blob ID` / `blobId` / `blob_id` from store output | Build live `walrus://...` refs and read public or encrypted bytes. |
+| Sui blob object ID | `Sui object ID` / `blobObjectId` / `blob_object_id` from store output | Plan lifetime extension and metadata operations. |
+
+The renewal plan uses `walrus extend --blob-obj-id <object-id>
+--epochs-extended <n> --context testnet`. It intentionally requires the Sui
+blob object ID, not only the content blob ID, because renewal is a metadata
+operation on the Sui object. Offline CI should assert command construction and
+parsing only; live execution needs a current Walrus config, Sui testnet wallet,
+SUI gas, and WAL balance.
+
+## Seal and Access Policy
+
+Seal is a reference access-control and encryption policy provider. The protocol
+should model the capabilities needed from Seal or an equivalent provider rather
+than hard-code a single service.
+
+An access policy should answer:
+
+- Who can decrypt a persona artifact or private memory object?
+- Which runtime delegate wallets or provider identities are authorized?
+- Which aNFT object, owner wallet, or delegate state must be checked on-chain?
+- Whether access is allowed during pause, migration, transfer, or recovery.
+- Whether key release requires fresh owner consent, spend-policy approval, or a
+  runtime attestation.
+- What audit event or policy proof is emitted when decryption is granted.
+
+Typical policy subjects:
+
+| Subject | Allowed capability |
+|---|---|
+| Owner wallet | Create, rotate, revoke, and decrypt private artifacts. |
+| Authorized runtime delegate | Decrypt for serving the Living Character under current policy. |
+| Migration delegate | Read and re-encrypt state for an owner-approved migration. |
+| Public viewer | Read public metadata only; no private decryption. |
+
+The runtime should fail closed. If chain authority, digest verification, policy
+lookup, or key release cannot be verified, the runtime should not decrypt or use
+private persona material.
+
+## Memory Substrate vs Derived Retrieval Layer
+
+Memory is split into two layers.
+
+| Layer | Contents | Durability | Can be rebuilt? |
+|---|---|---|---|
+| Memory substrate | Canonical memories, conversation summaries, owner notes, state checkpoints, signed updates, retention metadata, and private memory objects. | Durable, digest-addressed, and owner-controlled. | No, except through explicit migration or owner-authorized edits. |
+| Derived retrieval layer | Embeddings, vector indexes, ranker features, caches, prompt snippets, search indexes, and model-specific retrieval transforms. | Operational and provider-managed. | Yes, from the memory substrate. |
+
+The memory substrate is the source of truth for durable character memory. It may
+be stored as encrypted content-addressed objects with digests referenced from
+runtime configs, provenance bundles, or owner-authorized update records.
+
+The derived retrieval layer is an off-chain acceleration and ranking layer. It
+should not be treated as canonical state because embeddings, rankers, chunking,
+and prompt assembly will vary by provider and model. A runtime may discard and
+rebuild derived indexes as long as it can prove which memory substrate snapshot
+or checkpoint was used.
+
+## Inference Request Flow
+
+Inference runs off-chain. The chain does not execute model calls and should not
+receive private prompt text, user messages, retrieved private memory, provider
+API keys, or model responses by default.
+
+Recommended request flow:
+
+1. Authenticate the caller and resolve the Living Character's aNFT, owner,
+   delegate, pause, migration, and spend-policy state.
+2. Load runtime configuration and provider bindings.
+3. Resolve persona input using either direct prompt mode or GEN synthesized
+   classified prompt mode.
+4. Fetch and verify any referenced persona, memory, or policy objects.
+5. Decrypt private artifacts only if the current access policy allows the
+   runtime to do so.
+6. Build a retrieval query from the user message and current runtime context.
+7. Read the durable memory substrate, query derived retrieval indexes, and
+   assemble bounded context for the model.
+8. Send the inference provider a request containing only the authorized system
+   prompt, user input, retrieved context, safety policy, and model parameters.
+9. Receive the model response, provider metadata, token usage, and safety
+   annotations.
+10. Apply post-processing, moderation, spend accounting, and response shaping.
+11. Return the response to the caller with public provenance and runtime status
+   that do not leak private prompts or private memory.
+
+Recommended inference request fields:
+
+| Field | Purpose |
+|---|---|
+| `character_ref` | aNFT object ID, home chain, and Proof of Genesis reference. |
+| `caller_context` | Authenticated user, wallet, app, channel, or session metadata. |
+| `persona_context_ref` | Digest or reference for the resolved persona context. |
+| `memory_snapshot_ref` | Digest or checkpoint used for retrieval. |
+| `retrieval_refs` | References or IDs for memory chunks used in the prompt. |
+| `model_policy` | Allowed provider, model class, temperature, limits, and fallback policy. |
+| `safety_policy` | Runtime refusal, moderation, rate-limit, and escalation rules. |
+| `spend_policy` | Budget and approval context for the request. |
+| `user_message` | Caller-supplied message or action request. |
+
+Recommended inference response fields:
+
+| Field | Purpose |
+|---|---|
+| `response_text` | User-visible model output. |
+| `response_metadata` | Model provider, model identifier, latency, token usage, and finish reason. |
+| `provenance` | Redacted refs for persona digest, memory snapshot, retrieval refs, and runtime version. |
+| `safety_result` | Moderation decision, refusals, or escalation state. |
+| `write_back_proposal` | Candidate memory updates generated from the interaction. |
+| `billing_event_ref` | Optional provider-side billing or metering reference. |
+
+Private prompt text, decrypted artifact bytes, private source evidence, and
+provider secrets must not be included in public response metadata.
+
+The first executable provider-adapter slice is `runtime/providers/inference-router.mjs`. It:
+
+- resolves an inference provider from `provider-registry.v1` and `provider-policy.v1`
+- builds an OpenAI-compatible chat payload for providers such as Verathos SN96
+- records fallback provider IDs without automatically leaking private prompts to fallback providers
+- normalizes successful provider output into `inference-response.v1`
+- returns `payment_required` with the provider's x402 challenge when the provider requires payment
+- can run the testnet x402 path through `executeInferenceWithRuntimePayments`, which builds the
+  payment attempt, simulates facilitator settlement, reconciles the receipt, retries the provider
+  call with an x402 payment header, and emits a provider claim
+
+This is still a runtime adapter, not the whole decentralized inference layer. It does not decrypt
+Seal artifacts, sign wallet payments, execute production facilitator settlement, run Talus
+workflows, or write memory back to Walrus by itself. Those remain separate adapter/provider
+responsibilities.
+
+## Write-Back
+
+Write-back is the process of converting an interaction into durable memory,
+state updates, provenance records, or on-chain commits.
+
+Recommended write-back stages:
+
+1. Candidate extraction.
+   The runtime identifies possible new memories, preference updates, safety
+   notes, or state changes from the interaction.
+2. Policy evaluation.
+   The runtime checks owner controls, retention rules, privacy class,
+   moderation, and whether explicit owner confirmation is required.
+3. Canonicalization.
+   Accepted updates are normalized into durable memory substrate objects with
+   clear provenance and visibility metadata.
+4. Encryption and storage.
+   Private updates are encrypted and written to content-addressed storage.
+   Public updates are written to public storage only if policy permits.
+5. Digest and index update.
+   The runtime records object digests, updates memory checkpoint references, and
+   refreshes derived retrieval indexes.
+6. Optional on-chain commit.
+   If the update affects canonical protocol state, authority, lineage, pause,
+   migration, or a public memory root, the owner or authorized delegate commits
+   the new reference on-chain.
+
+Most conversational memory write-back should remain off-chain and encrypted.
+Only roots, digests, update records, or public metadata that need protocol-level
+authority should be committed on-chain.
+
+## Provenance
+
+Provenance should prove what was used and who authorized it without exposing
+private material.
+
+Recommended provenance references:
+
+| Provenance item | Public content | Private content |
+|---|---|---|
+| Persona artifact | Mode, visibility, digest, storage ref, producer, timestamp, owner authorization. | Plaintext prompt and private source evidence. |
+| Memory snapshot | Checkpoint digest, namespace, retention policy, storage ref, update authority. | Private memory text and embeddings. |
+| Inference request | Runtime version, model policy, persona digest, retrieval refs, safety policy. | Decrypted persona, user-private context, provider secrets. |
+| Write-back | Update digest, authorizing wallet/delegate, timestamp, namespace, visibility. | Private memory payload before encryption. |
+
+Proof of Genesis may reference public provenance bundles and encrypted private
+artifacts. It should not force disclosure of source files, social ingestion
+results, classified prompts, or private memories.
+
+## Privacy Boundary
+
+The privacy boundary is between verifiable references and private runtime
+contents.
+
+Public or chain-visible data may include:
+
+- aNFT object ID, owner/delegate state, lineage, pause, migration, and spend
+  policy references
+- public profile metadata and public asset references
+- persona mode, visibility class, artifact digest, and encrypted storage ref
+- Proof of Genesis references and redacted provenance
+- provider capability declarations and runtime availability status
+- public memory roots or checkpoint digests when owner policy allows them
+
+Private off-chain data may include:
+
+- plaintext direct prompts marked private
+- plaintext GEN synthesized classified prompts
+- private source evidence, user files, social ingestion results, and scoring
+  artifacts
+- decrypted memory substrate objects
+- embeddings, ranker features, retrieval cache contents, and prompt assembly
+- raw user conversations, safety annotations, and provider request logs
+- provider API keys, billing records, operational telemetry, and support notes
+
+Runtimes and providers should log references, digests, and redacted metadata by
+default. They should avoid logging plaintext persona material, private memory,
+or user-private conversation content unless owner policy and applicable privacy
+controls explicitly permit it.
+
+## Off-Chain vs On-Chain
+
+The chain commits authority and verifiable references. It does not run the
+character.
+
+| Concern | Runs off-chain | Committed on-chain |
+|---|---|---|
+| Persona synthesis | GEN-4013 or another producer creates an artifact outside XEL core. | Artifact reference, digest, visibility, and owner authorization if used for mint/runtime state. |
+| Persona decryption | Runtime requests key release from Seal or equivalent policy provider. | Policy reference and current owner/delegate authority. |
+| Storage fetch | Runtime fetches public or encrypted bytes from Walrus or another provider. | Storage references and digests when part of canonical state. |
+| Retrieval | Runtime builds embeddings, indexes, caches, and selected prompt context. | Optional memory root or checkpoint reference if owner/delegate commits it. |
+| Inference | Provider executes model call and returns response metadata. | Nothing by default; optional event or reference only if protocol policy requires it. |
+| Write-back | Runtime extracts, moderates, encrypts, stores, and indexes candidate memory updates. | New root, digest, or state update only when owner/delegate policy requires canonical commitment. |
+| Provenance | Runtime and storage providers maintain detailed private provenance bundles. | Public or redacted Proof of Genesis and update references. |
+| Privacy controls | Provider enforces runtime retention, logging, and access limits. | Authority, policy refs, pause, transfer, and migration constraints. |
+
+This split lets a Living Character remain verifiable and portable without
+placing private prompts, memories, model traffic, or provider secrets on-chain.
+
+## Reference Runtime Sequence
+
+For a normal chat or action request:
+
+1. Resolve `character_ref` against Sui and verify the aNFT is active.
+2. Verify caller authentication and runtime delegate authorization.
+3. Load runtime config and provider capability descriptors.
+4. Resolve persona mode.
+5. Fetch Walrus-style artifact references and verify digests.
+6. Request Seal-style decryption only when policy allows it.
+7. Load memory substrate checkpoint and query derived retrieval layer.
+8. Assemble authorized model context.
+9. Call inference provider.
+10. Return redacted response and provenance metadata.
+11. Evaluate write-back candidate updates.
+12. Store encrypted memory updates and refresh retrieval indexes.
+13. Commit an on-chain reference only when the update affects canonical protocol
+    state or owner policy requires a public root.
+
+## Acceptance Expectations
+
+- Direct prompt mode can mint and run without GEN synthesis.
+- GEN synthesized classified prompt mode uses an encrypted artifact boundary and
+  does not expose the synthesized prompt by default.
+- Walrus references are treated as storage pointers plus digests, not as access
+  grants.
+- Seal or equivalent access policy controls decryption for persona and private
+  memory artifacts.
+- Durable memory substrate is distinct from rebuildable derived retrieval
+  indexes.
+- Inference request and response metadata can be audited without leaking private
+  prompt or memory contents.
+- Write-back is policy-controlled, encrypted by default for private memory, and
+  committed on-chain only when canonical protocol state changes.
+- Public provenance proves authorization and integrity while preserving privacy.

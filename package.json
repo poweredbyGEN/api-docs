@@ -7,6 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "update:whitepaper": "node scripts/update-whitepaper.mjs",
     "astro": "astro"
   },
   "dependencies": {

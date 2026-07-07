@@ -1,496 +1,319 @@
-/* ───────────────────────────────────────────────────────────────────────────
-   GEN API docs — themed to match the /aura-enterprise + /managed design kit.
-
-   Starlight is themed entirely through its --sl-* custom properties. We repoint
-   the dark theme onto the GEN surface (#0c1520), set Manrope as the doc font,
-   map the gray scale to GEN reading-grays, add the drifting purple aurora, and
-   give the sidebar/cards the glass + hairline treatment. Light mode keeps the
-   GEN purple accent but stays readable.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/* Manrope — the standalone marketing-page font (aura-enterprise / managed). */
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 :root {
-  /* GEN brand accent — light mode */
-  --sl-color-accent-low: #e8e6ff;
-  --sl-color-accent: #524caf;
-  --sl-color-accent-high: #2e2971;
+  --sl-font: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sl-font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --sl-nav-height: 5.75rem;
+  --sl-sidebar-width: 16rem;
 
-  /* Manrope everywhere (headings + body). */
-  --sl-font: "Manrope", ui-sans-serif, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  --xel-bg: #121212;
+  --xel-card: #1c1c1c;
+  --xel-card-soft: #171717;
+  --xel-line: rgba(255, 255, 255, 0.1);
+  --xel-muted: #999999;
+  --xel-pink: #ff6ef4;
+  --xel-amber: #ffb534;
+  --xel-green: #76ff9a;
+  --xel-gradient-primary: linear-gradient(135deg, var(--xel-pink), var(--xel-amber));
+  --xel-gradient-accent: linear-gradient(135deg, var(--xel-amber), var(--xel-green));
+  --xel-gradient-full: linear-gradient(135deg, var(--xel-pink), var(--xel-amber), var(--xel-green));
 
-  /* GEN brand tokens reused below */
-  --gen-purple-start: #524caf;
-  --gen-purple-end: #a29cff;
-  --gen-peach: #ffdbbb;
-  --gen-pink: #f170fd;
-  --gen-glass: linear-gradient(
-    180deg,
-    rgba(30, 37, 52, 0.85) 0%,
-    rgba(16, 22, 34, 0.92) 100%
-  );
-  --gen-hairline: rgba(255, 255, 255, 0.1);
+  --sl-color-accent-low: #3a2038;
+  --sl-color-accent: var(--xel-pink);
+  --sl-color-accent-high: #ffd2fb;
 }
 
-/* ── Dark theme → the GEN surface (#0c1520 family) ── */
 :root[data-theme="dark"] {
-  --sl-color-accent-low: #352f7e;
-  --sl-color-accent: #6a63d6; /* a touch brighter so links read on #0c1520 */
-  --sl-color-accent-high: #a29cff;
-
-  /* Surfaces */
-  --sl-color-bg: #0c1520; /* page */
-  --sl-color-bg-nav: rgba(12, 21, 32, 0.82); /* top nav (glassy) */
-  --sl-color-bg-sidebar: #0c1520;
-  --sl-color-black: #0c1520;
-  --sl-color-white: #f6f7f9; /* "white" text role */
-
-  /* Reading grays — body is a mid reading-gray, headings near-white.
-     (Starlight's --sl-color-text defaults to gray-2.) */
-  --sl-color-gray-1: #e7e9ee;
-  --sl-color-gray-2: #aab1bd; /* body copy */
-  --sl-color-gray-3: #818a95; /* muted / captions */
-  --sl-color-gray-4: #5b6472;
-  --sl-color-gray-5: #2a3242;
-  --sl-color-gray-6: #1a2231; /* card / inline-code bg */
-  --sl-color-gray-7: #131b27;
-  --sl-color-text: #aab1bd;
-  --sl-color-text-accent: var(--gen-purple-end);
-
-  --sl-color-hairline-light: var(--gen-hairline);
+  --sl-color-bg: var(--xel-bg);
+  --sl-color-bg-nav: rgba(18, 18, 18, 0.78);
+  --sl-color-bg-sidebar: var(--xel-bg);
+  --sl-color-black: var(--xel-bg);
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #f5f5f5;
+  --sl-color-gray-2: #d9d9d9;
+  --sl-color-gray-3: #a8a8a8;
+  --sl-color-gray-4: #777777;
+  --sl-color-gray-5: #3a3a3a;
+  --sl-color-gray-6: #242424;
+  --sl-color-gray-7: #181818;
+  --sl-color-text: #d9d9d9;
+  --sl-color-text-accent: var(--xel-pink);
+  --sl-color-hairline: var(--xel-line);
+  --sl-color-hairline-light: var(--xel-line);
   --sl-color-hairline-shade: rgba(255, 255, 255, 0.06);
-  --sl-color-bg-inline-code: #1a2231;
+  --sl-color-bg-inline-code: #1f1f1f;
 }
 
-/* ── Animated aurora — the EXACT homepage/managed 4-blob field ──
- * `.gen-aurora` is injected as the first body child (head script in config);
- * each blob drifts on its own keyframe, blurred + screen-blended. */
-.gen-aurora {
-  position: fixed;
-  top: -440px;   /* lift the bright centre up so the glow peaks at the very top */
-  left: -10%;
-  right: -10%;
-  height: 900px;
-  z-index: 0;
-  pointer-events: none;
-  filter: blur(70px) saturate(135%);
-  opacity: 0.9;
+:root[data-theme="light"] {
+  --sl-color-bg: #ffffff;
+  --sl-color-bg-nav: rgba(255, 255, 255, 0.82);
+  --sl-color-bg-sidebar: #ffffff;
+  --sl-color-text-accent: #bf1aae;
+  --sl-color-accent-low: #ffe7fc;
+  --sl-color-accent: #db35ca;
+  --sl-color-accent-high: #711268;
 }
-.gen-aurora span {
-  position: absolute;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
+
+body {
+  font-feature-settings: "liga" 1, "calt" 1;
 }
-.gen-aurora .b1 { width: 620px; height: 620px; top: 40px; left: 18%;
-  background: radial-gradient(circle at center, rgba(82,76,175,.85), transparent 66%); animation: gen-drift1 22s ease-in-out infinite; }
-.gen-aurora .b2 { width: 560px; height: 560px; top: 0; left: 42%;
-  background: radial-gradient(circle at center, rgba(162,156,255,.8), transparent 64%); animation: gen-drift2 26s ease-in-out infinite; }
-.gen-aurora .b3 { width: 500px; height: 500px; top: 80px; left: 60%;
-  background: radial-gradient(circle at center, rgba(241,112,253,.55), transparent 66%); animation: gen-drift3 30s ease-in-out infinite; }
-.gen-aurora .b4 { width: 460px; height: 460px; top: 30px; left: 8%;
-  background: radial-gradient(circle at center, rgba(255,219,187,.4), transparent 64%); animation: gen-drift4 28s ease-in-out infinite; }
-@keyframes gen-drift1 { 0%,100% { transform: translate(-12%,0) scale(1); opacity:.85; } 50% { transform: translate(14%,24px) scale(1.12); opacity:1; } }
-@keyframes gen-drift2 { 0%,100% { transform: translate(10%,10px) scale(1.08); opacity:1; } 50% { transform: translate(-14%,-8px) scale(.94); opacity:.8; } }
-@keyframes gen-drift3 { 0%,100% { transform: translate(8%,0) scale(.95); opacity:.7; } 50% { transform: translate(-16%,20px) scale(1.15); opacity:.95; } }
-@keyframes gen-drift4 { 0%,100% { transform: translate(-8%,12px) scale(1); opacity:.7; } 50% { transform: translate(18%,-6px) scale(1.1); opacity:.5; } }
-@media (prefers-reduced-motion: reduce) { .gen-aurora span { animation: none !important; } }
 
-/* keep real content above the aurora */
-:root[data-theme="dark"] .page { position: relative; z-index: 1; }
-
-/* The pill header is fully defined in Header.astro (.gen-header / .gen-pill).
- * Reserve enough space below the fixed pill so the content AND the left
- * sidebar clear it (the sidebar starts at --sl-nav-height). */
-:root { --sl-nav-height: 7rem; }
-
-/* Kill Starlight's full-width header BAND — its solid dark background + bottom
- * border are what block the top glow and draw a line between header and body.
- * Our floating pill (.gen-header) is the only header chrome we want. */
 .header {
-  background-color: transparent !important;
   background: transparent !important;
   border-bottom: none !important;
   backdrop-filter: none !important;
 }
 
-/* Search box pinned to the TOP of the left sidebar (Sidebar.astro override). */
-.gen-sidebar-search {
-  margin: 0 0 1rem;
-  padding-block-start: 0.5rem;
-  /* Search box left edge lands on the nav-item TEXT edge at zero inset. To make
-     it line up with the active PILL's left edge instead (the pill extends
-     --gen-pill-pad left of the text), pull the search left by that same amount. */
-  padding-inline: 0 0.4rem;
-  /* Align the search box LEFT edge with the active pill's left edge (pill sits
-     at nav-inset − pill-pad). Measured on the real page: this +0.4rem lands the
-     search box on the pill edge. */
-  margin-inline: 0.4rem 0;
-}
-.gen-sidebar-search :global(button[data-open-modal]),
-.gen-sidebar-search button {
-  width: 100% !important;
-  max-width: none !important;          /* drop Starlight's 22rem cap so it fills the nav width */
-  margin-inline: 0 !important;         /* no extra inset — wrapper sets the edge */
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid var(--gen-hairline) !important;
-  border-radius: 10px !important;
+:root[data-theme="dark"] body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -10% auto;
+  height: 34rem;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 110, 244, 0.22), transparent 28rem),
+    radial-gradient(circle at 58% 8%, rgba(255, 181, 52, 0.16), transparent 24rem),
+    radial-gradient(circle at 82% 22%, rgba(118, 255, 154, 0.13), transparent 24rem);
+  filter: blur(12px);
 }
 
-:root[data-theme="dark"] .sidebar { background: transparent; }
-
-/* Sidebar active link — neutral light pill (z.ai style; see Left-nav section below). */
-:root[data-theme="dark"] .sidebar a[aria-current="page"] {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  border-radius: 8px;
+.page {
+  position: relative;
+  z-index: 1;
 }
 
-/* ── Headings near-white + tight tracking; bold body brighter ── */
-:root[data-theme="dark"] .sl-markdown-content :is(h1, h2, h3, h4) {
-  color: #f6f7f9;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-}
-:root[data-theme="dark"] .sl-markdown-content :is(strong, b) {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-/* Links — lavender, on-brand */
-:root[data-theme="dark"] .sl-markdown-content a {
-  color: var(--gen-purple-end);
-  text-underline-offset: 2px;
-}
-:root[data-theme="dark"] .sl-markdown-content a:hover {
-  color: var(--gen-peach);
-}
-
-/* ── Hero overrides for the splash page ── */
-[data-has-hero] .hero > img {
-  display: none;
-}
-[data-has-hero] .hero h1 {
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-[data-has-hero] .hero .tagline {
-  font-size: 1.15rem;
-  max-width: 42ch;
-}
-
-/* Primary CTA — the GEN pill gradient */
-[data-has-hero] .hero .action.primary a {
-  background: linear-gradient(
-    90deg,
-    var(--gen-purple-start),
-    var(--gen-purple-end)
-  );
-  border: 0.5px solid rgba(255, 255, 255, 0.26);
-  color: #fff !important;
-  font-weight: 600;
-  padding: 0.75rem 1.75rem;
-  border-radius: 999px;
-  box-shadow: 0 4px 24px rgba(162, 156, 255, 0.3);
-  transition: box-shadow 0.25s, transform 0.2s;
-}
-[data-has-hero] .hero .action.primary a:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 30px rgba(162, 156, 255, 0.5);
-}
-[data-has-hero] .hero .action.minimal a {
-  border-radius: 999px;
-  padding: 0.75rem 1.75rem;
-  font-weight: 600;
-}
-
-/* Hero title near-white, tagline muted-gray on dark. */
-:root[data-theme="dark"] [data-has-hero] .hero h1 { color: #f6f7f9; }
-:root[data-theme="dark"] [data-has-hero] .hero .tagline { color: #aab1bd; }
-
-/* ── Card grid on splash — the kit's glass card ── */
-.sl-markdown-content .card {
-  border-radius: 16px;
-  transition:
-    border-color 0.3s,
-    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.sl-markdown-content .card:hover {
-  transform: translateY(-6px);
-}
-:root[data-theme="dark"] .sl-markdown-content .card {
-  background: var(--gen-glass);
-  border-color: var(--gen-hairline);
-}
-:root[data-theme="dark"] .sl-markdown-content .card:hover {
-  border-color: rgba(162, 156, 255, 0.45);
-}
-.card .icon {
-  border: none !important;
-  background: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  color: var(--gen-purple-end);
-}
-
-/* ── Code blocks — hairline frame on the dark surface ── */
-:root[data-theme="dark"] .expressive-code .frame {
-  border-color: var(--gen-hairline);
-}
-:root[data-theme="dark"] .sl-markdown-content :not(pre) > code {
-  background: #1a2231;
-  border: 1px solid var(--gen-hairline);
-  color: var(--gen-purple-end);
-}
-
-/* ── Selection ── */
-:root[data-theme="dark"] ::selection {
-  background: var(--gen-purple-end);
-  color: #0c1520;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
-   Layout — whole page scrolls as one piece; remove the section dividers that
-   cut the page up. Left nav stays but flows WITH the page (no embedded scroll).
-   The right "On this page" TOC stays anchored (sticky), per request.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/* Left sidebar: scrolls WITH the page (no independent scroll), but stays in its
-   own column beside the content. Starlight pins it position:fixed + overflow-y:
-   auto on desktop, which gives it a separate scrollbar. We switch it to sticky
-   with auto height + visible overflow so:
-     · it sits in its grid column (content stays to its right),
-     · it scrolls with the page as one piece,
-     · when the nav is taller than the viewport it just scrolls with the page
-       (no inner scrollbar), and sticks to the top once you scroll past it. */
 @media (min-width: 50rem) {
-  /* Starlight stacks .sidebar-pane + .main-frame as siblings inside .page
-     (a flex column) and floats the sidebar via position:fixed. We turn .page
-     into a flex ROW so the two become real side-by-side columns: the sidebar
-     scrolls WITH the page (sticky, auto height, no inner scrollbar) and the
-     content sits beside it. */
   .page {
     flex-direction: row !important;
     flex-wrap: wrap !important;
     align-items: flex-start !important;
-    /* both columns clear the fixed pill header */
-    padding-block-start: var(--sl-nav-height) !important;
-    /* align EXACTLY with the header pill: same 1410px cap + 1.5rem gutter */
-    max-width: 1410px !important;
+    max-width: 1240px !important;
     margin-inline: auto !important;
-    padding-inline: 1.5rem !important;
-    column-gap: 2rem !important;
+    padding-block-start: var(--sl-nav-height) !important;
+    padding-inline: clamp(1rem, 2vw, 1.5rem) !important;
+    column-gap: 1.75rem !important;
   }
-  /* header is fixed/full-width — force it onto its own row above the columns */
-  .page > .header { flex: 0 0 100% !important; }
+
+  .page > .header {
+    flex: 0 0 100% !important;
+  }
 
   .sidebar-pane {
     position: sticky !important;
     top: var(--sl-nav-height) !important;
-    inset: auto !important;
-    inset-inline-start: auto !important;
     flex: 0 0 var(--sl-sidebar-width) !important;
     width: var(--sl-sidebar-width) !important;
     height: max-content !important;
     max-height: none !important;
     overflow: visible !important;
     background: transparent !important;
-    border-inline-end: none !important; /* drop the sidebar divider */
+    border-inline-end: 0 !important;
   }
+
   .sidebar-content {
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
   }
-  /* content column takes the rest; drop the reserved gutter padding. */
+
   .main-frame {
     flex: 1 1 0 !important;
     min-width: 0 !important;
     padding-inline-start: 0 !important;
-    /* .page now provides the top clearance — don't double it. */
     padding-block-start: 0 !important;
   }
+
+  .main-pane > .content-panel {
+    padding-inline: clamp(1.25rem, 4vw, 3rem);
+  }
 }
 
-/* Remove ALL the layout/section borders that "cut up" the page:
-   header divider, sidebar divider, content↔TOC divider, asides/cards/hr. */
 .main-frame,
-.sl-markdown-content,
 .content-panel,
 .content-panel + .content-panel,
-nav.sidebar-pane,
 .right-sidebar,
-.right-sidebar-container {
-  border: none !important;
-}
-/* Starlight draws a divider between stacked content panels — remove it. */
-.content-panel {
-  border-top: none !important;
-}
-/* The article hairline rules between sections — gone. */
-:root[data-theme="dark"] .sl-markdown-content hr {
-  border: none;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  margin: 2.5rem 0;
+.right-sidebar-container,
+nav.sidebar-pane {
+  border: 0 !important;
 }
 
-/* Right "On this page" TOC pane stays — standard docs layout (left page-tree,
-   center content, right TOC). */
-
-/* ── Left rail = search on top of the "On this page" TOC ──
-   The page tree moved to the top nav, so the left sidebar holds search + TOC.
-   Make it flow with the page (no embedded scroll) with comfortable padding. */
-@media (min-width: 50rem) {
-  .sidebar-pane {
-    position: sticky !important;
-    top: var(--sl-nav-height) !important;
-    inset: auto !important;
-    height: max-content !important;
-    max-height: none !important;
-    overflow: visible !important;
-    border-inline-end: none !important;
-  }
-  .sidebar-content { height: auto !important; min-height: 0 !important; overflow: visible !important; }
+.sl-markdown-content {
+  max-width: 48rem;
+  padding-block: 1.25rem 3rem;
 }
 
-/* Breathing room around the reading column — modest, no big side padding so
-   the content fills the width of the header (no narrow inset). */
-.main-pane .sl-markdown-content { padding-block: 1.5rem; }
-.sl-container { padding-inline: 1.25rem !important; }
-
-/* ───────────────────────────────────────────────────────────────────────────
-   Splash landing hero — the branded "API · MCP · Claude Code" landing page.
-   Eyebrow + two-tone Manrope headline + tagline + GEN gradient CTAs, on the
-   aurora. Generous padding. Only affects template: splash (the index).
-   ─────────────────────────────────────────────────────────────────────────── */
-.hero {
-  padding-block: clamp(2.5rem, 6vw, 4.5rem) 1.5rem;
-  gap: clamp(1.5rem, 4vw, 3rem);
+.sl-container {
+  padding-inline: 1.25rem !important;
 }
-.hero > .hero-html,
-.hero > img { display: none; }   /* lead with type, not an image */
-.hero .copy { gap: 1.1rem; max-width: 46rem; }
 
-/* Eyebrow above the title — the kit's glowing-dot label. */
-.hero .copy > h1::before {
-  content: "GEN API · MCP · SDK";
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gen-purple-end);
+:root[data-theme="dark"] .content-panel {
+  background: transparent;
 }
-.hero .copy > h1 {
-  display: flex;
-  flex-direction: column;
-  font-size: clamp(2.4rem, 5.5vw, 3.5rem);
-  font-weight: 800;
+
+.sl-markdown-content :is(h1, h2, h3, h4),
+.hero h1 {
+  font-family: "Space Grotesk", var(--sl-font);
+  letter-spacing: 0;
+}
+
+.sl-markdown-content h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: #f6f7f9;
-}
-.hero .tagline {
-  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
-  line-height: 1.6;
-  color: #aab1bd;
-  max-width: 46ch;
+  font-weight: 700;
 }
 
-/* CTAs — primary = GEN pill gradient; others = glass pills. */
-.hero .actions { gap: 0.75rem 1rem; margin-top: 0.75rem; }
+.sl-markdown-content h2 {
+  margin-top: 2.6em;
+  font-size: clamp(1.45rem, 2.2vw, 1.85rem);
+  line-height: 1.18;
+  font-weight: 700;
+}
+
+.sl-markdown-content h3 {
+  margin-top: 2em;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.sl-markdown-content p,
+.sl-markdown-content li,
+.sl-markdown-content td {
+  line-height: 1.72;
+}
+
+:root[data-theme="dark"] .sl-markdown-content :is(h1, h2, h3, h4, strong, b) {
+  color: #ffffff;
+}
+
+.sl-markdown-content a {
+  text-underline-offset: 0.18em;
+}
+
+:root[data-theme="dark"] .sl-markdown-content a {
+  color: #ff98f7;
+}
+
+:root[data-theme="dark"] .sl-markdown-content a:hover {
+  color: var(--xel-amber);
+}
+
+[data-has-hero] .hero > img,
+.hero > .hero-html {
+  display: none;
+}
+
+.hero {
+  padding-block: clamp(2.5rem, 6vw, 5rem) 1.25rem;
+}
+
+.hero .copy {
+  max-width: 48rem;
+  gap: 1rem;
+}
+
+.hero .copy > h1::before {
+  content: "XEL PROTOCOL · LIVING CHARACTERS";
+  display: block;
+  margin-bottom: 0.7rem;
+  font-family: var(--sl-font);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  color: transparent;
+  background: var(--xel-gradient-full);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  line-height: 0.98;
+  font-weight: 700;
+}
+
+.hero .tagline {
+  max-width: 48rem;
+  color: var(--sl-color-gray-2);
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  line-height: 1.6;
+}
+
+.hero .actions {
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
 .hero .action {
-  border-radius: 9999px !important;
-  padding: 0.72rem 1.6rem !important;
-  font-weight: 600 !important;
-  font-family: var(--sl-font) !important;
+  border-radius: 999px !important;
+  padding: 0.75rem 1.4rem !important;
+  font-weight: 800 !important;
 }
+
 .hero .action.primary {
-  background: linear-gradient(90deg, var(--gen-purple-start), var(--gen-purple-end)) !important;
-  border: 0.5px solid rgba(255, 255, 255, 0.26) !important;
+  background: var(--xel-gradient-primary) !important;
+  border: 0 !important;
   color: #fff !important;
-  box-shadow: 0 4px 24px rgba(162, 156, 255, 0.3) !important;
-  transition: box-shadow 0.25s, transform 0.2s !important;
+  box-shadow: 0 2px 16px rgba(255, 110, 244, 0.3) !important;
 }
-.hero .action.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 30px rgba(162, 156, 255, 0.5) !important;
-}
+
 .hero .action.secondary,
 .hero .action.minimal {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid var(--gen-hairline) !important;
-  color: #e7e9ee !important;
-  transition: border-color 0.2s, background 0.2s !important;
-}
-.hero .action.secondary:hover,
-.hero .action.minimal:hover {
-  border-color: rgba(162, 156, 255, 0.45) !important;
-  background: rgba(255, 255, 255, 0.07) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--xel-line) !important;
+  color: #fff !important;
 }
 
-/* Splash content below the hero — breathing room + centered measure. */
-.sl-markdown-content { padding-block-start: 1.5rem; }
-
-/* ───────────────────────────────────────────────────────────────────────────
-   Tighter docs sizing — match the nav width (1180px) by trimming the type scale
-   and column gaps. Type sizes follow the gen.pro blog article reference:
-   body 17px/1.65, h1 38→44, h2 28→30/600, h3 22/600, all Manrope.
-   ─────────────────────────────────────────────────────────────────────────── */
-@media (min-width: 50rem) {
-  /* page H1 */
-  .sl-markdown-content h1,
-  .content-panel h1 {
-    font-size: 2.25rem !important;   /* ~36px */
-    line-height: 1.12 !important;
-    letter-spacing: -0.03em !important;
-  }
-  /* body copy */
-  .sl-markdown-content p,
-  .sl-markdown-content li,
-  .sl-markdown-content td {
-    font-size: 1.0625rem !important; /* 17px — blog body */
-    line-height: 1.65 !important;
-  }
-  .sl-markdown-content :is(h2) {
-    font-size: 1.625rem !important;  /* ~26px */
-    font-weight: 600 !important;
-    line-height: 1.2 !important;
-    letter-spacing: -0.025em !important;
-  }
-  .sl-markdown-content :is(h3) {
-    font-size: 1.3125rem !important; /* 21px */
-    font-weight: 600 !important;
-    line-height: 1.25 !important;
-  }
-  /* sidebar + TOC links a touch smaller so the columns stay narrow */
-  .sidebar-content a,
-  .sidebar-content span,
-  .right-sidebar a {
-    font-size: 0.8125rem !important; /* 13px */
-  }
-  /* trim the content column's inner padding so it sits tight to the columns */
-  .sl-markdown-content { padding-inline: 0 !important; }
-  .main-pane > .sl-container { padding-inline: 0.5rem !important; }
+.sl-markdown-content .card {
+  border-radius: 12px;
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
-   Clean code-first layout (z.ai / Sakana feel) — 2026-06-24, mav.
-   Spacing + width + de-clutter ONLY. Keeps GEN colors, aurora, and Manrope.
-   ─────────────────────────────────────────────────────────────────────────── */
+:root[data-theme="dark"] .sl-markdown-content .card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.035));
+  border-color: var(--xel-line);
+}
 
-/* 1. Right "On this page" TOC removed via config (tableOfContents:false).
-      Reclaim the width so content centers in the remaining column. */
-.main-frame .main-pane { min-width: 0; }
+.sl-markdown-content .card:hover {
+  transform: translateY(-2px);
+}
 
-/* 2. Left nav — z.ai feel: NO rail line, narrower sidebar, content sits close. */
-/* Starlight draws the rail as border-inline-start on the nested <ul>; kill it
-   on every nesting level with high specificity. */
+:root[data-theme="dark"] .sl-markdown-content .card:hover {
+  border-color: rgba(255, 110, 244, 0.45);
+}
+
+.card .icon {
+  color: var(--xel-pink);
+  background: transparent !important;
+  border: 0 !important;
+}
+
+:root[data-theme="dark"] .expressive-code .frame,
+:root[data-theme="dark"] .sl-markdown-content :not(pre) > code,
+:root[data-theme="dark"] table {
+  border-color: var(--xel-line) !important;
+}
+
+:root[data-theme="dark"] .sl-markdown-content :not(pre) > code {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ff98f7;
+}
+
+.gen-sidebar-search {
+  margin: 0 0 1rem;
+  padding: 0.35rem 0.35rem 0;
+}
+
+.gen-sidebar-search button {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--xel-line) !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
 .sidebar-content ul,
 .sidebar-content ul ul,
 .sidebar-content li > ul,
@@ -500,229 +323,48 @@ nav.sidebar ul,
 nav.sidebar li {
   border-inline-start: 0 !important;
   border-inline: 0 !important;
-  margin-inline-start: 0 !important;
-  padding-inline-start: 0 !important;
 }
-/* THE actual rail line: Starlight scopes it onto the nested <li> via
-   :where(.astro-XXXX). Kill the border + ALL left indent so sub-items align
-   FLUSH with their group title (z.ai). */
-/* IMPORTANT: scope this rail-reset to ul/li ONLY — never to <a> — or it forces
-   padding-inline-start:0 on the link and kills the active-pill left gutter. */
-.sidebar-content ul ul li,
-.sidebar-content ul ul,
-nav.sidebar ul ul li,
-.sidebar-content [class*="astro-"] ul li[class*="astro-"],
-.sidebar-content [class*="astro-"] ul ul[class*="astro-"] {
-  border-inline-start: 0 !important;
-  margin-inline-start: 0 !important;
-  padding-inline-start: 0 !important;
-}
-/* ─────────────────────────────────────────────────────────────────────
-   SINGLE SOURCE OF TRUTH for the left-nav column edge.
-   --gen-nav-inset = the gap from the sidebar pane's left edge to where ALL
-   nav text (group labels, items, active-pill text, search) must start so it
-   lines up under the GEN logo. Tune ONLY this one value.
-   The active pill / item background uses a small symmetric pad (--gen-pill-pad)
-   and is pulled left by that same pad via negative margin, so the pill wraps
-   its text evenly AND the text still sits at --gen-nav-inset. ───────────── */
-/* The real sidebar link is `a.astro-gwczggwz` (text in a child <span>); its
-   left padding comes from Starlight's --sl-sidebar-item-padding-inline, and the
-   pill background is drawn on that <a>. So: set the item padding = the gutter we
-   want INSIDE the pill, and pull the whole row LEFT by that same amount with a
-   negative container margin, so the pill bg has a real left gutter before the
-   text WHILE the text still lands on the nav edge under the logo. */
-:root { --gen-nav-inset: 1.25rem; --gen-pill-pad: 0.85rem; }
-/* Kill Starlight's own sidebar container padding so --gen-nav-inset is the
-   ONLY horizontal inset (otherwise it stacks and pushes everything right). */
-.sidebar-content:where([class*="astro-"]),
-nav.sidebar-pane:where([class*="astro-"]) { --sl-sidebar-pad-x: 0px !important; padding-inline: 0 !important; }
 
-/* Link text-left = pane-edge + margin-left + padding-left
-   = pane-edge + (inset - pad) + pad = pane-edge + inset  → always the nav edge,
-   independent of pad. The pill background starts at (inset - pad), so the pill
-   has a `pad`-wide gutter to the LEFT of the text. Group labels use the same
-   `inset` so EVERYTHING (label, link text, active text) shares one left edge,
-   and only the pill background extends left of it. */
 .sidebar-content a {
-  padding-inline: var(--gen-pill-pad) !important;
-  margin-inline: calc(var(--gen-nav-inset) - var(--gen-pill-pad)) 0.4rem !important;
-}
-/* narrower sidebar + tight content gap (z.ai ≈ 240px nav, snug column) */
-:root {
-  --sl-sidebar-width: 15rem;     /* was 18.75rem */
-  --sl-content-pad-x: 1.25rem;
-  --sl-nav-gap: 1.25rem;
-}
-.sidebar-content ul { gap: 0.05rem !important; }
-
-/* sub-item rows (z.ai): 14px, muted gray, compact full-width rows. */
-.sidebar-content a {
-  display: block;
-  padding-block: 0.5rem;     /* taller rows so the active pill isn't squished */
-  /* padding-inline + margin-inline set above (even pill, logo-aligned text) */
-  font-size: 0.95rem;        /* up per mav */
-  font-weight: 400;
-  line-height: 1.5;
-  color: #8b93a1;            /* muted gray, like z.ai items */
-  border-radius: 8px;
-}
-.sidebar-content a:hover { color: #e7e9ee; background: rgba(255,255,255,0.035); }
-
-/* group headers (z.ai): REGULAR case, ~13px, brighter, clear space above. */
-.sidebar-content > ul > li + li { margin-top: 1.35rem; }
-.sidebar-content .group-label,
-.sidebar-content summary > .group-label,
-.sidebar-content > ul > li > span:first-child {
-  font-size: 0.92rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;      /* z.ai is NOT uppercase */
-  color: #c5cad3;
-  opacity: 1;
-  margin-bottom: 0.45rem;
-  /* Match the link TEXT edge: links resolve to pane-edge + nav-inset, but the
-     label sits one DOM level out (no link margin), so it needs the link's full
-     effective inset = nav-inset + the link's own padding-derived offset. */
-  padding-inline: 0.75rem 0.7rem !important;
+  border-radius: 10px;
+  color: var(--sl-color-gray-3);
 }
 
-/* active item (z.ai): white text on a neutral full-width light pill, no accent bar. */
+.sidebar-content a:hover {
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--sl-color-white);
+}
+
 :root[data-theme="dark"] .sidebar-content a[aria-current="page"],
 .sidebar-content a[aria-current="page"] {
-  background: rgba(255,255,255,0.07) !important;
-  color: #ffffff !important;
-  font-weight: 500;
+  background: rgba(255, 110, 244, 0.12) !important;
+  color: #fff !important;
+  font-weight: 700;
 }
 
-/* 3. Content column: tighter, code-first reading width + generous padding. */
-.sl-markdown-content {
-  max-width: 46rem;          /* ~736px — z.ai/Sakana reading column */
-}
-.content-panel + .content-panel { border-top: none; }
-.main-pane > .content-panel {
-  padding-inline: clamp(1.25rem, 4vw, 3rem);
-  padding-block: 1.5rem;
-}
-
-/* 4. Heading rhythm (z.ai feel) — frequent, bold section headings, strong
-      separation; short paragraphs read as scannable blocks. */
-.sl-markdown-content h1 { font-size: 2rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
-.sl-markdown-content h2 {
-  font-size: 1.4rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.015em;
-  margin-top: 2.5em; margin-bottom: 0.7em;
-}
-.sl-markdown-content h3 {
-  font-size: 1.1rem; font-weight: 600;
-  margin-top: 1.9em; margin-bottom: 0.5em;
-}
-.sl-markdown-content > :first-child { margin-top: 0; }
-.sl-markdown-content p,
-.sl-markdown-content li { line-height: 1.7; }
-.sl-markdown-content p { margin-block: 0.85em; max-width: 60ch; }
-
-/* 5. Code blocks — the star of a code-first page. Clear, padded, rounded. */
-.sl-markdown-content .expressive-code,
-.sl-markdown-content pre {
-  margin-block: 1.25em;
-}
-.sl-markdown-content .expressive-code .frame pre {
-  padding-block: 1rem;
-}
-
-/* 6. Hairline page chrome (no heavy borders). */
-.main-frame { --sl-content-pad-x: 1.5rem; }
-
-/* NO lines on the sidebar — remove BOTH the right divider and any left edge line. */
-.sidebar-pane,
-nav.sidebar-pane,
-.sidebar-pane:where(.astro-2kn2pk2s),
-.sidebar,
-.sidebar-content {
-  border-inline-end: none !important;   /* right divider — GONE */
-  border-inline-start: none !important; /* left edge line — GONE */
-  border-right: none !important;
-  border-left: none !important;
-}
-@media (min-width: 50rem) {
-  .main-pane { --sl-content-margin-inline: 0; }
-}
-
-/* ── z.ai-match polish (CSS only) — subtle callout, no group caret, tighter body ── */
-
-/* Note/callout — z.ai style: faint thin box, no loud 0.25rem accent bar. */
-.sl-markdown-content .starlight-aside {
-  border-inline-start: none !important;
-  border: 1px solid var(--gen-hairline) !important;
-  border-radius: 12px !important;
-  background-color: rgba(255,255,255,0.025) !important;
-  padding: 1rem 1.15rem !important;
-}
-.sl-markdown-content .starlight-aside__title {
-  color: var(--sl-color-gray-2) !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-}
-.sl-markdown-content .starlight-aside__content,
-.sl-markdown-content .starlight-aside__content a { color: var(--sl-color-gray-2) !important; }
-
-/* Sidebar group headers — hide the collapse caret/chevron (z.ai has none). */
-.sidebar-content details > summary svg,
-.sidebar-content summary .caret,
-.sidebar-content details > summary::after { display: none !important; }
-.sidebar-content details > summary { list-style: none; cursor: default; }
-.sidebar-content details > summary::-webkit-details-marker { display: none; }
-
-/* Body text — z.ai feel: slightly smaller, lighter, tighter measure. */
-.sl-markdown-content p,
-.sl-markdown-content li {
-  font-size: 0.95rem;
-  color: #aab1bd;
-}
-
-/* No underlines on hyperlinks (mav). */
-.sl-markdown-content a,
-.sl-markdown-content a:hover { text-decoration: none !important; }
-
-/* "On this page" TOC — larger, readable text (mav). */
-.right-sidebar a,
-.right-sidebar .sl-link-button,
-starlight-toc a,
-.right-sidebar li a { font-size: 0.9rem !important; }
-.right-sidebar h2,
-starlight-toc > nav > h2 { font-size: 0.8rem !important; letter-spacing: 0.04em; }
-
-/* MCP guide client compatibility row. */
-.mcp-top-actions {
-  margin-top: 1.1rem;
-  margin-bottom: 0.8rem;
-}
-
-.mcp-client-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  margin: 0.4rem 0 1.4rem;
-}
-
-.mcp-client-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 2rem;
-  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
-  border: 1px solid var(--gen-hairline);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.035);
+.sidebar-content .group-label,
+.sidebar-content summary > .group-label {
   color: var(--sl-color-gray-2);
-  font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
-.mcp-client-icon {
-  width: 1.45rem;
-  height: 1.45rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.09);
-  object-fit: contain;
-  padding: 0.16rem;
+.gen-footer-controls {
+  border-top-color: var(--xel-line) !important;
+}
+
+:root[data-theme="dark"] ::selection {
+  background: var(--xel-pink);
+  color: #121212;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

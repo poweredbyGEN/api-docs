@@ -1,0 +1,105 @@
+---
+title: "Cost Model and XEL Funding"
+description: "Funding model, costs, runway, and treasury policy."
+---
+
+# Cost Model and XEL Funding
+
+## Product Rule
+
+XEL should not gate XEL object creation in the first product version. A user can create the XEL object, import a
+social profile, upload media to Walrus, mint the Sui aNFT, publish the XEL page, and configure the
+profile before paying.
+
+Runtime is different. Chat/inference should be disabled until the XEL object has enough funding to cover
+the activation threshold. The public page should ask the user to "Fund this XEL" after creation.
+
+Default launch threshold:
+
+```text
+required_to_activate = $5 credits or equivalent crypto funding
+```
+
+This is an activation buffer, not a permanence promise.
+
+## First-Pass Cost Buckets
+
+| Bucket | What it covers | Initial estimate |
+|---|---|---|
+| Sui mint and policy transactions | aNFT mint, Proof of Genesis, wallet/policy refs, package calls. | Usually cents-level; budget `$0.05-$0.25` until measured on testnet/mainnet. |
+| Walrus public media and encrypted artifacts | Avatar, public media refs, videos, persona artifact, memory checkpoints, manifests. | Official storage pricing is `$0.023/GB/month` before app-specific overhead and gas. |
+| Social import and media processing | GEN scan/import, video download, profile metadata, transcription/extraction, evidence mapping. | Provider-dependent; measure per source and duration. Budget `$0.25-$2.00` for early MVP profiles until metered. |
+| Persona synthesis | GEN transforms prompt/files/social evidence into encrypted runtime persona artifact. | Provider-dependent; measure by tokens and media minutes. Budget `$0.10-$1.00` for MVP. |
+| Runtime/inference | Decentralized chat provider calls, x402 settlement, relay/orchestration. | Chutes live default `Qwen/Qwen3-32B-TEE` is currently `$0.104` input / `$0.416` output per 1M tokens before x402/facilitator overhead. Keep a conservative UI budget of `$0.005-$0.05` per response until real receipts are reconciled. |
+| XEL hosting/indexing | XEL profile page, discovery metadata, settings UX, status polling. | Low fixed platform cost; do not charge separately in MVP. |
+
+## Launch Recommendation
+
+Use `$5` as the first activation threshold because it comfortably covers:
+
+- mint and setup overhead
+- Walrus storage for normal profile assets
+- initial persona/import processing subsidy
+- a small runtime buffer for first chat interactions
+
+Do not promise that `$5` keeps the XEL object alive forever. The UI should say how much runway remains.
+
+## Runway Formula
+
+For the first implementation:
+
+```text
+available_runtime_balance = sum(reconciled funding balances allocated to runtime/storage)
+daily_burn_estimate = storage_daily_estimate + hosting_daily_estimate + baseline_inference_daily_estimate
+runway_seconds = floor((available_runtime_balance / daily_burn_estimate) * 86400)
+```
+
+Default demo values:
+
+```text
+required_to_activate = $5.00
+estimated_daily_cost = $0.35
+unfunded_runway = 0 seconds
+$5 funded runway ~= 14 days, 6 hours
+```
+
+The default `$0.35/day` is intentionally conservative for the demo. It assumes the XEL object is available
+for chat and may receive light interaction. Storage-only XEL objects should last much longer; active XEL objects
+with many chats can burn faster.
+
+## Page Behavior
+
+Unfunded XEL:
+
+- profile is published
+- media and proof links are visible according to privacy settings
+- chat CTA routes to the funding section
+- chat input is disabled
+- page says "Chat is disabled until this XEL is funded"
+- page shows current funds, activation minimum, estimated daily burn, and deposit wallets
+
+Funded XEL:
+
+- chat is enabled according to interaction policy
+- page says "This XEL will expire in X days, Y hours" unless more funds are added
+- countdown is recomputed after wallet-ledger or chain-balance reconciliation
+
+Expired or underfunded XEL:
+
+- profile remains visible according to privacy settings
+- chat is disabled
+- storage renewal warnings should become prominent before media or encrypted artifacts are at risk
+
+## Measurement Required Before Mainnet Pricing
+
+Before charging users beyond the MVP credit buffer, measure:
+
+- exact Sui gas for mint + policy setup on testnet and mainnet
+- Walrus cost per imported profile with real video counts and file sizes
+- GEN import/transcription/persona synthesis cost by profile source
+- Chutes SN64 end-to-end request cost after x402 proxy/facilitator overhead
+- Verathos SN96 fallback request cost
+- storage renewal cadence and warning thresholds
+- average chat turns per active XEL object per day
+
+These measured values should replace the demo constants in `fundingStatus`.

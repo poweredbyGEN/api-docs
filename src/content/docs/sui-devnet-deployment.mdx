@@ -1,0 +1,178 @@
+---
+title: "Sui Testnet Deployment"
+description: "Current public Sui testnet deployment evidence for the XEL package."
+---
+
+# Sui Testnet Deployment
+
+This records the current XEL v1 Living Character package deployed to Sui testnet for MVP integration testing.
+
+The current testnet package uses the recoverable shared mint entrypoints documented in
+`docs/04-smart-contracts.md`: `mint_direct_prompt_shared` and `mint_classified_prompt_shared`.
+The local package passes `sui move test --path contracts/v1 --build-env testnet` with shared mint
+plus `finalize_recovery_and_transfer`.
+
+## Current Package: On-Chain Endowment Waterfall
+
+- Network: Sui testnet
+- Publisher/sponsor address:
+  `0x27a696d786c12ce2966f1fa3f87468758dce0fafa7ec9b3f33cc56bc3610ed83`
+- Test command: `sui move test --path contracts/v1 --build-env testnet`
+- Package ID: `0x566fce85dfdac042d32f9bc004e17e3cf5c5acfc9281f822ced596003fce6544`
+- Publish transaction: `NKBqgwajFqMQ9Hta49NmvFSiEtPgeVWEiaqhxX6eS1z`
+- UpgradeCap object, deleted by immutability call:
+  `0xe1d8984cc111bd4d49508d553c61c959a1e002ba58708970cc6e9bd870615980`
+- Immutable transaction: `7vVkzZCRrjhc6owmAur97irfWBRutZUo4viK9fpCNpD2`
+- Current package owner: immutable. The UpgradeCap was deleted by `0x2::package::make_immutable`.
+- Modules: `identity`, `authority`, `access_mgmt`, `registry`, `breaker`, `treasury`, `wallets`, `payment`, `guardian`, `lineage`, `storage_policy`
+
+This package adds the contract-first Endowment Waterfall:
+
+- generic `Endowment<T>` with contract-held principal and ring-fenced keep-alive, storage, and
+  interaction allocations,
+- public top-up to principal or a named allocation,
+- owner-only principal withdrawal above the keep-alive reserve floor,
+- authority-free heartbeat that allocates realized yield by priority, compounds residual, and pays
+  a fixed keeper bounty,
+- owner-configured yield harvest policy and main treasury wallet ref,
+- owner-configured yield venue allowlist by hash,
+- owner-configured waterfall rates,
+- monthly yield harvest intent with cadence/min-claim/destination/venue checks,
+- epoch waterfall accounting event,
+- creator-paid interaction split event.
+
+Backend/keepers can execute PTBs and index events, but these policy rules now live on-chain.
+
+## Current Package: Full On-Chain MVP + Recovery/Lineage/Storage
+
+- Network: Sui testnet
+- CLI active address: `0x340b30311a263b6f162ccfc672eb9e5eb38c3b65844404a81db469c10e7354db`
+- Test command: `sui move test --path contracts/v1 --build-env testnet`
+- Publish command: `sui client publish contracts/v1 --gas-budget 1000000000 --json`
+- Package ID: `0x7141545596b89c92b0f8ecf95692a9e2e0bd2134cf24460a39c076224de3ba67`
+- Publish transaction: `2YTz2pVHsB86x6N5kCQsdi3wWWJzhqAjiM8Sj8uDxEQ3`
+- Modules: `identity`, `authority`, `treasury`, `wallets`, `payment`, `guardian`, `lineage`, `storage_policy`
+- UpgradeCap object, deleted by immutability call: `0x88a6b97f31ab948f81d24b54d68e61b42ffe9e4404b21be0756e08a1f6ef8e2e`
+- Immutable transaction: `E8ZDbaoW4WyggdVQ4ZBdxoxrwEpuXeBbWkgToHZcsUEC`
+- Current package owner: immutable. The UpgradeCap was deleted by `0x2::package::make_immutable`.
+
+## Current Character Smoke
+
+- Character object ID: `0x783bce4f71b6bbf7f5738cb6b5b290420cabc54f9246e3448e9043554c12fa5e`
+- Mint transaction: `CnqUq82KK11kh31MmSvnkqGQFVLppFGZuB4K7EDZxCrJ`
+- Object type: `0x7141545596b89c92b0f8ecf95692a9e2e0bd2134cf24460a39c076224de3ba67::identity::LivingCharacter`
+- Owner: `0x340b30311a263b6f162ccfc672eb9e5eb38c3b65844404a81db469c10e7354db`
+- Name: `Mira Chutes Testnet`
+- Profile URI: `https://xel.xyz/@mira-chutes-test`
+- Manifest URI: `walrus://manifest/mira-chutes-test`
+- Prompt mode: classified/encrypted persona commitment.
+- Object ownership mode: shared object, so guardian recovery and indexed app reads can work without requiring absent-owner co-signing.
+
+## Guardian Recovery Smoke
+
+- Guardian set object ID: `0x3ea0168ec4addbf41500956571e31722f748b10bca1e4f6a4c6ff9e30f83a4fc`
+- Guardian set transaction: `GTbGagHPmLvaMV1wo8LSTjr5wUqqwRckVofR7xA9D2sA`
+- Recovery request object ID: `0xa902b8a223735355b19b8a766d0a90cf6baf0952e7208298582b259cc6e57d2e`
+- Recovery request transaction: `4Q4o28hLGgmPiq2cixgmWiHBLv59ToxNALBY2Cbd8u4S`
+- Recovery finalization transaction: `2VtCNKAL9y7pA5i6gFD1Mde9kBgUukhgJLB8LzXfFJzs`
+
+Guardian finalization emits `SuccessionFinalized` and `KeyRotationRequired`. The package also
+includes `finalize_recovery_and_transfer` for shared characters that should mutate
+`LivingCharacter.owner` after recovery.
+
+## Lineage And Migration Smoke
+
+- Lineage object ID: `0x2212aace13f97bdfc79a3af9d513d061e4fed9818615ce00081b901e1408f08c`
+- Lineage create transaction: `BJ2rd5eLJ4PFm5ZecSdGQahoNj2ohSK3rCpjQzuPhpMy`
+- Persona commitment append transaction: `9tbnkwV8pkKmFsy9FxbR6wHY6G9fQoDzC8Zobm7xi9Qs`
+- Migration record object ID: `0xec9c498fa7c8edb6cf55d8fde3fafaf074dd6503b6f07e965b6a39317fbf2547`
+- Migration continuity transaction: `7fCDnwmz9up1EX6UNhNNQGEantf33U29VAXvWVyBvaoc`
+
+Lineage appends are owner-only in this package. Delegated lineage append needs a future explicit authority scope.
+
+## Contribution Wallet Smoke
+
+- Contribution wallet set object ID: `0x78f9f9e3e68b781532fad271db8eca16088f2ebb28511747473967e1b3f32328`
+- Create transaction: `HtWBZjj9bz6g9UXphbyN6jnDSEfCbfJqrBrkXpimpEDL`
+- Chain namespace: `sui`
+- Storage renewal wallet ref: `sui:storage-renewal:mira-chutes-test`
+- Inference/runtime wallet ref: `sui:inference-runtime:mira-chutes-test`
+- Treasury/endowment wallet ref: `sui:treasury-endowment:mira-chutes-test`
+
+The wallet set enforces exactly the three contribution buckets required by the whitepaper MVP: storage renewal, inference/runtime, and treasury/endowment.
+
+## Storage Renewal Smoke
+
+- Storage policy object ID: `0xb1a4e3aead3e6b400eaa98dcf0dbd57c2d3faaaf36ed5d295e8457db55c3d0e9`
+- Storage policy transaction: `ETREXBi91uEYT4M7HB2DnZpD7fHLDru5igok5rXKSBW`
+- Storage blob record object ID: `0xf8548737c02e61764e483758c7b695c086193125b1f941432bbe1d72ef1e0a65`
+- Storage blob transaction: `9KPDHF1LotC3agr1EhxWKfZFmdcFJ2mSnDREKTsBagkk`
+- Storage renewal intent transaction: `Buw7eCCwnLZSWYiAnQduSic9HvAJqL81djPqvRaUEUfF`
+
+## Treasury Smoke
+
+- Treasury policy object ID: `0x4ef748fce2e5a94d34ca654fcf21fcee5459a41cc3f80e398e7701ee11512905`
+- Treasury policy transaction: `SGtCh9bpAq5epA1cFqUuCAqQ7BTRfKhcywKQc2cNmQh`
+- Contribution recorded transaction: `GtSB838ZP5XANqW8wqXccZtmPCajAXWtm5TzpkoDmDCv`
+- Sweep intent transaction: `5dFf356mfxatG2FCFkfeUvPthxdFTdUQDF8YS1RSJ9wu`
+- Stake intent transaction: `DcCRYkeSf9LH9aH4CarqUruRQPV7p5Wmw87oLmySisSw`
+- Claim-yield intent transaction: `5ZKYzsF7xibb3A7hc1ivPEFSWNCDG35QMT9F4mJvYRcG`
+- Swap intent transaction: `J5sAYq7TnNw8hPDHzk83M6gPRZEPmEC79iAQrL5copUY`
+- Auto-yield enabled: true
+- Yield-claim enabled: true
+- Swap enabled: true
+- Max slippage: 50 bps
+
+The treasury module remains a policy and auditable-intent layer. Actual venue execution is an adapter/provider responsibility.
+
+## Payment Smoke
+
+- Payment policy object ID: `0xfc1f0ddfa8cd6ac22a569debea9677496b6c38605f3230a42e8ff94c27776280`
+- Payment policy transaction: `EWAwrGjvnEh2YbNr91bMd9Fj8JBTzxwcXWUfcwH778Yi`
+- Owner payment authorization: `EqweNY6tv26iLxDaYV1VqQcsgyX88kFfZjDUdYAA5xCH`
+- Provider receipt recorded: `s8REnpKSNWJGtE9q6YAdgqdyZYXezkK5ApVj9M9prwN`
+- Provider claim submitted: `EgEKcLcipWu8VJA4rLP4NSBsr27yegrmCsjiQz3bpVhG`
+- Provider claim settled: `Bm14CjCQCrzfsCj66wKPN9SE68fkPdT4nKULEFqipvWm`
+- Provider claim rejected: `4ggQJSLK8XzM5JaBjjDuVFGNyXtrd8jJuzS3vS9dTv1V`
+
+The Herdr `payments` tab is working GEN backend x402 credit purchase/facilitator config. This package provides the XEL on-chain payment policy, authorization, provider receipt, and provider claim event surface.
+
+## Evidence Files
+
+Current testnet evidence:
+
+- Publish transaction: `2YTz2pVHsB86x6N5kCQsdi3wWWJzhqAjiM8Sj8uDxEQ3`
+- Immutability transaction: `E8ZDbaoW4WyggdVQ4ZBdxoxrwEpuXeBbWkgToHZcsUEC`
+- Shared classified-prompt mint transaction: `CnqUq82KK11kh31MmSvnkqGQFVLppFGZuB4K7EDZxCrJ`
+- Contribution wallet-set transaction: `HtWBZjj9bz6g9UXphbyN6jnDSEfCbfJqrBrkXpimpEDL`
+- Full-smoke JSON directory: `/tmp/xel-smoke-newpkg/`
+
+Historical raw JSON evidence from the previous full-smoke deployment run:
+
+- `/tmp/xel-full-onchain-publish-devnet.json`
+- `/tmp/xel-full-onchain-immutable-devnet.json`
+- `/tmp/xel-full-onchain-mint-devnet.json`
+- `/tmp/xel-full-onchain-guardian-set-devnet.json`
+- `/tmp/xel-full-onchain-recovery-request-devnet.json`
+- `/tmp/xel-full-onchain-recovery-finalize-devnet.json`
+- `/tmp/xel-full-onchain-lineage-create-devnet.json`
+- `/tmp/xel-full-onchain-lineage-append-devnet.json`
+- `/tmp/xel-full-onchain-migration-devnet.json`
+- `/tmp/xel-full-onchain-wallets-devnet.json`
+- `/tmp/xel-full-onchain-storage-policy-devnet.json`
+- `/tmp/xel-full-onchain-storage-blob-devnet.json`
+- `/tmp/xel-full-onchain-storage-renewal-devnet.json`
+- `/tmp/xel-full-onchain-treasury-policy-devnet.json`
+- `/tmp/xel-full-onchain-sweep-devnet.json`
+- `/tmp/xel-full-onchain-payment-policy-devnet.json`
+- `/tmp/xel-full-onchain-provider-claim-submit-devnet.json`
+- `/tmp/xel-full-onchain-provider-claim-settle-devnet.json`
+- `/tmp/xel-full-onchain-provider-claim-reject-devnet.json`
+
+## Previous Immutable Package
+
+The previous package remains immutable and usable for historical comparison, but it does not include guardian, lineage, or storage policy modules:
+
+- Package ID: `0x26e3c35d5fb089257c579a1dc7c91c0a29d3ca05c37dacbcc62a322417f7649b`
+- Modules: `identity`, `authority`, `treasury`, `wallets`, `payment`
+- Immutable transaction: `DcJTHZUbwbgQab3BVeZeCM6kCHUsf9D9UbRTZueieAAJ`

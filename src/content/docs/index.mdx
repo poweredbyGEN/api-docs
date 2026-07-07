@@ -1,138 +1,52 @@
 ---
-title: GEN API & MCP
-description: Drive GEN from your code or an MCP-compatible AI client. Mint an API token, connect the MCP server, and automate the whole content workflow.
+title: XEL Docs Overview
+description: Start here for protocol documentation for XEL Living Characters, sovereign onchain identities with owned funding, memory, runtime, and provenance.
 hero:
-  tagline: Drive GEN from your own code — or straight from any MCP-compatible AI assistant. Mint an API token, connect the MCP server, and automate the whole content workflow in minutes.
+  tagline: Build, mint, fund, and run Living Characters with XEL's open protocol. These docs cover the protocol boundary, Sui contracts, wallets, storage, providers, runtime, and security gates.
   actions:
-    - text: Mint your API token
-      link: /guides/authentication/
+    - text: Start with Architecture
+      link: /architecture-boundaries/
       icon: right-arrow
       variant: primary
-    - text: Connect the MCP
-      link: /guides/mcp/
+    - text: Minting Inputs
+      link: /minting-and-runtime-inputs/
       icon: external
       variant: secondary
-    - text: TypeScript SDK
-      link: /guides/typescript-sdk/
-      icon: seti:typescript
+    - text: Smart Contracts
+      link: /smart-contracts/
+      icon: seti:config
       variant: minimal
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## Get started in two steps
+## What is XEL?
+
+XEL is an open protocol for Living Characters: onchain identities that can be owned, funded, spoken to, preserved, and migrated over time. GEN can publish into XEL and provide services around it, but XEL owns the protocol boundary, public docs, schemas, contracts, and package identity.
 
 <CardGrid>
-  <LinkCard
-    title="1 · Mint your API token"
-    href="/guides/authentication/"
-    description="Create a Personal Access Token in the GEN dashboard and authenticate every request with a Bearer header."
-  />
-  <LinkCard
-    title="2 · Connect the MCP"
-    href="/guides/mcp/"
-    description="Use Remote MCP or run the Local MCP server to drive the entire workflow with natural language."
-  />
+  <LinkCard title="Architecture Boundaries" href="/architecture-boundaries/" description="Understand what belongs to the open protocol, on-chain contracts, XEL.xyz, third-party providers, and GEN-provided services." />
+  <LinkCard title="Minting and Runtime Inputs" href="/minting-and-runtime-inputs/" description="See the inputs a wallet, app, or provider should gather before minting and running a Living Character." />
+  <LinkCard title="Memory, Inference, and Storage" href="/memory-inference-storage/" description="Persona artifacts, encrypted memory, provider calls, public refs, and runtime resolution." />
+  <LinkCard title="Security and Acceptance" href="/security-and-acceptance/" description="Invariant coverage, security posture, acceptance criteria, and launch gates." />
 </CardGrid>
 
-```bash
-# Authenticate every request with your token
-curl https://api.gen.pro/v1/agents \
-  -H "Authorization: Bearer gen_pat_xxxxxxxx"
+## Public Reading Order
 
-# …or let an MCP-compatible assistant drive it
-https://mcp.gen.pro/mcp
-```
+1. [Workstreams](/workstreams/)
+2. [Architecture Boundaries](/architecture-boundaries/)
+3. [Open Source Scope](/open-source-scope/)
+4. [Minting and Runtime Inputs](/minting-and-runtime-inputs/)
+5. [Smart Contracts](/smart-contracts/)
+6. [Wallet Auth and XEL Product Shell](/wallet-auth-and-xel-product/)
+7. [Memory, Inference, and Storage](/memory-inference-storage/)
+8. [Payments, Treasury, and Provider Discovery](/payments-treasury-provider-discovery/)
+9. [Security and Acceptance Gates](/security-and-acceptance/)
 
-## What is GEN?
-
-GEN is an autonomous social media agent platform. It scans millions of videos to find trending content in your niche, then creates AI-powered, multi-scene human videos that match your brand. Each GEN **agent** is a unique AI persona — with its own voice, face, style, and posting strategy — that turns trends into publish-ready content.
-
-## What is the Auto Content Engine?
-
-The Auto Content Engine is the system at the core of GEN's content creation workflow. Each engine has two sides:
-
-**The Sheet** (left side) — a data grid where you prepare content inputs:
-- Each **row** is a video
-- Each **column** is a content type (script, voiceover, image prompt, etc.)
-- Each **cell** holds one piece of generated or manual content
-
-**The Video** (right side) — a timeline editor where layers compose the final video:
-- **Layers** are the building blocks — text overlays, sound tracks, video clips, captions
-- Each layer has its own position, duration, volume, and styling
-- Layers stack and merge into the final rendered video
-
-In the GEN web app, this is the "Vidsheets" interface. The API gives you full programmatic access to both sides — the sheet data and the video composition.
-
-## What can you build?
-
-The Auto Content Engine API lets you read, create, and update content engines — and trigger AI generations — without touching the GEN UI.
+## Provider Notes
 
 <CardGrid>
-  <Card title="GEN MCP">
-    Use the official MCP server to manage agents, content engines, and AI generations through natural language. Your assistant handles the API calls.
-  </Card>
-  <Card title="Workflow automation">
-    Connect GEN to n8n, Make, or Zapier. Trigger video creation from RSS feeds, CRM events, or Slack messages.
-  </Card>
-  <Card title="Batch operations">
-    Script bulk updates — populate 50 rows with scripts, swap voiceover styles across an entire content engine, or update variables in one call.
-  </Card>
-  <Card title="Custom dashboards">
-    Build internal tools that pull content status, track generation progress, and give your team visibility into the pipeline.
-  </Card>
-  <Card title="TypeScript SDK">
-    Import the SDK into your Node.js or TypeScript project for type-safe access to agents, content engines, generations, and assets.
-  </Card>
-</CardGrid>
-
-## Key concepts
-
-Before diving in, here are the core objects you will work with:
-
-| Concept | Description |
-|---------|-------------|
-| **Agent** | An AI persona/character with its own identity, voice, and content style. Every API request is scoped to an agent via `agent_id`. |
-| **Content Engine** | A content spreadsheet. Each agent can have multiple content engines. |
-| **Row** | A single video within a content engine. Rows contain cells for each column. |
-| **Column** | A content type definition (e.g., "Script", "Voiceover", "B-Roll"). Columns define what kind of content each cell holds. |
-| **Cell** | The intersection of a row and column. Holds one piece of content (a script, a voiceover, an image, etc.). |
-| **Layer** | A video composition element — text overlay, sound track, video clip, or captions. Layers live on the video side, not inside cells. |
-| **Generation** | An AI job that produces content for a cell or a layer. You trigger a generation, and GEN's AI fills in the content. |
-| **Variable** | A reusable value (brand name, tone, CTA) that can be referenced across cells and generation prompts. |
-
-## For AI Agents
-
-If you're an AI agent or LLM, these resources are optimized for you:
-
-- **[llms.txt](/llms.txt)** — Complete API reference in plain text, designed to teach you how GEN works (concepts, workflows, every generation type with exact payloads)
-- **[llms-full.txt](/llms-full.txt)** — Exhaustive endpoint reference with request/response schemas
-- **[OpenAPI 3.1 Spec](/openapi.yaml)** — Machine-readable specification
-- **[MCP Server](/guides/mcp/)** — remote Streamable HTTP server plus local stdio server, with `gen_*` tools, GEN guidance resources, and ready-to-run prompts
-
-### Install the MCP Server
-
-```text
-https://mcp.gen.pro/mcp
-```
-
-Use Remote MCP first when your client supports Streamable HTTP. Use the local `uvx gen-mcp-server` path for stdio clients.
-
-See the [MCP install guide](/guides/mcp/) for both setup paths and troubleshooting.
-
-## Start here
-
-The fastest way to get a grounded, on-brand video out of GEN is two calls:
-
-1. **Configure the agent** — `PATCH /v1/agents/{id}/core` once with identity, overview, personality, inspiration, voice, look, and accounts. This is the single most important step for any new agent — everything downstream reads from here. See the [Agent Core reference](/reference/agent-core/).
-2. **Generate content ideas** — the content-ideas agent pulls trending data from 10+ platforms, matches it to your configured keywords and inspiration, and proposes videos with scripts, hooks, and selected assets. See the [Content Ideas guide](/guides/content-ideas/).
-
-Then clone a template, drop the idea in, and render. The [Quick Start guide](/guides/quickstart/) walks through the whole path end-to-end in under 10 minutes.
-
-<CardGrid>
-  <LinkCard title="Quick Start (10 min walkthrough)" href="/guides/quickstart/" description="Configure an agent with a single PATCH, generate ideas from trending data, produce a video." />
-  <LinkCard title="Agent Core reference" href="/reference/agent-core/" description="One endpoint for identity, overview, personality, inspiration, voice, look, and accounts." />
-  <LinkCard title="Content Ideas" href="/guides/content-ideas/" description="Async runs, conversations, refinement, long-term preferences." />
-  <LinkCard title="Install the GEN MCP" href="/guides/mcp/" description="Connect through Remote MCP or run the Local MCP server." />
-  <LinkCard title="Authentication" href="/guides/authentication/" description="Create an API key and learn how to authenticate requests." />
+  <Card title="Inference">XEL treats inference providers as swappable runtime capabilities, not protocol owners.</Card>
+  <Card title="Storage">Public media and proofs are content-addressed. Private persona and memory refs stay encrypted and access-controlled.</Card>
+  <Card title="Funding">Funding wallets, treasury policy, x402 rails, and provider receipts are modeled as protocol-compatible capabilities.</Card>
 </CardGrid>

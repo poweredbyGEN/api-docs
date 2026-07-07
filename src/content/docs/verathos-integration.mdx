@@ -1,0 +1,126 @@
+---
+title: "Verathos Integration"
+description: "Verathos fallback integration boundary for verified inference."
+---
+
+# Verathos Integration
+
+Verathos SN96 is a decentralized verified-inference fallback target for XEL. Chutes SN64 is the
+immediate decentralized inference default.
+
+## Role In XEL
+
+When a Living Character has an encrypted persona artifact and a user sends a chat request, the XEL
+runtime can select Verathos from `provider_policy` and send an OpenAI-compatible chat completion
+request.
+
+Flow:
+
+1. XEL checks profile visibility, password/payment access, spend limits, and runtime provider policy.
+2. Runtime obtains the allowed persona prompt/context through the configured access policy.
+3. Runtime sends an OpenAI-compatible request to Verathos.
+4. Verathos generates the response and returns any available verification/payment metadata.
+5. XEL records usage, payment receipt, provider ID, model ID, and optional proof refs.
+
+## Default Model Candidate
+
+Live model target verified from `https://api.verathos.ai/v1/models` on 2026-07-06:
+
+```text
+qwen3.6-27b-abliterated
+```
+
+The model is explicitly selected because XEL needs an adult-capable, less-censored provider option
+for consenting-adult character conversations. That does not remove XEL policy boundaries: the
+runtime must still block minors, non-consensual sexual content, coercion, exploitation, illegal
+sexual content, and privacy abuse before or around the model call.
+
+Other adult-capable/open-weight candidates can be added through provider policy after live
+availability is verified on the provider:
+
+- Dolphin Llama 3 / 3.1 variants
+- Llama/Qwen/Mistral abliterated variants
+- Mixtral-style roleplay variants
+- Owner-approved custom fine-tunes
+
+## Local Example
+
+Without an API key, this prints the request payload:
+
+```bash
+npm run example:verathos
+```
+
+With an API key, when Verathos opens API-key accounts:
+
+```bash
+VERATHOS_API_KEY=vrt_sk_... npm run example:verathos
+```
+
+The adapter lives at:
+
+```text
+runtime/providers/verathos.mjs
+```
+
+## Payment Notes
+
+Verathos publicly presents an OpenAI-compatible API and the live endpoint currently returns an x402
+`upto` payment challenge without requiring an API key. The observed live challenge uses Base USDC:
+
+| Field | Live value |
+| --- | --- |
+| Network | `eip155:8453` |
+| Asset | `USDC` |
+| Asset address | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| Scheme | `upto` |
+
+The Verathos web app also reports that API-key accounts and prepaid TAO/USDC deposits are still in
+preview. Signup currently returns `503 API is in preview mode. Public access coming soon.`
+
+Because XEL's default home chain is Sui, the first deployment needs one of:
+
+- direct Verathos x402 support for the chosen wallet/network;
+- an XEL/GEN payment facilitator that can authorize from Sui and settle to a supported x402 rail;
+- a character-funded operating balance on the provider-supported USDC rail.
+
+The testnet runtime path can now simulate this settlement without real funds: the provider adapter
+captures the x402 challenge, `runtime/payments/x402.mjs` builds the unsigned payment attempt and
+facilitator request, records a simulated testnet receipt, reconciles it, and retries the
+OpenAI-compatible request with an `X-PAYMENT` header.
+
+Remaining environment and secret inputs for a real paid Verathos call:
+
+| Name | Secret | Purpose |
+| --- | --- | --- |
+| `VERATHOS_API_KEY` | Optional | Bearer token for the Verathos OpenAI-compatible API once API-key accounts are available. The x402 path can request a payment challenge without it. |
+| `VERATHOS_BASE_URL` | No | Override for `https://api.verathos.ai/v1` if Verathos publishes a different testnet endpoint. |
+| `XEL_X402_FACILITATOR_URL` | No | XEL or third-party facilitator endpoint that can verify/settle x402 payment payloads. |
+| `XEL_X402_FACILITATOR_TOKEN` | Yes | Optional facilitator API credential when the facilitator is not public verifier-only. |
+| `XEL_RUNTIME_PAYMENT_WALLET_ID` | No | Wallet descriptor ID from `payment-capability.v1`, normally the character's `inference_runtime` wallet. |
+| `XEL_RUNTIME_PAYMENT_SIGNER_REF` | Yes | Reference to the testnet signer/key material held in Infisical or an HSM/KMS; do not store raw keys in repo files. |
+| `SUI_RPC_URL` | No | Sui RPC endpoint used by a real Sui settlement adapter to verify balances or transaction refs. |
+| `SUI_NETWORK` | No | Expected settlement network, for this slice `testnet` or equivalent non-mainnet configuration. |
+
+Do not hard-code Verathos as the only inference provider. It is a fallback/alternate provider
+target, with Chutes SN64, Targon SN4, Phala, Marlin/Oyster, Akash-hosted open models, and GEN
+runtime as alternate/fallback provider classes.
+
+## Orchestration Compatibility
+
+Verathos remains a direct decentralized inference provider target even if XEL later adds Talus
+Nexus as an orchestration layer. Talus should be evaluated as a workflow coordinator around a
+selected inference provider, not as the model backend itself.
+
+A Talus-coordinated Verathos path could:
+
+1. request or verify allowed memory retrieval;
+2. call the Verathos OpenAI-compatible inference endpoint through a Nexus tool;
+3. coordinate payment, metering, or gas-budget handling;
+4. return the model response and provider metadata to the XEL runtime;
+5. trigger owner-policy-aware memory write-back; and
+6. emit workflow, payment, and receipt references.
+
+The response metadata should still identify Verathos as the inference provider and the selected
+model ID as the model. Talus/Nexus metadata should be recorded separately as orchestration,
+workflow, tool, or receipt metadata.

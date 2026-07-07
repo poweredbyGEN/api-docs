@@ -1,0 +1,250 @@
+---
+title: "Security and Acceptance Gates"
+description: "Security posture, invariant coverage, and launch gates."
+---
+
+# Security and Acceptance Gates
+
+This document defines the security posture, invariant coverage, acceptance criteria, and launch
+gates for the XEL open protocol. It applies to protocol docs, schemas, examples, Sui Move
+contracts, conformance tests, and release artifacts.
+
+XEL must support a provider-neutral Living Character protocol without requiring GEN synthesis,
+GEN hosting, or GEN private systems. GEN-produced artifacts may be accepted only through the same
+public schema and authorization boundaries available to other providers.
+
+## Security Principles
+
+- Store private prompts, memories, keys, source evidence, decrypted Seal payloads, provider
+  credentials, and raw private assets off-chain.
+- Put only commitments, hashes, storage references, public metadata, authority state, policy state,
+  and events on-chain.
+- Keep user wallet sign-in separate from Living Character owner, delegate, and treasury authority.
+- Treat direct prompt mode as a first-class open-protocol path.
+- Treat GEN synthesized classified prompts as optional encrypted persona artifacts, not as a
+  protocol dependency.
+- Keep storage, encryption, inference, retrieval, payments, discovery, and runtime providers
+  replaceable behind schemas and policy objects.
+- Fail closed when authority, policy, pause, migration, or schema validation is missing or stale.
+- Make every externally meaningful state transition auditable through events or signed receipts.
+
+## Contract Invariants
+
+Contract invariant tests are required before any network release that includes Move code. At
+minimum, tests must cover these properties:
+
+| Area | Required invariant |
+|---|---|
+| Identity | A `LivingCharacter` has exactly one current owner and a stable root identity. |
+| Proof of Genesis | Creation mode, schema version, persona commitment, source commitments, and creator authority cannot be silently rewritten. |
+| Privacy | No private prompt text, source social data, raw private assets, memories, keys, or decrypted payloads can be stored in contract state or emitted in events. |
+| Ownership | Only the current owner can transfer ownership, configure guardians, authorize migration, or weaken high-risk policies. |
+| Delegation | `AgentCap` authority is scoped to one character, checked centrally, expires, can be revoked, and never implies ownership. |
+| Pause | Paused scopes block the affected actions and cannot transfer ownership, seize funds, or rewrite lineage. |
+| Access policy | Encrypted resource access verifies character state, pause state, authority scope, expiry, and policy nonce before emitting authorization. |
+| Guardian recovery | Recovery requires configured quorum, distinct guardian approvals, timelock, owner dispute window, event trail, and post-recovery owner-transfer/key-rotation plus sensitive-cap or payment freeze integration. |
+| Wallet/payment auth | Payment intents bind character ID, wallet binding, recipient, amount, asset, nonce, deadline, authority scope, and treasury policy. |
+| Treasury policy | Spending fails when policy is missing, locked, expired, paused, over limit, wrong asset, wrong recipient, or wrong venue/provider. |
+| Lineage | Lineage edges are append-only, parent consent cannot be forged, and migration preserves visible source records. |
+| Migration | Migration requires current owner signature, source package, target package, source character, source version, target version, nonce, deadline, and migration plan hash. |
+| Versioning | v1 behavior cannot be changed through package upgrade authority after immutable publish. |
+
+## Schema Conformance Tests
+
+Every schema under `schemas/` must have positive and negative fixtures before testnet release.
+Fixtures should be small, deterministic, and safe to publish.
+
+Required schema checks:
+
+- Valid examples conform to their declared `$schema`, `$id`, `schemaVersion`, required fields, enum
+  values, `additionalProperties: false` constraints, and cross-field conditions.
+- Invalid examples reject missing required fields, wrong versions, unknown provider-specific
+  top-level fields, invalid visibility/mode combinations, duplicate IDs where uniqueness is
+  required, and malformed digest, wallet, URI, timestamp, amount, or policy fields.
+- Schema references resolve locally and do not depend on private GEN services.
+- Provider-specific metadata remains optional and cannot become required protocol state without a
+  new documented schema version.
+- Direct prompt and classified persona examples both validate without requiring GEN account state.
+
+## Classified Persona Privacy Tests
+
+Classified persona artifacts are privacy-sensitive even when the owner authorized publication.
+Tests must prove that XEL publishes only safe commitments and references.
+
+Required privacy cases:
+
+- A synthesized classified persona artifact uses `promptVisibility` of `private`, `encrypted`, or
+  `classified`; it must not include plaintext `systemPrompt`.
+- Public manifests, profile metadata, Proof of Genesis records, discovery records, and contract
+  events include only public summaries, hashes, content-addressed references, encryption metadata,
+  provider attestations, and owner authorization references.
+- Source materials from DW socials, `gen.pro/assets`, files, user uploads, or provider evidence are
+  not copied into XEL public state unless explicitly marked public by the owner.
+- Encrypted prompt references include digest and access policy references sufficient to verify
+  integrity without decrypting content.
+- Runtime decryption is allowed only for owner-approved runtimes or delegates with current
+  authority, unexpired scope, matching policy nonce, and unpaused access scope.
+- Negative fixtures containing plaintext classified prompts, raw source evidence, provider secrets,
+  or private user identifiers in public fields must fail review or automated tests.
+
+## Direct Prompt Acceptance
+
+Direct prompt mode is accepted when:
+
+- The persona input uses `creationMode` or manifest mode `direct_prompt`.
+- The creator supplies a prompt inline or through a storage reference.
+- The prompt visibility is public, private, encrypted, or owner-controlled according to the
+  artifact schema and storage policy.
+- The authorizing wallet signs the mint or publication intent.
+- The artifact has a digest or content-addressed reference used by Proof of Genesis.
+- Minting, indexing, profile display, proof display, and runtime startup work without GEN synthesis,
+  GEN account state, GEN private APIs, or GEN-hosted runtime services.
+
+Direct prompt mode is not accepted if any required field assumes GEN synthesis, DW social
+ingestion, `gen.pro/assets`, private GEN scoring, or GEN-only provider routing.
+
+## GEN-4013 and GEN-4014 Non-Duplication Checks
+
+XEL must verify and reuse compatible upstream work without copying private implementation into this
+repo.
+
+GEN-4013 checks:
+
+- XEL defines only the persona artifact schema, publication boundary, privacy requirements, and
+  runtime access contract.
+- XEL does not implement GEN persona synthesis, DW social ingestion, `gen.pro/assets` evidence
+  processing, prompt classification, scoring, private prompt construction, or GEN orchestration.
+- Any GEN-produced artifact crosses into XEL through documented schema fields, storage references,
+  owner authorization, encryption metadata, and provider attestations.
+
+GEN-4014 checks:
+
+- XEL verifies existing x402 wallet ledger and agent-discovery assets before creating new payment,
+  wallet-ledger, or discovery surfaces.
+- Compatible GEN-4014 fields are mapped into provider-neutral XEL schemas or documented as gaps.
+- XEL does not copy GEN-4014 backend implementation, support workflows, or GEN-only operational
+  files into open protocol code.
+- x402 support remains a compatible payment capability, not the only allowed payment path.
+
+## Wallet-Auth Acceptance
+
+Wallet and email authentication acceptance covers the XEL.xyz user account layer and the separate
+Living Character authority layer.
+
+Required acceptance criteria:
+
+- Email login sends one email containing a magic link and copyable one-time code.
+- Email login challenges expire, can be resent after cooldown, and make older resent challenges
+  unusable.
+- Magic-link tokens and one-time codes are stored only as keyed hashes and are consumed once.
+- Email login is rate limited by normalized email and request source before SendGrid delivery.
+- Email login authenticates the XEL account/product session only; it never grants minting,
+  ownership, delegate, treasury, payment, or migration authority.
+- Sui wallet signature login is the default sign-in path.
+- Phantom support is included in the immediate sign-in scope.
+- Solana and Base/EVM login remain future linked-wallet options unless a later spec changes scope.
+- A login wallet authenticates a user account but does not automatically become owner, delegate, or
+  treasury authority for a Living Character.
+- Owner, delegate, treasury, and runtime wallets are represented as separate roles even when the
+  same address is intentionally reused.
+- Publication requires the wallet role relevant to the requested protocol action to sign or
+  otherwise prove authority.
+- Payment authorization uses Living Character wallet bindings, `AgentCap` scope where applicable,
+  treasury policy, nonce, and deadline. It must not rely only on a product session.
+- Linked-wallet flows reject replayed signatures, wrong chain namespaces, wrong account linkage,
+  stale nonces, expired challenges, and ambiguous wallet role assignment.
+
+## Storage and Encryption Requirements
+
+Storage and encryption are provider-neutral protocol capabilities. Walrus, Seal, or equivalent
+providers may satisfy them, but no provider is mandatory unless a release explicitly labels an
+adapter as a reference implementation.
+
+Required gates:
+
+- Public artifacts use content-addressed or digest-backed references.
+- Private and classified persona artifacts are encrypted or sealed before durable storage.
+- Encryption metadata records state, scheme, access policy reference, and key reference without
+  exposing decryption keys.
+- Access policies bind resource commitment, character ID, authority scope, provider class or
+  binding, policy version, and revocation nonce.
+- Storage references for private artifacts have integrity digests and persistence expectations.
+- Provider hints are optional routing hints, not canonical authority.
+- Build, test, and example fixtures contain no real private prompts, user files, credentials,
+  production provider tokens, or customer data.
+
+## Audit and Reproducible-Build Gates
+
+Before a contract package or schema release is promoted, the release candidate must be auditable
+from source.
+
+Required audit gates:
+
+- `git status` is clean except for intentional release artifacts.
+- The release commit, schema files, examples, contracts, tests, and generated package artifacts are
+  recorded in a release manifest.
+- Schema validation and contract tests run from a clean checkout.
+- Move package bytecode, package digest, or publish transaction payload is reproducible from the
+  release commit with documented tool versions.
+- Contract address, package ID, schema hashes, event names, and capability names are recorded after
+  deployment.
+- Security review confirms no private data is stored on-chain, emitted in events, committed in
+  fixtures, or published in public metadata.
+- Third-party audit or independent review findings are triaged before mainnet.
+- Any launch exception is documented with owner, impact, expiry, and mitigation.
+
+## Release Gates
+
+### Devnet Gate
+
+Devnet release is allowed when:
+
+- Schemas and examples validate locally.
+- Direct prompt and classified artifact fixtures pass conformance and privacy tests.
+- Move package compiles and invariant tests pass where contract code exists.
+- Wallet sign-in acceptance is documented with Sui default and Phantom immediate scope.
+- Storage/encryption references use test fixtures only.
+- Deployment manifest records package ID, schema hashes, commit, tool versions, and test output.
+
+### Testnet Gate
+
+Testnet release is allowed when all devnet gates pass and:
+
+- Contract invariant coverage includes ownership, delegation, pause, access policy, wallet/payment
+  authorization, treasury limits, guardian recovery, lineage, and migration.
+- Negative schema and privacy fixtures fail as expected.
+- GEN-4013 and GEN-4014 non-duplication checks are reviewed and documented.
+- Indexer or proof/detail consumers can read required events without exposing private artifacts.
+- Reproducible package build is verified by a second clean checkout.
+- Release notes list known gaps, disabled features, provider assumptions, and rollback or migration
+  procedure.
+
+### Mainnet Gate
+
+Mainnet release is allowed when all testnet gates pass and:
+
+- External or independent security review is complete, or documented launch approval accepts the
+  residual risk.
+- Immutable package publish or upgrade/migration policy is finalized and reviewed.
+- Mainnet deployment transaction payload is reproduced from the approved release commit.
+- Contract package IDs, schema hashes, public docs, examples, and conformance status are published.
+- Monitoring, incident ownership, and pause/resume authority are assigned for any operated public
+  surface.
+- No open critical or high security issues remain.
+- Wallet-auth, direct-prompt mint, classified-artifact mint, proof display, storage resolution, and
+  payment/spend-policy smoke tests pass against mainnet configuration using non-sensitive test
+  characters.
+
+## Launch Acceptance Summary
+
+XEL is launch-ready only when these conditions are true:
+
+- A third-party implementer can mint and run a direct-prompt Living Character from public docs,
+  schemas, and examples.
+- Classified persona artifacts can be published by reference without revealing private prompt or
+  source evidence.
+- Contract invariants protect ownership, delegation, treasury spend, pause, recovery, lineage, and
+  migration.
+- Wallet sign-in is clearly separated from character authority.
+- GEN-4013 and GEN-4014 are integration inputs, not duplicated core implementation.
+- Release artifacts are reproducible, auditable, and tied to deployed package/schema hashes.

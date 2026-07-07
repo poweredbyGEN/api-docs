@@ -1,0 +1,451 @@
+---
+title: "Payments, Treasury, and Provider Discovery Architecture"
+description: "Provider-neutral payments, treasury, funding, and discovery architecture."
+---
+
+# Payments, Treasury, and Provider Discovery Architecture
+
+This document defines the payment, treasury, wallet-ledger, and provider-discovery architecture for XEL Living Characters. It is protocol documentation; canonical JSON Schemas and contract interfaces live in separate files when a slice becomes executable.
+
+GEN-4014 is an existing implementation reference for this area. It tracks x402 wallet ledger and agent-discovery work across `feature/x402-wallet-ledger`, `feature/agent-discovery-docs`, `feature/agent-discovery-files`, and `feature/agent-discovery-support`. XEL should verify and map the reusable ideas, but xel.xyz owns its own protocol surface, discovery files, wallet roles, and payment UX. This work is not deployed on gen.pro.
+
+## Scope
+
+This document covers:
+
+- provider-neutral payment capabilities
+- x402 as the first/default payment integration, not the only mechanism
+- dedicated XEL funding wallets per XEL object
+- Sui as the default home chain for ownership and treasury policy
+- character wallets versus user authentication wallets
+- wallet-ledger and spend-policy boundaries
+- funding, endowment, storage renewal, spend caps, auto-sweep, staking, and rebalance phases
+- post-publication funding, activation thresholds, and runtime runway countdowns
+- provider discovery metadata for payments, runtime, storage, indexing, and agent-discovery files
+- what belongs on-chain, what may be XEL-hosted, and what belongs to third-party providers
+
+It does not define Move source, backend routes, or GEN-private implementation details. Concrete schema/runtime slices now exist for payment capability, treasury policy, and provider registry where noted below.
+
+## Design Principles
+
+- Payment support must be provider-neutral. The protocol describes capabilities, intents, limits, receipts, and discovery metadata; it does not require a single payment rail.
+- x402 is the first/default integration because a prior implementation reference already has wallet-ledger and agent-discovery assets to verify. It must not become the only allowed payment mechanism.
+- Sui is the default home chain for a Living Character's ownership, policy state, and treasury authority unless a later protocol version or owner policy explicitly supports another chain.
+- User sign-in wallets authenticate people into XEL.xyz. Character owner, delegate, runtime, treasury, payment, and provider wallets authorize Living Character actions. These roles must remain separate even when the same address fills multiple roles.
+- Every XEL object must be able to publish dedicated funding wallets. These are per-object receive wallets, not shared deposit addresses.
+- Contracts should enforce authority and policy commitments. They should not custody funds by default, execute third-party settlement, store provider secrets, or run billing logic.
+- Provider-specific terms, credentials, ledger internals, support tooling, and operational dashboards stay outside the open protocol unless explicitly promoted into a public reference implementation.
+
+## Payment Capability Model
+
+Payment capability is the protocol-level description of how a Living Character can pay, receive, meter, or settle value. It should be represented as a capability descriptor and runtime/provider binding, not as a hard dependency on one vendor.
+
+Recommended capability categories:
+
+| Capability | Purpose |
+|---|---|
+| `payment_intent` | Describes an owner- or delegate-authorized payment request before execution. |
+| `payment_rail` | Identifies the payment mechanism, such as x402, Sui transfer, stablecoin rail, card processor, or future chain-specific rail. |
+| `wallet_ledger` | Records provider-side accounting events, balances, holds, debits, credits, and reconciliation references. |
+| `metering` | Links runtime, storage, inference, or discovery usage to billable units. |
+| `spend_policy` | Declares transaction limits, rolling budgets, approval thresholds, asset rules, recipient rules, and venue constraints. |
+| `receipt` | Provides a verifiable result reference after settlement, refund, failure, or reversal. |
+| `revenue_route` | Describes splits, fees, royalties, creator payouts, or protocol fees where policy permits them. |
+
+x402 should be expressed as one implementation of these capabilities, for example `x402.payment.v1` or a successor capability name. A provider that does not use x402 can still be compatible if it supports the same intent, authorization, policy, receipt, and discovery semantics.
+
+The first executable x402 slice is `runtime/payments/x402.mjs`. It does not sign or spend funds.
+It selects the configured x402 rail, selects the relevant XEL funding wallet, builds an unsigned
+payment attempt from a provider challenge, builds a facilitator settlement request, can simulate
+testnet settlement without mainnet funds, reconciles the resulting receipt against the original
+attempt, and converts the receipt into a provider claim. Live wallet signing and production
+facilitator execution remain adapter work.
+
+## Reference Implementation Boundary
+
+GEN-4014 should be treated as prior implementation and documentation to verify for XEL compatibility. It is not the product destination for this work.
+
+Expected reuse inputs:
+
+- x402 wallet-ledger concepts for payment intents, balances, ledger entries, receipts, and reconciliation.
+- Agent-discovery files and public metadata patterns for publishing agent capabilities.
+- API documentation patterns that explain provider capabilities to external consumers.
+- Support draft language that can be converted into public XEL docs if it contains non-private operational guidance.
+
+XEL should not copy GEN-4014 backend implementation into this repo by default. The reusable boundary is the public interface, field mapping, provider-discovery metadata, and conformance behavior. GEN-private billing, support, customer account state, operational dashboards, credentials, and internal ledger tables are outside the XEL public protocol unless a later open-source decision changes that boundary.
+
+Before introducing a new XEL payment or discovery interface, the implementation owner should check whether GEN-4014 already covers:
+
+- payment capability name and version
+- wallet-ledger event model
+- public agent file shape
+- provider endpoint metadata
+- authentication and signature expectations
+- error and status vocabulary
+- supportable x402 request/response flow
+- gaps where XEL needs provider-neutral abstractions beyond x402
+
+## Dedicated XEL Funding Wallets
+
+Each XEL object should have its own funding wallet set. The same object may expose multiple receive
+wallets for different rails or networks, but the wallet must be dedicated to that object. A payment
+quote, public profile, or discovery file must not point users or agents at a shared XEL deposit
+address unless the address is clearly labeled as a treasury destination rather than a receive wallet.
+
+Recommended first-pass contribution wallet set:
+
+| Wallet | Purpose | Default allocation |
+|---|---|---|
+| Storage renewal wallet | Funds Walrus, Walrus Sites, Seal retention, and renewal. | Storage reserve |
+| Inference/runtime wallet | Funds runtime providers, inference, retrieval, and GEN/provider work. | Runtime balance |
+| Treasury/endowment wallet | Funds long-term principal, staking/yield, and survival runway. | Endowment principal |
+
+Rails are separate from these wallet purposes. A character can accept x402 on Base, Solana, or Sui,
+but the default public contribution model still exposes three purpose-bound receive wallets per XEL
+object.
+
+Dedicated funding wallets are receive endpoints only. Spend authority remains controlled by owner,
+delegate, treasury, and spend policy. A receive wallet can be swept into a master treasury or owner
+treasury wallet only through an auditable sweep event.
+
+For the XEL-hosted default, all platform-managed received funds should sweep into the matching XEL
+main treasury wallet for that settlement network after attribution and receipt creation. Attribution
+must happen before sweeping: the ledger records which XEL object, purpose, contributor, rail,
+network, and transaction funded the account, then an auditable sweep intent moves the spendable
+balance to the XEL master treasury destination. This lets XEL pay providers such as Verathos from a
+central treasury while preserving per-Icon accounting and runway calculations.
+
+Wallet key custody and Infisical backup requirements are defined in
+`docs/19-wallet-custody-infisical.md`.
+
+The canonical public schema for this is `payment-capability.v1.json`. It records:
+
+- the XEL object id
+- supported payment rails and facilitators
+- dedicated funding wallets
+- contribution purpose policy for tips, paid interaction payments, runtime funding, storage renewal,
+  and endowment funding
+- wallet-ledger event requirements
+- sweep policy and treasury destinations
+
+The first executable treasury runtime slice is `runtime/treasury/lifecycle.mjs`. It builds
+contribution receipts, sweep/treasury intents, main-treasury sweep plans, provider-claim records,
+adapter-interface descriptors, and runway estimates. It does not sign transactions, call staking or
+swap venues, claim rewards, move funds, or mark venue execution complete. Plans stay in
+`requires_external_execution` / `not_submitted` state until a real wallet or venue adapter submits
+the transaction and reconciles the resulting chain/provider receipt.
+
+## Wallet Roles
+
+Wallet roles must be explicit. A single address may serve multiple roles only when the owner intentionally configures it and signs the required authorization.
+
+| Wallet role | Scope | Authority source |
+|---|---|---|
+| `LoginWallet` | Authenticates a user into XEL.xyz or GEN. | Product session policy and wallet signature. |
+| `CharacterOwnerWallet` | Owns or controls the Living Character aNFT. | Sui contract ownership and owner signatures. |
+| `CharacterDelegateWallet` | Performs scoped character operations. | Owner-issued `AgentCap`, delegate policy, expiry, and revocation state. |
+| `RuntimeDelegateWallet` | Lets a runtime act for serving, metering, or limited updates. | Runtime provider binding plus owner/delegate authorization. |
+| `CharacterTreasuryWallet` | Receives, holds, routes, or spends funds for the character. | Treasury policy and wallet binding. |
+| `PaymentProviderWallet` | Executes or settles a third-party payment rail. | Provider capability attestation and payment authorization. |
+| `RevenueRecipientWallet` | Receives creator, owner, royalty, staking, or sweep payouts. | Revenue route policy and owner authorization. |
+
+User login is not payment authority. A chat user may sign in with a Sui wallet or Phantom for product access without gaining spend authority. A character may have a treasury wallet that is different from the user login wallet, owner wallet, and runtime delegate wallet.
+
+## Sui Default Home Chain
+
+Sui is the default home chain for Living Character payment authority and treasury policy.
+
+Sui-owned state should include:
+
+- aNFT identity and owner authority
+- delegate scopes and revocation state
+- wallet bindings for character-controlled payment actions
+- spend-policy commitments and emergency treasury locks
+- payment authorization intent hashes or nonce records when needed for replay protection
+- capability attestations and provider status references where the contract registry owns them
+- events that indexers, wallets, XEL.xyz, GEN, and providers can use to explain state
+
+Cross-chain payments, Solana-native ownership, Base/EVM wallet login, and multi-chain treasury execution are future linked-wallet or provider-rail work. They should not displace Sui as the default home chain in the immediate architecture.
+
+## Wallet Ledger
+
+The wallet ledger is the accounting surface that records payment and treasury events. It may be implemented by GEN, an x402 provider, a third-party payment processor, a self-hosted runtime, or a future open reference service.
+
+Ledger entries should be append-only from the consumer perspective. Corrections should be represented as reversal, adjustment, refund, or reconciliation entries rather than silent mutation.
+
+Recommended ledger event types:
+
+| Event | Purpose |
+|---|---|
+| `funding_received` | Funds entered the character treasury or provider-managed balance. |
+| `contribution_observed` | A tip, paid interaction payment, storage funding, runtime funding, or endowment contribution was detected. |
+| `contribution_verified` | The contribution settled and was assigned to a wallet purpose/allocation. |
+| `endowment_created` | Owner funded a longer-lived reserve for the character. |
+| `payment_authorized` | Owner or delegate authorized a typed payment intent. |
+| `payment_settled` | Provider or chain execution completed a payment. |
+| `payment_failed` | Execution failed with a reason and retry policy. |
+| `usage_metered` | Runtime, inference, storage, or discovery usage produced a billable event. |
+| `storage_renewal_reserved` | Funds were reserved for future storage or hosting renewal. |
+| `sweep_created` | A funding-wallet deposit was selected for consolidation. |
+| `sweep_submitted` | A sweep transaction was submitted to the chain or provider. |
+| `sweep_confirmed` | A sweep transaction was confirmed and reconciled. |
+| `sweep_executed` | Legacy/general event name for excess balance routed to an owner, revenue recipient, or safer treasury account. |
+| `stake_entered` | Funds entered a staking or yield venue under owner policy. |
+| `stake_exited` | Funds exited a staking or yield venue. |
+| `yield_claimed` | Claimable yield was harvested and routed according to policy. |
+| `swap_executed` | Assets were swapped under the active swap policy. |
+| `rebalance_executed` | Funds moved across allowed assets, wallets, or venues under policy. |
+| `reconciliation_completed` | Ledger state was reconciled against a chain, processor, or provider receipt. |
+
+The open protocol should define enough metadata for portable reconciliation: character reference, wallet role, payment rail, asset, amount, recipient, nonce, policy reference, provider receipt, timestamp, status, and visibility class. Provider-private ledger IDs can exist, but public discovery and protocol state should use stable references that do not require GEN account state to interpret.
+
+## Spend Policy
+
+Spend policy is the guardrail between delegated character activity and funds movement.
+
+Recommended spend-policy dimensions:
+
+| Dimension | Purpose |
+|---|---|
+| Asset allowlist | Which assets may be spent, received, staked, or swept. |
+| Recipient rules | Explicit allowlist, denylist, category rule, or owner-confirmation requirement. |
+| Per-transaction maximum | Maximum amount for one intent. |
+| Rolling velocity limits | Hourly, daily, weekly, or epoch-based budgets. |
+| Approval thresholds | Amounts or action types requiring fresh owner signature. |
+| Rail constraints | Allowed payment mechanisms, including x402 or non-x402 rails. |
+| Venue constraints | Allowed treasury, staking, exchange, bridge, or processor venues. |
+| Purpose constraints | Storage renewal, inference, hosting, creator payout, reward, or other purpose labels. |
+| Emergency lock | Owner, recovery, or circuit-breaker freeze over spending. |
+
+Spend policy should fail closed. Missing policy, expired policy, paused character state, revoked delegate state, stale nonce, unsupported asset, unsupported rail, or unknown provider status should block execution.
+
+## Paid Interaction Pricing
+
+Paid interaction pricing is the product-facing version of spend and payment policy. It should let an
+owner charge users to talk to a Living Character while keeping the actual provider/runtime costs
+bounded and auditable.
+
+Pricing controls:
+
+- price mode: free, fixed price, provider-cost-plus-markup, subscription/pass, or disabled
+- unit: message, conversation, minute, tool call, or custom interaction
+- currency and accepted payment rails
+- base runtime/provider cost estimate when known
+- owner markup percentage above runtime/provider cost
+- minimum and maximum charge
+- free allowance or trial interactions
+- revenue destination, normally the character treasury wallet
+- failure and refund policy when the runtime is unavailable or cannot answer
+
+The whitepaper's paid-interaction model treats inbound payment as revenue for the character. XEL
+should keep that distinction clear: runtime spend caps protect the character from excessive
+outbound costs, while interaction pricing controls what users pay to interact.
+
+## Funding and Treasury Phases
+
+The immediate architecture should support a small treasury model and leave advanced flows as later phases.
+
+### Phase 1: Funding and Basic Spend Controls
+
+Phase 1 should cover:
+
+- owner-funded treasury wallet or provider-managed payment balance
+- XEL funding after publication; creation is not payment-gated in the first product version
+- activation threshold that must be met before public chat/inference is enabled
+- public runway estimate based on reconciled funding balance and estimated daily burn
+- Sui-default wallet binding
+- x402 as the first/default payment rail where applicable
+- owner/delegate payment authorization
+- per-transaction limits and rolling spend caps
+- runtime metering references
+- provider receipts and reconciliation references
+- emergency treasury lock
+
+Recommended first-pass runway model:
+
+```text
+available_runtime_balance = sum(reconciled funding balances allocated to runtime/storage)
+daily_burn_estimate = storage_daily_estimate + hosting_daily_estimate + baseline_inference_daily_estimate
+runway_seconds = floor((available_runtime_balance / daily_burn_estimate) * 86400)
+```
+
+If `available_runtime_balance` is below the configured activation threshold, XEL should publish the
+object but keep chat disabled. The public page should show "Fund this XEL," the deposit wallets, the
+current balance, the activation minimum, the estimated daily burn, and a locked-state message. Once
+the threshold is met, the runtime may enable chat and display "This XEL will expire in X days, Y
+hours" based on the same estimate.
+
+The first implementation can use USD-denominated estimates from the wallet ledger or chain balance
+snapshot. Later phases should replace estimates with reconciled provider receipts, storage renewal
+obligations, oracle values, and treasury policy state.
+
+### Phase 2: Storage Renewal and Endowment
+
+Phase 2 should cover:
+
+- storage renewal reserves for Walrus-style public assets, encrypted persona artifacts, memory checkpoints, and provenance bundles
+- owner-configured endowment for long-lived character hosting or preservation
+- reserve accounting separate from operational spend balance
+- renewal warnings and renewal intents surfaced through XEL.xyz, GEN, or third-party providers
+- policy for what happens when storage renewal funds run low
+
+### Phase 3: Auto-Sweep and Revenue Routing
+
+Phase 3 should cover:
+
+- automatic sweep of excess balance to an owner, multisig, revenue recipient, or safer treasury wallet
+- creator, owner, provider, protocol, royalty, or affiliate splits where policy allows them
+- minimum retained balance for storage renewal and runtime availability
+- sweep cadence, destination, asset, fee, and receipt metadata
+- owner controls to pause or adjust sweep policy
+
+### Phase 4: Auto-Yield, Staking, Claim-Yield, Swap, and Rebalance
+
+Phase 4 should cover:
+
+- staking venue allowlists and risk labels
+- owner-approved staking and unstaking intents
+- auto-yield rules that stake or route excess treasury only after minimum runtime/storage reserves are met
+- claim-yield rules that harvest rewards above a threshold and route them into runtime, storage, treasury,
+  or endowment balances
+- swap policy with asset allowlist, venue allowlist, per-swap limit, daily limit, and max slippage
+- treasury rebalancing across assets, wallets, rails, or venues
+- oracle or price-source requirements
+- slippage, lockup, liquidity, and failure handling
+- clear user disclosure that staking and yield are optional advanced treasury actions, not required to mint or run a Living Character
+
+These later phases should not be required for the first x402 wallet-ledger integration.
+
+For testnet readiness, XEL can publish provider-neutral adapter interfaces for `sweep`, `stake`,
+`swap`, and `claim_yield`. Each interface declares the required plan/build, submit, reconcile, and
+receipt surfaces for a venue adapter. The reference runtime may build those plans from policy and
+ledger state, but live venue execution remains blocked until concrete Sui wallet custody,
+staking/swap venue bindings, failure handling, and reconciliation are implemented.
+
+### Estimated Life
+
+The product should expose an estimated life/runway calculation from ledger state:
+
+```text
+daily_burn = daily_runtime_cost + daily_storage_cost
+daily_yield = endowment_principal * annual_yield * claim_efficiency / 365
+net_daily_burn = max(0, daily_burn - daily_yield)
+estimated_life = (runtime_balance + storage_balance + spendable_principal) / net_daily_burn
+```
+
+If `daily_yield >= daily_burn`, the character is sustainable while yield remains above burn. This
+is still an estimate, not a promise, because yield, provider costs, storage renewal costs, and asset
+prices can change.
+
+The reference runtime can derive these inputs from reconciled character wallet balances:
+`inference_runtime` maps to runtime balance, `storage_renewal` maps to storage balance, and
+`treasury_endowment` maps to endowment principal. Burn assumptions can be split into runtime,
+storage, inference, and hosting components so testnet examples are explicit about what is being
+estimated.
+
+## Provider Discovery Metadata
+
+Provider discovery tells wallets, runtimes, indexers, XEL.xyz, GEN, and third-party agents what a Living Character and its providers support.
+
+Discovery metadata should be public or safely redacted. It should never contain provider secrets, customer account IDs, private ledger rows, private prompts, decrypted memory, or operational support notes.
+
+The current executable slice is a typed provider registry plus runtime resolver:
+
+| Artifact | Purpose |
+|---|---|
+| `schemas/provider-registry.v1.json` | Public schema for provider capability metadata, payment rails, privacy posture, transport/security flags, and audit-receipt support. |
+| `examples/provider-registry.xel.json` | Devnet registry example covering Chutes default inference, Verathos fallback inference, Talus orchestration/retrieval, and GEN Agent Core storage/synthesis. |
+| `runtime/providers/registry.mjs` | Policy resolver that selects eligible providers by capability, allow/deny rules, privacy requirements, encrypted transport, audit receipts, reputation, jurisdiction, priority, and fallback policy. |
+| `tests/providers/registry.test.mjs` | Conformance tests for provider selection and blocked-provider behavior. |
+
+This is not the full provider marketplace yet. It is the first provider-neutral selection layer, so XEL can represent GEN Agent Core as one provider among others instead of hardcoding GEN as the whole runtime. A later marketplace/indexer can publish and sign registry entries; the runtime resolver should keep consuming the same typed shape.
+
+Provider selection can be combined with `runtime/providers/health.mjs` health snapshots. Health
+snapshots are runtime observations, not authority. They can exclude down providers or push degraded
+providers behind healthy fallbacks, but they do not change owner policy, provider allowlists, spend
+caps, or on-chain authority.
+
+Recommended discovery groups:
+
+| Group | Example metadata |
+|---|---|
+| Character identity | aNFT object ID, home chain, public handle, Proof of Genesis reference, lifecycle state. |
+| Payment capabilities | Supported rails, capability names, versions, accepted assets, settlement status, receipt format. |
+| Treasury policy summary | Public spend caps, emergency lock status, renewal reserve status, venue constraints, visibility class. |
+| Wallet roles | Public owner, delegate, treasury, runtime, or provider wallet references when contract or policy makes them public. |
+| Runtime capabilities | Chat/action availability, rate-limit class, metering requirement, required payment capability. |
+| Storage capabilities | Public asset storage, encrypted artifact storage, renewal requirements, digest format. |
+| Agent-discovery files | Agent metadata URL, action list, authentication requirements, payment requirement, contact or support URL if public. |
+| Provider attestations | Provider name, capability, version, endpoint commitment, schema hash, status, and signature. |
+| Receipts and status | Last successful reconciliation reference, provider availability, deprecation status, failure modes. |
+
+GEN-4014 agent-discovery files are the first source to map into this model. XEL should preserve provider-neutral field names and allow additional discovery publishers besides GEN. GEN Agent Core is currently modeled as a provider for storage and synthesis work only; inference, orchestration, retrieval, payment, and treasury execution remain separately selectable capabilities.
+
+## Agent Discovery Flow
+
+A typical discovery flow should work without private GEN APIs:
+
+1. A wallet, runtime, indexer, or external agent resolves the Living Character from its public identifier or XEL.xyz profile.
+2. The resolver reads public discovery metadata for the character.
+3. The resolver checks home chain, aNFT object ID, lifecycle state, pause state, and public provider capability references.
+4. The resolver identifies required payment capability, such as x402, Sui transfer, or another supported rail.
+5. The resolver checks spend-policy summary and public payment requirements before attempting an action.
+6. If an action requires private access, the resolver follows the runtime/provider auth flow rather than reading private data from discovery metadata.
+7. The provider returns a receipt or status reference that can be linked back to the wallet ledger and protocol state.
+
+Discovery metadata should describe how to interact with a character. It should not become the authority source for ownership, delegation, payment authorization, or treasury policy. Authority remains on-chain or inside owner-signed off-chain intents that can be verified against on-chain policy.
+
+## On-Chain vs GEN-Hosted vs Third-Party
+
+The architecture splits durable authority, hosted operations, and provider execution.
+
+| Concern | On-chain Sui protocol | GEN-hosted service | Third-party provider |
+|---|---|---|---|
+| aNFT identity | Root object, owner, lifecycle, lineage, pause, migration. | May index and display. | May index and display. |
+| User auth wallet | Not the product session store. May verify signatures for protocol actions. | XEL/GEN session management and linked-wallet UX. | Wallet adapter or identity provider support. |
+| Character wallet binding | Wallet role, purpose, policy reference, events. | UX and operational linkage. | Wallet custody, MPC, or processor account if owner chooses. |
+| Payment intent | Intent hash, nonce, required authority, policy reference where needed. | Drafting, preflight, metering, support, and ledger linkage. | Rail-specific authorization or settlement. |
+| Wallet ledger | Public receipts or reconciliation references only when policy requires. | GEN-4014 x402 wallet ledger if GEN is the provider. | Provider ledger, processor ledger, chain indexer, or self-hosted ledger. |
+| Spend policy | Limits, locks, allowed roles, policy commitments, events. | UX defaults, warnings, support workflows. | Enforcement adapters that check policy before execution. |
+| x402 integration | Capability name, policy binding, events or references. | First/default GEN integration and discovery mapping. | x402-compatible facilitator or payment service. |
+| Non-x402 rail | Capability binding if supported. | Optional provider integration. | Card processor, stablecoin rail, Sui transfer, or future chain rail. |
+| Funding and endowment | Owner-authorized wallet binding and policy references. | Funding UX, reminders, ledger views. | Custody, escrow, payment processor, staking, or treasury venue. |
+| Storage renewal reserve | Policy reference and optional reserve commitments. | Renewal reminders and managed billing if GEN hosts. | Storage provider billing, renewal processor, or self-hosted renewal job. |
+| Auto-sweep | Policy commitment and authorization events when applicable. | Managed sweep job if GEN provides it. | Treasury venue, wallet provider, or processor execution. |
+| Staking and rebalance | Owner-approved policy and venue constraints. | Advisory UX or managed workflow if GEN provides it. | Staking venue, exchange, bridge, oracle, or treasury provider. |
+| Provider discovery | Capability registry, attestations, status refs where on-chain. | GEN-published public discovery files. | Provider-published discovery files or attestations. |
+| Secrets and commercial terms | Never stored. | GEN secret storage and private commercial terms. | Provider credentials, SLAs, pricing, and private runbooks. |
+
+## Public and Private Data Boundary
+
+Public or chain-visible data may include:
+
+- aNFT object ID, home chain, lifecycle, pause, migration, and lineage references
+- owner, delegate, treasury, provider, or recipient wallet references when public by policy
+- spend-policy commitments, public limits, emergency lock status, and policy version
+- payment capability names, rail names, schema versions, endpoint commitments, and provider attestations
+- payment intent hashes, nonce commitments, receipt references, and reconciliation summaries when policy requires
+- public discovery files and agent metadata
+
+GEN-hosted or provider-private data may include:
+
+- raw ledger tables, internal account IDs, customer support records, chargeback notes, and reconciliation workpapers
+- provider credentials, processor keys, webhook secrets, and commercial terms
+- raw billing logs, metering logs, runtime logs, private telemetry, and dashboard URLs
+- private prompts, private source evidence, decrypted memories, and model request payloads
+- risk models, staking strategy internals, treasury venue private account state, and operational runbooks
+
+Public discovery and chain state should expose enough information to verify authority and interoperability without leaking private business or user data.
+
+## Acceptance Expectations
+
+- GEN-4014 is documented as an existing x402 wallet-ledger and agent-discovery integration asset to verify and reuse.
+- Payment capability is provider-neutral, with x402 as the first/default integration rather than the only supported mechanism.
+- Sui remains the default home chain for Living Character ownership, treasury policy, and payment authority.
+- User auth wallets are separate from character owner, delegate, runtime, treasury, provider, and revenue wallets.
+- Wallet-ledger events are portable enough for reconciliation without requiring GEN private account state.
+- Spend policy blocks unsafe or unauthorized payments by default.
+- Funding, endowment, storage renewal, spend caps, auto-sweep, staking, and rebalance are phased rather than all required for initial launch.
+- Provider discovery metadata can describe payment, treasury, runtime, storage, and agent capabilities without exposing secrets or private data.
+- On-chain, GEN-hosted, and third-party responsibilities are explicit.
+- No schema or contract implementation is implied by this document alone.

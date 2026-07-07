@@ -1,0 +1,88 @@
+---
+title: "Chutes Integration"
+description: "Chutes integration boundary for decentralized inference."
+---
+
+# Chutes Integration
+
+Chutes SN64 is the immediate decentralized inference provider target for XEL.
+
+## Role In XEL
+
+When a Living Character has an encrypted persona artifact and a user sends a chat request, the XEL
+runtime can select Chutes from `provider_policy` and send an OpenAI-compatible chat completion
+request.
+
+Flow:
+
+1. XEL checks profile visibility, password/payment access, spend limits, and runtime provider policy.
+2. Runtime obtains the allowed persona prompt/context through the configured access policy.
+3. Runtime sends an OpenAI-compatible request to Chutes.
+4. Chutes generates the response and returns usage/model metadata.
+5. XEL records usage, payment receipt, provider ID, model ID, and optional proof refs.
+
+## Default Model Candidate
+
+Live model target verified from `https://llm.chutes.ai/v1/models` on 2026-07-06:
+
+```text
+Qwen/Qwen3-32B-TEE
+```
+
+The model is selected as the first low-cost TEE-marked Chutes target for MVP testing. Owner policy
+can later select a larger or more roleplay-specific model from the live Chutes catalog.
+
+XEL may support adult-capable, human-like characters through owner-selected open-weight models.
+That does not remove XEL policy boundaries: the runtime must still block minors, non-consensual
+sexual content, coercion, exploitation, illegal sexual content, and privacy abuse before or around
+the model call.
+
+## Local Example
+
+The generic runtime router can call Chutes from `examples/provider-registry.xel.json` and
+`examples/provider-policy.chutes.json`.
+
+For the local simulator:
+
+```bash
+CHUTES_API_KEY=cpk_... node runtime/simulate-chat-turn.mjs --funded --provider chutes
+```
+
+The adapter lives at:
+
+```text
+runtime/providers/chutes.mjs
+```
+
+## Payment Notes
+
+Chutes exposes an OpenAI-compatible inference base URL:
+
+```text
+https://llm.chutes.ai/v1
+```
+
+The Chutes inference API currently uses Bearer API-key auth for direct server-to-server calls. XEL
+therefore treats x402 as a proxy or facilitator rail for Chutes until Chutes exposes native x402 on
+the selected inference endpoint.
+
+The first deployment needs one of:
+
+- a Chutes API key funded through the XEL treasury;
+- an XEL/GEN payment facilitator that accepts x402 and forwards to Chutes with a funded API key;
+- a character-funded operating balance on a provider-supported x402 proxy rail.
+
+Remaining environment and secret inputs for a real paid Chutes call:
+
+| Name | Secret | Purpose |
+| --- | --- | --- |
+| `CHUTES_API_KEY` | Yes | Bearer token for the Chutes OpenAI-compatible inference API. |
+| `CHUTES_BASE_URL` | No | Override for `https://llm.chutes.ai/v1`. |
+| `XEL_X402_FACILITATOR_URL` | No | XEL or third-party facilitator endpoint that can verify/settle x402 payment payloads before forwarding to Chutes. |
+| `XEL_X402_FACILITATOR_TOKEN` | Yes | Optional facilitator API credential when the facilitator is not public verifier-only. |
+| `XEL_RUNTIME_PAYMENT_WALLET_ID` | No | Wallet descriptor ID from `payment-capability.v1`, normally the character's `inference_runtime` wallet. |
+| `XEL_RUNTIME_PAYMENT_SIGNER_REF` | Yes | Reference to testnet signer/key material held in Infisical or an HSM/KMS; do not store raw keys in repo files. |
+
+Do not hard-code Chutes as the only inference provider. It is the immediate decentralized provider
+target, with Verathos SN96, Targon SN4, Phala, Marlin/Oyster, Akash-hosted open models, and GEN
+runtime as alternate/fallback provider classes.

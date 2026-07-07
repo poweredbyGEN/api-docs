@@ -1,0 +1,337 @@
+---
+title: "Smart Contracts"
+description: "Sui Move package responsibilities and protocol authority model."
+---
+
+# Smart Contracts
+
+XEL smart contracts are Sui Move packages authored, released, and signed by XEL. They define the on-chain protocol for XEL identity, ownership, lineage, authority, access policy, payment authorization, recovery, treasury controls, pause, and migration. The public product name is XEL; the protocol term is Living Character; the on-chain root object is the aNFT; and the technical creation proof is Proof of Genesis.
+
+This document defines the contract plan. It does not specify full Move implementation yet.
+
+## Design Principles
+
+- Immutable package by default: v1 is published without relying on package upgrade authority.
+- Owner sovereignty: the current owner controls transfer, migration, guardian setup, and high-risk policy changes.
+- Bounded delegation: agents act through scoped `AgentCap` objects and never implicitly become owners.
+- Private data minimization: private prompts, memories, raw assets, keys, and decrypted Seal artifacts stay off-chain.
+- Provider neutrality: Walrus, Seal, wallets, RPC/indexers, inference providers, payment facilitators, and runtime hosts are interchangeable providers.
+- Explicit migration: future package versions require owner-signed migration from the old package to the new package.
+- Transparent emergency controls: pause and recovery mechanisms emit events and cannot silently seize ownership or funds.
+
+## On-Chain Object Model
+
+The v1 package should be organized around a small set of durable objects:
+
+| Object | Purpose |
+|---|---|
+| `LivingCharacter` | aNFT root object for identity, owner, lifecycle state, policy references, and version. |
+| `ProofOfGenesis` | Creation commitment record for direct prompt or classified encrypted prompt modes. |
+| `LineageNode` / `LineageEdge` | Provenance graph linking roots, derivatives, and parent consent references. |
+| `AgentCap` | Scoped delegated authority for runtime agents and provider actions. |
+| `AccessPolicy` | Commitment-based rules for encrypted resources and Seal hook authorization. |
+| `GuardianSet` / `RecoveryRequest` | Owner recovery rules, guardian approvals, timelock, and cancellation. |
+| `WalletBinding` / `PaymentAuthorization` | Wallet and payment intent records for character-controlled actions. |
+| `TreasuryPolicy` | Spending limits, venue constraints, fee/split rules, and emergency lock. |
+| `CapabilityRegistry` | Protocol/provider capability names, schema versions, and attestations. |
+| `CircuitBreaker` | Scoped pause state for global or per-character emergency controls. |
+| `VersionRecord` / `MigrationReceipt` | Package version metadata and explicit migration trail. |
+
+## Module Plan
+
+### `identity`
+
+`identity` mints and maintains the aNFT root object.
+
+The mint path supports both protocol-approved persona modes:
+
+- Direct prompt mode: the owner supplies a persona artifact commitment directly.
+- GEN synthesized classified prompt: GEN or another provider supplies an encrypted persona commitment generated from user-provided material.
+
+The contract stores hashes, URIs, schema versions, and commitments. It must not store private prompt text, source social data, decrypted memory, or raw assets.
+
+Important invariants:
+
+- A `LivingCharacter` has exactly one current owner.
+- The root identity ID is stable across metadata, policy, and authority updates.
+- Creation mode is recorded in `ProofOfGenesis`.
+- Lifecycle transitions are explicit and evented.
+- Migrated characters keep a visible source record instead of disappearing.
+
+### `lineage`
+
+`lineage` records ancestry and derivative provenance. The current v1 slice binds a `Lineage`
+object to one `LivingCharacter` ID and owner, stores append-only commitment updates, and emits
+typed events for indexers. Commitment kinds are `persona`, `memory`, `raw_data`, `policy`,
+`storage`, `treasury`, `payment`, and `migration`.
+
+Migration continuity is owner-authorized and opt-in. A migration record captures source
+package/version, target package/version, source character ID, target character reference URI,
+`migration_hash`, approving owner, and timestamp. Recording migration appends a `migration`
+commitment and emits a continuity event; it does not force, auto-upgrade, or mutate the source
+character into a new package.
+
+Delegated lineage append is intentionally owner-only in this slice. Existing `AgentCap` scopes do
+not include a lineage/provenance scope, and the module does not overload `UpdateMemory` for broader
+persona, policy, treasury, payment, or migration commitments. A future authority slice should add
+an explicit scope such as `UpdateLineage` or narrower scopes such as `AppendMemoryCommitment` and
+`RecordMigrationContinuity` before delegated append is enabled.
+
+Important invariants:
+
+- Lineage edges are append-only.
+- A child cannot forge parent consent.
+- A parent package/version is recorded so lineage remains interpretable after migrations.
+- Derivative proofs use hashes or storage references rather than raw private artifacts.
+
+### `authority` and `AgentCap`
+
+`authority` separates ownership from delegated runtime power.
+
+The owner can issue an `AgentCap` for one Living Character with:
+
+- A character ID.
+- Allowed scopes.
+- Expiry epoch or timestamp.
+- Optional provider binding.
+- Optional treasury policy reference.
+- Nonce and revocation tracking.
+
+Expected scopes include `ReadEncrypted`, `PostPublicly`, `UpdateMemory`, `RequestInference`, `Spend`, `Derive`, and `Migrate`. High-risk scopes such as `Spend`, `Derive`, and `Migrate` should require stricter policy checks or owner confirmation. The default stance is that `AgentCap` cannot transfer ownership, change guardians, weaken treasury policy, or migrate a character unless that exact action is explicit and current.
+
+Important invariants:
+
+- Revoked or expired caps fail all guarded actions.
+- Scope checks are centralized and reused by other modules.
+- Delegated authority is tied to one character unless explicitly designed otherwise.
+- Ownership transfer can revoke sensitive caps by default.
+
+### `access_policy` and Seal Hooks
+
+`access_policy` defines how encrypted resources are authorized without exposing the resources on-chain. Seal integration should be represented through policy commitments and hook events that Seal-compatible providers can evaluate.
+
+The module should store:
+
+- Resource commitment hash.
+- Policy ID and schema version.
+- Required authority scope.
+- Provider binding or provider class.
+- Revocation nonce.
+- Short-lived grant metadata where needed.
+
+Seal hook flow:
+
+1. Requester presents owner authority or a valid `AgentCap`.
+2. Contract verifies character state, pause state, scope, expiry, and policy nonce.
+3. Contract emits a Seal-compatible authorization event containing IDs, scope, deadline, and decision commitment.
+4. Seal/provider uses the event and off-chain policy material to decide whether to release or decrypt data.
+
+Private prompts, memories, keys, and decrypted data remain outside the contract.
+
+### `guardian_recovery`
+
+`guardian_recovery` provides account recovery while preserving owner sovereignty.
+
+The owner configures a shared `GuardianSet` bound to one Living Character and owner, with M-of-N
+guardian threshold, heir address, timelock, dispute window, and nonce. For the v1 MVP,
+`begin_recovery` records guardian approvals as a `vector<address>` and requires threshold distinct
+addresses from the configured guardian set; this is an auditable signer-address record, not
+cryptographic multisig yet. A shared `RecoveryRequest` records the proposed owner/heir,
+reason hash, request time, executable time, dispute deadline, dispute flag, and finalized flag.
+
+The current owner can dispute a recovery during the configured dispute window. Finalization is
+allowed after `executable_after_ms` when the request is not disputed, not finalized, and still
+matches the guardian-set nonce.
+
+Recoverable v1 characters should use the shared mint entrypoints
+`mint_direct_prompt_shared` or `mint_classified_prompt_shared`. Those keep the canonical
+`LivingCharacter.owner` field as the authority source while making the object available to
+guardian recovery without requiring the absent owner to co-sign. `finalize_recovery_and_transfer`
+checks the guardian set, recovery request, nonce, timelock, dispute state, and exact character ID,
+then mutates `LivingCharacter.owner`, emits `SuccessionFinalized`, `KeyRotationRequired`, and
+`OwnerTransferred`, and leaves downstream key rotation to the Seal/storage runtime.
+
+The older owned-object mint and owner-transfer entrypoints remain for compatibility and simple
+manual transfer flows, but they cannot support guardian recovery without the current owner signing
+the transaction.
+
+Important invariants:
+
+- A single guardian cannot recover unless threshold is one by owner choice.
+- Owner dispute during the configured window stops recovery.
+- Recovery emits a full event trail.
+- Finalized recovery on shared characters mutates the canonical owner field and requires downstream
+  key-rotation plus sensitive-cap/payment freeze integrations before private data access changes are
+  treated as complete.
+- Guardian setup changes require current owner authority.
+
+### `wallet_auth`
+
+`wallet_auth` authorizes wallet and payment actions for a Living Character. It is distinct from XEL user wallet sign-in.
+
+User sign-in proves that a person controls a wallet. Character wallet authorization controls what a Living Character, provider, or agent may do with a linked wallet or payment rail.
+
+The module should support:
+
+- Binding a wallet address to a character with chain namespace and purpose.
+- Creating typed payment authorization intents.
+- Checking owner or `AgentCap` authority.
+- Enforcing treasury policy before authorization.
+- Consuming nonces to prevent replay.
+
+The package should not custody funds by default. Custody, escrow, payment processor settlement, or treasury venue integrations should be separate modules or provider contracts gated by this policy.
+
+### `treasury_policy`
+
+`treasury_policy` defines spend constraints and revenue routing.
+
+Policy fields should include:
+
+- Asset allowlist.
+- Recipient allowlist, denylist, or category rule.
+- Per-transaction maximum.
+- Rolling velocity limits.
+- Fee, royalty, or split rules.
+- Venue/provider constraints.
+- Emergency treasury lock.
+
+Important invariants:
+
+- Spending fails closed when policy is missing, paused, expired, or locked.
+- Policy changes are owner-authorized and evented.
+- `AgentCap` spend authority is bounded by treasury policy, not only by cap scope.
+- Recovery and circuit-breaker flows can freeze spending.
+
+### `capability_registry`
+
+`capability_registry` lets the protocol and providers advertise versioned capabilities without hard-coding every integration into the root object.
+
+Examples:
+
+- `seal.access.v1`
+- `walrus.storage.v1`
+- `x402.payment.v1`
+- `sui.wallet-auth.v1`
+- `gen.persona-synthesis.v1`
+
+Provider attestations should include provider address, capability name, schema hash, endpoint commitment, package/version compatibility, and status. The registry is for discoverability and verification hints; it should not turn provider registration into centralized permission unless a specific policy opts into allowlisting.
+
+### `circuit_breaker`
+
+`circuit_breaker` provides scoped pause controls.
+
+Pause scopes:
+
+- `Mint`
+- `Access`
+- `AgentAction`
+- `Spend`
+- `Recovery`
+- `Migration`
+- `All`
+
+Pause can be global or per-character. Global pause authority should be narrow, transparent, and ideally time-bounded. Per-character pause can be owner-controlled and recovery-controlled. Pause must not silently transfer ownership, seize assets, or rewrite lineage.
+
+### `versioning`
+
+`versioning` records package metadata and migration state.
+
+The v1 package should register:
+
+- Package ID.
+- Semantic version.
+- Schema hash.
+- Deployment timestamp or epoch.
+- Compatibility notes.
+- Deprecation status.
+
+The module also defines migration intent verification and migration receipt events.
+
+## Immutable Package and Migration Standard
+
+XEL v1 should be published as an immutable Sui package. Protocol evolution happens by publishing a new package and migrating characters through explicit owner consent.
+
+Official package releases should use XEL package identity and release signing. GEN provider keys,
+GEN deployment accounts, or GEN app credentials must not be the canonical package authority for XEL
+protocol contracts. GEN can run deployment tooling or provider services only when the resulting
+release is clearly XEL-authored and verifiable as such.
+
+Owner-signed migration intent must bind:
+
+```text
+XEL_MIGRATION_V1
+source_package_id
+target_package_id
+source_character_id
+source_version
+target_version
+owner_address
+nonce
+deadline_epoch
+migration_plan_hash
+```
+
+The migration function must verify:
+
+- The signer is the current owner.
+- The source object belongs to the expected source package/version.
+- The target package and version match the signed intent.
+- The nonce has not been used.
+- The deadline has not passed.
+- Migration is not paused.
+- The migration plan hash matches the published migration specification.
+
+Successful migration emits `MigrationReceipt` with old object ID, target object ID or target marker, source package, target package, signer, and timestamp/epoch. Indexers and products should show both the legacy v1 identity and the active target identity.
+
+No migration should be implicit, automatic, admin-only, or triggered solely by a package publisher.
+
+## Event Strategy
+
+Every externally meaningful state transition should emit a typed event:
+
+- `CharacterMinted`
+- `ProofOfGenesisRecorded`
+- `LineageAttached`
+- `AgentCapIssued`
+- `AgentCapRevoked`
+- `AccessPolicyUpdated`
+- `SealAccessAuthorized`
+- `GuardianSetUpdated`
+- `RecoveryRequested`
+- `RecoveryApproved`
+- `RecoveryCancelled`
+- `RecoveryExecuted`
+- `WalletBound`
+- `PaymentAuthorized`
+- `TreasuryPolicyUpdated`
+- `CapabilityRegistered`
+- `CircuitPaused`
+- `CircuitResumed`
+- `VersionRegistered`
+- `MigrationAuthorized`
+- `MigrationReceipt`
+
+Events are part of the protocol surface because XEL.xyz, wallets, indexers, GEN, and third-party providers will use them to explain state to users.
+
+## Security and Invariant Checklist
+
+- No private prompt, memory, key, raw asset, or decrypted Seal payload is stored on-chain.
+- Ownership and `AgentCap` delegation are never conflated.
+- Every delegated action checks character state, pause state, cap scope, cap expiry, and revocation nonce.
+- Treasury spends require both authority and policy approval.
+- Payment intents include nonce, deadline, recipient, amount, asset, and character ID.
+- Guardian recovery has threshold, timelock, owner cancellation, and event trail.
+- Circuit breaker is scoped and cannot seize ownership or funds.
+- Migration requires current owner signature and package/version binding.
+- Immutable v1 behavior cannot be changed through package upgrade authority.
+- All policy-changing functions emit events.
+
+## Open Questions Before Implementation
+
+- Should `LivingCharacter` be owned by the owner wallet, shared with owner authority fields, or split between owned root and shared policy objects?
+- Which actions require owner-only authority versus scoped `AgentCap` authority?
+- Should guardian addresses be public addresses or hashed commitments until used?
+- Which treasury policy defaults are safe for a newly minted character?
+- Should provider capability registry updates be open attestations, owner-curated allowlists, or both?
+- What exact typed-data format should wallets use for migration and payment intents?
+- How should Solana/Base linked-wallet futures be represented without expanding the v1 auth scope prematurely?

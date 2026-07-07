@@ -1,0 +1,200 @@
+---
+title: "XEL Open Source Scope"
+description: "Public protocol artifacts, schemas, examples, and conformance boundaries."
+---
+
+# XEL Open Source Scope
+
+This document defines what XEL should open source early, what can wait until interfaces stabilize,
+and what stays outside the open core. It complements the architecture boundaries in
+`docs/01-architecture-boundaries.md`.
+
+## Scope Model
+
+XEL has five labeled surfaces:
+
+| Surface | Role | Open-source posture |
+|---|---|---|
+| Open source protocol | Provider-neutral specs, schemas, examples, tests, and reference interfaces. | Open early. |
+| On-chain contracts | Sui Move contracts that enforce aNFT identity, authority, lineage, ownership, spend policy, pause, and migration. | Open early with tests. |
+| Third-party providers | Replaceable storage, encryption, wallets, inference, retrieval, payments, treasury, oracle, and discovery services. | Open interfaces early; adapters later as useful. |
+| XEL.xyz | Public protocol/product destination for published Living Characters. | Public docs and metadata formats early; site implementation can phase in. |
+| GEN-provided services | GEN app integration, Publish to XEL, persona synthesis add-on, hosted runtime, billing, monitoring, support, and admin. | Not open core unless a component is intentionally contributed later. |
+
+## Open Early
+
+Open early means these artifacts should be public while XEL is still forming, because they define
+trust boundaries and let third parties build compatible implementations.
+
+### Open Source Protocol
+
+- Architecture and boundary docs.
+- Glossary and protocol object model for Living Character, aNFT, Proof of Genesis, persona
+  artifact, runtime manifest, provider binding, owner, delegate, treasury, lineage, pause, and
+  migration.
+- JSON schemas for:
+  - Mint manifest.
+  - Persona artifact.
+  - Runtime manifest.
+  - Provider capability descriptor.
+  - Public discovery metadata.
+  - Proof of Genesis record.
+  - Spend policy references.
+- Example manifests for direct prompt mode and GEN-produced encrypted persona mode.
+- Conformance tests for schema validity, required references, public/private field separation,
+  provider neutrality, and backward-compatible versioning.
+- Reference interface docs for storage, encryption, wallet, inference, retrieval, payment, indexer,
+  and discovery providers.
+
+### On-Chain Contracts
+
+- Sui Move packages for the aNFT root object and related authority modules.
+- Contract docs explaining object ownership, transfer rules, delegate updates, lineage updates,
+  pause/recovery, migration, and spend-policy anchoring.
+- Event definitions used by indexers and XEL.xyz.
+- Invariant tests for:
+  - Only authorized owners or delegates can mutate protected state.
+  - Paused characters cannot execute restricted actions.
+  - Migration preserves lineage and authority.
+  - Spend-policy references cannot be silently bypassed.
+  - Proof of Genesis references cannot be rewritten without authorized versioning.
+- Deployment docs for devnet/testnet/mainnet package publishing when ready.
+
+### Third-Party Providers
+
+- Provider capability descriptor schema.
+- Provider-selection and fallback rules at the protocol level.
+- Required observability/status fields that runtimes can expose without GEN services.
+- Wallet sign-in requirements for XEL.xyz user accounts: Sui default path and Phantom support in
+  immediate scope.
+- Integration notes for existing GEN-4014 x402 wallet ledger and agent-discovery work, clearly
+  marked as an input to verify and map rather than implementation to duplicate.
+
+### XEL.xyz
+
+- Public protocol documentation.
+- Public metadata model for published Living Character pages.
+- Discovery file format and compatibility notes.
+- Contract/package address registry once deployments exist.
+- Public Proof of Genesis rendering rules that reveal provenance without leaking private prompts or
+  source evidence.
+
+## Open Later
+
+Open later means useful to publish, but not required before the core trust boundary and schemas are
+stable.
+
+### Open Source Protocol
+
+- SDKs for TypeScript, Python, or Move clients.
+- CLI tooling for manifest validation, local packaging, deployment preparation, and conformance
+  checks.
+- Reference runtime once provider interfaces and persona artifact schemas settle.
+- Expanded sample apps that demonstrate non-GEN runtimes.
+- Version migration tooling for schemas and manifests.
+
+### On-Chain Contracts
+
+- Additional optional modules for advanced treasury policies, staking integrations, reputation
+  signals, or oracle-driven behavior.
+- Indexer packages and query examples after event formats stabilize.
+- Formal verification artifacts if they become part of the contract release process.
+
+### Third-Party Providers
+
+- Concrete open adapters for storage, encryption, inference, retrieval, wallet, x402-compatible
+  payment, and discovery providers.
+- Compatibility test fixtures for specific vendors.
+- Provider health dashboards that can run outside GEN.
+- Cross-chain linked-wallet support beyond the immediate Sui and Phantom sign-in scope, including
+  Solana and Base/EVM when explicitly added.
+
+### XEL.xyz
+
+- Reusable frontend components for published Living Character pages.
+- Public indexer views or APIs after privacy, rate limits, and contract events stabilize.
+- Optional self-hosting guide for protocol explorers.
+
+## Not Open Core
+
+These may integrate with XEL, but they are not part of the open core.
+
+### GEN-Provided Services
+
+- GEN app source code and private product workflows.
+- Publish to XEL implementation details inside GEN unless separately approved for release.
+- GEN-4013 persona synthesis implementation, including DW social ingestion, `gen.pro/assets`
+  evidence processing, prompt classification, scoring, and internal orchestration.
+- GEN-hosted runtime/provider services, memory orchestration defaults, inference routing, billing,
+  monitoring, support, moderation, and admin tooling.
+- Customer data, private prompts, source evidence, user files, provider credentials, support
+  records, or operational secrets.
+
+### Third-Party And Commercial Material
+
+- Provider credentials, account details, private SLAs, pricing agreements, support contacts, and
+  non-public technical runbooks.
+- Commercial treasury venue integrations that expose private business terms.
+- Any provider-specific code that cannot be redistributed under XEL's chosen open-source license.
+
+## Persona Artifact Scope
+
+The persona artifact schema is open. Persona generation services are not automatically open.
+
+Open protocol fields should describe:
+
+- Creation mode: direct prompt, GEN synthesized, or another provider-produced mode.
+- Visibility: public, private, encrypted, classified, or redacted.
+- Content references: content-addressed pointers, encrypted payload references, and integrity
+  hashes.
+- Ownership and authorization references.
+- Runtime compatibility requirements.
+- Proof of Genesis references that establish provenance without exposing private materials.
+
+The schema must allow:
+
+- Direct prompt mode where the creator supplies the persona artifact directly.
+- GEN synthesized classified prompt mode where GEN-4013 produces an encrypted artifact.
+- Future third-party synthesis providers that emit compatible artifacts.
+
+The schema must not require:
+
+- GEN synthesis.
+- User-visible classified prompts.
+- DW socials, `gen.pro/assets`, or any GEN-only evidence source.
+- A GEN-hosted runtime.
+
+## Agent Discovery And x402 Scope
+
+XEL should use GEN-4014 as prior work for discovery and payment metadata.
+
+Open early:
+
+- XEL discovery metadata schema.
+- Payment capability fields and spend-policy references.
+- Mapping notes from GEN-4014 x402 wallet ledger and agent-discovery outputs into XEL schemas.
+- Gap list for any XEL requirement not covered by GEN-4014.
+
+Open later:
+
+- Reusable adapters or generators if the GEN-4014 implementation proves portable.
+- Additional payment-provider examples once the core payment capability model is stable.
+
+Not open core:
+
+- GEN-4014 backend implementation copied into this repo.
+- GEN-specific support drafts or internal operational workflows.
+- A requirement that every Living Character use x402 or GEN-hosted discovery.
+
+## Release Checklist
+
+Before marking a XEL component as open core, confirm:
+
+- It is provider-neutral or explicitly labeled as a reference implementation.
+- It does not leak private prompts, source evidence, user data, credentials, or commercial terms.
+- It does not require GEN persona synthesis to mint or run a Living Character.
+- It does not duplicate GEN-4013 implementation.
+- It references GEN-4014 only as an integration input unless a reusable component is intentionally
+  contributed.
+- It has schema docs, examples, and tests appropriate to its risk.
+- It can be understood by a third-party implementer without access to GEN internal systems.

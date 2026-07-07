@@ -1,0 +1,96 @@
+---
+title: "Inference Provider Strategy"
+description: "Provider strategy for runtime inference and fallback behavior."
+---
+
+# Inference Provider Strategy
+
+Once XEL has a persona artifact, a chat request should be answered by the configured runtime
+provider. XEL should not hard-code one model or one company as the brain. The character's
+`provider_policy` chooses a provider, model family, payment rail, and safety/runtime behavior.
+
+## Default Provider Stack
+
+| Use case | First provider path | Why |
+|---|---|---|
+| Default decentralized provider | Chutes / Bittensor SN64 | OpenAI-compatible serverless AI compute with decentralized GPU backend and a live public model catalog. |
+| Verified-inference fallback | Verathos / Bittensor SN96 | OpenAI-compatible verified inference path once public access is stable. |
+| Optional GEN service path | GEN runtime/provider services | GEN can provide synthesis, import, orchestration, support, and fallback runtime services without becoming the protocol owner. |
+| Candidate orchestration layer | Talus Nexus | Workflow layer that can coordinate retrieval, inference, payment, write-back, and receipts; not the raw LLM. |
+| Confidential/private inference | Targon SN4, Phala, Marlin/Oyster | TEE/confidential compute path for encrypted persona and memory. |
+
+## Adult-Capable / Less-Censored Models
+
+XEL can support adult-capable, human-like characters by allowing owner-selected open-weight model
+families behind provider policy. Good candidates to evaluate:
+
+- Chutes live default: `Qwen/Qwen3-32B-TEE`.
+- Verathos alternate: `qwen3.6-27b-abliterated`.
+- Dolphin Llama 3 / Dolphin Llama 3.1 variants when live provider availability is verified.
+- Llama/Qwen/Mistral abliterated variants.
+- Mixtral-based uncensored roleplay variants.
+- Provider-hosted custom fine-tunes where the owner controls persona policy.
+
+"Uncensored" must not mean policy-free infrastructure. XEL should allow profanity, adult tone, and
+human-like conversation where legal and consensual, while still blocking illegal content, minors,
+non-consensual sexual content, doxxing, malware, explicit threats, and platform-abuse behavior.
+
+## Response Flow
+
+1. User sends chat message.
+2. XEL/runtime loads the character profile, persona artifact reference, memory refs, and policy.
+3. Runtime checks profile visibility, interaction policy, password/payment status, and spend caps.
+4. Runtime requests decryption/access only if the current policy allows it.
+5. Runtime sends the assembled prompt/context to the selected inference provider.
+6. Provider returns model output and any receipt/attestation available.
+7. Runtime applies character policy, records usage/payment receipt, and proposes memory write-back.
+
+## Provider Requirements
+
+Every inference provider should expose:
+
+- OpenAI-compatible or XEL-compatible chat API.
+- Model identifier and model-family metadata.
+- Pricing or metering fields.
+- Availability/status metadata.
+- Optional attestation or receipt.
+- Content policy declaration.
+- Payment capability, ideally x402-compatible or wallet-authorized.
+
+GEN can be the first working provider. XEL's protocol should make Chutes, Verathos, Targon, Phala,
+Marlin/Oyster, Akash-hosted open models, and future Bittensor subnets interchangeable provider
+options.
+
+## Candidate Orchestration Layer: Talus Nexus
+
+Talus Nexus should be evaluated as a swappable decentralized orchestration/workflow provider, not
+as the raw LLM, first direct inference provider, or any load-bearing protocol dependency. In an XEL
+deployment, Nexus could coordinate a multi-step runtime path:
+
+```text
+memory retrieval -> Chutes/direct inference -> payment/metering -> memory write-back -> receipts
+```
+
+That means Chutes is the immediate decentralized direct inference target. Talus may sit around
+Chutes, Verathos, GEN runtime, or another selected inference provider as a workflow controller,
+tool registry, payment coordinator, and receipt/provenance surface. XEL should not describe Talus
+as replacing the inference provider unless a Talus tool is explicitly wrapping a concrete model API
+and the underlying model/provider is still identified in response metadata.
+
+Talus-specific integration notes belong in `14-talus-nexus-orchestration.md`. XEL root protocol
+objects stay separate: the aNFT, Proof of Genesis, ownership/delegate rules, spend-policy authority,
+and XEL-authored contracts remain XEL/Sui protocol surfaces, not Talus Agent Package state.
+Removing Talus from provider policy must not require a character migration.
+
+## First Integration Target: Chutes
+
+XEL should start with Chutes SN64 for decentralized inference. The first runtime adapter is
+OpenAI-compatible and defaults to:
+
+```text
+https://llm.chutes.ai/v1
+Qwen/Qwen3-32B-TEE
+```
+
+Chutes is not hard-coded as the only provider. It is the first policy-selected provider target,
+with Verathos and GEN runtime as fallback classes.
