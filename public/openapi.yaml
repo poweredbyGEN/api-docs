@@ -37,6 +37,14 @@ info:
     All `/v1/vidsheet/` endpoints require an active GEN credit balance.
     If your organization has no usable credits, requests return `422` with error code `usable_gen_credit_required`.
 
+    Credits can be funded with x402 by calling `POST /v1/x402_credit_purchase`
+    with `workspace_id` plus `amount_usd` or `credits`. If `network` is omitted,
+    GEN returns every configured payment option in `payment_methods` and
+    `payment_required.accepts`; show the Sui, Solana, and Base options to the
+    user or calling agent and sign one selected accept entry. Workspace funding
+    wallets are backend settlement infrastructure; the user-facing payment
+    choices are the returned payment methods.
+
   version: 1.0.0
   contact:
     name: GEN Support
@@ -167,6 +175,64 @@ paths:
                   $ref: '#/components/schemas/Workspace'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  /x402_credit_purchase:
+    post:
+      operationId: createX402CreditPurchase
+      x-phase: export
+      summary: Create an x402 credit-purchase quote
+      description: |
+        Create a 402 quote to fund workspace credits with USDC over x402.
+        Pass either `amount_usd` or `credits`; x402 credit purchases are not
+        limited to fixed credit packs. If `network` is omitted, GEN returns
+        every configured payment option in `payment_methods` and
+        `payment_required.accepts` instead of silently choosing one chain.
+
+        Show the Sui, Solana, and Base options to the user or calling agent,
+        sign one matching `payment_required.accepts[]` entry, then settle/retry
+        with `PAYMENT-SIGNATURE`, `checkout_session_id`, and the chosen network.
+        Workspace funding wallets are backend settlement/sweeping
+        infrastructure; the user-facing choices are the returned payment
+        methods.
+      tags: [Organizations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workspace_id]
+              properties:
+                workspace_id:
+                  type: string
+                  description: Workspace/organization receiving credits.
+                amount_usd:
+                  type: string
+                  description: Arbitrary USD amount to convert to credits.
+                  example: "1.25"
+                credits:
+                  type: string
+                  description: Arbitrary credit amount to buy.
+                  example: "100.0"
+                network:
+                  type: string
+                  enum: [sui, solana, base]
+                  description: Optional selected payment network. Omit to receive all configured options.
+      responses:
+        '402':
+          description: x402 payment required. Sign one returned payment method and settle/retry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/X402CreditPurchaseQuote'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Missing amount, invalid workspace, or quote failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /agents:
     get:
@@ -4139,6 +4205,116 @@ components:
         type: string
 
   schemas:
+    X402PaymentMethod:
+      type: object
+      required: [network, x402Network, asset, payTo, amountUsd, credits]
+      properties:
+        network:
+          type: string
+          enum: [sui, solana, base]
+          description: Human-readable payment rail to show to users and agents.
+        x402Network:
+          type: string
+          description: x402 network identifier used inside `payment_required.accepts`.
+          examples: ["sui", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "eip155:8453"]
+        asset:
+          type: string
+          example: USDC
+        payTo:
+          type: string
+          description: Treasury payment recipient for this rail.
+        amountUsd:
+          type: string
+          description: USD amount represented by this payment method.
+        credits:
+          type: string
+          description: Credits that will be issued after settlement.
+
+    X402Accept:
+      type: object
+      required: [scheme, network, asset, maxAmountRequired, payTo, resource]
+      properties:
+        scheme:
+          type: string
+          example: exact
+        network:
+          type: string
+        asset:
+          type: string
+          example: USDC
+        maxAmountRequired:
+          type: string
+          description: Atomic USDC amount required by this accept entry.
+        payTo:
+          type: string
+        resource:
+          type: string
+          example: https://api.gen.pro/v1/x402_credit_purchase
+        description:
+          type: string
+        mimeType:
+          type: string
+          example: application/json
+        extra:
+          type: object
+          properties:
+            checkoutSessionId: { type: integer }
+            workspaceId: { type: integer }
+            pricingMode: { type: string, enum: [custom_amount, credit_plan] }
+            amountUsd: { type: string }
+            credits: { type: string }
+            network: { type: string, enum: [sui, solana, base] }
+            referenceCreditPlanId: { type: integer, nullable: true }
+
+    X402PaymentRequired:
+      type: object
+      required: [x402Version, accepts]
+      properties:
+        x402Version:
+          type: integer
+          example: 2
+        error:
+          type: string
+        paymentMethods:
+          type: array
+          items:
+            $ref: '#/components/schemas/X402PaymentMethod'
+        accepts:
+          type: array
+          items:
+            $ref: '#/components/schemas/X402Accept'
+
+    X402CreditPurchaseQuote:
+      type: object
+      required: [checkout_session_id, workspace_id, amount_usd, credits, payment_methods, payment_required]
+      properties:
+        checkout_session_id:
+          type: integer
+        workspace_id:
+          type: integer
+        pricing_mode:
+          type: string
+          enum: [custom_amount, credit_plan]
+        reference_credit_plan_id:
+          type: integer
+          nullable: true
+        credit_plan_id:
+          type: integer
+          nullable: true
+        quantity:
+          type: integer
+        amount_usd:
+          type: string
+        credits:
+          type: string
+        payment_methods:
+          type: array
+          description: User/agent-facing Sui, Solana, and Base payment options.
+          items:
+            $ref: '#/components/schemas/X402PaymentMethod'
+        payment_required:
+          $ref: '#/components/schemas/X402PaymentRequired'
+
     SongMixTrack:
       type: object
       properties:

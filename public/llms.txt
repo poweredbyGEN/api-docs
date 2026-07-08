@@ -10,6 +10,8 @@ Base URLs:
 
 Auth: `X-API-Key: <your-PAT>` (recommended) or `Authorization: Bearer <jwt>`. Create a PAT in the GEN dashboard: log in > select agent > API page in the sidebar > Create API Key.
 
+Credits: paid generation/research/voice/render work spends workspace credits. Buy arbitrary credit amounts with x402 by calling `POST /v1/x402_credit_purchase` with `workspace_id` plus `amount_usd` or `credits`. If no `network` is supplied, the response lists every configured payment option in `payment_methods` and `payment_required.accepts`: Sui, Solana, and Base when configured. Show those options to the user/agent, sign one accept entry, then retry/settle with `PAYMENT-SIGNATURE`, `X402-Checkout-Session-Id`, and the chosen `X402-Network`. Workspace funding wallets are backend infrastructure; the user-facing wallet choices are the returned payment methods.
+
 ---
 
 ## The 5-step journey
