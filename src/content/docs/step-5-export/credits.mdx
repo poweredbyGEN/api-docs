@@ -18,6 +18,48 @@ curl "https://api.gen.pro/v1/organizations/$ORG_ID" \
 
 Response includes `available_credit: { generic, aura }`. The `generic` bucket covers all Auto Content Engine + agent.gen.pro operations; the `aura` bucket is for connected-social features and isn't consumed by the API surface.
 
+## Buying credits with x402
+
+Credit purchases can be funded with Stripe or with x402. x402 purchases are arbitrary amount: pass either `amount_usd` or `credits`, and GEN returns a `402 Payment Required` quote.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/x402_credit_purchase" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id": "'$ORG_ID'",
+    "amount_usd": "1.25"
+  }'
+```
+
+The response includes `payment_methods` and `payment_required.accepts`. If you do not send `network`, GEN lists every configured payment option instead of choosing silently.
+
+```json
+{
+  "workspace_id": 123,
+  "amount_usd": "1.25",
+  "credits": "143.678161",
+  "payment_methods": [
+    { "network": "sui", "x402Network": "sui", "asset": "USDC", "payTo": "0x..." },
+    { "network": "solana", "x402Network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "asset": "USDC", "payTo": "3Y..." },
+    { "network": "base", "x402Network": "eip155:8453", "asset": "USDC", "payTo": "0x..." }
+  ],
+  "payment_required": {
+    "x402Version": 2,
+    "accepts": ["same options as payment_methods, with maxAmountRequired"]
+  }
+}
+```
+
+For agents and MCP clients: show the user or calling agent the `payment_methods` list, then sign one matching `payment_required.accepts[]` entry. Workspace funding wallets exist behind the scenes for settlement and sweeping; the user-facing choice is the returned Sui, Solana, or Base payment method.
+
+When a paid API call returns `x402_credit_purchase`, read the same fields there:
+
+- `estimated_credits` / `minimum_credits` — how many credits the attempted API call needs.
+- `payment_methods` — available Sui, Solana, and Base x402 options.
+- `payment_required.accepts[]` — exact x402 payloads to sign.
+- `retry.headers` — send `PAYMENT-SIGNATURE`, `X402-Checkout-Session-Id`, and the selected `X402-Network`.
+
 ## Credit behavior
 
 Each compute operation costs a number of credits that depends on the

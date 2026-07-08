@@ -61,4 +61,17 @@ The current GEN MCP exposes **100 tools**, **9 prompts**, and **3 guidance resou
 | **Publish** | Connect social accounts, schedule posts, update schedules, and remove scheduled posts |
 | **Manage account data** | List agents, workspaces, organizations, API keys, avatars, credit balance, usage, and plans |
 
+## Credits and x402
+
+GEN MCP tools use workspace credits for paid generation, research, voice, song, and render work. Check balance with `gen_get_credit_balance` and estimate paid jobs with `gen_estimate_job`.
+
+To add credits:
+
+- Use `gen_buy_credits` for Stripe checkout.
+- Use `gen_create_x402_credit_quote` for USDC via x402.
+
+`gen_create_x402_credit_quote` returns the same `payment_methods` and `payment_required.accepts` fields as the API. If you omit `network`, GEN lists every configured option instead of assuming one chain. Show the Sui, Solana, and Base options to the user or calling agent, then sign and retry using the chosen `payment_required.accepts[]` entry.
+
+Workspace funding wallets are backend infrastructure for settlement and sweeping. MCP clients should present the returned payment methods, not ask users to hunt for hidden workspace wallets.
+
 Start with Remote MCP when your client supports it. Use Local MCP when your client needs a local command.
