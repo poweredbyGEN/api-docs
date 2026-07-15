@@ -1724,7 +1724,13 @@ paths:
                   enum: [publish_content]
                 data:
                   type: string
-                  description: JSON-stringified object with platform, media_url, description, schedule_type, scheduled_time, media_type, title, thumbnail_url, timezone_offset.
+                  description: >-
+                    JSON-stringified object with platform, media_url, description, schedule_type,
+                    scheduled_time, media_type, title, thumbnail_url, timezone_offset. For multiple
+                    images use media_urls (array; X allows up to 4 per tweet). X (Twitter) also
+                    supports thread (array of {text, media_urls?} segments, posted as a chain) and
+                    reply_to_tweet_id (reply to an existing tweet); both are X-only and ignored by
+                    other platforms.
             example:
               user_job_type: publish_content
               data: '{"platform":"tiktok","media_url":"https://cdn.example.com/video.mp4","description":"Factory price reveal #sourcing","schedule_type":"now","media_type":"VIDEO"}'
