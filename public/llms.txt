@@ -795,7 +795,29 @@ Local install example:
 GEN_API_KEY=your-pat uvx gen-mcp-server
 ```
 
-The current MCP exposes 100 `gen_*` tools, 9 prompts, and 3 guidance resources across chat/research, content ideas, Vidsheets, generation, assets, watchlists, recurring jobs, publishing, credits, agents, and workspaces.
+The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
+
+**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_research` (topic research across social + web), `gen_make_video` (finished multi-scene video from a brief), `gen_generate_content_ideas`.
+
+**Creation:** `gen_create_video` (single clip; models: seedance-2.0, veo_3, kling_2_1, sora_2, grok, pika), `gen_create_image` (nano-banana-pro/nano-banana/nano-banana-2), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`.
+
+**Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_delete_asset`.
+
+**Voices:** `gen_list_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_create_voice`.
+
+**Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
+
+**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
+
+**Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
+
+**Recurring automation:** `gen_create_recurring_job`, `gen_list_recurring_jobs`, `gen_run_recurring_job_now`, `gen_pause_recurring_job`, `gen_resume_recurring_job`.
+
+**Credits/billing:** `gen_get_credit_balance`, `gen_estimate_job`, `gen_buy_credits`, `gen_upgrade_workspace`.
+
+**Agent setup:** `gen_get_me`, `gen_list_agents`, `gen_get_agent_core`, `gen_update_agent_core`, `gen_set_agent_primary_photo`, `gen_add_agent_look`.
+
+**Job control:** `gen_get_generation` (poll), `gen_stop_generation` (refunds credits), `gen_get_run_status`.
 
 Full install guide: https://api.gen.pro/guides/mcp/
 

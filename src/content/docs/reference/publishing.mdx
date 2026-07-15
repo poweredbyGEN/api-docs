@@ -99,6 +99,103 @@ curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
 - Video/image must be publicly accessible via URL at post time
 - For scheduled posts, `scheduled_time` must be in the future
 
+## Posting to X (Twitter)
+
+X supports the richest set of post types: a plain text tweet, a tweet with up to **4 images**, a tweet with a video, a **thread** (an ordered chain of tweets), and a **reply** to an existing tweet. X posts are created through the scheduling API.
+
+```
+POST /v1/schedule/with-post
+```
+
+### Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `agent_id` | string | Yes | The agent whose connected X account posts. |
+| `platform` | string[] | Yes | Include `"x"`. |
+| `schedule_type` | string | Yes | `now`, `specific_time`, or `next_available`. |
+| `scheduled_time` | string | Conditional | Required when `schedule_type` is `specific_time`. |
+| `description` | string | Conditional | The tweet text. Required for a text-only tweet or reply. |
+| `media_type` | string | No | `TWEET_VIDEO` for video, `IMAGE` for images. |
+| `media_url` | string | No | A single video URL. |
+| `media_urls` | string[] | No | Up to **4 image URLs** for a single tweet. |
+| `thread` | object[] | No | **X only.** An ordered list of tweet segments to post as a chain. Each segment is `{ "text": "...", "media_urls": ["..."] }` (per-segment images optional, up to 4). |
+| `reply_to_tweet_id` | string | No | **X only.** Post as a reply to this tweet id. Combine with `thread` to reply and then continue a chain. |
+
+<Aside type="note">
+  `thread` and `reply_to_tweet_id` apply to **X only**. They are ignored for TikTok, Instagram, Facebook, and YouTube, which post a single piece of media.
+</Aside>
+
+### Example: Text-only tweet
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["x"],
+    "description": "gm from the API 👋",
+    "schedule_type": "now"
+  }'
+```
+
+### Example: Tweet with up to 4 images
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["x"],
+    "description": "four pics",
+    "media_type": "IMAGE",
+    "media_urls": [
+      "https://cdn.example.com/1.jpg",
+      "https://cdn.example.com/2.jpg",
+      "https://cdn.example.com/3.jpg",
+      "https://cdn.example.com/4.jpg"
+    ],
+    "schedule_type": "now"
+  }'
+```
+
+### Example: Thread
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["x"],
+    "schedule_type": "now",
+    "thread": [
+      { "text": "1/ Here is a thread about our launch." },
+      { "text": "2/ With a screenshot", "media_urls": ["https://cdn.example.com/shot.jpg"] },
+      { "text": "3/ Wrapping up. Thanks for reading!" }
+    ]
+  }'
+```
+
+### Example: Reply to a tweet
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["x"],
+    "description": "Great point — here is our take.",
+    "reply_to_tweet_id": "1780000000000000000",
+    "schedule_type": "now"
+  }'
+```
+
+If a thread fails partway through, posting stops at the failed segment; the tweets already posted are recorded and the post is marked failed (it is not retried, to avoid duplicate tweets).
+
 ### Errors
 
 | Status | Error code | Description |

@@ -987,6 +987,39 @@ Data fields (JSON-stringified in `data`):
 | `thumbnail_url` | string | No | custom thumbnail URL |
 | `timezone_offset` | integer | No | minutes from UTC |
 
+### X (Twitter) posting
+
+X supports the richest post set via `POST /v1/schedule/with-post` (the `gen_schedule_post` tool). Beyond a single text/video tweet, X adds up to 4 images per tweet, threads, and replies.
+
+```
+POST /v1/schedule/with-post
+Content-Type: application/json
+Body:
+{
+  "agent_id": "<agent_id>",
+  "platform": ["x"],
+  "schedule_type": "now",
+  "thread": [
+    { "text": "1/ launch thread" },
+    { "text": "2/ with a pic", "media_urls": ["https://cdn.gen.pro/outputs/a.jpg"] },
+    { "text": "3/ wrap up" }
+  ]
+}
+```
+
+X-specific fields on the schedule body:
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `platform` | string[] | Yes | include `"x"` |
+| `description` | string | for text/reply | the tweet text |
+| `media_urls` | string[] | No | up to 4 image URLs for one tweet |
+| `media_type` | string | No | `TWEET_VIDEO` for video, `IMAGE` for images |
+| `thread` | object[] | No | **X only.** ordered list of `{text, media_urls?}` tweet segments; posted as a chain |
+| `reply_to_tweet_id` | string | No | **X only.** reply to an existing tweet id; combine with `thread` to reply-then-chain |
+
+`thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube (single-media platforms). A thread that fails partway stops at the failed segment, records the tweets already posted, and is marked failed (not retried, to avoid duplicates).
+
 ### Poll the publish job
 
 ```
