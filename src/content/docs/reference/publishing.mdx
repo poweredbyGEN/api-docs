@@ -99,6 +99,64 @@ curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
 - Video/image must be publicly accessible via URL at post time
 - For scheduled posts, `scheduled_time` must be in the future
 
+## Upload media
+
+Posts reference media by **URL** — the media must be publicly fetchable at post time. Upload a local file with `upload_asset` to get a durable, hosted URL you can pass to `media_url` / `media_urls`. The uploaded file is also saved to the agent's Assets, so you can reuse it later.
+
+```
+POST /v1/social/upload_asset
+```
+
+Send the file as `multipart/form-data`.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | file | Yes | The video or image file (multipart). |
+| `agent_id` | string | Yes | The agent whose Assets the file is saved to. |
+
+### Response
+
+```json
+{
+  "url": "https://cdn.gen.pro/....jpg",
+  "cdn_url": "https://cdn.gen.pro/....jpg",
+  "asset_id": "12345",
+  "content_resource_id": 12345,
+  "asset_registered": true
+}
+```
+
+Use the returned `url` as `media_url` (single) or inside `media_urls` when scheduling a post.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/social/upload_asset" \
+  -H "X-API-Key: your-api-key" \
+  -F "file=@/path/to/image.jpg" \
+  -F "agent_id=your-agent-id"
+```
+
+### Upload → post recipe
+
+```bash
+# 1. Upload the file, capture the hosted URL
+URL=$(curl -s -X POST "https://api.gen.pro/v1/social/upload_asset" \
+  -H "X-API-Key: your-api-key" \
+  -F "file=@/path/to/image.jpg" \
+  -F "agent_id=your-agent-id" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])")
+
+# 2. Post it (X example — a tweet with one image)
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"your-agent-id\",\"platform\":[\"x\"],\"description\":\"from the API\",\"media_type\":\"IMAGE\",\"media_urls\":[\"$URL\"],\"schedule_type\":\"now\"}"
+```
+
+For up to 4 images on X, call `upload_asset` per file and pass all the URLs in `media_urls`.
+
 ## Posting to X (Twitter)
 
 X supports the richest set of post types: a plain text tweet, a tweet with up to **4 images**, a tweet with a video, a **thread** (an ordered chain of tweets), and a **reply** to an existing tweet. X posts are created through the scheduling API.
