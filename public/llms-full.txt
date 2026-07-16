@@ -987,6 +987,27 @@ Data fields (JSON-stringified in `data`):
 | `thumbnail_url` | string | No | custom thumbnail URL |
 | `timezone_offset` | integer | No | minutes from UTC |
 
+### Upload media (upload_asset)
+
+Posts reference media by URL (public at post time). Upload a local file to get a hosted URL and save it to the agent's Assets.
+
+```
+POST /v1/social/upload_asset   (multipart/form-data)
+Fields: file=<binary>, agent_id=<agent_id>
+-> { "url": "https://cdn.gen.pro/...", "asset_id": "123", "content_resource_id": 123, "asset_registered": true }
+```
+
+Use the returned `url` as `media_url` or an entry in `media_urls`. Upload -> post:
+
+```bash
+URL=$(curl -s -X POST "https://api.gen.pro/v1/social/upload_asset" -H "X-API-Key: $KEY" \
+  -F "file=@image.jpg" -F "agent_id=$AGENT" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])")
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  -d "{\"agent_id\":\"$AGENT\",\"platform\":[\"x\"],\"media_type\":\"IMAGE\",\"media_urls\":[\"$URL\"],\"schedule_type\":\"now\",\"description\":\"hi\"}"
+```
+
+For up to 4 images on X, call upload_asset per file and pass all URLs in `media_urls`.
+
 ### X (Twitter) posting
 
 X supports the richest post set via `POST /v1/schedule/with-post` (the `gen_schedule_post` tool). Beyond a single text/video tweet, X adds up to 4 images per tweet, threads, and replies.
