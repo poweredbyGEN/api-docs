@@ -59,6 +59,8 @@ servers:
     description: Agent Chat API
   - url: https://agent-core.gen.pro/v1
     description: Agent Core API (watchlists)
+  - url: https://python.gen.pro
+    description: Social publishing + OAuth integration service (schedule, social connect)
 
 security:
   - apiKey: []
@@ -125,6 +127,13 @@ tags:
       agent. Base URL `https://agent-core.gen.pro/v1`. Scraped data feeds back
       into agent chat and content idea generation. CRUD operations are free;
       downstream scrapes bill normally.
+  - name: Billing
+    description: |
+      Credit balance, usage history, plan discovery, and purchase flows. All on `https://api.gen.pro/v1`.
+      All endpoints that consume credits are marked `x-phase: export` and documented with a credit note.
+  - name: Voices
+    description: |
+      Voice library, custom voice CRUD, and voice-design status polling. Base URL `https://api.gen.pro/v1`.
   - name: Recurring Jobs
     description: |
       Scheduled agent runs ("daily tasks"). Base URL
@@ -4151,6 +4160,460 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
+
+  /agents/{agent_id}/recurring-jobs/{job_id}/test-run:
+    post:
+      operationId: runRecurringJobNow
+      x-phase: monitoring
+      summary: Trigger a recurring job immediately (test run)
+      tags: [Recurring Jobs]
+      servers:
+        - url: https://agent.gen.pro/v1
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '202':
+          description: Run accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id: { type: string }
+
+  /credit_balance:
+    get:
+      operationId: getCreditBalance
+      x-phase: export
+      summary: Get workspace credit balance
+      tags: [Billing]
+      parameters:
+        - { name: agent_id, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Credit balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available_credit: { type: number }
+                  generic: { type: number }
+                  aura: { type: number }
+
+  /credit_plans:
+    get:
+      operationId: listCreditPlans
+      x-phase: export
+      summary: List available credit and subscription plans
+      tags: [Billing]
+      parameters:
+        - { name: cycle, in: query, schema: { type: string, enum: [monthly, annual] } }
+      responses:
+        '200':
+          description: Credit plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    price: { type: number }
+                    credits: { type: number }
+                    cycle: { type: string }
+
+  /credit_transactions:
+    get:
+      operationId: getCreditUsage
+      x-phase: export
+      summary: List credit usage history
+      tags: [Billing]
+      parameters:
+        - { name: agent_id, in: query, required: true, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: Credit transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    amount: { type: number }
+                    description: { type: string }
+                    created_at: { type: string, format: date-time }
+
+  /payment:
+    post:
+      operationId: buyCredits
+      x-phase: export
+      summary: Start a Stripe credit purchase checkout session
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credit_plan_id, organization_id]
+              properties:
+                credit_plan_id: { type: string }
+                organization_id: { type: string }
+                success_url: { type: string }
+                cancel_url: { type: string }
+      responses:
+        '200':
+          description: Checkout session with payment URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url: { type: string }
+
+  /subscription_upgrade:
+    post:
+      operationId: upgradeWorkspace
+      x-phase: export
+      summary: Upgrade workspace subscription tier
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [creditPlanId, organizationId, returnUrl]
+              properties:
+                creditPlanId: { type: string }
+                organizationId: { type: string }
+                returnUrl: { type: string }
+      responses:
+        '200':
+          description: Checkout session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url: { type: string }
+
+  /user_jobs/estimate:
+    post:
+      operationId: estimateJob
+      x-phase: edit
+      summary: Estimate credit cost for one or more generation jobs
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id, user_jobs]
+              properties:
+                agent_id: { type: string }
+                user_jobs:
+                  type: array
+                  items: { type: object }
+      responses:
+        '200':
+          description: Cost estimate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_credits: { type: number }
+                  breakdown: { type: array, items: { type: object } }
+
+  /user_voice_resources:
+    get:
+      operationId: listMyVoices
+      x-phase: setup
+      summary: List the agent's custom voices
+      tags: [Voices]
+      parameters:
+        - { name: agent_id, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Custom voices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    source: { type: string }
+
+  /hume_ai_sample/status:
+    get:
+      operationId: getVoiceSampleStatus
+      x-phase: setup
+      summary: Poll voice design sample status
+      tags: [Voices]
+      parameters:
+        - { name: agent_id, in: query, required: true, schema: { type: string } }
+        - { name: generation_id, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Sample status and audio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [pending, completed, failed] }
+                  base64_audio: { type: string }
+                  speaker_embedding_url: { type: string }
+
+  /content_resources/from_url:
+    post:
+      operationId: importAssetFromUrl
+      x-phase: edit
+      summary: Import media from a public URL into the asset library
+      tags: [Content Resources]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id, url]
+              properties:
+                agent_id: { type: string }
+                url: { type: string, description: "Public URL (YouTube, TikTok, Instagram, or direct file)" }
+                folder_id: { type: string }
+      responses:
+        '200':
+          description: Import job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+
+  /schedule/posts:
+    get:
+      operationId: listScheduledPosts
+      x-phase: export
+      summary: List the content calendar (scheduled posts)
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: agent_id, in: query, required: true, schema: { type: string } }
+        - { name: start_date, in: query, schema: { type: string, format: date } }
+        - { name: end_date, in: query, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: Scheduled posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scheduled_posts:
+                    type: array
+                    items:
+                      type: object
+
+  /schedule/with-post:
+    post:
+      operationId: schedulePost
+      x-phase: export
+      summary: Create or schedule a social media post
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id, platform, schedule_type]
+              properties:
+                agent_id: { type: string }
+                platform:
+                  type: array
+                  items: { type: string, enum: [tiktok, instagram, facebook, youtube, x] }
+                description: { type: string }
+                media_url: { type: string }
+                media_urls: { type: array, items: { type: string } }
+                schedule_type: { type: string, enum: [now, specific_time] }
+                scheduled_time: { type: string, format: date-time }
+                title: { type: string }
+                media_type: { type: string, enum: [VIDEO, IMAGE, TWEET_VIDEO] }
+                thumbnail_url: { type: string }
+                thread:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      text: { type: string }
+                      media_urls: { type: array, items: { type: string } }
+                reply_to_tweet_id: { type: string }
+      responses:
+        '200':
+          description: Scheduled post created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+
+  /schedule/post/{post_id}:
+    get:
+      operationId: getPostStatus
+      x-phase: export
+      summary: Get platform-confirmed publish status of a post
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: post_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Post status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [accepted, publishing, published, failed] }
+                  platforms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        platform: { type: string }
+                        status: { type: string }
+                        platform_post_id: { type: string }
+                        post_url: { type: string }
+                        published_at: { type: string, format: date-time }
+                        error: { type: string }
+    patch:
+      operationId: updateScheduledPost
+      x-phase: export
+      summary: Update a scheduled post before it publishes
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: post_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Updated post
+    delete:
+      operationId: deleteScheduledPost
+      x-phase: export
+      summary: Delete a scheduled post from the calendar
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: post_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204':
+          description: Deleted
+
+  /platform/get_oauth_account:
+    post:
+      operationId: listConnectedSocials
+      x-phase: export
+      summary: List connected social accounts for publishing
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id]
+              properties:
+                agent_id: { type: string }
+      responses:
+        '200':
+          description: Connected platforms
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /platform/get_authorization_url:
+    post:
+      operationId: getSocialConnectUrl
+      x-phase: export
+      summary: Get OAuth URL to connect a social account
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: platform, in: query, required: true, schema: { type: string, enum: [tiktok, instagram, facebook, youtube, x] } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id]
+              properties:
+                agent_id: { type: string }
+      responses:
+        '200':
+          description: OAuth URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url: { type: string }
+
+  /platform/disconnect/{platform}:
+    put:
+      operationId: disconnectSocial
+      x-phase: export
+      summary: Disconnect a connected social account
+      tags: [Publishing]
+      servers:
+        - url: https://python.gen.pro
+      parameters:
+        - { name: platform, in: path, required: true, schema: { type: string, enum: [tiktok, instagram, facebook, youtube, x] } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_id]
+              properties:
+                agent_id: { type: string }
+      responses:
+        '200':
+          description: Disconnected
 
 components:
   securitySchemes:

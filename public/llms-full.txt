@@ -1332,7 +1332,7 @@ next cadence tick.
 
 # Integrations
 
-- MCP Server: remote endpoint `https://mcp.gen.pro/mcp` with `Authorization: Bearer <pat>`, or local stdio package `uvx gen-mcp-server` (Python, PyPI; env `GEN_API_KEY`). Exposes 100 gen_* tools, 9 prompts, and 3 guidance resources.
+- MCP Server: remote endpoint `https://mcp.gen.pro/mcp` with `Authorization: Bearer <pat>`, or local stdio package `uvx gen-mcp-server` (Python, PyPI; env `GEN_API_KEY`). Exposes 142 gen_* tools, 9 prompts, and 3 guidance resources.
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

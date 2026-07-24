@@ -795,7 +795,7 @@ Local install example:
 GEN_API_KEY=your-pat uvx gen-mcp-server
 ```
 
-The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
+The current MCP exposes 142 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
 
 **Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_research` (topic research across social + web), `gen_make_video` (finished multi-scene video from a brief), `gen_generate_content_ideas`.
 
