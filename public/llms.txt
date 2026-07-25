@@ -797,27 +797,39 @@ GEN_API_KEY=your-pat uvx gen-mcp-server
 
 The current MCP exposes 142 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
 
-**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_research` (topic research across social + web), `gen_make_video` (finished multi-scene video from a brief), `gen_generate_content_ideas`.
+**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_run_research` (deep topic research across 10+ platforms), `gen_generate_content_ideas` (data-driven ideas/scripts), `gen_refine_content_ideas` (iterate with feedback).
 
-**Creation:** `gen_create_video` (single clip; models: seedance-2.0, veo_3, kling_2_1, sora_2, grok, pika), `gen_create_image` (nano-banana-pro/nano-banana/nano-banana-2), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`.
+**Content ideas lifecycle:** `gen_list_content_ideas` (see all ideas), `gen_expand_idea` (expand one idea to a full scene plan), `gen_update_idea_status` (approve/reject/archive), `gen_set_content_preference` (persistent rules for future generations), `gen_get_session_preferences` / `gen_update_session_preferences` (per-conversation creative rules), `gen_decide_agent_run` (approve/reject a pending agent action gate).
 
-**Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_delete_asset`.
+**Conversations:** `gen_list_conversations`, `gen_get_conversation`.
 
-**Voices:** `gen_list_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_create_voice`.
+**Creation:** `gen_create_video` (single clip; models: seedance-2.0, veo_3, kling_2_1, sora_2, grok, pika), `gen_create_image` (nano-banana-pro/nano-banana/nano-banana-2), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`, `gen_generate_content` (trigger generation for a vidsheet cell), `gen_generate_layer` (trigger generation for a specific layer), `gen_continue_generation` (resume a stopped generation).
 
-**Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
+**Assets / Content Resources:** `gen_list_assets` / `gen_list_content_resources`, `gen_get_asset` / `gen_get_content_resource`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_create_content_resource`, `gen_update_content_resource`, `gen_delete_asset` / `gen_delete_content_resource`.
 
-**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
+**Voices:** `gen_list_agent_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_preview_voice` (TTS audition), `gen_get_voice_preview_status`, `gen_generate_voice_description`, `gen_generate_voice_samples`, `gen_get_voice_sample_status`, `gen_delete_voice`.
 
-**Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
+**Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`, `gen_publish_content` (direct publish/schedule to TikTok). On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
 
-**Recurring automation:** `gen_create_recurring_job`, `gen_list_recurring_jobs`, `gen_run_recurring_job_now`, `gen_pause_recurring_job`, `gen_resume_recurring_job`.
+**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_update_column`, `gen_delete_column`, `gen_list_rows`, `gen_create_row`, `gen_duplicate_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_layer`, `gen_get_layer`, `gen_update_layer`, `gen_delete_layer`, `gen_list_variables`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
 
-**Credits/billing:** `gen_get_credit_balance`, `gen_estimate_job`, `gen_buy_credits`, `gen_upgrade_workspace`.
+**Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_get_watchlist`, `gen_update_watchlist`, `gen_delete_watchlist`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`, `gen_pause_watchlist`, `gen_resume_watchlist`.
 
-**Agent setup:** `gen_get_me`, `gen_list_agents`, `gen_get_agent_core`, `gen_update_agent_core`, `gen_set_agent_primary_photo`, `gen_add_agent_look`.
+**Content monitoring:** `gen_create_monitoring_job` (scrape TikTok/Instagram/YouTube into agent knowledge), `gen_update_monitoring_job`.
 
-**Job control:** `gen_get_generation` (poll), `gen_stop_generation` (refunds credits), `gen_get_run_status`.
+**Proof of Genesis backups:** `gen_list_proof_of_genesis_backups`, `gen_create_proof_of_genesis_backup`, `gen_remove_proof_of_genesis_backup`.
+
+**Recurring automation:** `gen_create_recurring_job`, `gen_list_recurring_jobs`, `gen_get_recurring_job`, `gen_update_recurring_job`, `gen_run_recurring_job_now`, `gen_pause_recurring_job`, `gen_resume_recurring_job`, `gen_delete_recurring_job`, `gen_ensure_default_recurring_job` (idempotent daily-ideas setup).
+
+**Credits/billing:** `gen_get_credit_balance`, `gen_estimate_job`, `gen_get_credit_usage`, `gen_list_credit_plans`, `gen_buy_credits`, `gen_upgrade_workspace`.
+
+**Agent setup:** `gen_get_me`, `gen_list_agents`, `gen_get_agent`, `gen_create_agent`, `gen_update_agent`, `gen_delete_agent`, `gen_get_agent_core`, `gen_update_agent_core`, `gen_get_agent_profile`, `gen_create_agent_profile`, `gen_update_agent_profile`, `gen_reset_agent_profile`, `gen_set_agent_primary_photo`, `gen_add_agent_look`, `gen_add_agent_account`, `gen_add_agent_inspiration`, `gen_connect_agent_elevenlabs`, `gen_list_agent_avatars`, `gen_create_agent_avatar`, `gen_delete_agent_avatar`.
+
+**Organizations:** `gen_list_organizations`, `gen_create_organization`, `gen_get_organization`, `gen_update_organization`, `gen_delete_organization`.
+
+**API keys:** `gen_list_api_keys`, `gen_create_api_key`, `gen_update_api_key`, `gen_revoke_api_key`, `gen_revoke_all_api_keys`.
+
+**Job control:** `gen_get_generation` (poll), `gen_stop_generation` (refunds credits), `gen_continue_generation` (resume), `gen_get_run_status`.
 
 Full install guide: https://api.gen.pro/guides/mcp/
 
