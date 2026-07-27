@@ -294,6 +294,26 @@ DELETE /v1/persisted_tokens/{id}/revoke
 DELETE /v1/persisted_tokens/revoke_all
 ```
 
+## Agent Profile (agentic service mirror, `https://agent.gen.pro/v1`)
+
+The agent profile is a lightweight mirror of agent setup as seen by the ideas/research service. Use `gen_get_agent_core` / `gen_update_agent_core` (Rails) for the authoritative read/write. These endpoints are useful when you need to check or reset how the agentic service sees the agent, or to set `content_idea_preferences` (persistent rules for future idea runs).
+
+```
+GET    /v1/agent/profile?agent_id={id}
+→ { identity: { name, description, persona }, voice: { api_keys, default_voice }, brand: { brand_name, description, goal, keywords, target_platforms, shortform, longform, linked_accounts, content_idea_preferences } }
+
+POST   /v1/agent/profile?agent_id={id}
+Body: { identity?, voice?, brand? }
+→ updated profile
+
+PUT    /v1/agent/profile?agent_id={id}
+Body: { identity?, voice?, brand? }      (replaces; same shape as POST)
+
+DELETE /v1/agent/profile?agent_id={id}  — resets brand section only (does NOT delete the agent)
+```
+
+`content_idea_preferences` (inside `brand`) holds persistent plain-text rules applied to every future idea generation, e.g. `"- always use statement hooks\n- never mention competitors"`.
+
 ---
 
 # Phase 2 — Ideas
@@ -480,9 +500,9 @@ Only pending/processing jobs can be updated.
 | Instagram | Yes | Yes | No |
 | YouTube | Yes | Yes | Yes |
 
-### Pricing
+### Credit usage
 
-Per video/post: $0.015. Per comment (when enabled): $0.002.
+Content monitoring uses credits per post and comment scraped. Check your balance with `GET /v1/credit_balance?agent_id={id}` before starting large jobs.
 
 ### Reading scraped data
 
@@ -563,6 +583,8 @@ Types: `text`, `image`, `video`, `audio`.
 ```
 GET    /v1/vidsheet/{id}/columns?agent_id={id}
 POST   /v1/vidsheet/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
+PATCH  /v1/vidsheet/{id}/columns/{col_id}?agent_id={id}     Body: { spreadsheet_column: { title?, type?, position? } }
+DELETE /v1/vidsheet/{id}/columns/{col_id}?agent_id={id}
 POST   /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={id}
 PATCH  /v1/vidsheet/{id}/columns/update_positions?agent_id={id}
 PUT    /v1/vidsheet/{id}/columns/mass_update?agent_id={id}

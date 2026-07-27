@@ -974,6 +974,49 @@ paths:
               schema:
                 $ref: '#/components/schemas/Column'
 
+  /vidsheet/{sheet_id}/columns/{column_id}:
+    patch:
+      operationId: updateColumn
+      x-phase: edit
+      summary: Update a column
+      description: Update a column's title, type, or position. Only ingredient-role columns can be modified.
+      tags: [Columns]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - name: column_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spreadsheet_column:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    type:
+                      type: string
+                      enum: [text, image, video, audio]
+                    position:
+                      type: integer
+      responses:
+        '200':
+          description: Column updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        '403':
+          description: Forbidden — cannot modify system-role columns
+        '422':
+          description: Validation error
+
   /vidsheet/{sheet_id}/columns/{column_id}/duplicate:
     post:
       operationId: duplicateColumn
@@ -3409,6 +3452,35 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+
+  /agents/{agent_id}/core/inspiration:
+    post:
+      operationId: addAgentInspiration
+      x-phase: setup
+      summary: Add one inspiration source to the agent
+      description: Adds a single inspiration source URL to the agent's existing inspiration list. Does not replace the full list. Use PATCH /agents/{agent_id}/core with the full `inspiration` array to replace.
+      tags: [Agent Core]
+      parameters:
+        - { name: agent_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  description: Full URL of the inspiration source
+                platform:
+                  type: string
+                  description: Platform hint (e.g. tiktok, instagram, youtube)
+      responses:
+        '200':
+          description: Inspiration source added
+        '422':
+          description: Validation error
 
   # ── Agent Voice ───────────────────────────────────────────
   /agents/{agent_id}/proof-of-genesis/backups:

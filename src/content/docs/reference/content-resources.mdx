@@ -5,7 +5,7 @@ description: Upload, organize, and manage files — images, videos, audio, and f
 
 import { Aside } from '@astrojs/starlight/components';
 
-Content resources represent files in your agent's workspace — generated outputs (images, videos, audio) and manually uploaded assets. The asset library provides a unified view with folder organization, and direct upload lets you send files straight to S3 for maximum performance.
+Content resources represent files in your agent's workspace — generated outputs (images, videos, audio) and manually uploaded assets. The asset library provides a unified view with folder organization, and direct upload lets you send files straight from your client for maximum performance.
 
 <Aside type="note">
   All endpoints in this section require an `agent_id` query parameter to scope operations to a specific agent. See the [Discovery](/reference/discovery) page to list your agents.
@@ -465,7 +465,7 @@ curl -X DELETE "https://api.gen.pro/v1/asset_folders/16?agent_id=42" \
 
 ## Create direct upload
 
-Returns a pre-signed S3 URL for uploading a file directly from the client. This is the recommended approach for large files — the upload goes straight to S3 without passing through the API server.
+Returns a pre-signed URL for uploading a file directly from the client. This is the recommended approach for large files — the upload goes straight to cloud storage without passing through the API server.
 
 **Workflow:**
 1. Call this endpoint with file metadata to get a signed upload URL.
