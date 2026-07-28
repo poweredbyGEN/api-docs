@@ -181,6 +181,23 @@ Returns `204 No Content` on success.
 }
 ```
 
+## Run a job immediately
+
+Trigger one execution right now without waiting for the scheduled time. Fires the same execution path as a scheduled run — credits are charged and the run is recorded. Useful for testing a new job before its first scheduled firing.
+
+```
+POST /v1/agents/:agent_id/recurring-jobs/:job_id/test-run
+```
+
+Base URL: `https://agent.gen.pro`
+
+```bash
+curl -X POST "https://agent.gen.pro/v1/agents/your-agent-id/recurring-jobs/your-job-id/test-run" \
+  -H "X-API-Key: your-api-key"
+```
+
+Returns `202 Accepted` with a `run_id` you can poll via `GET /v1/agent/runs/:run_id`.
+
 ## Errors
 
 | Status | Code | Description |

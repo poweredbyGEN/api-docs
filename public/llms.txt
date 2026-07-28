@@ -480,9 +480,9 @@ Only `ingredient` role columns can be created / updated / deleted.
 
 ## Step 5 — Export & Publish
 
-**What it is.** Composite all layers on the final_video cell into one MP4 (render), download it, optionally publish to TikTok (Instagram / YouTube coming).
+**What it is.** Composite all layers on the final_video cell into one MP4 (render), download it, and publish to social platforms: TikTok, Instagram, Facebook, YouTube, and X.
 
-**Mental model.** Render is an async generation like any other — trigger it on the final_video cell, poll until completed, then the `output_resources[0].url` is a public CDN URL. Publishing is a user_job that takes a `media_url` (the render URL works directly).
+**Mental model.** Render is an async generation — trigger it on the final_video cell, poll until completed, then the `output_resources[0].url` is a public CDN URL. Publishing takes a `media_url` (the render URL works directly). Connect social accounts first via the OAuth flow.
 
 **Render:**
 
@@ -492,25 +492,13 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$FINAL_VIDEO_CELL
 # → { "generation_id": 56789, "status": "pending" }
 ```
 
-**Poll:**
+**Poll render:**
 
 ```bash
 curl "https://api.gen.pro/v1/generations/56789" \
   -H "X-API-Key: $GEN_API_KEY"
 # pending → processing → completed | failed
-# on completed:
-# {
-#   "id": 56789,
-#   "status": "completed",
-#   "output_resources": [
-#     {
-#       "id": 4821,
-#       "url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
-#       "thumbnail_url": "https://cdn.gen.pro/thumbnails/render_xyz.jpg",
-#       "object_type": "video"
-#     }
-#   ]
-# }
+# on completed: output_resources[0].url is a public CDN URL
 ```
 
 **Download** (public CDN URL, no auth needed):
@@ -519,45 +507,70 @@ curl "https://api.gen.pro/v1/generations/56789" \
 curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
 ```
 
-**Publish to TikTok now** (chain from the render URL):
+**Connect a social account** (OAuth URL — user opens in browser):
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=$AGENT_ID" \
+curl "https://python.gen.pro/platform/get_authorization_url?agent_id=$AGENT_ID&platform=tiktok" \
+  -H "X-API-Key: $GEN_API_KEY"
+# → { "url": "https://..." }   ← open this in a browser
+```
+
+**Publish now** (TikTok — chain from the render URL):
+
+```bash
+curl -X POST "https://python.gen.pro/schedule/with-post" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "user_job_type": "publish_content",
-    "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"The $2 taco at 2am #streetfood #tacotok\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
+    "agent_id": "'$AGENT_ID'",
+    "platform": ["tiktok"],
+    "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+    "description": "The $2 taco at 2am #streetfood #tacotok",
+    "media_type": "VIDEO",
+    "schedule_type": "now"
   }'
-# → { "user_job_id": 138860 }
 ```
 
 **Schedule for later:**
 
 ```bash
-# same body but:
-# "schedule_type": "scheduled",
-# "scheduled_time": "2026-04-20T15:00:00Z"
+curl -X POST "https://python.gen.pro/schedule/with-post" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "'$AGENT_ID'",
+    "platform": ["instagram"],
+    "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+    "description": "Morning routine 🌅 #wellness",
+    "schedule_type": "specific_time",
+    "scheduled_time": "2026-08-01T09:00:00Z"
+  }'
 ```
 
-**Poll publish job:**
+**Check publish status:**
 
 ```bash
-curl "https://api.gen.pro/v1/user_jobs/138860?agent_id=$AGENT_ID" \
+curl "https://python.gen.pro/schedule/post/POST_ID" \
   -H "X-API-Key: $GEN_API_KEY"
-# pending → processing → completed | failed
-# on completed: result.post_id is the TikTok post ID
+# status: accepted → publishing → published | failed
+# on published: platforms[0].post_url is the live link
 ```
 
-**Prerequisites for publish.** The agent must have a connected TikTok account. The media URL must be publicly accessible at post time.
+**Prerequisites for publish.** The agent must have a connected social account for the target platform (connected via OAuth). The media URL must be publicly accessible at post time.
 
 ### Step 5 endpoints
 
 ```
-POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=   — kick off render
-GET    /v1/generations/:id                                          — poll render
-POST   /v1/user_jobs?agent_id= (publish_content)                    — publish now / schedule
-GET    /v1/user_jobs/:id?agent_id=                                  — poll publish job
+POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=      — kick off render (api.gen.pro)
+GET    /v1/generations/:id                                   — poll render (api.gen.pro)
+GET    /platform/get_authorization_url                       — OAuth connect URL (python.gen.pro)
+GET    /platform/get_oauth_account                           — list connected socials (python.gen.pro)
+PUT    /platform/disconnect/:platform                        — disconnect social (python.gen.pro)
+POST   /schedule/with-post                                   — post or schedule (python.gen.pro)
+GET    /schedule/posts                                       — content calendar (python.gen.pro)
+GET    /schedule/post/:id                                    — poll post status (python.gen.pro)
+PATCH  /schedule/post/:id                                    — update scheduled post (python.gen.pro)
+DELETE /schedule/post/:id                                    — delete scheduled post (python.gen.pro)
 ```
 
 ---

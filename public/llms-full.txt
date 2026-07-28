@@ -980,66 +980,88 @@ curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
 
 CDN URLs are public and permanent until you explicitly delete the content resource. Individual layer outputs are also downloadable via each layer's `default_user_job.output_resources[0].url`.
 
+## Connect Social Accounts
+
+Base URL for social connect and scheduling: `https://python.gen.pro`
+
+Connect accounts with OAuth — never pass credentials through the API.
+
+```
+GET  /platform/get_authorization_url?agent_id={id}&platform={platform}
+→ { url: "https://..." }   ← user opens this in a browser
+```
+
+Supported platforms: `tiktok` | `instagram` | `facebook` | `youtube` | `x`
+
+```
+GET  /platform/get_oauth_account?agent_id={id}
+→ [ { platform, account_name, connected_at, ... } ]
+
+PUT  /platform/disconnect/{platform}
+Body: { "agent_id": "{id}" }
+→ 200
+```
+
+MCP tools: `gen_get_social_connect_url`, `gen_list_connected_socials`, `gen_disconnect_social`
+
 ## Publish to Social
 
-Currently TikTok. Instagram and YouTube coming.
+Supported platforms: **TikTok, Instagram, Facebook, YouTube, X**. Base URL: `https://python.gen.pro`
 
 ```
-POST /v1/user_jobs?agent_id={id}
+POST /schedule/with-post
 Content-Type: application/json
-Body:
-{
-  "user_job_type": "publish_content",
-  "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"caption #hashtags\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
-}
-→ { user_job_id }
 ```
 
-Data fields (JSON-stringified in `data`):
+Fields:
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
-| `platform` | string | Yes | `tiktok` |
-| `media_url` | string | Yes | public URL to media (render URL works directly) |
-| `description` | string | Yes | caption, max ~2200 chars for TikTok; include hashtags inline |
-| `title` | string | No | post title |
-| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` |
-| `schedule_type` | string | Yes | `now` \| `scheduled` |
-| `scheduled_time` | string | if `scheduled` | ISO 8601 UTC, must be future |
+| `agent_id` | string | Yes | agent posting the content |
+| `platform` | string[] | Yes | e.g. `["tiktok"]` or `["instagram"]` |
+| `schedule_type` | string | Yes | `now` \| `specific_time` |
+| `scheduled_time` | string | if `specific_time` | ISO 8601 UTC, must be future |
+| `description` | string | Yes for text/recommended | caption; include hashtags inline |
+| `media_url` | string | No | single video URL |
+| `media_urls` | string[] | No | image URLs (X: up to 4) |
+| `title` | string | No | post title (YouTube) |
+| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` \| `TWEET_VIDEO` |
 | `thumbnail_url` | string | No | custom thumbnail URL |
-| `timezone_offset` | integer | No | minutes from UTC |
+| `timezone_offset` | number | No | UTC offset in hours (e.g. `-7` for PDT) |
+| `thread` | object[] | No | **X only** — `[{text, media_urls?}]` chain |
+| `reply_to_tweet_id` | string | No | **X only** — reply to this tweet id |
 
-### Upload media (upload_asset)
+Post now (TikTok):
 
-Posts reference media by URL (public at post time). Upload a local file to get a hosted URL and save it to the agent's Assets.
-
-```
-POST /v1/social/upload_asset   (multipart/form-data)
-Fields: file=<binary>, agent_id=<agent_id>
--> { "url": "https://cdn.gen.pro/...", "asset_id": "123", "content_resource_id": 123, "asset_registered": true }
-```
-
-Use the returned `url` as `media_url` or an entry in `media_urls`. Upload -> post:
-
-```bash
-URL=$(curl -s -X POST "https://api.gen.pro/v1/social/upload_asset" -H "X-API-Key: $KEY" \
-  -F "file=@image.jpg" -F "agent_id=$AGENT" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])")
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
-  -d "{\"agent_id\":\"$AGENT\",\"platform\":[\"x\"],\"media_type\":\"IMAGE\",\"media_urls\":[\"$URL\"],\"schedule_type\":\"now\",\"description\":\"hi\"}"
-```
-
-For up to 4 images on X, call upload_asset per file and pass all URLs in `media_urls`.
-
-### X (Twitter) posting
-
-X supports the richest post set via `POST /v1/schedule/with-post` (the `gen_schedule_post` tool). Beyond a single text/video tweet, X adds up to 4 images per tweet, threads, and replies.
-
-```
-POST /v1/schedule/with-post
-Content-Type: application/json
-Body:
+```json
 {
-  "agent_id": "<agent_id>",
+  "agent_id": "<id>",
+  "platform": ["tiktok"],
+  "description": "caption #hashtags",
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+  "media_type": "VIDEO",
+  "schedule_type": "now"
+}
+```
+
+Schedule for later (Instagram):
+
+```json
+{
+  "agent_id": "<id>",
+  "platform": ["instagram"],
+  "description": "Morning routine 🌅 #wellness",
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+  "schedule_type": "specific_time",
+  "scheduled_time": "2026-08-01T09:00:00Z"
+}
+```
+
+X thread:
+
+```json
+{
+  "agent_id": "<id>",
   "platform": ["x"],
   "schedule_type": "now",
   "thread": [
@@ -1050,32 +1072,38 @@ Body:
 }
 ```
 
-X-specific fields on the schedule body:
+`thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube. A thread that fails partway stops at the failed segment and is marked failed (not retried, to avoid duplicates).
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `platform` | string[] | Yes | include `"x"` |
-| `description` | string | for text/reply | the tweet text |
-| `media_urls` | string[] | No | up to 4 image URLs for one tweet |
-| `media_type` | string | No | `TWEET_VIDEO` for video, `IMAGE` for images |
-| `thread` | object[] | No | **X only.** ordered list of `{text, media_urls?}` tweet segments; posted as a chain |
-| `reply_to_tweet_id` | string | No | **X only.** reply to an existing tweet id; combine with `thread` to reply-then-chain |
+### Upload media (upload_asset)
 
-`thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube (single-media platforms). A thread that fails partway stops at the failed segment, records the tweets already posted, and is marked failed (not retried, to avoid duplicates).
-
-### Poll the publish job
+Upload a local file to get a hosted CDN URL for use in `media_url`/`media_urls`.
 
 ```
-GET /v1/user_jobs/{id}?agent_id={id}
+POST /v1/social/upload_asset   (multipart/form-data, api.gen.pro)
+Fields: file=<binary>, agent_id=<agent_id>
+→ { url, asset_id, content_resource_id, asset_registered }
 ```
 
-Status flow: `pending → processing → completed | failed`. On `completed`, `result.post_id` is the platform's post ID.
+For up to 4 images on X, call `upload_asset` per file and pass all URLs in `media_urls`.
+
+### Content calendar
+
+```
+GET    /schedule/posts?agent_id={id}[&start_date=2026-08-01&end_date=2026-08-31]
+GET    /schedule/post/{post_id}   → { id, status, platforms: [{platform, status, post_url, published_at}] }
+PATCH  /schedule/post/{post_id}   → update before it publishes (e.g. reschedule or edit caption)
+DELETE /schedule/post/{post_id}   → cancel a scheduled post
+```
+
+Status flow: `accepted → publishing → published | failed`. On `published`, `platforms[0].post_url` is the live link.
+
+MCP tools: `gen_schedule_post`, `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`
 
 ### Prerequisites
 
-- Agent must have a connected TikTok account (connected via the GEN app)
-- Media must be publicly accessible at post time
-- For scheduled posts, `scheduled_time` must be in the future
+- Agent must have a connected account for the target platform (OAuth via `get_authorization_url`)
+- Media URL must be publicly accessible at post time
+- `scheduled_time` must be in the future for `specific_time` posts
 
 ---
 
@@ -1338,6 +1366,9 @@ delivery.
 - `POST /recurring-jobs/:id/pause` → `status = "paused"`, scheduler stops
   queueing new runs. History and configuration preserved.
 - `POST /recurring-jobs/:id/resume` → `status = "active"`.
+- `POST /recurring-jobs/:id/test-run` → fires one immediate execution now,
+  same path as a scheduled run. Returns `202 Accepted` with `run_id` to poll
+  via `GET /v1/agent/runs/:run_id`. Credits charged per normal execution.
 - `DELETE /recurring-jobs/:id` → `status = "deleted"`, returns 204. Use
   pause for reversible stops.
 
