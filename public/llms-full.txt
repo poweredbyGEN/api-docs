@@ -79,6 +79,15 @@ id may be underscore-joined for multi-delete (e.g. "7_8_9").
 → 200 empty
 ```
 
+MCP shortcuts for avatar management:
+- `gen_list_agent_avatars(agent_id)` — list avatars for an agent
+- `gen_create_agent_avatar(agent_id, degod_avatar_id)` — attach a DeGod collection avatar
+- `gen_delete_agent_avatar(agent_id, avatar_id)` — delete one or more avatars
+- `gen_add_agent_look(agent_id, signed_id)` — attach an uploaded image as a non-primary look (after `gen_create_direct_upload`)
+- `gen_set_agent_primary_photo(agent_id, signed_id)` — upload and set as primary avatar (replaces existing primary)
+- `gen_add_agent_account(agent_id, url, platform?)` — add one of the agent's OWN social accounts (what it posts from)
+- `gen_add_agent_inspiration(agent_id, url)` — add one inspiration source (creator the agent draws style from)
+
 ## Agent Core (preferred single-call setup)
 
 **Use this for all agent setup reads and writes.** Flat endpoint. Every field name mirrors the GEN Setup canvas.
@@ -362,6 +371,8 @@ Live progress:
 
 Backend/API-first contract for combining multiple songs into one long DJ-style audio output.
 
+MCP tool: `gen_create_song_mix(agent_id, tracks?, prompt?, transition_style?, output_format?, auto_order?, desired_duration_seconds?, generate_missing_count?)` — combine existing songs into a DJ-style mix. Returns `status=pending_engine` until the renderer worker is installed, or `pending_song_generation` when source songs must be generated first.
+
 ```
 POST /v1/audio/mixes
 Body: {
@@ -416,6 +427,8 @@ PATCH  /v1/agent/conversations/{id}                    — Body: { title?, pinne
 DELETE /v1/agent/conversations/{id}                    — deletes conversation, runs, messages
 ```
 
+MCP tools: `gen_list_conversations(agent_id)`, `gen_get_conversation(agent_id, conversation_id)`, `gen_get_session_preferences(agent_id, conversation_id)`, `gen_update_session_preferences(agent_id, conversation_id, preferences)`.
+
 ## Content Ideas
 
 Ideas produced by runs are first-class records.
@@ -451,6 +464,8 @@ Edit/rejection statuses: `change_idea`, `change_video`, `rejected`.
 
 Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven, 5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit`.
 
+MCP tools: `gen_list_content_ideas(agent_id, status?)`, `gen_update_idea_status(agent_id, idea_id, status)`, `gen_expand_idea(agent_id, idea_id)`, `gen_refine_content_ideas(agent_id, conversation_id, feedback)`, `gen_decide_agent_run(agent_id, run_id, approved)`, `gen_set_content_preference(agent_id, preference)`.
+
 ## Research (standalone)
 
 ```
@@ -462,6 +477,8 @@ Body: { topic, depth: "quick" | "default" | "deep", agent_id }
 Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. Completed messages contain the structured research findings and summary.
 
 Depths: `quick`, `default`, `deep`.
+
+MCP tool: `gen_run_research(agent_id, topic, depth?)` — returns a `run_id` to poll with `gen_get_run_status`.
 
 ## Research topics (daily background research)
 
@@ -511,6 +528,8 @@ No raw data dump endpoint — query through the agent:
 - **Automation Pipelines**: scheduled prompts that populate vidsheet rows with results
 
 Status flow: `pending → processing → completed` (one-time) or stays `processing` (monitoring). Poll `GET /v1/user_jobs/{id}?agent_id={id}`.
+
+MCP tools: `gen_create_monitoring_job(agent_id, platform, search_type, value, days?, country?, max_results?, monitoring?, comment_monitoring?)`, `gen_update_monitoring_job(agent_id, job_id, ...)` — only pending/processing jobs can be updated.
 
 ---
 
@@ -629,6 +648,13 @@ GET /v1/generations/{id}
 POST /v1/generations/{id}/stop       — credits refunded; status → "stopped"
 POST /v1/generations/{id}/continue   — credits re-charged; status → "pending"
 ```
+
+MCP tools:
+- `gen_generate_content(agent_id, sheet_id, cell_id, generation_type, data)` — THE WORKHORSE. Trigger cell generation. Returns `generation_id` to poll with `gen_get_generation`.
+- `gen_generate_layer(agent_id, sheet_id, cell_id, layer_id)` — trigger generation for a specific layer (uses the layer's already-configured generation type and data).
+- `gen_get_generation(generation_id)` — poll until `status == "completed"`, then read `output_resources`.
+- `gen_stop_generation(generation_id)` — stop and refund credits.
+- `gen_continue_generation(generation_id)` — resume a stopped generation (credits re-charged).
 
 Status flow: `pending → processing → completed | failed | stopped`.
 
@@ -788,6 +814,14 @@ Workflow:
 
 Compute checksum: openssl md5 -binary file | base64
 ```
+
+MCP tools for asset management:
+- `gen_create_direct_upload(agent_id, filename, byte_size, checksum, content_type)` — returns `signed_id` + upload URL
+- `gen_complete_asset_upload(agent_id, signed_id)` — attach an already-uploaded blob to the agent's durable asset library; returns `content_resource` id and CDN URL
+- `gen_create_content_resource(agent_id, signed_id)` — create a content resource from a signed_id (alias for the POST endpoint above)
+- `gen_list_content_resources(agent_id, type?)` — list content resources with optional type filter
+- `gen_get_content_resource(agent_id, id)` — get a single resource with its public URL and generator info
+- `gen_delete_content_resource(agent_id, id)` — permanently delete a content resource
 
 ## Proof of Genesis / Backup to Blockchain (`https://agent-core.gen.pro/v1`)
 
@@ -1228,6 +1262,7 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
   restoring it if it had been soft-deleted.
 - **`PATCH /watchlists/:id` with `{"intent_active": false}`** is the pause
   primitive; `true` resumes. Use `DELETE` only to permanently retire.
+  MCP: `gen_pause_watchlist(agent_id, watchlist_id)` / `gen_resume_watchlist(agent_id, watchlist_id)`.
 - **`DELETE`** is a soft delete: rows are marked inactive and `deleted_at`
   is set; nothing is returned by subsequent `GET`/`list`.
 
@@ -1364,13 +1399,15 @@ delivery.
 ### Pause / resume / delete
 
 - `POST /recurring-jobs/:id/pause` → `status = "paused"`, scheduler stops
-  queueing new runs. History and configuration preserved.
-- `POST /recurring-jobs/:id/resume` → `status = "active"`.
+  queueing new runs. History and configuration preserved. MCP: `gen_pause_recurring_job(agent_id, job_id)`
+- `POST /recurring-jobs/:id/resume` → `status = "active"`. MCP: `gen_resume_recurring_job(agent_id, job_id)`
 - `POST /recurring-jobs/:id/test-run` → fires one immediate execution now,
   same path as a scheduled run. Returns `202 Accepted` with `run_id` to poll
-  via `GET /v1/agent/runs/:run_id`. Credits charged per normal execution.
+  via `GET /v1/agent/runs/:run_id`. Credits charged per normal execution. MCP: `gen_run_recurring_job_now(agent_id, job_id)`
 - `DELETE /recurring-jobs/:id` → `status = "deleted"`, returns 204. Use
-  pause for reversible stops.
+  pause for reversible stops. MCP: `gen_delete_recurring_job(agent_id, job_id)`
+- Get a single job: `gen_get_recurring_job(agent_id, job_id)` — returns 404 if deleted.
+- Idempotent default setup: `gen_ensure_default_recurring_job(agent_id)` — creates the default daily content-ideas job if none exists.
 
 ### Credit semantics
 
