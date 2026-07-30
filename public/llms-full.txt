@@ -79,6 +79,15 @@ id may be underscore-joined for multi-delete (e.g. "7_8_9").
 → 200 empty
 ```
 
+MCP shortcuts for avatar management:
+- `gen_list_agent_avatars(agent_id)` — list avatars for an agent
+- `gen_create_agent_avatar(agent_id, degod_avatar_id)` — attach a DeGod collection avatar
+- `gen_delete_agent_avatar(agent_id, avatar_id)` — delete one or more avatars
+- `gen_add_agent_look(agent_id, signed_id)` — attach an uploaded image as a non-primary look (after `gen_create_direct_upload`)
+- `gen_set_agent_primary_photo(agent_id, signed_id)` — upload and set as primary avatar (replaces existing primary)
+- `gen_add_agent_account(agent_id, url, platform?)` — add one of the agent's OWN social accounts (what it posts from)
+- `gen_add_agent_inspiration(agent_id, url)` — add one inspiration source (creator the agent draws style from)
+
 ## Agent Core (preferred single-call setup)
 
 **Use this for all agent setup reads and writes.** Flat endpoint. Every field name mirrors the GEN Setup canvas.
@@ -294,6 +303,26 @@ DELETE /v1/persisted_tokens/{id}/revoke
 DELETE /v1/persisted_tokens/revoke_all
 ```
 
+## Agent Profile (agentic service mirror, `https://agent.gen.pro/v1`)
+
+The agent profile is a lightweight mirror of agent setup as seen by the ideas/research service. Use `gen_get_agent_core` / `gen_update_agent_core` (Rails) for the authoritative read/write. These endpoints are useful when you need to check or reset how the agentic service sees the agent, or to set `content_idea_preferences` (persistent rules for future idea runs).
+
+```
+GET    /v1/agent/profile?agent_id={id}
+→ { identity: { name, description, persona }, voice: { api_keys, default_voice }, brand: { brand_name, description, goal, keywords, target_platforms, shortform, longform, linked_accounts, content_idea_preferences } }
+
+POST   /v1/agent/profile?agent_id={id}
+Body: { identity?, voice?, brand? }
+→ updated profile
+
+PUT    /v1/agent/profile?agent_id={id}
+Body: { identity?, voice?, brand? }      (replaces; same shape as POST)
+
+DELETE /v1/agent/profile?agent_id={id}  — resets brand section only (does NOT delete the agent)
+```
+
+`content_idea_preferences` (inside `brand`) holds persistent plain-text rules applied to every future idea generation, e.g. `"- always use statement hooks\n- never mention competitors"`.
+
 ---
 
 # Phase 2 — Ideas
@@ -341,6 +370,8 @@ Live progress:
 ## Song Mixes
 
 Backend/API-first contract for combining multiple songs into one long DJ-style audio output.
+
+MCP tool: `gen_create_song_mix(agent_id, tracks?, prompt?, transition_style?, output_format?, auto_order?, desired_duration_seconds?, generate_missing_count?)` — combine existing songs into a DJ-style mix. Returns `status=pending_engine` until the renderer worker is installed, or `pending_song_generation` when source songs must be generated first.
 
 ```
 POST /v1/audio/mixes
@@ -396,6 +427,8 @@ PATCH  /v1/agent/conversations/{id}                    — Body: { title?, pinne
 DELETE /v1/agent/conversations/{id}                    — deletes conversation, runs, messages
 ```
 
+MCP tools: `gen_list_conversations(agent_id)`, `gen_get_conversation(agent_id, conversation_id)`, `gen_get_session_preferences(agent_id, conversation_id)`, `gen_update_session_preferences(agent_id, conversation_id, preferences)`.
+
 ## Content Ideas
 
 Ideas produced by runs are first-class records.
@@ -431,6 +464,8 @@ Edit/rejection statuses: `change_idea`, `change_video`, `rejected`.
 
 Video type IDs: `0=Any, 1=Talking Avatar, 2=Green Screen, 3=Montage, 4=Text-Driven, 5=POV Object, 6=Narrated/VO, 8=Split Screen, 9=Skit`.
 
+MCP tools: `gen_list_content_ideas(agent_id, status?)`, `gen_update_idea_status(agent_id, idea_id, status)`, `gen_expand_idea(agent_id, idea_id)`, `gen_refine_content_ideas(agent_id, conversation_id, feedback)`, `gen_decide_agent_run(agent_id, run_id, approved)`, `gen_set_content_preference(agent_id, preference)`.
+
 ## Research (standalone)
 
 ```
@@ -442,6 +477,8 @@ Body: { topic, depth: "quick" | "default" | "deep", agent_id }
 Poll `GET /v1/agent/runs/{run_id}` until `status` is `completed`. Completed messages contain the structured research findings and summary.
 
 Depths: `quick`, `default`, `deep`.
+
+MCP tool: `gen_run_research(agent_id, topic, depth?)` — returns a `run_id` to poll with `gen_get_run_status`.
 
 ## Research topics (daily background research)
 
@@ -480,9 +517,9 @@ Only pending/processing jobs can be updated.
 | Instagram | Yes | Yes | No |
 | YouTube | Yes | Yes | Yes |
 
-### Pricing
+### Credit usage
 
-Per video/post: $0.015. Per comment (when enabled): $0.002.
+Content monitoring uses credits per post and comment scraped. Check your balance with `GET /v1/credit_balance?agent_id={id}` before starting large jobs.
 
 ### Reading scraped data
 
@@ -491,6 +528,8 @@ No raw data dump endpoint — query through the agent:
 - **Automation Pipelines**: scheduled prompts that populate vidsheet rows with results
 
 Status flow: `pending → processing → completed` (one-time) or stays `processing` (monitoring). Poll `GET /v1/user_jobs/{id}?agent_id={id}`.
+
+MCP tools: `gen_create_monitoring_job(agent_id, platform, search_type, value, days?, country?, max_results?, monitoring?, comment_monitoring?)`, `gen_update_monitoring_job(agent_id, job_id, ...)` — only pending/processing jobs can be updated.
 
 ---
 
@@ -563,6 +602,8 @@ Types: `text`, `image`, `video`, `audio`.
 ```
 GET    /v1/vidsheet/{id}/columns?agent_id={id}
 POST   /v1/vidsheet/{id}/columns?agent_id={id}               Body: { spreadsheet_column: { title, type, position? } }
+PATCH  /v1/vidsheet/{id}/columns/{col_id}?agent_id={id}     Body: { spreadsheet_column: { title?, type?, position? } }
+DELETE /v1/vidsheet/{id}/columns/{col_id}?agent_id={id}
 POST   /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={id}
 PATCH  /v1/vidsheet/{id}/columns/update_positions?agent_id={id}
 PUT    /v1/vidsheet/{id}/columns/mass_update?agent_id={id}
@@ -608,6 +649,13 @@ POST /v1/generations/{id}/stop       — credits refunded; status → "stopped"
 POST /v1/generations/{id}/continue   — credits re-charged; status → "pending"
 ```
 
+MCP tools:
+- `gen_generate_content(agent_id, sheet_id, cell_id, generation_type, data)` — THE WORKHORSE. Trigger cell generation. Returns `generation_id` to poll with `gen_get_generation`.
+- `gen_generate_layer(agent_id, sheet_id, cell_id, layer_id)` — trigger generation for a specific layer (uses the layer's already-configured generation type and data).
+- `gen_get_generation(generation_id)` — poll until `status == "completed"`, then read `output_resources`.
+- `gen_stop_generation(generation_id)` — stop and refund credits.
+- `gen_continue_generation(generation_id)` — resume a stopped generation (credits re-charged).
+
 Status flow: `pending → processing → completed | failed | stopped`.
 
 ## Creation Card Types (exact `generation_type` + `data`)
@@ -635,9 +683,9 @@ Output: image content resource
 
 ```
 generation_type: "video_from_text"
-Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok
+Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, kling_2_1, kling_2_6, seedance-2.0, seedance-1.5-pro, seedance-1.0-pro, seedance-1.0-lite, seedance_pro, seedance_pro_1_5, grok
 Aspect ratios: "1:1", "9:16", "16:9"; grok also supports "4:3", "3:4", "3:2", "2:3"
-Durations: model-dependent
+Durations: model-dependent (seedance-2.0 supports 4-15s)
 data: { prompt, negative_prompt?, model, aspect_ratio, resolution?, duration, native_audio?, variables }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -647,7 +695,7 @@ Output: video content resource
 
 ```
 generation_type: "video_from_image"
-Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok
+Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance-2.0, seedance_lite, seedance_pro, seedance_pro_1_5, grok
 data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, resolution?, duration, native_audio? }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -766,6 +814,14 @@ Workflow:
 
 Compute checksum: openssl md5 -binary file | base64
 ```
+
+MCP tools for asset management:
+- `gen_create_direct_upload(agent_id, filename, byte_size, checksum, content_type)` — returns `signed_id` + upload URL
+- `gen_complete_asset_upload(agent_id, signed_id)` — attach an already-uploaded blob to the agent's durable asset library; returns `content_resource` id and CDN URL
+- `gen_create_content_resource(agent_id, signed_id)` — create a content resource from a signed_id (alias for the POST endpoint above)
+- `gen_list_content_resources(agent_id, type?)` — list content resources with optional type filter
+- `gen_get_content_resource(agent_id, id)` — get a single resource with its public URL and generator info
+- `gen_delete_content_resource(agent_id, id)` — permanently delete a content resource
 
 ## Proof of Genesis / Backup to Blockchain (`https://agent-core.gen.pro/v1`)
 
@@ -958,66 +1014,88 @@ curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
 
 CDN URLs are public and permanent until you explicitly delete the content resource. Individual layer outputs are also downloadable via each layer's `default_user_job.output_resources[0].url`.
 
+## Connect Social Accounts
+
+Base URL for social connect and scheduling: `https://python.gen.pro`
+
+Connect accounts with OAuth — never pass credentials through the API.
+
+```
+GET  /platform/get_authorization_url?agent_id={id}&platform={platform}
+→ { url: "https://..." }   ← user opens this in a browser
+```
+
+Supported platforms: `tiktok` | `instagram` | `facebook` | `youtube` | `x`
+
+```
+GET  /platform/get_oauth_account?agent_id={id}
+→ [ { platform, account_name, connected_at, ... } ]
+
+PUT  /platform/disconnect/{platform}
+Body: { "agent_id": "{id}" }
+→ 200
+```
+
+MCP tools: `gen_get_social_connect_url`, `gen_list_connected_socials`, `gen_disconnect_social`
+
 ## Publish to Social
 
-Currently TikTok. Instagram and YouTube coming.
+Supported platforms: **TikTok, Instagram, Facebook, YouTube, X**. Base URL: `https://python.gen.pro`
 
 ```
-POST /v1/user_jobs?agent_id={id}
+POST /schedule/with-post
 Content-Type: application/json
-Body:
-{
-  "user_job_type": "publish_content",
-  "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"caption #hashtags\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
-}
-→ { user_job_id }
 ```
 
-Data fields (JSON-stringified in `data`):
+Fields:
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
-| `platform` | string | Yes | `tiktok` |
-| `media_url` | string | Yes | public URL to media (render URL works directly) |
-| `description` | string | Yes | caption, max ~2200 chars for TikTok; include hashtags inline |
-| `title` | string | No | post title |
-| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` |
-| `schedule_type` | string | Yes | `now` \| `scheduled` |
-| `scheduled_time` | string | if `scheduled` | ISO 8601 UTC, must be future |
+| `agent_id` | string | Yes | agent posting the content |
+| `platform` | string[] | Yes | e.g. `["tiktok"]` or `["instagram"]` |
+| `schedule_type` | string | Yes | `now` \| `specific_time` |
+| `scheduled_time` | string | if `specific_time` | ISO 8601 UTC, must be future |
+| `description` | string | Yes for text/recommended | caption; include hashtags inline |
+| `media_url` | string | No | single video URL |
+| `media_urls` | string[] | No | image URLs (X: up to 4) |
+| `title` | string | No | post title (YouTube) |
+| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` \| `TWEET_VIDEO` |
 | `thumbnail_url` | string | No | custom thumbnail URL |
-| `timezone_offset` | integer | No | minutes from UTC |
+| `timezone_offset` | number | No | UTC offset in hours (e.g. `-7` for PDT) |
+| `thread` | object[] | No | **X only** — `[{text, media_urls?}]` chain |
+| `reply_to_tweet_id` | string | No | **X only** — reply to this tweet id |
 
-### Upload media (upload_asset)
+Post now (TikTok):
 
-Posts reference media by URL (public at post time). Upload a local file to get a hosted URL and save it to the agent's Assets.
-
-```
-POST /v1/social/upload_asset   (multipart/form-data)
-Fields: file=<binary>, agent_id=<agent_id>
--> { "url": "https://cdn.gen.pro/...", "asset_id": "123", "content_resource_id": 123, "asset_registered": true }
-```
-
-Use the returned `url` as `media_url` or an entry in `media_urls`. Upload -> post:
-
-```bash
-URL=$(curl -s -X POST "https://api.gen.pro/v1/social/upload_asset" -H "X-API-Key: $KEY" \
-  -F "file=@image.jpg" -F "agent_id=$AGENT" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])")
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
-  -d "{\"agent_id\":\"$AGENT\",\"platform\":[\"x\"],\"media_type\":\"IMAGE\",\"media_urls\":[\"$URL\"],\"schedule_type\":\"now\",\"description\":\"hi\"}"
-```
-
-For up to 4 images on X, call upload_asset per file and pass all URLs in `media_urls`.
-
-### X (Twitter) posting
-
-X supports the richest post set via `POST /v1/schedule/with-post` (the `gen_schedule_post` tool). Beyond a single text/video tweet, X adds up to 4 images per tweet, threads, and replies.
-
-```
-POST /v1/schedule/with-post
-Content-Type: application/json
-Body:
+```json
 {
-  "agent_id": "<agent_id>",
+  "agent_id": "<id>",
+  "platform": ["tiktok"],
+  "description": "caption #hashtags",
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+  "media_type": "VIDEO",
+  "schedule_type": "now"
+}
+```
+
+Schedule for later (Instagram):
+
+```json
+{
+  "agent_id": "<id>",
+  "platform": ["instagram"],
+  "description": "Morning routine 🌅 #wellness",
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+  "schedule_type": "specific_time",
+  "scheduled_time": "2026-08-01T09:00:00Z"
+}
+```
+
+X thread:
+
+```json
+{
+  "agent_id": "<id>",
   "platform": ["x"],
   "schedule_type": "now",
   "thread": [
@@ -1028,32 +1106,48 @@ Body:
 }
 ```
 
-X-specific fields on the schedule body:
+`thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube. A thread that fails partway stops at the failed segment and is marked failed (not retried, to avoid duplicates).
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `platform` | string[] | Yes | include `"x"` |
-| `description` | string | for text/reply | the tweet text |
-| `media_urls` | string[] | No | up to 4 image URLs for one tweet |
-| `media_type` | string | No | `TWEET_VIDEO` for video, `IMAGE` for images |
-| `thread` | object[] | No | **X only.** ordered list of `{text, media_urls?}` tweet segments; posted as a chain |
-| `reply_to_tweet_id` | string | No | **X only.** reply to an existing tweet id; combine with `thread` to reply-then-chain |
+### Upload media (direct upload)
 
-`thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube (single-media platforms). A thread that fails partway stops at the failed segment, records the tweets already posted, and is marked failed (not retried, to avoid duplicates).
-
-### Poll the publish job
+Upload a local file to get a hosted CDN URL for use in `media_url`/`media_urls`. Three-step flow:
 
 ```
-GET /v1/user_jobs/{id}?agent_id={id}
+# Step 1: get a pre-signed upload URL
+POST /v1/direct_upload
+{ blob: { filename, byte_size, checksum, content_type } }
+→ { signed_id, direct_upload: { url, headers } }
+
+# Step 2: PUT the file to the signed URL (no auth header needed)
+PUT <direct_upload.url>  (file bytes, Content-Type header from direct_upload.headers)
+
+# Step 3: register the asset in GEN's library
+POST /v1/content_resources?agent_id={id}
+{ content_resource: { file: <signed_id> } }
+→ { id, url, ... }
 ```
 
-Status flow: `pending → processing → completed | failed`. On `completed`, `result.post_id` is the platform's post ID.
+MCP tools: `gen_create_direct_upload` (Step 1) → `gen_complete_asset_upload` (Step 3).
+For up to 4 images on X, upload each file and pass all resulting URLs in `media_urls`.
+
+### Content calendar
+
+```
+GET    /schedule/posts?agent_id={id}[&start_date=2026-08-01&end_date=2026-08-31]
+GET    /schedule/post/{post_id}   → { id, status, platforms: [{platform, status, post_url, published_at}] }
+PATCH  /schedule/post/{post_id}   → update before it publishes (e.g. reschedule or edit caption)
+DELETE /schedule/post/{post_id}   → cancel a scheduled post
+```
+
+Status flow: `accepted → publishing → published | failed`. On `published`, `platforms[0].post_url` is the live link.
+
+MCP tools: `gen_schedule_post`, `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`
 
 ### Prerequisites
 
-- Agent must have a connected TikTok account (connected via the GEN app)
-- Media must be publicly accessible at post time
-- For scheduled posts, `scheduled_time` must be in the future
+- Agent must have a connected account for the target platform (OAuth via `get_authorization_url`)
+- Media URL must be publicly accessible at post time
+- `scheduled_time` must be in the future for `specific_time` posts
 
 ---
 
@@ -1178,6 +1272,7 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
   restoring it if it had been soft-deleted.
 - **`PATCH /watchlists/:id` with `{"intent_active": false}`** is the pause
   primitive; `true` resumes. Use `DELETE` only to permanently retire.
+  MCP: `gen_pause_watchlist(agent_id, watchlist_id)` / `gen_resume_watchlist(agent_id, watchlist_id)`.
 - **`DELETE`** is a soft delete: rows are marked inactive and `deleted_at`
   is set; nothing is returned by subsequent `GET`/`list`.
 
@@ -1314,10 +1409,15 @@ delivery.
 ### Pause / resume / delete
 
 - `POST /recurring-jobs/:id/pause` → `status = "paused"`, scheduler stops
-  queueing new runs. History and configuration preserved.
-- `POST /recurring-jobs/:id/resume` → `status = "active"`.
+  queueing new runs. History and configuration preserved. MCP: `gen_pause_recurring_job(agent_id, job_id)`
+- `POST /recurring-jobs/:id/resume` → `status = "active"`. MCP: `gen_resume_recurring_job(agent_id, job_id)`
+- `POST /recurring-jobs/:id/test-run` → fires one immediate execution now,
+  same path as a scheduled run. Returns `202 Accepted` with `run_id` to poll
+  via `GET /v1/agent/runs/:run_id`. Credits charged per normal execution. MCP: `gen_run_recurring_job_now(agent_id, job_id)`
 - `DELETE /recurring-jobs/:id` → `status = "deleted"`, returns 204. Use
-  pause for reversible stops.
+  pause for reversible stops. MCP: `gen_delete_recurring_job(agent_id, job_id)`
+- Get a single job: `gen_get_recurring_job(agent_id, job_id)` — returns 404 if deleted.
+- Idempotent default setup: `gen_ensure_default_recurring_job(agent_id)` — creates the default daily content-ideas job if none exists.
 
 ### Credit semantics
 
@@ -1332,7 +1432,7 @@ next cadence tick.
 
 # Integrations
 
-- MCP Server: remote endpoint `https://mcp.gen.pro/mcp` with `Authorization: Bearer <pat>`, or local stdio package `uvx gen-mcp-server` (Python, PyPI; env `GEN_API_KEY`). Exposes 100 gen_* tools, 9 prompts, and 3 guidance resources.
+- MCP Server: remote endpoint `https://mcp.gen.pro/mcp` with `Authorization: Bearer <pat>`, or local stdio package `uvx gen-mcp-server` (Python, PyPI; env `GEN_API_KEY`). Exposes 142 gen_* tools, 9 prompts, and 3 guidance resources.
 - TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

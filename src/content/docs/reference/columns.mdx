@@ -123,6 +123,46 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/columns?agent_id=42" \
 
 ---
 
+## Update column
+
+Update a column's title, type, or position. Only `ingredient`-role columns can be updated.
+
+```
+PATCH /v1/vidsheet/{id}/columns/{col_id}?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spreadsheet_column.title` | string | No | New column name. |
+| `spreadsheet_column.type` | string | No | New content type: `text`, `image`, `video`, or `audio`. |
+| `spreadsheet_column.position` | integer | No | New zero-indexed position. |
+
+Send only the fields you want to change.
+
+### Response (200)
+
+Returns the updated column.
+
+### Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| `403` | `forbidden` | Column is a system role and cannot be modified. |
+| `422` | `validation_error` | Invalid type or missing required field. |
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101/columns/200?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"spreadsheet_column": {"title": "Voiceover Script", "position": 0}}'
+```
+
+---
+
 ## Duplicate column
 
 Creates a copy of a column and all its cell values.

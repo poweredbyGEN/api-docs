@@ -44,6 +44,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Kling 1.6 | `video_from_text` | `"kling_1_6"` |
 | Seedance Pro | `video_from_text` | `"seedance_pro"` |
 | Seedance Pro 1.5 | `video_from_text` | `"seedance_pro_1_5"` |
+| Seedance 2.0 | `video_from_text` | `"seedance-2.0"` |
 | Grok | `video_from_text` | `"grok"` |
 
 ---
@@ -55,7 +56,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `generation_type` | string | Yes | `"video_from_text"`. |
 | `data.prompt` | string | Yes | Text description of the video to generate. Supports `{{variable_name}}` syntax. |
 | `data.negative_prompt` | string | No | What to avoid in the generated video. |
-| `data.model` | string | No | Model variant. See [Models](#models) table. |
+| `data.model` | string | No | Model variant — one of `"veo_3"`, `"veo_3_fast"`, `"veo_3_1"`, `"veo_3_1_fast"`, `"sora_2"`, `"kling_1_6"`, `"seedance_pro"`, `"seedance_pro_1_5"`, `"seedance-2.0"`, `"grok"`. See [Models](#models) table. |
 | `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `data.resolution` | string | No | Output resolution. Use `"1080p"` or `"720p"` when supported by the selected model. If omitted, the API uses the cell default or the closest supported model default. |
 | `data.duration` | integer | No | Video duration in seconds. |

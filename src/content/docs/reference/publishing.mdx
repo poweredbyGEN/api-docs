@@ -1,228 +1,138 @@
 ---
 title: Publishing
-description: Post and schedule content to social media platforms.
+description: Connect social accounts and post or schedule content to TikTok, Instagram, Facebook, YouTube, and X.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Publishing lets you post content to social media platforms immediately or schedule it for later. Currently supports TikTok, with more platforms coming soon.
+Publishing lets you connect social accounts and post content immediately or schedule it for later. Supported platforms: **TikTok, Instagram, Facebook, YouTube, and X**.
 
 <Aside type="note">
-  Publishing requires authentication via the `X-API-Key` header. The agent must have a connected TikTok social account (via AURA) before publishing.
+  Publishing requires authentication via the `X-API-Key` header. Connect a social account first via the OAuth flow before posting.
 </Aside>
 
-## Publish content
+## Connect a social account
 
-Posts or schedules content to a social media platform. Uses the standard user job creation endpoint.
+### Get the OAuth URL
+
+Returns a single-use OAuth URL the user opens in a browser to authorize GEN to post on their behalf. Never ask for credentials directly — always use this flow.
 
 ```
-POST /v1/user_jobs?agent_id={agent_id}
+GET /platform/get_authorization_url
 ```
 
-### Parameters
+Base URL: `https://python.gen.pro`
+
+#### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `agent_id` | string | Yes | The agent ID (query parameter). |
-| `user_job_type` | string | Yes | Must be `publish_content`. |
-| `data` | string (JSON) | Yes | JSON-stringified object containing the post configuration (see Data fields below). |
+| `agent_id` | string | Yes | The agent to attach the account to. |
+| `platform` | string | Yes | `tiktok` \| `instagram` \| `facebook` \| `youtube` \| `x` |
 
-### Data fields
-
-The `data` value is a JSON string containing:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `platform` | string | Yes | Target platform. Currently `tiktok`. |
-| `media_url` | string | Yes | Public URL to the media file (S3 presigned URL, CDN link, etc). Must be accessible at post time. |
-| `description` | string | Yes | Post caption/description. Max ~2200 characters for TikTok. Include hashtags inline. |
-| `title` | string | No | Post title (used on some platforms). |
-| `media_type` | string | No | `VIDEO` (default) or `IMAGE`. |
-| `schedule_type` | string | Yes | `now` for immediate posting. `scheduled` for future posting. |
-| `scheduled_time` | string | Conditional | ISO 8601 UTC datetime (e.g. `2026-03-16T15:00:00Z`). Required when `schedule_type` is `scheduled`. Must be in the future. |
-| `thumbnail_url` | string | No | Custom thumbnail URL. Auto-generated from video if not provided. |
-| `timezone_offset` | integer | No | Timezone offset in minutes from UTC. Default `0`. |
-
-### Schedule types
-
-| Value | Behavior |
-|-------|----------|
-| `now` | Posts immediately via the connected social account. |
-| `scheduled` | Queues for posting at `scheduled_time`. |
-
-### Response
-
-```json
-{
-  "user_job_id": 138860
-}
-```
-
-### Status flow
-
-Poll status via `GET /v1/user_jobs/{id}?agent_id={agent_id}`.
-
-| Status | Description |
-|--------|-------------|
-| `pending` | Job created, queued for processing. |
-| `processing` | Post is being submitted to the platform. |
-| `completed` | Post published successfully. The `result` field contains the `post_id` from the platform. |
-| `failed` | Publishing failed. Check `failed_reason`. |
-
-### Example: Post now
+#### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
+curl "https://python.gen.pro/platform/get_authorization_url?agent_id=your-agent-id&platform=tiktok" \
+  -H "X-API-Key: your-api-key"
+```
+
+### List connected accounts
+
+```
+GET /platform/get_oauth_account?agent_id={agent_id}
+```
+
+Base URL: `https://python.gen.pro`
+
+```bash
+curl "https://python.gen.pro/platform/get_oauth_account?agent_id=your-agent-id" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Disconnect an account
+
+```
+PUT /platform/disconnect/:platform
+```
+
+Base URL: `https://python.gen.pro`
+
+```bash
+curl -X PUT "https://python.gen.pro/platform/disconnect/tiktok" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
-  -d '{
-    "user_job_type": "publish_content",
-    "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://cdn.example.com/video.mp4\", \"description\": \"Factory price reveal #sourcing #china\", \"schedule_type\": \"now\", \"media_type\": \"VIDEO\"}"
-  }'
+  -d '{"agent_id": "your-agent-id"}'
 ```
 
-### Example: Schedule for later
+---
 
-```bash
-curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=your-agent-id" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_job_type": "publish_content",
-    "data": "{\"platform\": \"tiktok\", \"media_url\": \"https://cdn.example.com/video.mp4\", \"description\": \"Your $12 beauty sponge costs 10 cents #beauty #factory\", \"title\": \"Beauty sponge price reveal\", \"schedule_type\": \"scheduled\", \"scheduled_time\": \"2026-03-16T15:00:00Z\", \"media_type\": \"VIDEO\"}"
-  }'
-```
-
-### Prerequisites
-
-- Agent must have a connected TikTok social account (connected via AURA)
-- Video/image must be publicly accessible via URL at post time
-- For scheduled posts, `scheduled_time` must be in the future
-
-## Upload media
-
-Posts reference media by **URL** — the media must be publicly fetchable at post time. Upload a local file with `upload_asset` to get a durable, hosted URL you can pass to `media_url` / `media_urls`. The uploaded file is also saved to the agent's Assets, so you can reuse it later.
+## Schedule a post
 
 ```
-POST /v1/social/upload_asset
+POST /schedule/with-post
 ```
 
-Send the file as `multipart/form-data`.
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `file` | file | Yes | The video or image file (multipart). |
-| `agent_id` | string | Yes | The agent whose Assets the file is saved to. |
-
-### Response
-
-```json
-{
-  "url": "https://cdn.gen.pro/....jpg",
-  "cdn_url": "https://cdn.gen.pro/....jpg",
-  "asset_id": "12345",
-  "content_resource_id": 12345,
-  "asset_registered": true
-}
-```
-
-Use the returned `url` as `media_url` (single) or inside `media_urls` when scheduling a post.
-
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/social/upload_asset" \
-  -H "X-API-Key: your-api-key" \
-  -F "file=@/path/to/image.jpg" \
-  -F "agent_id=your-agent-id"
-```
-
-### Upload → post recipe
-
-```bash
-# 1. Upload the file, capture the hosted URL
-URL=$(curl -s -X POST "https://api.gen.pro/v1/social/upload_asset" \
-  -H "X-API-Key: your-api-key" \
-  -F "file=@/path/to/image.jpg" \
-  -F "agent_id=your-agent-id" | python3 -c "import sys,json;print(json.load(sys.stdin)['url'])")
-
-# 2. Post it (X example — a tweet with one image)
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d "{\"agent_id\":\"your-agent-id\",\"platform\":[\"x\"],\"description\":\"from the API\",\"media_type\":\"IMAGE\",\"media_urls\":[\"$URL\"],\"schedule_type\":\"now\"}"
-```
-
-For up to 4 images on X, call `upload_asset` per file and pass all the URLs in `media_urls`.
-
-## Posting to X (Twitter)
-
-X supports the richest set of post types: a plain text tweet, a tweet with up to **4 images**, a tweet with a video, a **thread** (an ordered chain of tweets), and a **reply** to an existing tweet. X posts are created through the scheduling API.
-
-```
-POST /v1/schedule/with-post
-```
+Base URL: `https://python.gen.pro`
 
 ### Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `agent_id` | string | Yes | The agent whose connected X account posts. |
-| `platform` | string[] | Yes | Include `"x"`. |
-| `schedule_type` | string | Yes | `now`, `specific_time`, or `next_available`. |
-| `scheduled_time` | string | Conditional | Required when `schedule_type` is `specific_time`. |
-| `description` | string | Conditional | The tweet text. Required for a text-only tweet or reply. |
-| `media_type` | string | No | `TWEET_VIDEO` for video, `IMAGE` for images. |
-| `media_url` | string | No | A single video URL. |
-| `media_urls` | string[] | No | Up to **4 image URLs** for a single tweet. |
-| `thread` | object[] | No | **X only.** An ordered list of tweet segments to post as a chain. Each segment is `{ "text": "...", "media_urls": ["..."] }` (per-segment images optional, up to 4). |
-| `reply_to_tweet_id` | string | No | **X only.** Post as a reply to this tweet id. Combine with `thread` to reply and then continue a chain. |
+| `agent_id` | string | Yes | The agent posting. |
+| `platform` | string[] | Yes | Array with the target platform: `["tiktok"]`, `["instagram"]`, etc. |
+| `schedule_type` | string | Yes | `now` (immediate) or `specific_time` (requires `scheduled_time`). |
+| `description` | string | Conditional | Post caption. Required for text-only posts (X) or recommended for all. |
+| `media_url` | string | No | Single video URL. |
+| `media_urls` | string[] | No | Image URLs (X supports up to 4). |
+| `title` | string | No | Post title (YouTube). |
+| `media_type` | string | No | `VIDEO` (default) \| `IMAGE` \| `TWEET_VIDEO` |
+| `scheduled_time` | string | Conditional | ISO 8601 datetime — required when `schedule_type` is `specific_time`. |
+| `thumbnail_url` | string | No | Custom thumbnail URL. |
+| `timezone_offset` | number | No | Local UTC offset in hours (e.g. `-7` for PDT). Omit to use the agent's configured timezone. |
+| `thread` | object[] | No | **X only.** Ordered chain of tweets: `[{"text":"..."}, {"text":"...", "media_urls":["..."]}]` |
+| `reply_to_tweet_id` | string | No | **X only.** Post as a reply to this tweet id. |
 
 <Aside type="note">
-  `thread` and `reply_to_tweet_id` apply to **X only**. They are ignored for TikTok, Instagram, Facebook, and YouTube, which post a single piece of media.
+  `thread` and `reply_to_tweet_id` apply to **X only**.
 </Aside>
 
-### Example: Text-only tweet
+### Example: Post now (TikTok)
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+curl -X POST "https://python.gen.pro/schedule/with-post" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "your-agent-id",
-    "platform": ["x"],
-    "description": "gm from the API 👋",
+    "platform": ["tiktok"],
+    "description": "Factory price reveal #sourcing #china",
+    "media_url": "https://cdn.example.com/video.mp4",
+    "media_type": "VIDEO",
     "schedule_type": "now"
   }'
 ```
 
-### Example: Tweet with up to 4 images
+### Example: Scheduled post (Instagram)
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+curl -X POST "https://python.gen.pro/schedule/with-post" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "your-agent-id",
-    "platform": ["x"],
-    "description": "four pics",
-    "media_type": "IMAGE",
-    "media_urls": [
-      "https://cdn.example.com/1.jpg",
-      "https://cdn.example.com/2.jpg",
-      "https://cdn.example.com/3.jpg",
-      "https://cdn.example.com/4.jpg"
-    ],
-    "schedule_type": "now"
+    "platform": ["instagram"],
+    "description": "Morning routine 🌅 #wellness",
+    "media_url": "https://cdn.example.com/video.mp4",
+    "schedule_type": "specific_time",
+    "scheduled_time": "2026-08-01T09:00:00Z"
   }'
 ```
 
-### Example: Thread
+### Example: X thread
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+curl -X POST "https://python.gen.pro/schedule/with-post" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -230,35 +140,98 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
     "platform": ["x"],
     "schedule_type": "now",
     "thread": [
-      { "text": "1/ Here is a thread about our launch." },
-      { "text": "2/ With a screenshot", "media_urls": ["https://cdn.example.com/shot.jpg"] },
-      { "text": "3/ Wrapping up. Thanks for reading!" }
+      { "text": "1/ Our launch thread:" },
+      { "text": "2/ Here is what we built", "media_urls": ["https://cdn.example.com/shot.jpg"] },
+      { "text": "3/ Thanks for reading!" }
     ]
   }'
 ```
 
-### Example: Reply to a tweet
+---
 
-```bash
-curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "your-agent-id",
-    "platform": ["x"],
-    "description": "Great point — here is our take.",
-    "reply_to_tweet_id": "1780000000000000000",
-    "schedule_type": "now"
-  }'
+## Content calendar
+
+### List scheduled posts
+
+```
+GET /schedule/posts?agent_id={agent_id}
 ```
 
-If a thread fails partway through, posting stops at the failed segment; the tweets already posted are recorded and the post is marked failed (it is not retried, to avoid duplicate tweets).
+Optional: `start_date` and `end_date` (ISO 8601) to filter the calendar window.
 
-### Errors
+```bash
+curl "https://python.gen.pro/schedule/posts?agent_id=your-agent-id&start_date=2026-08-01&end_date=2026-08-31" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Get post status
+
+Check whether a post actually went live (not just queued). Returns platform-confirmed status.
+
+```
+GET /schedule/post/:post_id
+```
+
+```bash
+curl "https://python.gen.pro/schedule/post/post-id-here" \
+  -H "X-API-Key: your-api-key"
+```
+
+#### Response
+
+```json
+{
+  "id": "post-id",
+  "status": "published",
+  "platforms": [
+    {
+      "platform": "tiktok",
+      "status": "published",
+      "platform_post_id": "7123456789",
+      "post_url": "https://tiktok.com/@user/video/7123456789",
+      "published_at": "2026-08-01T09:01:12Z",
+      "error": null
+    }
+  ]
+}
+```
+
+Overall status flow: `accepted` → `publishing` → `published` | `failed`.
+
+### Update a scheduled post
+
+Edit a post before it goes out. Only works on posts that have not yet been published.
+
+```
+PATCH /schedule/post/:post_id
+```
+
+```bash
+curl -X PATCH "https://python.gen.pro/schedule/post/post-id-here" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"scheduled_time": "2026-08-02T10:00:00Z"}'
+```
+
+### Delete a scheduled post
+
+```
+DELETE /schedule/post/:post_id
+```
+
+```bash
+curl -X DELETE "https://python.gen.pro/schedule/post/post-id-here" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Errors
 
 | Status | Error code | Description |
 |--------|------------|-------------|
 | `401` | `unauthorized` | Missing or invalid API key. |
 | `403` | `permission_denied` | You do not have access to this agent. |
 | `422` | `validation_error` | Invalid or missing required fields. |
-| `422` | `no_active_credit_purchase` | The agent's workspace has no active credit purchase. |
+| `422` | `insufficient_credits` | The agent's workspace has no usable credits. |
+| `404` | `not_found` | The post or agent was not found. |
