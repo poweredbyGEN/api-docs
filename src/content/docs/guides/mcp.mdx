@@ -41,6 +41,10 @@ claude mcp add --transport http gen https://mcp.gen.pro --header "Authorization:
 
 The GEN MCP is hosted-only — there is no package to install or local process to run.
 
+## Already using the local package?
+
+The `gen-mcp-server` PyPI package is **deprecated**. Remove the stdio entry from your client config and switch to the hosted config above — same tools, no install, and your PAT moves from the `GEN_API_KEY` env var to the `Authorization` header. If your client is already pointed at `https://mcp.gen.pro/mcp`, that URL keeps working; bare `https://mcp.gen.pro` is simply the canonical form.
+
 ## Previously used the local package?
 
 The downloadable `gen-mcp-server` package (PyPI, `uvx gen-mcp-server`) is **deprecated** — its final release only points here. It still works so existing setups have a migration window, but it no longer receives new tools, fixes, or API updates. Switch to the hosted config above. If your client is already configured with `https://mcp.gen.pro/mcp`, that URL keeps working — no change needed beyond removing the local package when convenient.
