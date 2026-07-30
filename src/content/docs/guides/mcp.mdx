@@ -1,6 +1,6 @@
 ---
 title: Install the GEN MCP
-description: Connect GEN to an MCP-compatible AI client with the remote server or the local stdio server.
+description: Connect GEN to an MCP-compatible AI client with the hosted remote server at mcp.gen.pro.
 ---
 
 The **GEN MCP** gives your AI assistant access to GEN's content studio: trend research, content ideas, Vidsheets, AI video, images, voices, songs, assets, scheduling, watchlists, recurring jobs, and credits.
@@ -22,7 +22,7 @@ Use this when your MCP client supports a remote MCP server over Streamable HTTP.
 ```json
 {
   "name": "gen",
-  "url": "https://mcp.gen.pro/mcp",
+  "url": "https://mcp.gen.pro",
   "headers": {
     "Authorization": "Bearer gen_pat_your_key_here"
   }
@@ -31,21 +31,15 @@ Use this when your MCP client supports a remote MCP server over Streamable HTTP.
 
 Replace `gen_pat_your_key_here` with a GEN API key from **Settings -> API Keys** in [gen.pro](https://gen.pro).
 
-## Local MCP
+## Command-line clients
 
-Use this when your MCP client runs local MCP servers over stdio. Copy this command:
-
-```bash
-GEN_API_KEY=gen_pat_your_key_here uvx gen-mcp-server
-```
-
-This runs the GEN MCP package locally. In clients that use JSON config, set the command to `uvx`, the args to `["gen-mcp-server"]`, and the env var to `GEN_API_KEY`.
-
-If `uvx` is missing, install `uv` first:
+Claude Code and other CLI clients connect to the same hosted server:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+claude mcp add --transport http gen https://mcp.gen.pro --header "Authorization: Bearer gen_pat_your_key_here"
 ```
+
+The GEN MCP is hosted-only — there is no package to install or local process to run.
 
 ## What It Can Do
 
@@ -74,4 +68,4 @@ To add credits:
 
 Workspace funding wallets are backend infrastructure for settlement and sweeping. MCP clients should present the returned payment methods, not ask users to hunt for hidden workspace wallets.
 
-Start with Remote MCP when your client supports it. Use Local MCP when your client needs a local command.
+The hosted server is the official GEN MCP — every client connects to `https://mcp.gen.pro`.
