@@ -612,14 +612,14 @@ Models: `gemini_image`, `gemini_pro_image`, `midjourney`, `grok`. Aspect ratios:
 { "generation_type": "video_from_text",
   "data": { "prompt": "...", "model": "veo_3", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 10, "native_audio": false, "negative_prompt": "no text overlays" } }
 ```
-Models: `veo_3`, `veo_3_fast`, `veo_3_1`, `veo_3_1_fast`, `sora_2`, `kling_1_6`, `seedance_pro`, `seedance_pro_1_5`, `grok`. Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent; use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
+Models: `veo_3`, `veo_3_fast`, `veo_3_1`, `veo_3_1_fast`, `sora_2`, `kling_1_6`, `kling_2_1`, `kling_2_6`, `seedance-2.0`, `seedance-1.5-pro`, `seedance-1.0-pro`, `seedance-1.0-lite`, `seedance_pro`, `seedance_pro_1_5`, `grok`. Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent (seedance-2.0 supports 4-15s); use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ### video_from_image
 ```json
 { "generation_type": "video_from_image",
   "data": { "image_resource_id": 4821, "image_tail_resource_id": 4822, "prompt": "...", "model": "kling_2_6", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
 ```
-Models: `kling_2_1`, `kling_2_6`, `veo_3`, `veo_3_1`, `sora_2`, `seedance_lite`, `seedance_pro`, `seedance_pro_1_5`, `grok`. `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
+Models: `kling_2_1`, `kling_2_6`, `veo_3`, `veo_3_1`, `sora_2`, `seedance-2.0`, `seedance_lite`, `seedance_pro`, `seedance_pro_1_5`, `grok`. `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
 
 ### video_from_ingredients
 ```json

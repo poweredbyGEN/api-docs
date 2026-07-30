@@ -683,9 +683,9 @@ Output: image content resource
 
 ```
 generation_type: "video_from_text"
-Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok
+Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, kling_2_1, kling_2_6, seedance-2.0, seedance-1.5-pro, seedance-1.0-pro, seedance-1.0-lite, seedance_pro, seedance_pro_1_5, grok
 Aspect ratios: "1:1", "9:16", "16:9"; grok also supports "4:3", "3:4", "3:2", "2:3"
-Durations: model-dependent
+Durations: model-dependent (seedance-2.0 supports 4-15s)
 data: { prompt, negative_prompt?, model, aspect_ratio, resolution?, duration, native_audio?, variables }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -695,7 +695,7 @@ Output: video content resource
 
 ```
 generation_type: "video_from_image"
-Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok
+Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance-2.0, seedance_lite, seedance_pro, seedance_pro_1_5, grok
 data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, resolution?, duration, native_audio? }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
