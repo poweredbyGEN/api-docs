@@ -1108,17 +1108,27 @@ X thread:
 
 `thread` and `reply_to_tweet_id` are ignored for TikTok/Instagram/Facebook/YouTube. A thread that fails partway stops at the failed segment and is marked failed (not retried, to avoid duplicates).
 
-### Upload media (upload_asset)
+### Upload media (direct upload)
 
-Upload a local file to get a hosted CDN URL for use in `media_url`/`media_urls`.
+Upload a local file to get a hosted CDN URL for use in `media_url`/`media_urls`. Three-step flow:
 
 ```
-POST /v1/social/upload_asset   (multipart/form-data, api.gen.pro)
-Fields: file=<binary>, agent_id=<agent_id>
-→ { url, asset_id, content_resource_id, asset_registered }
+# Step 1: get a pre-signed upload URL
+POST /v1/direct_upload
+{ blob: { filename, byte_size, checksum, content_type } }
+→ { signed_id, direct_upload: { url, headers } }
+
+# Step 2: PUT the file to the signed URL (no auth header needed)
+PUT <direct_upload.url>  (file bytes, Content-Type header from direct_upload.headers)
+
+# Step 3: register the asset in GEN's library
+POST /v1/content_resources?agent_id={id}
+{ content_resource: { file: <signed_id> } }
+→ { id, url, ... }
 ```
 
-For up to 4 images on X, call `upload_asset` per file and pass all URLs in `media_urls`.
+MCP tools: `gen_create_direct_upload` (Step 1) → `gen_complete_asset_upload` (Step 3).
+For up to 4 images on X, upload each file and pass all resulting URLs in `media_urls`.
 
 ### Content calendar
 

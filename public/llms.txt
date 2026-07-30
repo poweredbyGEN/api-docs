@@ -818,7 +818,7 @@ The current MCP exposes 142 `gen_*` tools, 9 prompts, and 3 guidance resources. 
 
 **Creation:** `gen_create_video` (single clip; models: seedance-2.0, veo_3, kling_2_1, sora_2, grok, pika), `gen_create_image` (nano-banana-pro/nano-banana/nano-banana-2), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`, `gen_generate_content` (trigger generation for a vidsheet cell), `gen_generate_layer` (trigger generation for a specific layer), `gen_continue_generation` (resume a stopped generation).
 
-**Assets / Content Resources:** `gen_list_assets` / `gen_list_content_resources`, `gen_get_asset` / `gen_get_content_resource`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_create_content_resource`, `gen_update_content_resource`, `gen_delete_asset` / `gen_delete_content_resource`.
+**Assets / Content Resources:** `gen_list_assets` / `gen_list_content_resources`, `gen_get_asset` / `gen_get_content_resource`, `gen_import_asset_from_url`, `gen_create_direct_upload` (get pre-signed S3 URL → PUT file → `gen_complete_asset_upload`), `gen_create_content_resource`, `gen_update_content_resource`, `gen_delete_asset` / `gen_delete_content_resource`.
 
 **Voices:** `gen_list_agent_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_preview_voice` (TTS audition), `gen_get_voice_preview_status`, `gen_generate_voice_description`, `gen_generate_voice_samples`, `gen_get_voice_sample_status`, `gen_delete_voice`.
 
