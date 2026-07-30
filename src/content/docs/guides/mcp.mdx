@@ -41,6 +41,10 @@ claude mcp add --transport http gen https://mcp.gen.pro --header "Authorization:
 
 The GEN MCP is hosted-only — there is no package to install or local process to run.
 
+## Previously used the local package?
+
+The downloadable `gen-mcp-server` package (PyPI, `uvx gen-mcp-server`) is **deprecated** — its final release only points here. It still works so existing setups have a migration window, but it no longer receives new tools, fixes, or API updates. Switch to the hosted config above. If your client is already configured with `https://mcp.gen.pro/mcp`, that URL keeps working — no change needed beyond removing the local package when convenient.
+
 ## What It Can Do
 
 The current GEN MCP exposes **100 tools**, **9 prompts**, and **3 guidance resources**.

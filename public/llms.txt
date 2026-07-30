@@ -787,7 +787,7 @@ The official GEN MCP is the hosted remote server (Streamable HTTP):
 { "name": "gen", "url": "https://mcp.gen.pro", "headers": { "Authorization": "Bearer your-pat" } }
 ```
 
-`https://mcp.gen.pro/mcp` also still works for previously configured clients. There is no local package to install.
+`https://mcp.gen.pro/mcp` also still works for previously configured clients. There is no local package to install: the downloadable `gen-mcp-server` PyPI package is deprecated (its final release only points at the hosted server) — anyone still running it via `uvx`/`pip` should switch to the hosted URL above.
 
 The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
 
