@@ -1581,6 +1581,205 @@ paths:
                 type: string
                 format: binary
 
+  # ── Undo / redo (change-set history) ───────────────────────
+  /vidsheet/{sheet_id}/operations:
+    get:
+      operationId: listVidsheetOperations
+      x-phase: edit
+      summary: List undo/redo change sets
+      description: |
+        Returns the recent undoable change sets for a vidsheet (the undo/redo history),
+        newest-first. Each change set is a grouped, atomic write (rows/columns/cells/layers
+        edited together in one request). Set `include_undone=true` to also list change sets
+        that have already been undone.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Max change sets to return (1-100, default 20).
+        - name: include_undone
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Include already-undone change sets (default false).
+      responses:
+        '200':
+          description: Recent change sets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  change_sets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChangeSet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vidsheet/{sheet_id}/operations/last:
+    get:
+      operationId: getLastVidsheetOperation
+      x-phase: edit
+      summary: Get the next-to-undo change set
+      description: |
+        Returns the single next-to-undo change set for a vidsheet — what the undo
+        button would take back. `{change_set: null}` when the undo stack is empty.
+        Cheaper than `GET /operations` when you only need the top of the undo stack.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      responses:
+        '200':
+          description: Next-to-undo change set (or null)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  change_set:
+                    allOf:
+                      - $ref: '#/components/schemas/ChangeSet'
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vidsheet/{sheet_id}/operations/undo:
+    post:
+      operationId: undoVidsheetOperation
+      x-phase: edit
+      summary: Undo the last change set
+      description: |
+        Undoes the most recent undoable change set (or a specific one by `change_set_id`).
+        Returns the operations that were undone plus the new next-to-undo change set.
+        `nothing_to_undo` (422) when the stack is empty; `undo_conflict` (409) means the
+        vidsheet changed underneath you — refresh the engine and retry.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                change_set_id:
+                  type: string
+                  description: Undo this specific change set instead of the most recent undoable one.
+      responses:
+        '200':
+          description: Change set undone
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  change_set_id:
+                    type: string
+                  undone:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChangeSet'
+                  next_undoable:
+                    allOf:
+                      - $ref: '#/components/schemas/ChangeSet'
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Undo conflict — refresh the engine and retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Nothing to undo, or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vidsheet/{sheet_id}/operations/redo:
+    post:
+      operationId: redoVidsheetOperation
+      x-phase: edit
+      summary: Redo the last undone change set
+      description: |
+        Redoes the most recently undone change set (or a specific one by `change_set_id`).
+        Re-applies something just undone. `nothing_to_redo` (422) when there is nothing to
+        redo; `redo_conflict` (409) — refresh the engine and retry.
+      tags: [Sheets]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - $ref: '#/components/parameters/SheetId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                change_set_id:
+                  type: string
+                  description: Redo this specific change set instead of the most recently undone one.
+      responses:
+        '200':
+          description: Change set redone
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  change_set_id:
+                    type: string
+                  redone:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChangeSet'
+                  next_undoable:
+                    allOf:
+                      - $ref: '#/components/schemas/ChangeSet'
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Redo conflict — refresh the engine and retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Nothing to redo, or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # ── Automation ─────────────────────────────────────────────
   /agents/{agent_id}/automation_config:
     get:
@@ -4967,6 +5166,28 @@ components:
         error_code:
           type: string
           description: Machine-readable error code.
+
+    ChangeSet:
+      type: object
+      description: |
+        A grouped, atomic vidsheet change set on the undo/redo stack. Each change set
+        bundles the operations (row/column/cell/layer writes) from a single request so
+        they can be walked back or re-applied together.
+      properties:
+        change_set_id:
+          type: string
+          description: Stable ID of this change set. Pass to undo/redo to target a specific one.
+        undone:
+          type: boolean
+          description: Whether this change set has been undone (true) or is still applied (false).
+        summary:
+          type: string
+          description: Short human-readable label for the change set (e.g. "Updated 3 cells").
+        operations:
+          type: array
+          description: The individual operations grouped in this change set.
+          items:
+            type: object
 
     # ── Agent Core schemas ──────────────────────────────────
     # Flat schema — every field name mirrors the public Agent Core setup fields.

@@ -715,6 +715,20 @@ POST /v1/vidsheet/{id}/import_global_variables?agent_id={id}      (multipart XLS
 GET  /v1/vidsheet/global_variables_template                        (XLSX template download)
 ```
 
+## Undo / Redo (change-set history)
+
+Every grouped write to a vidsheet (rows/columns/cells/layers edited in one request) is
+recorded as a change set on an undo/redo stack. List recent change sets, see the next-to-undo
+one, and undo/redo. Pass `change_set_id` to target a specific change set instead of the most
+recent one. `409 conflict` = the sheet changed underneath you — re-fetch and retry.
+
+```
+GET  /v1/vidsheet/{id}/operations?agent_id={id}&limit={1-100}&include_undone={bool}   → { change_sets: [...] } newest first
+GET  /v1/vidsheet/{id}/operations/last?agent_id={id}                                  → { change_set: {...}|null }
+POST /v1/vidsheet/{id}/operations/undo?agent_id={id}     body { change_set_id? }      → { change_set_id, undone:[...], next_undoable }  (422 nothing_to_undo)
+POST /v1/vidsheet/{id}/operations/redo?agent_id={id}     body { change_set_id? }      → { change_set_id, redone:[...], next_undoable }  (422 nothing_to_redo)
+```
+
 ## Content Resources (upload and manage assets)
 
 ```
