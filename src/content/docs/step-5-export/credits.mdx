@@ -18,6 +18,51 @@ curl "https://api.gen.pro/v1/organizations/$ORG_ID" \
 
 Response includes `available_credit: { generic, aura }`. The `generic` bucket covers all Auto Content Engine + agent.gen.pro operations; the `aura` bucket is for connected-social features and isn't consumed by the API surface.
 
+## Check your balance and usage
+
+Three read-only endpoints tell you how many credits you have, where they went, and what plans are available. All are free.
+
+### Balance
+
+Check the agent's available credits before a paid operation (generate, render, publish).
+
+```bash
+curl "https://api.gen.pro/v1/credit_balance?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+```json
+{
+  "available_credit": {
+    "generic": 48230.5
+  }
+}
+```
+
+The `generic` bucket covers Auto Content Engine and agent.gen.pro operations.
+
+### Usage history
+
+List credit transactions to answer questions like "how many credits did I spend this week?". Negative `amount` values are charges; positive values are refunds or grants. Paginated.
+
+```bash
+curl "https://api.gen.pro/v1/credit_transactions?agent_id=$AGENT_ID&page=1" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+### Available plans
+
+List the credit and subscription plans a user can buy. Filter by billing cycle with the `cycle` query parameter (`monthly`, the default, or `annual`). Use this to show options before starting a purchase.
+
+```bash
+curl "https://api.gen.pro/v1/credit_plans?cycle=monthly" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
+<Aside type="note" title="Read prices at runtime">
+Plan names, prices, and included credits change over time. Read them from this endpoint at runtime rather than hardcoding values into your app.
+</Aside>
+
 ## Buying credits with x402
 
 Credit purchases can be funded with Stripe or with x402. x402 purchases are arbitrary amount: pass either `amount_usd` or `credits`, and GEN returns a `402 Payment Required` quote.

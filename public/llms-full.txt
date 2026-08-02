@@ -199,6 +199,13 @@ GET /v1/agents/{agent_id}/voice/library?source={public|user_designed|user_traine
 }
 ```
 
+To list only the voices the user **created** (designed, trained, or cloned — not the public catalog):
+
+```
+GET /v1/user_voice_resources?agent_id={id}
+→ [ { voice_id, name, source, preview_url } ]
+```
+
 ### ElevenLabs integration
 
 Users connect their own ElevenLabs API key to unlock their personal voice library and use their own quota.
@@ -535,6 +542,23 @@ GET /v1/vidsheet/{id}?agent_id={id}&with_execution_cost=true
 POST /v1/vidsheet/{id}/clone?agent_id={id}
 Body: { target_agent_id? }
 → new engine, optionally under a different agent
+
+# Undo / redo history (every edit is recorded as a change set)
+GET /v1/vidsheet/{id}/operations?agent_id={id}&limit=20&include_undone=false
+→ { change_sets: [{ change_set_id, undone, created_at, entries }] } newest-first
+
+GET /v1/vidsheet/{id}/operations/last?agent_id={id}
+→ { change_set: {...} | null }  # the next-to-undo entry (cheaper than the full list)
+
+POST /v1/vidsheet/{id}/operations/undo?agent_id={id}
+Body: { change_set_id? }  # omit to undo the most recent undoable change set
+→ { change_set_id, undone: [...], next_undoable: {...} | null }
+Errors: 422 nothing_to_undo (stack empty); 409 undo_conflict (sheet changed — refetch and retry)
+
+POST /v1/vidsheet/{id}/operations/redo?agent_id={id}
+Body: { change_set_id? }
+→ { change_set_id, redone: [...], next_undoable: {...} | null }
+Errors: 422 nothing_to_redo; 409 redo_conflict (refetch and retry)
 ```
 
 ---
@@ -888,6 +912,22 @@ Once configured, generations POST status updates to your `webhook_url`.
 # Phase 5 — Export
 
 Render the final composite, poll to completion, download the MP4, optionally publish to TikTok.
+
+## Check Credit Balance and Usage
+
+Read-only credit endpoints — all free. Check the balance before a paid operation, audit spend with the transaction history, or list plans before a purchase.
+
+```
+GET /v1/credit_balance?agent_id={id}
+→ { available_credit: { generic: <number> } }
+
+GET /v1/credit_transactions?agent_id={id}&page=1
+→ paginated list of { id, amount, balance_after, source_type, description, created_at }
+  # amount is negative for a charge, positive for a refund or grant
+
+GET /v1/credit_plans?cycle={monthly|annual}
+→ [ { id, name, cycle, credits } ]  # read prices/amounts at runtime — they change
+```
 
 ## Render the Final Video
 

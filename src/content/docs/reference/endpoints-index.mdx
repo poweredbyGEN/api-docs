@@ -55,6 +55,7 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | Method | Path | Phase |
 |--------|------|-------|
 | GET | /v1/agents/:agent_id/voice/library | setup |
+| GET | /v1/user_voice_resources?agent_id= | setup |
 | GET | /v1/agents/:agent_id/voice/integrations/elevenlabs | setup |
 | POST | /v1/agents/:agent_id/voice/integrations/elevenlabs | setup |
 | POST | /v1/agents/:agent_id/voice/integrations/elevenlabs/test | setup |
@@ -129,6 +130,10 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | POST | /v1/vidsheet | convert |
 | GET | /v1/vidsheet/:id | convert |
 | POST | /v1/vidsheet/:id/clone | convert |
+| GET | /v1/vidsheet/:id/operations | edit |
+| GET | /v1/vidsheet/:id/operations/last | edit |
+| POST | /v1/vidsheet/:id/operations/undo | edit |
+| POST | /v1/vidsheet/:id/operations/redo | edit |
 
 ## Rows
 
@@ -233,3 +238,11 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | PATCH | /v1/agents/:agent_id/automation_config | edit |
 | POST | /v1/agents/:agent_id/automation_config/test_webhook | edit |
 | POST | /v1/agents/:agent_id/automation_config/test_callback | edit |
+
+## Credits
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/credit_balance?agent_id= | export |
+| GET | /v1/credit_transactions?agent_id= | export |
+| GET | /v1/credit_plans | export |
