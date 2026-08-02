@@ -99,6 +99,7 @@ GET    /v1/agents/:agent_id/core                 — read flat agent setup
 PATCH  /v1/agents/:agent_id/core                 — write any subset
 
 GET    /v1/agents/:agent_id/voice/library        — list voices (filter by source)
+GET    /v1/user_voice_resources?agent_id=         — list voices the user created only
 POST   /v1/agents/:agent_id/voice/integrations/elevenlabs   — connect user ElevenLabs key
 POST   /v1/agents/:agent_id/voice/integrations/elevenlabs/test   — validate without saving
 DELETE /v1/agents/:agent_id/voice/integrations/elevenlabs   — disconnect
@@ -446,6 +447,12 @@ GET    /v1/vidsheet/:id/global_variables?agent_id=
 POST   /v1/vidsheet/:id/import_global_variables?agent_id=     (XLSX)
 GET    /v1/vidsheet/global_variables_template                 (download template)
 
+# Undo / redo history (every edit is a change set)
+GET    /v1/vidsheet/:id/operations?agent_id=&limit=&include_undone=
+GET    /v1/vidsheet/:id/operations/last?agent_id=
+POST   /v1/vidsheet/:id/operations/undo?agent_id=             Body: { change_set_id? }
+POST   /v1/vidsheet/:id/operations/redo?agent_id=             Body: { change_set_id? }
+
 # Content Resources & Assets
 GET    /v1/content_resources?agent_id=&type=&page=
 POST   /v1/content_resources?agent_id=                                  (multipart)
@@ -554,6 +561,9 @@ curl "https://api.gen.pro/v1/user_jobs/138860?agent_id=$AGENT_ID" \
 ### Step 5 endpoints
 
 ```
+GET    /v1/credit_balance?agent_id=                              — read available credits (free)
+GET    /v1/credit_transactions?agent_id=&page=                   — usage history (free)
+GET    /v1/credit_plans?cycle={monthly|annual}                   — plans to buy (free)
 POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=   — kick off render
 GET    /v1/generations/:id                                          — poll render
 POST   /v1/user_jobs?agent_id= (publish_content)                    — publish now / schedule

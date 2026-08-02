@@ -174,3 +174,65 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
 |--------|------------|-------------|
 | `404` | `not_found` | Engine not found or agent does not have access. |
 | `422` | `validation_error` | Target agent not accessible or insufficient credits. |
+
+## Undo / redo history
+
+Every edit to a sheet (cell updates, layer changes, column moves, etc.) is recorded as a **change set**. You can read the stack and undo or redo its top entry. This mirrors the undo/redo button in the GEN UI.
+
+### List change sets
+
+```
+GET /v1/vidsheet/{sheet_id}/operations?agent_id={agent_id}
+```
+
+**Query params:**
+- `limit` (optional) — max change sets to return, 1–100 (default 20)
+- `include_undone` (optional) — include already-undone change sets (default `false`)
+
+Returns `{ change_sets: [...] }` newest-first.
+
+### Peek at the next-to-undo entry
+
+```
+GET /v1/vidsheet/{sheet_id}/operations/last?agent_id={agent_id}
+```
+
+Returns just the single change set the undo button would take back — `{ change_set: ... }`, or `{ change_set: null }` when the stack is empty. Cheaper than the full list when you only need the top of the stack.
+
+### Undo
+
+```
+POST /v1/vidsheet/{sheet_id}/operations/undo?agent_id={agent_id}
+```
+
+Undoes the most recent undoable change set. Send a body with a `change_set_id` to undo a specific change set instead of the most recent one.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/operations/undo?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+Returns `{ change_set_id, undone: [...], next_undoable: {...} | null }`.
+
+### Redo
+
+```
+POST /v1/vidsheet/{sheet_id}/operations/redo?agent_id={agent_id}
+```
+
+Re-applies the most recently undone change set (or a specific one by `change_set_id`).
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/operations/redo?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+Returns `{ change_set_id, redone: [...], next_undoable: {...} | null }`.
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `not_found` | Sheet not found or agent does not have access. |
+| `409` | `undo_conflict` / `redo_conflict` | The sheet changed under you. Re-fetch the sheet (`GET /v1/vidsheet/{sheet_id}`) and retry. |
+| `422` | `nothing_to_undo` / `nothing_to_redo` | The relevant stack is empty. |

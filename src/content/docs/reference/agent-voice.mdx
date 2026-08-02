@@ -35,6 +35,19 @@ GET /v1/agents/{agent_id}/voice/library
 
 The `user_elevenlabs` source only appears when the agent has a connected ElevenLabs API key (see below).
 
+### List the agent's own voices
+
+```
+GET /v1/user_voice_resources?agent_id={agent_id}
+```
+
+Returns only the voices the user **created** — designed, trained, or cloned — not the shared public catalog. Use `GET /v1/agents/{agent_id}/voice/library` (above) when you want the public and connected-provider voices as well.
+
+```bash
+curl "https://api.gen.pro/v1/user_voice_resources?agent_id=$AGENT_ID" \
+  -H "X-API-Key: $GEN_API_KEY"
+```
+
 ## ElevenLabs integration
 
 Users connect their own ElevenLabs API key to unlock their personal voice library and use their own usage quota. The key is validated against ElevenLabs `/v1/user` before being saved on the agent record.
