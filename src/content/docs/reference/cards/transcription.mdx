@@ -1,0 +1,212 @@
+---
+title: "Transcription"
+description: Transcribe audio or video into full text with sentence-level timings.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The Transcription card turns audio or video into text. The output includes the full transcript plus sentence-level timings.
+
+<Aside type="tip">
+  Use the [Captions](/reference/cards/captions/) card instead when you want word-level timing data for subtitle overlays on a video.
+</Aside>
+
+<Aside>
+  All generation endpoints require the `agent_id` query parameter.
+</Aside>
+
+## Generate a transcription
+
+```
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"transcription"`. |
+| `data` | object | Yes | The source to transcribe. See [Source options](#source-options). |
+
+### Source options
+
+Pass exactly one source in `data`.
+
+| Source | Shape | Description |
+|--------|-------|-------------|
+| Audio URL | `{"audio": {"value": "<uri>"}}` | Publicly reachable audio URL. |
+| Video URL | `{"video": {"value": "<uri>"}}` | Publicly reachable video URL. Audio is taken from the video. |
+| Content resource | `{"content_resource_id": "<id>"}` | ID of an audio or video resource already uploaded to the agent. |
+
+Add `trim` alongside `audio` or `video` to transcribe only part of the source:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `trim.start_seconds` | number | Yes | Offset to start from. `0` or greater. |
+| `trim.duration_seconds` | number | Yes | How many seconds to transcribe. Greater than `0`. |
+
+<Aside type="caution">
+  `audio` and `video` are mutually exclusive. Sending both, or neither, returns `422 validation_error`.
+</Aside>
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "transcription",
+    "data": {
+      "audio": { "value": "https://cdn.example.com/episode-12.mp3" }
+    }
+  }'
+```
+
+Transcribe 30 seconds of a video, starting 15 seconds in:
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "transcription",
+    "data": {
+      "video": { "value": "https://cdn.example.com/clip.mp4" },
+      "trim": { "start_seconds": 15, "duration_seconds": 30 }
+    }
+  }'
+```
+
+Transcribe an already-uploaded [content resource](/reference/content-resources/):
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "transcription",
+    "data": { "content_resource_id": "res_abc123" }
+  }'
+```
+
+You can also transcribe on a layer:
+
+```
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+```
+
+---
+
+## Transcribe without a vidsheet
+
+Transcribe a standalone file without creating a sheet or cell. Same `data` shape as above.
+
+```
+POST /v1/transcriptions?agent_id={agent_id}
+```
+
+### Query parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | integer | Yes | The agent the job belongs to. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `data` | object | Yes | The source to transcribe. See [Source options](#source-options). |
+
+### Response (201)
+
+```json
+{
+  "generation_id": 9100,
+  "status": "pending"
+}
+```
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/transcriptions?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "audio": { "value": "https://cdn.example.com/episode-12.mp3" }
+    }
+  }'
+```
+
+```typescript
+const response = await fetch(
+  "https://api.gen.pro/v1/transcriptions?agent_id=42",
+  {
+    method: "POST",
+    headers: {
+      "X-API-Key": "your-api-key",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data: { audio: { value: "https://cdn.example.com/episode-12.mp3" } },
+    }),
+  }
+);
+const { generation_id, status } = await response.json();
+```
+
+---
+
+## Response
+
+Poll [Check generation status](/reference/generations/#check-generation-status) until `status` is `"completed"`. The transcript lands in the `result` field.
+
+```bash
+curl "https://api.gen.pro/v1/generations/9100" \
+  -H "X-API-Key: your-api-key"
+```
+
+```json
+{
+  "id": 9100,
+  "status": "completed",
+  "result": {
+    "full_text": "Welcome back to another episode. Today we are hunting tacos.",
+    "sentences": [
+      { "text": "Welcome back to another episode.", "startMs": 0, "endMs": 1840 },
+      { "text": "Today we are hunting tacos.", "startMs": 1840, "endMs": 3620 }
+    ],
+    "audio_duration": 3.62
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `result.full_text` | string | The entire transcript as one string. |
+| `result.sentences` | array | Sentence segments in order. |
+| `result.sentences[].text` | string | Sentence text. |
+| `result.sentences[].startMs` | integer | Sentence start, in milliseconds. |
+| `result.sentences[].endMs` | integer | Sentence end, in milliseconds. |
+| `result.audio_duration` | number | Length of the transcribed audio, in seconds. |
+
+<Aside>
+  Transcription uses credits based on the duration of the audio transcribed. Credits are pre-charged when the job is created and refunded if it fails.
+</Aside>
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `422` | `validation_error` | No source provided, both `audio` and `video` provided, invalid URL, or invalid `trim`. |
+| `422` | `insufficient_credits_for_job` | Not enough workspace credits to start the job. |
+| `404` | `not_found` | Sheet or cell not found. |
