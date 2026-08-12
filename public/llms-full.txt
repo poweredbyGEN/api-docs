@@ -693,6 +693,35 @@ data: { model, source_resource_id }
 Output: caption / subtitle data
 ```
 
+### transcription
+
+```
+generation_type: "transcription"
+Pass exactly one source. audio and video are mutually exclusive.
+data (audio url): { audio: { value: "<uri>", key? }, trim?: { start_seconds, duration_seconds } }
+data (video url): { video: { value: "<uri>", key? }, trim?: { start_seconds, duration_seconds } }
+data (uploaded):  { content_resource_id }
+trim.start_seconds >= 0; trim.duration_seconds > 0.
+Output (in generation `result`):
+  { full_text: "<entire transcript>",
+    sentences: [{ text, startMs, endMs }],
+    audio_duration: <seconds> }
+Uses credits based on the duration of audio transcribed. Pre-charged on create, refunded on failure.
+Use `captions` instead when you need word-level timings for subtitle overlays on a video.
+```
+
+Also available standalone, without a sheet or cell:
+
+```
+POST /v1/transcriptions?agent_id={id}
+Body: { "data": { ... same shape as above ... } }
+→ 201 { generation_id, status: "pending" }
+Errors: 422 { error, error_code: "validation_error" }          (no source, both audio and video, bad uri, bad trim)
+        422 { error, error_code: "insufficient_credits_for_job" }
+
+Poll GET /v1/generations/{generation_id} until status is "completed", then read `result`.
+```
+
 ### media (pass-through upload)
 
 ```

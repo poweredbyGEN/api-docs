@@ -23,6 +23,7 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 | `speech_from_text` | audio | (voice_method: my_voices, design_voice, clone_voice) |
 | `lipsync` | video | sync_so, gen |
 | `captions` | caption data | gemini |
+| `transcription` | transcript text + sentence timings | — |
 | `media` | pass-through upload | — |
 | `render` | composite video | (no model — uses layer stack) |
 
@@ -194,6 +195,19 @@ Models: `sync_so`, `gen`.
 ```
 
 Works from either audio or video source. Returns caption timing data usable as a caption layer.
+
+## Transcription
+
+```json
+{
+  "generation_type": "transcription",
+  "data": {
+    "audio": { "value": "https://cdn.example.com/episode-12.mp3" }
+  }
+}
+```
+
+Pass exactly one source: `audio`, `video`, or `content_resource_id`. Add `trim` with `start_seconds` and `duration_seconds` to transcribe only part of it. Returns `full_text`, `sentences` with `startMs`/`endMs`, and `audio_duration`. Also available without a sheet via `POST /v1/transcriptions?agent_id=`. See [Transcription](/reference/cards/transcription/).
 
 ## Media (pass-through upload)
 

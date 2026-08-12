@@ -1312,7 +1312,8 @@ paths:
                   description: |
                     The type of AI generation to run. Canonical names:
                     text, image_from_text, video_from_text, video_from_image,
-                    video_from_ingredients, speech_from_text, lipsync, captions, media.
+                    video_from_ingredients, speech_from_text, lipsync, captions,
+                    transcription, media.
                     Use canonical names for new integrations.
                   enum:
                     - text
@@ -1323,6 +1324,7 @@ paths:
                     - speech_from_text
                     - lipsync
                     - captions
+                    - transcription
                     - media
                   example: "text"
                 data:
@@ -1477,6 +1479,57 @@ paths:
                   status:
                     type: string
                     example: "pending"
+
+  /transcriptions:
+    post:
+      operationId: createTranscription
+      x-phase: edit
+      summary: Transcribe audio or video
+      description: |
+        Transcribes audio or video to text without a sheet or cell. Pass exactly one
+        source in `data`: `audio`, `video`, or `content_resource_id`. Returns a
+        generation id — poll `GET /v1/generations/{id}` until status is "completed",
+        then read `result`. Uses credits based on the duration of audio transcribed;
+        credits are pre-charged and refunded on failure.
+
+        Use the `captions` generation type instead when you need word-level timings
+        for subtitle overlays on a video.
+      tags: [Generations]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [data]
+              properties:
+                data:
+                  $ref: '#/components/schemas/TranscriptionData'
+      responses:
+        '201':
+          description: Transcription job created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generation_id:
+                    type: integer
+                  status:
+                    type: string
+                    example: "pending"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: |
+            Invalid source (`validation_error`) or not enough workspace credits
+            (`insufficient_credits_for_job`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ── Render ────────────────────────────────────────────────
   /vidsheet/{sheet_id}/cells/{cell_id}/render:
@@ -4211,6 +4264,100 @@ components:
         type: string
 
   schemas:
+    TranscriptionSource:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+          format: uri
+          description: Publicly reachable URL of the media to transcribe.
+          example: "https://cdn.example.com/episode-12.mp3"
+        key:
+          type: string
+          description: Optional storage key for the media.
+
+    TranscriptionTrim:
+      type: object
+      required: [start_seconds, duration_seconds]
+      description: Transcribe only part of the source.
+      properties:
+        start_seconds:
+          type: number
+          minimum: 0
+          description: Offset to start transcribing from.
+          example: 15
+        duration_seconds:
+          type: number
+          exclusiveMinimum: 0
+          description: How many seconds to transcribe.
+          example: 30
+
+    TranscriptionData:
+      type: object
+      description: |
+        The source to transcribe. Pass exactly one of `audio`, `video`, or
+        `content_resource_id`. `audio` and `video` are mutually exclusive;
+        `trim` may accompany either.
+      oneOf:
+        - type: object
+          required: [audio]
+          additionalProperties: false
+          properties:
+            audio:
+              $ref: '#/components/schemas/TranscriptionSource'
+            trim:
+              $ref: '#/components/schemas/TranscriptionTrim'
+        - type: object
+          required: [video]
+          additionalProperties: false
+          properties:
+            video:
+              $ref: '#/components/schemas/TranscriptionSource'
+            trim:
+              $ref: '#/components/schemas/TranscriptionTrim'
+        - type: object
+          required: [content_resource_id]
+          properties:
+            content_resource_id:
+              type: string
+              description: ID of an audio or video content resource already uploaded to the agent.
+              example: "res_abc123"
+
+    TranscriptionSentence:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Sentence text.
+          example: "Welcome back to another episode."
+        startMs:
+          type: integer
+          description: Sentence start, in milliseconds.
+          example: 0
+        endMs:
+          type: integer
+          description: Sentence end, in milliseconds.
+          example: 1840
+
+    TranscriptionResult:
+      type: object
+      description: The `result` field of a completed transcription generation.
+      properties:
+        full_text:
+          type: string
+          description: The entire transcript as one string.
+          example: "Welcome back to another episode. Today we are hunting tacos."
+        sentences:
+          type: array
+          description: Sentence segments in order.
+          items:
+            $ref: '#/components/schemas/TranscriptionSentence'
+        audio_duration:
+          type: number
+          description: Length of the transcribed audio, in seconds.
+          example: 3.62
+
     X402PaymentMethod:
       type: object
       required: [network, x402Network, asset, payTo, amountUsd, credits]

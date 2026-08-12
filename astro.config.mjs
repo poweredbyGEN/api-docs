@@ -113,7 +113,7 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'step-4-edit/overview' },
 						{ label: 'Vidsheet Anatomy', slug: 'step-4-edit/anatomy' },
 						{
-							label: 'Creation Cards (9 types)',
+							label: 'Creation Cards (10 types)',
 							collapsed: false,
 							items: [
 								{ label: 'Creation Cards Overview', slug: 'reference/creation-cards' },
@@ -125,6 +125,7 @@ export default defineConfig({
 								{ label: 'Speech from Text', slug: 'reference/cards/speech-from-text' },
 								{ label: 'Lipsync', slug: 'reference/cards/lipsync' },
 								{ label: 'Captions', slug: 'reference/cards/captions' },
+								{ label: 'Transcription', slug: 'reference/cards/transcription' },
 								{ label: 'Media (Upload)', slug: 'reference/cards/media' },
 							],
 						},

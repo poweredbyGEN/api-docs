@@ -440,6 +440,7 @@ POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/generate?agent_id=
 GET    /v1/generations/:id
 POST   /v1/generations/:id/stop
 POST   /v1/generations/:id/continue
+POST   /v1/transcriptions?agent_id=                           — transcribe audio/video without a sheet
 
 # Variables
 GET    /v1/vidsheet/:id/global_variables?agent_id=
@@ -634,6 +635,13 @@ Models: `sync_so`, `gen`.
 { "generation_type": "captions",
   "data": { "model": "gemini", "source_resource_id": 6001 } }
 ```
+
+### transcription
+```json
+{ "generation_type": "transcription",
+  "data": { "audio": { "value": "https://cdn.example.com/episode-12.mp3" } } }
+```
+Pass exactly one source: `audio` (`{ "value": "<uri>" }`), `video` (`{ "value": "<uri>" }`), or `content_resource_id`. Optional `trim: { "start_seconds": 15, "duration_seconds": 30 }` alongside `audio`/`video`. Result: `{ full_text, sentences: [{ text, startMs, endMs }], audio_duration }`. Uses credits based on the audio duration transcribed. Also available without a sheet: `POST /v1/transcriptions?agent_id=`. Use `captions` instead when you want word-level timings for subtitle overlays.
 
 ### media (pass-through upload)
 ```json
