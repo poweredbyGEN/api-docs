@@ -431,6 +431,11 @@ POST   /v1/vidsheet/:id/cells/:cell_id/layers?agent_id=
 GET    /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
 PATCH  /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
 DELETE /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id?agent_id=
+       # Two-phase when the layer carries content: first DELETE returns 428
+       # {error_code:"confirmation_required", would_destroy, confirm_token, expires_in}.
+       # Repeat with &confirm_token= to execute (single-use, 5-min TTL, invalid
+       # if the layer changed). Bare layers delete in one step. Same protocol
+       # applies to destructive column and global-variable deletes.
 POST   /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/duplicate?agent_id=
 PUT    /v1/vidsheet/:id/cells/:cell_id/layers/update_positions?agent_id=
 
@@ -809,7 +814,7 @@ The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. 
 
 **Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
 
-**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
+**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`. Destructive deletes (a variable with a value or live `{{name}}` references, a populated column, a content-bearing layer) are two-phase: the first call returns `confirmation_required` with a `would_destroy` preview and a single-use `confirm_token`; repeat with the token to execute.
 
 **Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
 

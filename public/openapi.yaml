@@ -1224,15 +1224,49 @@ paths:
       operationId: deleteLayer
       x-phase: edit
       summary: Delete a layer
+      description: >-
+        Deleting a layer that carries content (media, styling, or a generated
+        output) is a two-phase operation for API-key callers. The first DELETE
+        returns 428 with a `would_destroy` preview and a single-use
+        `confirm_token` (5-minute TTL, bound to the exact target state); repeat
+        the DELETE with `confirm_token` to execute. If the layer changed in
+        between, the request re-gates with a fresh preview and token
+        (`token_rejected: "target_changed"`). Bare layers (name/type/position
+        only) delete in one step.
       tags: [Layers]
       parameters:
         - $ref: '#/components/parameters/AgentId'
         - $ref: '#/components/parameters/SheetId'
         - $ref: '#/components/parameters/CellId'
         - $ref: '#/components/parameters/LayerId'
+        - name: confirm_token
+          in: query
+          required: false
+          schema: {type: string}
+          description: Single-use confirmation token issued by a prior 428 response.
       responses:
         '204':
           description: Layer deleted
+        '428':
+          description: >-
+            Confirmation required — the layer holds content. Repeat the DELETE
+            with the returned `confirm_token` within `expires_in` seconds.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: {type: string}
+                  error_code: {type: string, enum: [confirmation_required]}
+                  operation: {type: string, example: video_layer.destroy}
+                  would_destroy:
+                    type: object
+                    description: Authoritative server-computed preview of what the delete destroys.
+                  confirm_token: {type: string}
+                  expires_in: {type: integer, example: 300}
+                  token_rejected:
+                    type: string
+                    description: Present when a supplied token was refused (target_changed, invalid_or_expired, already_used_or_expired, actor_mismatch).
 
   /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
