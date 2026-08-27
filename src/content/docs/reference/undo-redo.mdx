@@ -1,0 +1,164 @@
+---
+title: Undo / Redo
+description: Walk back and re-apply grouped changes to a vidsheet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Every grouped write to a vidsheet — a row, column, cell, or layer edit made in a single
+request — is recorded as a **change set** on an undo/redo stack. You can list recent change
+sets, see what the next undo would take back, and undo or redo a change set. Pass an explicit
+`change_set_id` to undo or redo a specific change set instead of the most recent one.
+
+<Aside>
+  All operations endpoints require the `agent_id` query parameter and operate on a single
+  sheet (`{id}`). They mirror the in-app undo/redo buttons and are safe for agents to call.
+</Aside>
+
+<Aside type="caution">
+  Undo and redo are change-set scoped: one request undoes or redoes the whole grouped edit,
+  not a single field. A `409 conflict` means the sheet changed underneath you (another edit
+  landed in between) — re-fetch the sheet and retry.
+</Aside>
+
+---
+
+## List change sets
+
+Returns the recent undoable change sets for a sheet, newest-first.
+
+```
+GET /v1/vidsheet/{id}/operations?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+
+### Query parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `limit` | integer | `20` | Max change sets to return (`1`–`100`). |
+| `include_undone` | boolean | `false` | Include change sets that have already been undone. |
+
+### Response
+
+Returns `{ change_sets: [...] }`, newest first. Each change set has a `change_set_id`, a
+`summary`, and the grouped `operations`.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/vidsheet/101/operations?agent_id=42&limit=10" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Get the next-to-undo change set
+
+Returns the single change set that the undo button would take back. Cheaper than listing when
+you only need the top of the undo stack.
+
+```
+GET /v1/vidsheet/{id}/operations/last?agent_id={agent_id}
+```
+
+### Response
+
+Returns `{ change_set: { ... } }`, or `{ change_set: null }` when the undo stack is empty.
+
+### Example
+
+```bash
+curl "https://api.gen.pro/v1/vidsheet/101/operations/last?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+---
+
+## Undo a change set
+
+Undoes the most recent undoable change set, or a specific one when you pass `change_set_id`.
+
+```
+POST /v1/vidsheet/{id}/operations/undo?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `change_set_id` | string | No | Undo this specific change set instead of the most recent undoable one. |
+
+### Response
+
+Returns `{ change_set_id, undone: [...], next_undoable: { ... } | null }`. `undone` lists the
+operations that were reversed; `next_undoable` is the new top of the undo stack.
+
+### Example
+
+```bash
+# undo the most recent change set
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/operations/undo?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# undo a specific change set
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/operations/undo?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"change_set_id":"01J..."}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `409` | `undo_conflict` | The sheet changed underneath you — re-fetch the sheet and retry. |
+| `422` | `nothing_to_undo` | The undo stack is empty. |
+| `422` | `change_set_not_found` | The given `change_set_id` does not exist. |
+| `422` | `project_not_found` | The sheet does not exist or is not accessible. |
+
+---
+
+## Redo a change set
+
+Redoes the most recently undone change set, or a specific one when you pass `change_set_id`.
+Use this to re-apply something you just undid.
+
+```
+POST /v1/vidsheet/{id}/operations/redo?agent_id={agent_id}
+```
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `change_set_id` | string | No | Redo this specific change set instead of the most recently undone one. |
+
+### Response
+
+Returns `{ change_set_id, redone: [...], next_undoable: { ... } | null }`.
+
+### Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/operations/redo?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `409` | `redo_conflict` | The sheet changed underneath you — re-fetch the sheet and retry. |
+| `422` | `nothing_to_redo` | There is nothing to redo. |
+| `422` | `change_set_not_found` | The given `change_set_id` does not exist. |
+| `422` | `project_not_found` | The sheet does not exist or is not accessible. |

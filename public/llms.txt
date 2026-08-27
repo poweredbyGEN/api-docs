@@ -447,6 +447,12 @@ GET    /v1/vidsheet/:id/global_variables?agent_id=
 POST   /v1/vidsheet/:id/import_global_variables?agent_id=     (XLSX)
 GET    /v1/vidsheet/global_variables_template                 (download template)
 
+# Undo / Redo (change-set history — undo/redo a grouped edit)
+GET    /v1/vidsheet/:id/operations?agent_id=&limit=&include_undone=   — recent undoable change sets (newest first)
+GET    /v1/vidsheet/:id/operations/last?agent_id=                      — next-to-undo change set (or null)
+POST   /v1/vidsheet/:id/operations/undo?agent_id=                      — undo last (or {change_set_id}); 422 nothing_to_undo, 409 undo_conflict
+POST   /v1/vidsheet/:id/operations/redo?agent_id=                      — redo last undone (or {change_set_id}); 422 nothing_to_redo, 409 redo_conflict
+
 # Content Resources & Assets
 GET    /v1/content_resources?agent_id=&type=&page=
 POST   /v1/content_resources?agent_id=                                  (multipart)

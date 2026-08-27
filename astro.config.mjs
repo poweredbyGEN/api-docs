@@ -134,6 +134,7 @@ export default defineConfig({
 						{ label: 'Cells', slug: 'reference/cells' },
 						{ label: 'Layers', slug: 'reference/layers' },
 						{ label: 'Variables', slug: 'reference/variables' },
+						{ label: 'Undo / Redo', slug: 'reference/undo-redo' },
 						{ label: 'Assets & Content Resources', slug: 'reference/content-resources' },
 						{ label: 'Proof of Genesis Backups', slug: 'reference/proof-of-genesis' },
 						{ label: 'Trigger + Poll a Generation', slug: 'reference/generations' },
