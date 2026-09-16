@@ -1212,9 +1212,9 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
 ### Querying a watchlist with typed filters (`https://agent.gen.pro/v1`)
 
 Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
-The MCP server ships a `gen_query_watchlist` tool that wraps the chat
-path with a typed parameter object so you don't hand-build a prompt. Under the
-hood it posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference; the
+The MCP tool `gen_query_watchlist` takes the same ask as a typed parameter
+object so you don't hand-build a prompt. It is the `/v1/agent/run` call below
+with a `@list:<watchlist_id>` reference; the
 chat layer parses the filters and applies them byte-identically across all of
 the watchlist's sources, and returns a `run_id`. Poll the run until
 `status == "completed"`; the final answer payload carries a video-grid block
@@ -1360,7 +1360,8 @@ next cadence tick.
 
 # Integrations
 
-- MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` path also still accepted for older configs; the downloadable `gen-mcp-server` PyPI package is deprecated — switch to the hosted endpoint). Exposes 100 gen_* tools, 9 prompts, and 3 guidance resources.
+- MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` path also still accepted for older configs; the downloadable `gen-mcp-server` PyPI package is retired and no longer served — never `pip install`/`uvx` it). Exposes 155 gen_* tools and one guidance resource, `gen://api-reference`.
+- MCP vs agent: The MCP owns the Vidsheet surface (sheets, cards, cells, layers, generation, render, publish). GEN's own agent — the chat at gen.pro, and `gen_chat` / `gen_ask` here — plans over those same tools; there is no second implementation of Vidsheet logic behind the chat. If a capability crosses the network with your credentials, it is an MCP tool; the agent keeps only its local loop (resolving what you meant, refusing, asking when ambiguous). Exact operation → call the `gen_*` tool. Fuzzy goal → `gen_chat` (build) or `gen_ask` (data question); the agent returns a `run_id` you poll with `gen_get_run_status`.
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
 - Full Docs (5-step journey): https://api.gen.pro
