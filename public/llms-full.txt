@@ -616,7 +616,7 @@ Status flow: `pending → processing → completed | failed | stopped`.
 
 ```
 generation_type: "text"
-Models: gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4
+Models: openai, gemini
 data: { prompt, model, variables: { key: value } }
 Output: text string in cell value
 ```
@@ -625,7 +625,8 @@ Output: text string in cell value
 
 ```
 generation_type: "image_from_text"
-Models: gemini_image, gemini_pro_image, midjourney, grok
+Models: gemini, gemini_pro, gemini_2, gemini_2_lite, imagen, seedream-4.0, seedream-4.5, gpt-image-2, gpt-image-2.5-flare, gpt-image-2.5-sunburst, midjourney, grok
+Version (model gemini only): nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite
 Aspect ratios: "1:1", "9:16", "16:9", "4:3", "3:4"; grok also supports "3:2", "2:3"
 data: { prompt, model, aspect_ratio, variables }
 Output: image content resource
@@ -635,9 +636,9 @@ Output: image content resource
 
 ```
 generation_type: "video_from_text"
-Models: veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok
+Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
 Aspect ratios: "1:1", "9:16", "16:9"; grok also supports "4:3", "3:4", "3:2", "2:3"
-Durations: model-dependent
+Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3, kling-v1-6; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
 data: { prompt, negative_prompt?, model, aspect_ratio, resolution?, duration, native_audio?, variables }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -647,7 +648,8 @@ Output: video content resource
 
 ```
 generation_type: "video_from_image"
-Models: kling_2_1, kling_2_6, veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok
+Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
+Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3, kling-v2-6, kling-v2-1, kling-v1-6; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
 data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, resolution?, duration, native_audio? }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -657,7 +659,7 @@ Output: video content resource
 
 ```
 generation_type: "video_from_ingredients"
-Models: pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast, grok
+Models: pika, grok
 data: { prompt, model, asset_resource_ids: [], aspect_ratio, resolution?, duration, native_audio? }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource

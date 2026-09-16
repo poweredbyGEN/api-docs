@@ -44,7 +44,7 @@ Use canonical `generation_type: "text"` for new integrations.
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"text"`. |
 | `data.prompt` | string | Yes | The text prompt. Supports `{{variable_name}}` template syntax. |
-| `data.model` | string | No | `gemini_2_0_flash`, `gemini_2_5_pro`, `gpt_4o`, `gpt_4o_mini`, `o3_mini`, `o4_mini`, or `claude_sonnet_4`. |
+| `data.model` | string | No | `openai`, `gemini`. Default `gemini`. |
 | `data.temperature` | float | No | Controls randomness. Default `0.2`. Range `0.0` - `1.0`. |
 | `data.max_length` | integer | No | Maximum output length in tokens. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |
@@ -78,7 +78,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=4
     "generation_type": "text",
     "data": {
       "prompt": "Write a 60-second video script about {{product_name}}. Keep it energetic and include a call to action.",
-      "model": "gemini_2_5_pro",
+      "model": "gemini",
       "temperature": 0.3,
       "max_length": 500
     }

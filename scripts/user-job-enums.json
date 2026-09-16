@@ -1,0 +1,315 @@
+{
+  "x-generated-by": "scripts/vendor_user_job_enums.py",
+  "x-source": "gen-backend-v2@e80b9629b29ec1cd5a3f9fc00d8d746cdd174b5f",
+  "x-fields": [
+    "model",
+    "version",
+    "duration"
+  ],
+  "user_jobs": {
+    "gemini_image_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "gemini",
+          "gemini_pro",
+          "gemini_2",
+          "gemini_2_lite",
+          "imagen"
+        ],
+        "default": "gemini"
+      },
+      "version": {
+        "type": "string",
+        "enum": [
+          "nano-banana",
+          "nano-banana-pro",
+          "nano-banana-2",
+          "nano-banana-2-lite"
+        ],
+        "default": "nano-banana-2"
+      }
+    },
+    "gemini_omni_video_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "gemini-omni-flash-preview"
+        ],
+        "default": "gemini-omni-flash-preview"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "default": 10
+      }
+    },
+    "gemini_video_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "veo-3",
+          "veo-3-fast",
+          "veo-3.1",
+          "veo-3.1-fast",
+          "veo-3.1-lite"
+        ],
+        "default": "veo-3.1-fast"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "enum": [
+          4,
+          6,
+          8,
+          "4",
+          "6",
+          "8"
+        ],
+        "default": 8
+      }
+    },
+    "grok_image_generation": {
+      "model": {
+        "type": "string",
+        "default": "grok-imagine-image-quality"
+      }
+    },
+    "grok_video_generation": {
+      "model": {
+        "type": "string",
+        "default": "grok-imagine-video-1.5"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15"
+        ],
+        "default": 5
+      }
+    },
+    "kling": {
+      "model": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "kling-v3",
+          "kling-v1-6"
+        ],
+        "default": "kling-v1-6"
+      },
+      "duration": {
+        "type": "integer",
+        "default": 10
+      }
+    },
+    "kling_img2video": {
+      "model": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "kling-v3",
+          "kling-v2-6",
+          "kling-v2-1",
+          "kling-v1-6",
+          null
+        ],
+        "default": "kling-v3"
+      },
+      "duration": {
+        "type": "integer",
+        "default": 10
+      }
+    },
+    "openai_image_generation_2": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "gpt-image-2",
+          "gpt-image-2.5-flare",
+          "gpt-image-2.5-sunburst"
+        ],
+        "default": "gpt-image-2"
+      }
+    },
+    "remove_background": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "transparent"
+        ],
+        "default": "transparent"
+      }
+    },
+    "replace_master_kling": {
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "minimum": 1,
+        "maximum": 10,
+        "default": 5
+      }
+    },
+    "seedance_2_0_video_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "seedance-2.0"
+        ],
+        "default": "seedance-2.0"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "minimum": 4,
+        "maximum": 15,
+        "default": 5
+      }
+    },
+    "seedance_2_5_video_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "seedance-2.5"
+        ],
+        "default": "seedance-2.5"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "minimum": 4,
+        "maximum": 15,
+        "default": 5
+      }
+    },
+    "seedance_video_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "seedance-lite",
+          "seedance-pro",
+          "seedance-1.0-lite",
+          "seedance-1.0-pro",
+          "seedance-1.5-pro"
+        ],
+        "default": "seedance-1.5-pro"
+      },
+      "duration": {
+        "type": "integer",
+        "minimum": 3,
+        "maximum": 12,
+        "default": 5
+      }
+    },
+    "seedream_image_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "seedream-4.0",
+          "seedream-4.5"
+        ],
+        "default": "seedream-4.0"
+      }
+    },
+    "song_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "suno-v5-beta",
+          "suno-v4.5plus-beta",
+          "suno-v5.5-beta"
+        ],
+        "default": "suno-v5-beta"
+      },
+      "duration": {
+        "type": [
+          "number",
+          "integer",
+          "string"
+        ],
+        "minimum": 1,
+        "maximum": 480,
+        "default": 480
+      }
+    },
+    "text_generation": {
+      "model": {
+        "type": "string",
+        "enum": [
+          "openai",
+          "gemini"
+        ],
+        "default": "gemini"
+      }
+    }
+  }
+}

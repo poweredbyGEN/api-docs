@@ -36,8 +36,16 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
-| Standard image | `image_from_text` | `"gemini_image"` |
-| Pro image | `image_from_text` | `"gemini_pro_image"` |
+| Gemini (choose `version`) | `image_from_text` | `"gemini"` |
+| Gemini Pro | `image_from_text` | `"gemini_pro"` |
+| Gemini 2 | `image_from_text` | `"gemini_2"` |
+| Gemini 2 Lite | `image_from_text` | `"gemini_2_lite"` |
+| Imagen | `image_from_text` | `"imagen"` |
+| Seedream 4.0 | `image_from_text` | `"seedream-4.0"` |
+| Seedream 4.5 | `image_from_text` | `"seedream-4.5"` |
+| GPT Image 2 | `image_from_text` | `"gpt-image-2"` |
+| GPT Image 2.5 Flare | `image_from_text` | `"gpt-image-2.5-flare"` |
+| GPT Image 2.5 Sunburst | `image_from_text` | `"gpt-image-2.5-sunburst"` |
 | Midjourney | `image_from_text` | `"midjourney"` |
 | Grok | `image_from_text` | `"grok"` |
 
@@ -49,7 +57,8 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"image_from_text"`. |
 | `data.prompt` | string | Yes | Text description of the image to generate. Supports `{{variable_name}}` syntax. |
-| `data.model` | string | No | `"gemini_image"`, `"gemini_pro_image"`, `"midjourney"`, or `"grok"`. |
+| `data.model` | string | No | One of `"gemini"`, `"gemini_pro"`, `"gemini_2"`, `"gemini_2_lite"`, `"imagen"`, `"seedream-4.0"`, `"seedream-4.5"`, `"gpt-image-2"`, `"gpt-image-2.5-flare"`, `"gpt-image-2.5-sunburst"`, `"midjourney"`, `"grok"`. |
+| `data.version` | string | No | With `model: "gemini"` only — Nano Banana generation: `"nano-banana"`, `"nano-banana-pro"`, `"nano-banana-2"`, `"nano-banana-2-lite"`. |
 | `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, `"16:9"`, `"4:3"`, or `"3:4"`. Grok also supports `"3:2"` and `"2:3"`. |
 | `data.number_of_images` | integer | No | Number of images to generate. Default `1`. |
 | `data.content_resource_ids` | array | No | Array of content resource IDs to use as reference images. |
@@ -84,7 +93,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3050/generate?agent_id=4
     "generation_type": "image_from_text",
     "data": {
       "prompt": "A futuristic cityscape at sunset with neon lights reflecting off glass buildings, cinematic style",
-      "model": "gemini_pro_image",
+      "model": "gemini_pro",
       "aspect_ratio": "16:9",
       "number_of_images": 2
     }
@@ -130,6 +139,6 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3050/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"gemini_image"`, `"gemini_pro_image"`, `"midjourney"`, or `"grok"`. |
+| `model` | string | Default model: one of `"gemini"`, `"gemini_pro"`, `"gemini_2"`, `"gemini_2_lite"`, `"imagen"`, `"seedream-4.0"`, `"seedream-4.5"`, `"gpt-image-2"`, `"gpt-image-2.5-flare"`, `"gpt-image-2.5-sunburst"`, `"midjourney"`, `"grok"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`, `"4:3"`, or `"3:4"`. Grok also supports `"3:2"` and `"2:3"`. |
 | `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |
