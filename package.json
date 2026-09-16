@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "node scripts/check-model-enums.mjs"
+    "test": "node scripts/check-model-enums.mjs && node scripts/check-mdx-tables.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.37.7",
