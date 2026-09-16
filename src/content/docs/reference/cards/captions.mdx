@@ -1,11 +1,11 @@
 ---
 title: "Captions"
-description: Generate timestamped captions from audio or video using Gemini.
+description: Generate a timed caption layer from audio or video.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Captions card transcribes audio or video into timestamped captions using Gemini. The output includes word-level timing data that can be used for subtitle overlays in the final video.
+The Captions card transcribes audio or video into timed caption segments and attaches them to the cell as a caption layer for subtitle overlays in the final video.
 
 <Aside>
   All generation endpoints require the `agent_id` query parameter.
@@ -29,11 +29,14 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"captions"`. |
-| `data.model` | string | Yes | `"gemini"`. |
-| `data.source_resource_id` | string | Yes | ID of a previously uploaded audio or video content resource. |
+| `data.audio.value` | string (URI) | One of | Public URL of the audio to caption. |
+| `data.video.value` | string (URI) | One of | Public URL of the video to caption (its audio track is extracted). |
+| `data.trim` | object | No | `{ "start_seconds": number >= 0, "duration_seconds": number > 0 }` — caption only part of the source. |
+
+Pass exactly one of `audio` or `video`. No other fields are accepted.
 
 <Aside type="caution">
-  Upload audio or video first, then pass its content resource ID as `source_resource_id`.
+  Upload the file first, then pass its public URL (from `GET /v1/content_resources`) as `audio.value` or `video.value`.
 </Aside>
 
 ### Example
@@ -45,8 +48,8 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=4
   -d '{
     "generation_type": "captions",
     "data": {
-      "model": "gemini",
-      "source_resource_id": "res_abc123"
+      "video": { "value": "https://cdn.gen.pro/outputs/final-abc123.mp4" },
+      "trim": { "start_seconds": 0, "duration_seconds": 30 }
     }
   }'
 ```
@@ -61,29 +64,13 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agen
 
 ## Response
 
-Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation includes the captions object with timestamps in the `result` field.
-
-```json
-{
-  "id": 9003,
-  "status": "completed",
-  "result": {
-    "captions": [
-      {"word": "Welcome", "start": 0.0, "end": 0.45},
-      {"word": "back", "start": 0.45, "end": 0.72},
-      {"word": "to", "start": 0.72, "end": 0.85},
-      {"word": "another", "start": 0.85, "end": 1.20},
-      {"word": "episode", "start": 1.20, "end": 1.65}
-    ]
-  }
-}
-```
+Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation carries the transcript and timed segments in `result` (`full_text`, `captions`, `audio_duration`) and writes a caption layer onto the cell.
 
 ### Errors
 
 | Status | Error code | Description |
 |--------|------------|-------------|
-| `422` | `validation_error` | No audio or video resource provided. |
+| `422` | `validation_error` | No source, both `audio` and `video`, bad URI, or bad `trim`. |
 | `404` | `not_found` | Sheet or cell not found. |
 
 ---
@@ -98,4 +85,4 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 |-------|------|-------------|
 | `autoGenerate` | boolean | Auto-trigger generation when source audio/video changes. |
 
-Caption source and styling are passed in the generation `data` parameter.
+Caption source is passed in the generation `data` parameter.

@@ -1313,8 +1313,9 @@ paths:
                     The type of AI generation to run. Canonical names:
                     text, image_from_text, video_from_text, video_from_image,
                     video_from_ingredients, speech_from_text, lipsync, captions,
-                    transcription, media.
-                    Use canonical names for new integrations.
+                    transcription.
+                    Use canonical names for new integrations. Uploaded media is a
+                    cell value (PATCH the cell), not a generation.
                   enum:
                     - text
                     - image_from_text
@@ -1325,7 +1326,6 @@ paths:
                     - lipsync
                     - captions
                     - transcription
-                    - media
                   example: "text"
                 data:
                   type: object

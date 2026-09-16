@@ -1,31 +1,17 @@
 ---
 title: "Speech from Text"
-description: Convert text to speech using saved, designed, or cloned voices.
+description: Convert text to speech with a saved voice.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Speech from Text card converts written text into spoken audio. You can use an existing voice, design a new one from a description, or clone a voice from an audio sample. New design/clone flows default to `voice_model_provider: "supertonic_3"`; pass `"qwen3_voice_design"` to use Qwen instead.
+The Speech from Text card converts written text into spoken audio using a voice the agent already has. Pick the voice from `GET /v1/agents/{agent_id}/voice/library` (public catalog, designed, cloned, or connected voices) and pass its `voice_id`.
 
 <Aside>
   All generation endpoints require the `agent_id` query parameter.
 </Aside>
 
-## Voice methods
-
-Use canonical `generation_type: "speech_from_text"` for all speech generation. Choose the voice path with `data.voice_method`.
-
-| Method | `data.voice_method` | Description |
-|--------|---------------------|-------------|
-| My Voices | `my_voices` | Use an existing saved voice by ID. |
-| Design Voice | `design_voice` | Create a new voice from a text description. |
-| Clone Voice | `clone_voice` | Clone a voice from an audio sample. |
-
----
-
-## My Voices
-
-Use an existing ElevenLabs voice to generate speech.
+## Generate speech
 
 ```
 POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
@@ -36,96 +22,13 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"speech_from_text"`. |
-| `data.script` | string | Yes | The text to convert to speech. |
-| `data.voice_method` | string | Yes | `"my_voices"`. |
-| `data.voice_id` | string | Yes | Saved voice ID. |
-| `data.language` | string | No | Language code, for example `"en"`. |
-| `data.speed` | number | No | Playback speed. |
+| `data.text` | string | Yes | The text to speak, 1–4000 characters. |
+| `data.voice_id` | string | Yes | A voice from the agent's voice library. |
+| `data.enhance_voice` | boolean | No | Post-process for clarity. Default `false`. |
+| `data.remove_silence` | boolean | No | Trim leading/trailing silence. Default `false`. |
 
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "generation_type": "speech_from_text",
-    "data": {
-      "script": "Welcome back to another episode of our series.",
-      "voice_method": "my_voices",
-      "voice_id": "pNInz6obpgDQGcFmaJgB"
-    }
-  }'
-```
-
----
-
-## Design Voice
-
-Create a brand-new voice from a text description and use it to generate speech.
-
-```
-POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
-```
-
-### Request body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `generation_type` | string | Yes | `"speech_from_text"`. |
-| `data.script` | string | Yes | The text to convert to speech. |
-| `data.voice_method` | string | Yes | `"design_voice"`. |
-| `data.name` | string | Yes | A name for the new voice. |
-| `data.language` | string | Yes | Language code (e.g., `"en"`). |
-| `data.gender` | string | Yes | `"male"` or `"female"`. |
-| `data.voice_model_provider` | string | No | `"supertonic_3"` (default) or `"qwen3_voice_design"`. |
-| `data.voice_prompt` | string | Yes | A description of the voice characteristics (e.g., `"warm, friendly narrator with a slight British accent"`). |
-
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "generation_type": "speech_from_text",
-    "data": {
-      "script": "Welcome back to another episode of our series.",
-      "voice_method": "design_voice",
-      "name": "Friendly Narrator",
-      "language": "en",
-      "gender": "male",
-      "voice_model_provider": "supertonic_3",
-      "voice_prompt": "warm, friendly narrator with a slight British accent"
-    }
-  }'
-```
-
----
-
-## Clone Voice
-
-Clone a voice from an audio sample and use the clone to generate speech.
-
-```
-POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
-```
-
-### Request body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `generation_type` | string | Yes | `"speech_from_text"`. |
-| `data.script` | string | Yes | The text to convert to speech. |
-| `data.voice_method` | string | Yes | `"clone_voice"`. |
-| `data.name` | string | Yes | A name for the cloned voice. |
-| `data.audio_resource_id` | string | Yes | Content resource ID for the voice sample. |
-| `data.language` | string | Yes | Language code (e.g., `"en"`). |
-| `data.gender` | string | Yes | `"male"` or `"female"`. |
-| `data.voice_model_provider` | string | No | `"supertonic_3"` (default) or `"qwen3_voice_design"`. |
-
-<Aside type="caution">
-  The voice sample must be at least 30 seconds long for reliable cloning results.
+<Aside type="note">
+  Designing a voice from a description or cloning one from an audio sample are separate jobs (`design_voice`, `clone_voice`) that produce a reusable voice — they are not modes of `speech_from_text`.
 </Aside>
 
 ### Example
@@ -137,33 +40,18 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=4
   -d '{
     "generation_type": "speech_from_text",
     "data": {
-      "script": "Welcome back to another episode of our series.",
-      "voice_method": "clone_voice",
-      "name": "My Custom Voice",
-      "audio_resource_id": "audio_res_123",
-      "language": "en",
-      "gender": "male",
-      "voice_model_provider": "supertonic_3"
+      "text": "Welcome back to another episode of our series.",
+      "voice_id": "pNInz6obpgDQGcFmaJgB",
+      "enhance_voice": true
     }
   }'
 ```
 
 ---
 
-## Additional options
-
-These options can be added to the `data` object for any voice method:
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `enhance_voice` | boolean | `false` | Apply post-processing to enhance audio clarity. |
-| `voice_model_provider` | string | `supertonic_3` | Applies to `design_voice` and `clone_voice`. Supertonic 3 supports 31 languages; Qwen supports Mandarin/Cantonese/Chinese dialect options in addition to the shared language list. |
-
----
-
 ## Response
 
-All voice methods return a generation ID. Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation includes the audio URL in `output_resources`.
+Poll [Check generation status](/reference/generations/#check-generation-status) until complete. The finished generation includes the audio URL in `output_resources`.
 
 ```json
 {
@@ -195,6 +83,6 @@ All voice methods return a generation ID. Poll [Check generation status](/refere
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `autoGenerate` | boolean | Auto-trigger generation when the script cell changes. |
+| `autoGenerate` | boolean | Auto-trigger generation when the text cell changes. |
 
-Voice method, voice ID, language, and gender are passed in the generation `data` parameter, not stored as cell attributes.
+The voice is passed in the generation `data` parameter, not stored as a cell attribute.

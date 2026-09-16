@@ -1247,8 +1247,9 @@ paths:
                     The type of AI generation to run. Canonical names:
                     text, image_from_text, video_from_text, video_from_image,
                     video_from_ingredients, speech_from_text, lipsync, captions,
-                    transcription, media.
-                    Use canonical names for new integrations.
+                    transcription.
+                    Use canonical names for new integrations. Uploaded media is a
+                    cell value (PATCH the cell), not a generation.
                   enum:
                     - text
                     - image_from_text
@@ -1259,7 +1260,6 @@ paths:
                     - lipsync
                     - captions
                     - transcription
-                    - media
                   example: "text"
                 data:
                   type: object
@@ -1270,10 +1270,10 @@ paths:
                     Omitted optional fields use the cell defaults or the closest supported model defaults.
                   example:
                     prompt: "A handheld product demo video"
-                    model: "veo_3"
+                    model: "veo-3.1"
                     aspect_ratio: "9:16"
                     resolution: "1080p"
-                    duration: 10
+                    duration: 8
                     native_audio: false
       responses:
         '201':

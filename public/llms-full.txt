@@ -659,9 +659,9 @@ Output: video content resource
 
 ```
 generation_type: "video_from_ingredients"
-Models: pika, grok
-data: { prompt, model, asset_resource_ids: [], aspect_ratio, resolution?, duration, native_audio? }
-Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
+Model: pika
+data: { prompt, images: [{ value: "<uri>" }, ...], native_audio? }
+prompt and images are required; no other fields are accepted.
 Output: video content resource
 ```
 
@@ -669,11 +669,9 @@ Output: video content resource
 
 ```
 generation_type: "speech_from_text"
-Voice methods: my_voices | design_voice | clone_voice
-data (my_voices):    { script, voice_method: "my_voices",    voice_id, enhance_voice?, speed?, language? }
-data (design_voice): { script, voice_method: "design_voice", language, gender, voice_model_provider?: "supertonic_3"|"qwen3_voice_design", enhance_voice? }
-data (clone_voice):  { script, voice_method: "clone_voice",  audio_resource_id, voice_model_provider?: "supertonic_3"|"qwen3_voice_design" }
-Default voice_model_provider for design/clone is "supertonic_3".
+data: { text, voice_id, enhance_voice?, remove_silence? }
+text: 1–4000 chars. voice_id: a saved voice (GET /v1/agents/{agent_id}/voice/library).
+Designing or cloning a voice are separate jobs (design_voice, clone_voice), not modes of this one.
 Output: audio content resource
 ```
 
@@ -681,8 +679,11 @@ Output: audio content resource
 
 ```
 generation_type: "lipsync"
-Models: sync_so, gen
-data: { model, video_resource_id, audio_resource_id }
+data: { talking_avatar_video_data: { video: { value: "<uri>" }, audio?: { value: "<uri>" } },
+        voice_generation_data?: { text, voice_id, ... },   # same shape as speech_from_text data
+        lip_sync_model?: "sync.so" | "gen",                 # default "gen"
+        remove_background?, remove_silence? }
+talking_avatar_video_data.video.value is required; supply speech as audio.value or voice_generation_data.
 Output: video content resource with synced lip movements
 ```
 
@@ -690,9 +691,10 @@ Output: video content resource with synced lip movements
 
 ```
 generation_type: "captions"
-Models: gemini
-data: { model, source_resource_id }
-Output: caption / subtitle data
+Pass exactly one source. audio and video are mutually exclusive.
+data (audio url): { audio: { value: "<uri>" }, trim?: { start_seconds, duration_seconds } }
+data (video url): { video: { value: "<uri>" }, trim?: { start_seconds, duration_seconds } }
+Output: caption layer with timed segments (result.captions, full_text, audio_duration)
 ```
 
 ### transcription
@@ -724,13 +726,8 @@ Errors: 422 { error, error_code: "validation_error" }          (no source, both 
 Poll GET /v1/generations/{generation_id} until status is "completed", then read `result`.
 ```
 
-### media (pass-through upload)
-
-```
-generation_type: "media"
-data: { content_resource_id }
-Output: attaches an uploaded resource to the cell (no AI)
-```
+Uploaded media is a cell value, not a generation:
+`PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `{ "spreadsheet_cell": { "value": "<url>" } }`.
 
 ### render (composite)
 
