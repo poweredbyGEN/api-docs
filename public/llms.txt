@@ -2,7 +2,7 @@
 
 > GEN is an autonomous social media agent platform. One API surface takes a raw idea all the way to a published video — agent setup, idea generation with real trending data, vidsheet production, layer composition, render, and publish.
 
-This is a system-prompt style teaching document. Read it top-to-bottom and you will know how to use the GEN API end-to-end. Every workflow follows the same 5-step journey. The docs, the MCP server, and the TypeScript SDK are all organized around these 5 steps.
+This is a system-prompt style teaching document. Read it top-to-bottom and you will know how to use the GEN API end-to-end. Every workflow follows the same 5-step journey. The docs and the MCP server are both organized around these 5 steps.
 
 Base URLs:
 - `https://api.gen.pro/v1` — agent setup, vidsheets, generations, renders, publishing, content monitoring
@@ -579,7 +579,7 @@ If none match, build custom with `POST /v1/vidsheet` and add columns / layers by
 
 ## Creation Card Types (all 9)
 
-Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server and SDK map them to the platform's internal model identifiers automatically.
+Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server maps them to the platform's internal model identifiers automatically.
 
 ### text
 ```json
@@ -705,10 +705,10 @@ DELETE /v1/agents/:agent_id/watchlists/:id/sources/:source_id       — remove s
 DELETE /v1/agents/:agent_id/watchlists/:id/sources?platform=&target_type=&target_value=
 ```
 
-**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the SDK and MCP ship a `queryWatchlist` primitive so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
+**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the MCP server ships a `gen_query_watchlist` tool so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
 
 ```bash
-# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {...})
+# Equivalent to MCP: gen_query_watchlist(agent_id, watchlist_id, question="top videos", limit=30, days=90, sort_by="engagement_rate")
 curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
@@ -820,7 +820,6 @@ The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. 
 Full install guide: https://api.gen.pro/guides/mcp/
 
 ### Other integrations
-- TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml (every operation tagged with `x-phase`)
 

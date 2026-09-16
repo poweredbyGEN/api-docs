@@ -42,12 +42,6 @@ curl "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 
-```typescript
-import { gen } from "@poweredbygen/gen-sdk";
-const { sdk } = gen({ apiKey: process.env.GEN_API_KEY! });
-const { recurring_jobs } = await sdk.monitoring.listRecurringJobs(agentId);
-```
-
 ### POST /v1/agents/:agent_id/recurring-jobs/defaults
 
 Idempotently ensure the agent has the default daily content-ideas job. Returns the existing one if present, otherwise creates it (daily @ 09:00 UTC, `chat_only`).
@@ -55,10 +49,6 @@ Idempotently ensure the agent has the default daily content-ideas job. Returns t
 ```bash
 curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/defaults" \
   -H "X-API-Key: $GEN_API_KEY"
-```
-
-```typescript
-const { recurring_jobs, created } = await sdk.monitoring.ensureDefaultRecurringJob(agentId);
 ```
 
 **Response:**
@@ -84,16 +74,6 @@ curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs" \
     "schedule": { "cadence": "weekly", "timezone": "America/Los_Angeles", "time_of_day": "09:00", "days_of_week": [0] },
     "delivery": { "type": "email", "email": "you@example.com" }
   }'
-```
-
-```typescript
-const job = await sdk.monitoring.createRecurringJob(agentId, {
-  name: "weekly retention digest",
-  job_type: "generate_content_ideas",
-  prompt: "Give me 5 retention-focused hook patterns trending this week",
-  schedule: { cadence: "weekly", timezone: "America/Los_Angeles", time_of_day: "09:00", days_of_week: [0] },
-  delivery: { type: "email", email: "you@example.com" },
-});
 ```
 
 **Request body:**
@@ -138,10 +118,6 @@ Pause the job. `status → "paused"`. The scheduler stops queueing runs; history
 ```bash
 curl -X POST "https://agent.gen.pro/v1/agents/$AGENT_ID/recurring-jobs/$JOB_ID/pause" \
   -H "X-API-Key: $GEN_API_KEY"
-```
-
-```typescript
-await sdk.monitoring.pauseRecurringJob(agentId, jobId);
 ```
 
 ### POST /v1/agents/:agent_id/recurring-jobs/:job_id/resume

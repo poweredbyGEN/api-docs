@@ -1212,7 +1212,7 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
 ### Querying a watchlist with typed filters (`https://agent.gen.pro/v1`)
 
 Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
-The SDK and MCP both ship a `queryWatchlist` primitive that wraps the chat
+The MCP server ships a `gen_query_watchlist` tool that wraps the chat
 path with a typed parameter object so you don't hand-build a prompt. Under the
 hood it posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference; the
 chat layer parses the filters and applies them byte-identically across all of
@@ -1221,8 +1221,8 @@ the watchlist's sources, and returns a `run_id`. Poll the run until
 plus a natural-language summary that respects every filter.
 
 ```bash
-# Equivalent to: sdk.monitoring.queryWatchlist(agentId, watchlistId, {
-#   question: "top videos", limit: 30, days: 90, sort_by: "engagement_rate" })
+# Equivalent to MCP: gen_query_watchlist(agent_id, watchlist_id,
+#   question="top videos", limit=30, days=90, sort_by="engagement_rate")
 curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
@@ -1230,7 +1230,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
 # → { "run_id": "run_abc", "status": "running", ... }
 ```
 
-`queryWatchlist` typed fields (all optional except `question`):
+`gen_query_watchlist` typed fields (all optional except `question`):
 
 | Field | Type | Notes |
 |---|---|---|
@@ -1361,7 +1361,6 @@ next cadence tick.
 # Integrations
 
 - MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` path also still accepted for older configs; the downloadable `gen-mcp-server` PyPI package is deprecated — switch to the hosted endpoint). Exposes 100 gen_* tools, 9 prompts, and 3 guidance resources.
-- TypeScript SDK: `npm install @poweredbygen/gen-sdk`
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
 - Full Docs (5-step journey): https://api.gen.pro

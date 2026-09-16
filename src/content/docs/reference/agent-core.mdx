@@ -177,40 +177,6 @@ curl -X PATCH https://api.gen.pro/v1/agents/abc123/core \
   }'
 ```
 
-**TypeScript SDK equivalent:**
-
-```typescript
-import { GenClient } from '@poweredbygen/gen-sdk';
-
-const gen = new GenClient({ apiKey: process.env.GEN_API_KEY! });
-
-const result = await gen.agents.updateCore('abc123', {
-  brand_name: 'Santiago',
-  description: 'San Antonio street food scout who hunts the best tacos.',
-  identity_type: 'character',
-  goal: 'growth',
-  target_platforms: ['tiktok', 'instagram'],
-  shortform: true,
-  keywords: ['streetfood', 'tacotok', 'sanantonioeats'],
-  monitored: [
-    { handle: 'https://tiktok.com/@keilapacheco', item_type: 'account' },
-  ],
-  research_topics: [
-    { topic: 'new food truck openings in San Antonio' },
-    { topic: 'viral street food TikTok moments' },
-  ],
-  linked_accounts: [
-    { url: 'https://tiktok.com/@santiago_real', platform: 'tiktok' },
-  ],
-  personality: 'Santiago grew up eating at his tía\'s taco stand...',
-  default_user_voice: { voice_id: '21m00Tcm4TlvDq8ikWAM', source: 'public' },
-});
-
-if (result.personality?.status === 'error') {
-  console.error('personality write failed:', result.personality.error);
-}
-```
-
 ## Errors
 
 | Code | Meaning |

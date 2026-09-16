@@ -2650,10 +2650,10 @@ paths:
 
         **Base URL:** `https://agent.gen.pro/v1`
 
-        **Querying a watchlist with typed filters.** The SDK `queryWatchlist` and
-        MCP `gen_query_watchlist` primitives are typed wrappers over this
-        endpoint: they reference a watchlist by id with a `@list:<watchlist_id>`
-        token in `message` and let you pass structured filters instead of
+        **Querying a watchlist with typed filters.** The MCP `gen_query_watchlist`
+        tool is a typed wrapper over this endpoint: it references a watchlist by
+        id with a `@list:<watchlist_id>` token in `message` and lets you pass
+        structured filters instead of
         hand-building a prompt. Example message:
         `"top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"`.
         The chat layer parses the filters and applies them byte-identically

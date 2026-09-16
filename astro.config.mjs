@@ -66,7 +66,6 @@ export default defineConfig({
 						{ label: 'Quick Start', slug: 'guides/quickstart' },
 						{ label: 'Authentication', slug: 'guides/authentication' },
 						{ label: 'Install the MCP Server', slug: 'guides/mcp' },
-						{ label: 'TypeScript SDK', slug: 'guides/typescript-sdk' },
 						{ label: 'Using with n8n', slug: 'guides/n8n' },
 					],
 				},

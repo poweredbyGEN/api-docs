@@ -376,7 +376,7 @@ nav.sidebar-pane,
 
 /* Eyebrow above the title — the kit's glowing-dot label. */
 .hero .copy > h1::before {
-  content: "GEN API · MCP · SDK";
+  content: "GEN API · MCP";
   display: inline-flex;
   align-items: center;
   margin-bottom: 0.5rem;
