@@ -1336,10 +1336,10 @@ paths:
                     Omitted optional fields use the cell defaults or the closest supported model defaults.
                   example:
                     prompt: "A handheld product demo video"
-                    model: "veo_3"
+                    model: "veo-3.1"
                     aspect_ratio: "9:16"
                     resolution: "1080p"
-                    duration: 10
+                    duration: 8
                     native_audio: false
       responses:
         '201':

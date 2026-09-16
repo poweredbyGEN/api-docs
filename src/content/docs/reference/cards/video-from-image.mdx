@@ -34,17 +34,26 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 ## Models
 
-| Model | `generation_type` | `data.model` |
-|-------|--------------------|--------------|
-| Kling 2.1 | `video_from_image` | `"kling_2_1"` |
-| Kling 2.6 | `video_from_image` | `"kling_2_6"` |
-| Veo 3 | `video_from_image` | `"veo_3"` |
-| Veo 3.1 | `video_from_image` | `"veo_3_1"` |
-| Sora 2 | `video_from_image` | `"sora_2"` |
-| Seedance Lite | `video_from_image` | `"seedance_lite"` |
-| Seedance Pro | `video_from_image` | `"seedance_pro"` |
-| Seedance Pro 1.5 | `video_from_image` | `"seedance_pro_1_5"` |
-| Grok | `video_from_image` | `"grok"` |
+| Model | `generation_type` | `data.model` | Duration (s) |
+|-------|--------------------|--------------|--------------|
+| Veo 3 | `video_from_image` | `"veo-3"` | 4, 6, 8 |
+| Veo 3 Fast | `video_from_image` | `"veo-3-fast"` | 4, 6, 8 |
+| Veo 3.1 | `video_from_image` | `"veo-3.1"` | 4, 6, 8 |
+| Veo 3.1 Fast | `video_from_image` | `"veo-3.1-fast"` | 4, 6, 8 |
+| Veo 3.1 Lite | `video_from_image` | `"veo-3.1-lite"` | 4, 6, 8 |
+| Gemini Omni Flash | `video_from_image` | `"gemini-omni-flash-preview"` | 1–10 |
+| Kling v3 | `video_from_image` | `"kling-v3"` | — |
+| Kling v2.6 | `video_from_image` | `"kling-v2-6"` | — |
+| Kling v2.1 | `video_from_image` | `"kling-v2-1"` | — |
+| Kling v1.6 | `video_from_image` | `"kling-v1-6"` | — |
+| Seedance Lite (legacy alias) | `video_from_image` | `"seedance-lite"` | 3–12 |
+| Seedance Pro (legacy alias) | `video_from_image` | `"seedance-pro"` | 3–12 |
+| Seedance 1.0 Lite | `video_from_image` | `"seedance-1.0-lite"` | 3–12 |
+| Seedance 1.0 Pro | `video_from_image` | `"seedance-1.0-pro"` | 3–12 |
+| Seedance 1.5 Pro | `video_from_image` | `"seedance-1.5-pro"` | 3–12 |
+| Seedance 2.0 | `video_from_image` | `"seedance-2.0"` | 4–15 |
+| Seedance 2.5 | `video_from_image` | `"seedance-2.5"` | 4–15 |
+| Grok | `video_from_image` | `"grok"` | 1–15 |
 
 ---
 
@@ -60,7 +69,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.model` | string | No | Model variant. See [Models](#models) table. |
 | `data.aspect_ratio` | string | No | `"1:1"`, `"9:16"`, or `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `data.resolution` | string | No | Output resolution. Use `"1080p"` or `"720p"` when supported by the selected model. If omitted, the API uses the cell default or the closest supported model default. |
-| `data.duration` | integer | No | Video duration in seconds. |
+| `data.duration` | integer | No | Video duration in seconds. Accepted values depend on the model — see the Duration column in [Models](#models). |
 | `data.native_audio` | boolean | No | Request native audio when supported by the selected video model. Defaults to `false` when omitted. |
 | `data.image_var` | string | No | Variable name to map the image value from a column. |
 | `data.image_tail_var` | string | No | Variable name to map the end frame image from a column. |
@@ -94,7 +103,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3200/generate?agent_id=4
       "image_resource_id": "image_res_123",
       "prompt": "Camera slowly zooms in while the product rotates, soft studio lighting",
       "negative_prompt": "blurry, distorted, text overlay",
-      "model": "kling_2_6",
+      "model": "kling-v2-6",
       "aspect_ratio": "9:16",
       "resolution": "1080p",
       "native_audio": false,
@@ -139,7 +148,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3200/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling_2_1"`, `"kling_2_6"`, `"veo_3"`, `"veo_3_1"`, `"sora_2"`, `"seedance_lite"`, `"seedance_pro"`, `"grok"`, etc. |
+| `model` | string | Default model: one of `"veo-3"`, `"veo-3-fast"`, `"veo-3.1"`, `"veo-3.1-fast"`, `"veo-3.1-lite"`, `"gemini-omni-flash-preview"`, `"kling-v3"`, `"kling-v2-6"`, `"kling-v2-1"`, `"kling-v1-6"`, `"seedance-lite"`, `"seedance-pro"`, `"seedance-1.0-lite"`, `"seedance-1.0-pro"`, `"seedance-1.5-pro"`, `"seedance-2.0"`, `"seedance-2.5"`, `"grok"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `resolution` | string | Default output resolution for supported video models: `"1080p"` or `"720p"`. |
 | `duration` | number | Default duration in seconds. |

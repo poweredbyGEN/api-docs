@@ -15,11 +15,11 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 
 | `generation_type` | Produces | Key models |
 |---|---|---|
-| `text` | text | gemini_2_0_flash, gemini_2_5_pro, gpt_4o, gpt_4o_mini, o3_mini, o4_mini, claude_sonnet_4 |
-| `image_from_text` | image | gemini_image, gemini_pro_image, midjourney, grok |
-| `video_from_text` | video | veo_3, veo_3_fast, veo_3_1, veo_3_1_fast, sora_2, kling_1_6, seedance_pro, seedance_pro_1_5, grok |
-| `video_from_image` | video | kling_2_1, kling_2_6, veo_3, veo_3_1, sora_2, seedance_lite, seedance_pro, seedance_pro_1_5, grok |
-| `video_from_ingredients` | video | pika, kling_1_6, seedance_lite, veo_3_1, veo_3_1_fast, grok |
+| `text` | text | openai, gemini |
+| `image_from_text` | image | gemini, gemini_pro, gemini_2, gemini_2_lite, imagen, seedream-4.0, seedream-4.5, gpt-image-2, gpt-image-2.5-flare, gpt-image-2.5-sunburst, midjourney, grok |
+| `video_from_text` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
+| `video_from_image` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
+| `video_from_ingredients` | video | pika, grok |
 | `speech_from_text` | audio | (voice_method: my_voices, design_voice, clone_voice) |
 | `lipsync` | video | sync_so, gen |
 | `captions` | caption data | gemini |
@@ -34,7 +34,7 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
   "generation_type": "text",
   "data": {
     "prompt": "Write a 12-second TikTok hook for {{topic}}",
-    "model": "gemini_2_5_pro",
+    "model": "gemini",
     "variables": { "topic": "San Antonio tacos" }
   }
 }
@@ -65,17 +65,17 @@ Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2
   "generation_type": "video_from_text",
   "data": {
     "prompt": "San Antonio taco truck at golden hour, steam rising, handheld camera",
-    "model": "veo_3",
+    "model": "veo-3.1",
     "aspect_ratio": "9:16",
     "resolution": "1080p",
-    "duration": 10,
+    "duration": 8,
     "native_audio": false,
     "negative_prompt": "no text overlays, no logos"
   }
 }
 ```
 
-Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent. Use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
+Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Accepted `duration` (seconds) per model: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Resolution is model-dependent. Use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ## Video from Image
 
@@ -86,7 +86,7 @@ Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2
     "image_resource_id": 4821,
     "image_tail_resource_id": 4822,
     "prompt": "zoom in slowly, handheld feel",
-    "model": "kling_2_6",
+    "model": "kling-v2-6",
     "aspect_ratio": "9:16",
     "resolution": "1080p",
     "native_audio": false,

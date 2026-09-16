@@ -358,9 +358,9 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/$ENGINE_ID/cells/$CELL_ID/generate
     "generation_type": "video_from_text",
     "data": {
       "prompt": "San Antonio taco truck at golden hour, steam rising, handheld camera",
-      "model": "veo_3",
+      "model": "veo-3.1",
       "aspect_ratio": "9:16",
-      "duration": 10
+      "duration": 8
     }
   }'
 # → { "generation_id": 789, "status": "pending" }
@@ -584,37 +584,37 @@ Every cell generation declares a `generation_type` and `data` object. Models are
 ### text
 ```json
 { "generation_type": "text",
-  "data": { "prompt": "Write a 12s TikTok hook for {{topic}}", "model": "gemini_2_5_pro", "variables": { "topic": "San Antonio tacos" } } }
+  "data": { "prompt": "Write a 12s TikTok hook for {{topic}}", "model": "gemini", "variables": { "topic": "San Antonio tacos" } } }
 ```
-Models: `gemini_2_0_flash`, `gemini_2_5_pro`, `gpt_4o`, `gpt_4o_mini`, `o3_mini`, `o4_mini`, `claude_sonnet_4`.
+Models: `openai`, `gemini`.
 
 ### image_from_text
 ```json
 { "generation_type": "image_from_text",
   "data": { "prompt": "...", "model": "midjourney", "aspect_ratio": "9:16" } }
 ```
-Models: `gemini_image`, `gemini_pro_image`, `midjourney`, `grok`. Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2:3`.
+Models: `gemini`, `gemini_pro`, `gemini_2`, `gemini_2_lite`, `imagen`, `seedream-4.0`, `seedream-4.5`, `gpt-image-2`, `gpt-image-2.5-flare`, `gpt-image-2.5-sunburst`, `midjourney`, `grok`. For `gemini`, `version` picks the Nano Banana generation: `nano-banana`, `nano-banana-pro`, `nano-banana-2`, `nano-banana-2-lite`. Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2:3`.
 
 ### video_from_text
 ```json
 { "generation_type": "video_from_text",
-  "data": { "prompt": "...", "model": "veo_3", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 10, "native_audio": false, "negative_prompt": "no text overlays" } }
+  "data": { "prompt": "...", "model": "veo-3.1", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 8, "native_audio": false, "negative_prompt": "no text overlays" } }
 ```
-Models: `veo_3`, `veo_3_fast`, `veo_3_1`, `veo_3_1_fast`, `sora_2`, `kling_1_6`, `seedance_pro`, `seedance_pro_1_5`, `grok`. Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent; use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
+Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent; use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ### video_from_image
 ```json
 { "generation_type": "video_from_image",
-  "data": { "image_resource_id": 4821, "image_tail_resource_id": 4822, "prompt": "...", "model": "kling_2_6", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
+  "data": { "image_resource_id": 4821, "image_tail_resource_id": 4822, "prompt": "...", "model": "kling-v2-6", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
 ```
-Models: `kling_2_1`, `kling_2_6`, `veo_3`, `veo_3_1`, `sora_2`, `seedance_lite`, `seedance_pro`, `seedance_pro_1_5`, `grok`. `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
+Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v2-6`, `kling-v2-1`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
 
 ### video_from_ingredients
 ```json
 { "generation_type": "video_from_ingredients",
   "data": { "prompt": "...", "model": "pika", "asset_resource_ids": [4821, 4822, 4823], "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
 ```
-Models: `pika`, `kling_1_6`, `seedance_lite`, `veo_3_1`, `veo_3_1_fast`, `grok`. `resolution` and `native_audio` are optional and model-dependent.
+Models: `pika`, `grok`. `resolution` and `native_audio` are optional and model-dependent.
 
 ### speech_from_text
 ```json
@@ -801,7 +801,7 @@ The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. 
 
 **Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_research` (topic research across social + web), `gen_make_video` (finished multi-scene video from a brief), `gen_generate_content_ideas`.
 
-**Creation:** `gen_create_video` (single clip; models: seedance-2.0, veo_3, kling_2_1, sora_2, grok, pika), `gen_create_image` (nano-banana-pro/nano-banana/nano-banana-2), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`.
+**Creation:** `gen_create_video` (single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok), `gen_create_image` (nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`.
 
 **Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_delete_asset`.
 

@@ -37,10 +37,6 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Model | `generation_type` | `data.model` |
 |-------|--------------------|--------------|
 | Pika | `video_from_ingredients` | `"pika"` |
-| Kling 1.6 | `video_from_ingredients` | `"kling_1_6"` |
-| Seedance Lite | `video_from_ingredients` | `"seedance_lite"` |
-| Veo 3.1 | `video_from_ingredients` | `"veo_3_1"` |
-| Veo 3.1 Fast | `video_from_ingredients` | `"veo_3_1_fast"` |
 | Grok | `video_from_ingredients` | `"grok"` |
 
 ---
@@ -131,7 +127,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3300/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: `"kling_1_6"`, `"seedance_lite"`, `"pika"`, `"veo_3_1"`, `"veo_3_1_fast"`, or `"grok"`. |
+| `model` | string | Default model: `"pika"` or `"grok"`. |
 | `ratio` | string | Default aspect ratio. |
 | `resolution` | string | Default output resolution for supported video models: `"1080p"` or `"720p"`. |
 | `duration` | number | Default duration in seconds. |
