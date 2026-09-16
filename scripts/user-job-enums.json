@@ -4,10 +4,223 @@
   "x-fields": [
     "model",
     "version",
-    "duration"
+    "duration",
+    "lip_sync_model"
   ],
   "user_jobs": {
+    "analyze_viral_moment": {
+      "required": [
+        "video_url",
+        "video_layer_id"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "video_url",
+        "max_clip_duration",
+        "max_duration",
+        "min_duration",
+        "num_clips",
+        "output_aspect_ratio",
+        "smart_reframe",
+        "fit",
+        "speed_multiplier",
+        "selection_goal",
+        "mode",
+        "analysis_mode",
+        "speaker_lead_in_ms",
+        "reframe_precision",
+        "video_layer_id"
+      ]
+    },
+    "assemblyai_audio_caption_generation": {
+      "required": [],
+      "one_of_required": [
+        [
+          "audio"
+        ],
+        [
+          "video"
+        ]
+      ],
+      "properties": [
+        "audio",
+        "trim",
+        "video"
+      ]
+    },
+    "audio_matching": {
+      "required": [],
+      "one_of_required": [],
+      "properties": []
+    },
+    "clone_spreadsheet": {
+      "required": [
+        "project_id"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "project_id",
+        "project_share_token"
+      ]
+    },
+    "clone_voice": {
+      "required": [
+        "name",
+        "language",
+        "gender",
+        "text",
+        "sample_voice_url"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "name",
+        "language",
+        "gender",
+        "description",
+        "text",
+        "text_var",
+        "sample_voice_url",
+        "remove_silence",
+        "voice_model_provider"
+      ]
+    },
+    "create_avatar": {
+      "required": [
+        "train_avatar_node_id",
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "train_avatar_node_id",
+        "prompt",
+        "prompt_var",
+        "skin_noise_scale",
+        "skin_blend_opacity",
+        "is_detailed_skin"
+      ]
+    },
+    "create_avatar_switch_dress": {
+      "required": [
+        "train_avatar_node_id",
+        "content_resource_id",
+        "first_prompt",
+        "second_prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "train_avatar_node_id",
+        "content_resource_id",
+        "first_prompt",
+        "first_prompt_var",
+        "second_prompt",
+        "second_prompt_var",
+        "skin_detail_intensity",
+        "dress_resolution"
+      ]
+    },
+    "create_person_ear_product_avatar": {
+      "required": [
+        "person_train_avatar_node_id",
+        "product_train_avatar_node_id",
+        "person_prompt",
+        "product_prompt",
+        "product_ear_prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "person_train_avatar_node_id",
+        "product_train_avatar_node_id",
+        "person_prompt",
+        "person_prompt_var",
+        "product_prompt",
+        "product_prompt_var",
+        "product_ear_prompt",
+        "product_ear_prompt_var",
+        "person_model_strength",
+        "product_model_strength"
+      ]
+    },
+    "create_person_product_avatar": {
+      "required": [
+        "person_train_avatar_node_id",
+        "product_train_avatar_node_id",
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "person_train_avatar_node_id",
+        "product_train_avatar_node_id",
+        "prompt",
+        "prompt_var",
+        "skin_noise_scale",
+        "skin_blend_opacity",
+        "person_model_strength",
+        "product_model_strength"
+      ]
+    },
+    "create_talking_avatar_and_lip_sync": {
+      "required": [
+        "infinite_voice_lip_sync_data"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "talking_avatar_data",
+        "talking_avatar_combine_data",
+        "infinite_voice_lip_sync_data",
+        "previous_user_job_id"
+      ]
+    },
+    "design_voice": {
+      "required": [
+        "text",
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "text",
+        "text_var",
+        "gender",
+        "language",
+        "prompt",
+        "prompt_var",
+        "name",
+        "remove_silence",
+        "generation_id",
+        "speaker_embedding_url",
+        "voice_model_provider"
+      ]
+    },
+    "gemini_caption_generation": {
+      "required": [],
+      "one_of_required": [
+        [
+          "audio"
+        ],
+        [
+          "video"
+        ]
+      ],
+      "properties": [
+        "audio",
+        "trim",
+        "video"
+      ]
+    },
     "gemini_image_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "model",
+        "version",
+        "size",
+        "aspect_ratio",
+        "number_of_images",
+        "images"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -31,6 +244,21 @@
       }
     },
     "gemini_omni_video_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "model",
+        "aspect_ratio",
+        "duration",
+        "image",
+        "images",
+        "voice_replace_data",
+        "native_audio"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -69,6 +297,26 @@
       }
     },
     "gemini_video_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "negative_prompt",
+        "negative_prompt_var",
+        "model",
+        "aspect_ratio",
+        "resolution",
+        "duration",
+        "image",
+        "image_tail",
+        "images",
+        "image_var",
+        "native_audio",
+        "voice_replace_data"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -96,13 +344,56 @@
         "default": 8
       }
     },
+    "generate_pika_video": {
+      "required": [
+        "prompt",
+        "images"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "images",
+        "native_audio"
+      ]
+    },
     "grok_image_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "negative_prompt",
+        "negative_prompt_var",
+        "aspect_ratio",
+        "model"
+      ],
       "model": {
         "type": "string",
         "default": "grok-imagine-image-quality"
       }
     },
     "grok_video_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "negative_prompt",
+        "negative_prompt_var",
+        "image",
+        "images",
+        "duration",
+        "resolution",
+        "aspect_ratio",
+        "model",
+        "native_audio",
+        "voice_replace_data"
+      ],
       "model": {
         "type": "string",
         "default": "grok-imagine-video-1.5"
@@ -147,7 +438,61 @@
         "default": 5
       }
     },
+    "image_caption_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "images"
+      ]
+    },
+    "infinite_voice_lip_sync": {
+      "required": [
+        "talking_avatar_video_data"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "voice_generation_data",
+        "voice_data",
+        "talking_avatar_video_data",
+        "remove_background",
+        "remove_silence",
+        "lip_sync_model"
+      ],
+      "lip_sync_model": {
+        "type": "string",
+        "enum": [
+          "sync.so",
+          "gen"
+        ],
+        "default": "gen"
+      }
+    },
     "kling": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [
+        [
+          "images"
+        ],
+        [
+          "model"
+        ]
+      ],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "negative_prompt",
+        "negative_prompt_var",
+        "images",
+        "duration",
+        "native_audio",
+        "kling_mode",
+        "aspect_ratio",
+        "kling_version",
+        "model",
+        "voice_replace_data"
+      ],
       "model": {
         "type": [
           "string",
@@ -165,6 +510,26 @@
       }
     },
     "kling_img2video": {
+      "required": [
+        "image"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "negative_prompt",
+        "negative_prompt_var",
+        "image",
+        "image_tail",
+        "duration",
+        "native_audio",
+        "kling_mode",
+        "aspect_ratio",
+        "image_var",
+        "image_tail_var",
+        "model",
+        "voice_replace_data"
+      ],
       "model": {
         "type": [
           "string",
@@ -184,7 +549,44 @@
         "default": 10
       }
     },
+    "midjourney": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "aspect_ratio"
+      ]
+    },
+    "openai_image_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "operation",
+        "prompt",
+        "content_resource_id",
+        "content_resource_ids",
+        "size",
+        "number_of_images",
+        "images"
+      ]
+    },
     "openai_image_generation_2": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "model",
+        "prompt_var",
+        "format",
+        "number_of_images",
+        "images",
+        "content_resource_ids"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -195,7 +597,35 @@
         "default": "gpt-image-2"
       }
     },
+    "publish_content": {
+      "required": [],
+      "one_of_required": [],
+      "properties": []
+    },
+    "remotion": {
+      "required": [
+        "overlays"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "overlays"
+      ]
+    },
+    "remotion_publish": {
+      "required": [],
+      "one_of_required": [],
+      "properties": []
+    },
     "remove_background": {
+      "required": [
+        "model",
+        "video"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "model",
+        "video"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -205,6 +635,18 @@
       }
     },
     "replace_master_kling": {
+      "required": [
+        "master_kling_id"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "master_kling_id",
+        "image",
+        "prompt",
+        "duration",
+        "is_user_resource_uploaded",
+        "video"
+      ],
       "duration": {
         "type": [
           "integer",
@@ -216,6 +658,26 @@
       }
     },
     "seedance_2_0_video_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "images_list",
+        "video_files",
+        "audio_files",
+        "aspect_ratio",
+        "resolution",
+        "duration",
+        "input_video_duration",
+        "model",
+        "native_audio",
+        "voice_replace_data",
+        "image",
+        "image_tail",
+        "images",
+        "metadata"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -234,6 +696,26 @@
       }
     },
     "seedance_2_5_video_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "images_list",
+        "video_files",
+        "audio_files",
+        "aspect_ratio",
+        "resolution",
+        "duration",
+        "input_video_duration",
+        "model",
+        "native_audio",
+        "voice_replace_data",
+        "image",
+        "image_tail",
+        "images",
+        "metadata"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -252,6 +734,21 @@
       }
     },
     "seedance_video_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "image",
+        "image_tail",
+        "images",
+        "prompt",
+        "prompt_var",
+        "aspect_ratio",
+        "duration",
+        "camera_fixed",
+        "model",
+        "native_audio",
+        "voice_replace_data"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -271,6 +768,18 @@
       }
     },
     "seedream_image_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "model",
+        "aspect_ratio",
+        "images",
+        "content_resource_ids"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -281,6 +790,34 @@
       }
     },
     "song_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "auto_create_from_video",
+        "duration",
+        "duration_var",
+        "instrumental",
+        "custom_mode",
+        "model",
+        "style",
+        "title",
+        "negative_tags",
+        "vocal_gender",
+        "style_weight",
+        "weirdness_constraint",
+        "audio_reference",
+        "audio_reference_url",
+        "seed",
+        "video_context",
+        "reference_audio",
+        "reference_audio_url",
+        "source_audio_resource_id",
+        "audio_weight",
+        "persona_id",
+        "persona_model"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -301,7 +838,56 @@
         "default": 480
       }
     },
+    "sora2_video_generation": {
+      "required": [],
+      "one_of_required": [],
+      "properties": []
+    },
+    "spreadsheet_audio_matching": {
+      "required": [
+        "spreadsheet_row_id"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "spreadsheet_row_id",
+        "is_commercial"
+      ]
+    },
+    "talking_avatar": {
+      "required": [],
+      "one_of_required": [],
+      "properties": [
+        "is_user_resource_uploaded",
+        "image",
+        "image_tail",
+        "video",
+        "prompts",
+        "durations"
+      ]
+    },
+    "talking_avatar_combine": {
+      "required": [
+        "talking_avatar_user_job_id"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "talking_avatar_user_job_id",
+        "talking_avatar_name"
+      ]
+    },
     "text_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "model",
+        "temperature",
+        "prompt",
+        "prompt_var",
+        "max_length",
+        "images"
+      ],
       "model": {
         "type": "string",
         "enum": [
@@ -310,6 +896,88 @@
         ],
         "default": "gemini"
       }
+    },
+    "train_social": {
+      "required": [
+        "platform",
+        "type",
+        "value"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "platform",
+        "type",
+        "value",
+        "days",
+        "max_results",
+        "monitoring",
+        "comment_monitoring"
+      ]
+    },
+    "transcription": {
+      "required": [],
+      "one_of_required": [
+        [
+          "audio"
+        ],
+        [
+          "video"
+        ]
+      ],
+      "properties": [
+        "audio",
+        "trim",
+        "video"
+      ]
+    },
+    "video_from_image_and_image_from_text": {
+      "required": [
+        "image_from_text_data",
+        "video_from_image_data"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "media",
+        "image_from_text_data",
+        "video_from_image_data"
+      ]
+    },
+    "voice_design_runpod": {
+      "required": [],
+      "one_of_required": [],
+      "properties": []
+    },
+    "voice_generation": {
+      "required": [],
+      "one_of_required": [
+        [
+          "text"
+        ],
+        [
+          "sample_voice_url"
+        ]
+      ],
+      "properties": [
+        "text",
+        "sample_voice_url",
+        "text_var",
+        "voice_id",
+        "provider",
+        "enhance_voice",
+        "remove_silence",
+        "voice_model_provider"
+      ]
+    },
+    "voice_replace": {
+      "required": [
+        "source_content_resource_id",
+        "voice_replace_data"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "source_content_resource_id",
+        "voice_replace_data"
+      ]
     }
   }
 }

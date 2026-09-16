@@ -19,13 +19,13 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 | `image_from_text` | image | gemini, gemini_pro, gemini_2, gemini_2_lite, imagen, seedream-4.0, seedream-4.5, gpt-image-2, gpt-image-2.5-flare, gpt-image-2.5-sunburst, midjourney, grok |
 | `video_from_text` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
 | `video_from_image` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
-| `video_from_ingredients` | video | pika, grok |
-| `speech_from_text` | audio | (voice_method: my_voices, design_voice, clone_voice) |
-| `lipsync` | video | sync_so, gen |
-| `captions` | caption data | gemini |
+| `video_from_ingredients` | video | pika |
+| `speech_from_text` | audio | (uses a saved `voice_id`) |
+| `lipsync` | video | `lip_sync_model`: sync.so, gen |
+| `captions` | caption layer (timed segments) | — |
 | `transcription` | transcript text + sentence timings | — |
-| `media` | pass-through upload | — |
-| `render` | composite video | (no model — uses layer stack) |
+
+Uploaded media is a cell **value**, not a generation — see [Media](/reference/cards/media/). Compositing is the dedicated [render endpoint](#render-composite), with no `generation_type`.
 
 ## Text
 
@@ -104,68 +104,32 @@ Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2
   "generation_type": "video_from_ingredients",
   "data": {
     "prompt": "combine these 3 products in a tabletop pan-around shot",
-    "model": "pika",
-    "asset_resource_ids": [4821, 4822, 4823],
-    "aspect_ratio": "9:16",
-    "resolution": "1080p",
-    "native_audio": false,
-    "duration": 5
+    "images": [
+      { "value": "https://cdn.gen.pro/uploads/product-1.png" },
+      { "value": "https://cdn.gen.pro/uploads/product-2.png" }
+    ],
+    "native_audio": false
   }
 }
 ```
 
-Use when you want the generator to composite multiple uploaded assets. `resolution` and `native_audio` are optional and model-dependent.
+Pika composites the uploaded images (public URLs from your content resources) into one clip. `prompt` and `images` are required; `native_audio` is optional. No other fields are accepted.
 
 ## Speech from Text
 
-Three voice methods:
-
-### my_voices (use a saved voice)
-
 ```json
 {
   "generation_type": "speech_from_text",
   "data": {
-    "script": "Welcome to Santiago's taco tour...",
-    "voice_method": "my_voices",
+    "text": "Welcome to Santiago's taco tour...",
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "enhance_voice": true,
-    "speed": 1.0
+    "remove_silence": false
   }
 }
 ```
 
-### design_voice (voice from a text description)
-
-```json
-{
-  "generation_type": "speech_from_text",
-  "data": {
-    "script": "Welcome to Santiago's taco tour...",
-    "voice_method": "design_voice",
-    "language": "en",
-    "gender": "male",
-    "voice_model_provider": "supertonic_3",
-    "enhance_voice": true
-  }
-}
-```
-
-### clone_voice (voice cloned from audio)
-
-```json
-{
-  "generation_type": "speech_from_text",
-  "data": {
-    "script": "Welcome to Santiago's taco tour...",
-    "voice_method": "clone_voice",
-    "voice_model_provider": "supertonic_3",
-    "audio_resource_id": 5921
-  }
-}
-```
-
-`voice_model_provider` is optional for `design_voice` and `clone_voice`. It defaults to `supertonic_3`; use `qwen3_voice_design` for Qwen.
+`text` is required (1–4000 characters); `voice_id` is a saved voice from `GET /v1/agents/{agent_id}/voice/library`. Designing or cloning a voice are separate jobs (`design_voice`, `clone_voice`), not modes of `speech_from_text`.
 
 ## Lipsync
 
@@ -173,14 +137,17 @@ Three voice methods:
 {
   "generation_type": "lipsync",
   "data": {
-    "model": "sync_so",
-    "video_resource_id": 6001,
-    "audio_resource_id": 5921
+    "talking_avatar_video_data": {
+      "video": { "value": "https://cdn.gen.pro/uploads/talking-head.mp4" },
+      "audio": { "value": "https://cdn.gen.pro/outputs/voiceover-abc123.mp3" }
+    },
+    "lip_sync_model": "gen",
+    "remove_background": false
   }
 }
 ```
 
-Models: `sync_so`, `gen`.
+`talking_avatar_video_data.video.value` is required. Supply the speech either as `talking_avatar_video_data.audio.value` or as `voice_generation_data` (the same `data` shape as `speech_from_text`) to synthesize it in the same job. `lip_sync_model`: `sync.so` or `gen` (default `gen`).
 
 ## Captions
 
@@ -188,13 +155,13 @@ Models: `sync_so`, `gen`.
 {
   "generation_type": "captions",
   "data": {
-    "model": "gemini",
-    "source_resource_id": 6001
+    "video": { "value": "https://cdn.gen.pro/outputs/final-abc123.mp4" },
+    "trim": { "start_seconds": 0, "duration_seconds": 30 }
   }
 }
 ```
 
-Works from either audio or video source. Returns caption timing data usable as a caption layer.
+Pass exactly one source: `audio` or `video` (`{ "value": "<uri>" }`). `trim` is optional. Produces a caption layer with timed segments (`result.captions`, plus `full_text` and `audio_duration`).
 
 ## Transcription
 
@@ -208,19 +175,6 @@ Works from either audio or video source. Returns caption timing data usable as a
 ```
 
 Pass exactly one source: `audio`, `video`, or `content_resource_id`. Add `trim` with `start_seconds` and `duration_seconds` to transcribe only part of it. Returns `full_text`, `sentences` with `startMs`/`endMs`, and `audio_duration`. Also available without a sheet via `POST /v1/transcriptions?agent_id=`. See [Transcription](/reference/cards/transcription/).
-
-## Media (pass-through upload)
-
-```json
-{
-  "generation_type": "media",
-  "data": {
-    "content_resource_id": 7000
-  }
-}
-```
-
-No AI generation — just attaches an uploaded asset to the cell. Useful for background music, uploaded b-roll, etc.
 
 ## Render (composite)
 

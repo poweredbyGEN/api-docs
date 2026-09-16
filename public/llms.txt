@@ -382,7 +382,7 @@ curl -X POST "https://api.gen.pro/v1/generations/789/stop"     -H "X-API-Key: $G
 curl -X POST "https://api.gen.pro/v1/generations/789/continue" -H "X-API-Key: $GEN_API_KEY"   # re-charges
 ```
 
-**Upload an asset** (for `video_from_image`, `video_from_ingredients`, `lipsync`, `captions`, `media`):
+**Upload an asset** (for `video_from_image`, `video_from_ingredients`, `lipsync`, `captions`, or as a cell value):
 
 ```bash
 # Small files (multipart):
@@ -612,29 +612,30 @@ Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-
 ### video_from_ingredients
 ```json
 { "generation_type": "video_from_ingredients",
-  "data": { "prompt": "...", "model": "pika", "asset_resource_ids": [4821, 4822, 4823], "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
+  "data": { "prompt": "...", "images": [{ "value": "https://cdn.gen.pro/uploads/a.png" }, { "value": "https://cdn.gen.pro/uploads/b.png" }], "native_audio": false } }
 ```
-Models: `pika`, `grok`. `resolution` and `native_audio` are optional and model-dependent.
+Model: `pika`. `prompt` and `images` (public URLs) are required; `native_audio` optional; no other fields are accepted.
 
 ### speech_from_text
 ```json
 { "generation_type": "speech_from_text",
-  "data": { "script": "...", "voice_method": "my_voices", "voice_id": "21m00...", "enhance_voice": true, "speed": 1.0 } }
+  "data": { "text": "...", "voice_id": "21m00...", "enhance_voice": true, "remove_silence": false } }
 ```
-Voice methods: `my_voices` (saved voice), `design_voice` (generate from gender/language description), `clone_voice` (use audio sample: pass `audio_resource_id`). For `design_voice` and `clone_voice`, optional `voice_model_provider` defaults to `supertonic_3`; pass `qwen3_voice_design` for Qwen.
+`text` required (1–4000 chars); `voice_id` from `GET /v1/agents/:agent_id/voice/library`. Designing/cloning a voice are separate jobs (`design_voice`, `clone_voice`).
 
 ### lipsync
 ```json
 { "generation_type": "lipsync",
-  "data": { "model": "sync_so", "video_resource_id": 6001, "audio_resource_id": 5921 } }
+  "data": { "talking_avatar_video_data": { "video": { "value": "https://.../talking-head.mp4" }, "audio": { "value": "https://.../voiceover.mp3" } }, "lip_sync_model": "gen", "remove_background": false } }
 ```
-Models: `sync_so`, `gen`.
+`talking_avatar_video_data.video.value` required; speech as `talking_avatar_video_data.audio.value` or `voice_generation_data` (same shape as `speech_from_text` data). `lip_sync_model`: `sync.so`, `gen` (default).
 
 ### captions
 ```json
 { "generation_type": "captions",
-  "data": { "model": "gemini", "source_resource_id": 6001 } }
+  "data": { "video": { "value": "https://.../final.mp4" }, "trim": { "start_seconds": 0, "duration_seconds": 30 } } }
 ```
+Pass exactly one source: `audio` or `video` (`{ "value": "<uri>" }`); `trim` optional. Produces a caption layer with timed segments (`result.captions`, `full_text`, `audio_duration`).
 
 ### transcription
 ```json
@@ -643,12 +644,7 @@ Models: `sync_so`, `gen`.
 ```
 Pass exactly one source: `audio` (`{ "value": "<uri>" }`), `video` (`{ "value": "<uri>" }`), or `content_resource_id`. Optional `trim: { "start_seconds": 15, "duration_seconds": 30 }` alongside `audio`/`video`. Result: `{ full_text, sentences: [{ text, startMs, endMs }], audio_duration }`. Uses credits based on the audio duration transcribed. Also available without a sheet: `POST /v1/transcriptions?agent_id=`. Use `captions` instead when you want word-level timings for subtitle overlays.
 
-### media (pass-through upload)
-```json
-{ "generation_type": "media",
-  "data": { "content_resource_id": 7000 } }
-```
-No AI — just attaches an uploaded resource to the cell.
+Uploaded media is a cell value, not a generation: `PATCH /v1/vidsheet/:id/cells/:cell_id` with `{ "spreadsheet_cell": { "value": "<url>" } }`.
 
 ### render (composite)
 ```

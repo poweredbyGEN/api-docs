@@ -1,11 +1,11 @@
 ---
 title: "Lipsync"
-description: Synchronize audio to a video — the lips in the video match the speech.
+description: Synchronize speech to a video — the lips in the video match the audio.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The Lipsync card takes a video and an audio track, then re-renders the video so the speaker's lip movements match the audio. Two models are available with different quality/speed tradeoffs.
+The Lipsync card takes a talking-head video and a speech track, then re-renders the video so the speaker's lip movements match the audio. The speech can be an existing audio file or synthesized in the same job.
 
 <Aside>
   All generation endpoints require the `agent_id` query parameter.
@@ -13,62 +13,59 @@ The Lipsync card takes a video and an audio track, then re-renders the video so 
 
 ## Models
 
-| Model | `generation_type` | `data.model` | Notes |
-|-------|-------------------|---------------|-------|
-| Sync | `lipsync` | `"sync_so"` | Higher quality, slower processing. |
-| GEN | `lipsync` | `"gen"` | Faster, good quality. |
+| `data.lip_sync_model` | Notes |
+|-----------------------|-------|
+| `"gen"` | Default. Faster, good quality. |
+| `"sync.so"` | Higher quality, slower processing. |
 
 ---
 
 ## Generate lipsync
 
-Lipsync is typically applied to a **layer** within a cell, not the cell itself, since it composites audio onto an existing video layer.
-
 ```
-POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 ```
-
-### Path parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | integer | The sheet ID. |
-| `cell_id` | integer | The cell ID. |
-| `layer_id` | integer | The layer ID. |
 
 ### Request body
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"lipsync"`. |
-| `data.video_resource_id` | string | Yes | Source video content resource ID. |
-| `data.audio_resource_id` | string | Yes | Source audio content resource ID. |
-| `data.model` | string | Yes | `"sync_so"` or `"gen"`. |
+| `data.talking_avatar_video_data.video.value` | string (URI) | Yes | Public URL of the source video. |
+| `data.talking_avatar_video_data.audio.value` | string (URI) | One of | Public URL of the speech audio. |
+| `data.voice_generation_data` | object | One of | Synthesize the speech in this job — same shape as [Speech from Text](/reference/cards/speech-from-text/) `data` (`text`, `voice_id`, …). |
+| `data.lip_sync_model` | string | No | `"gen"` (default) or `"sync.so"`. |
+| `data.remove_background` | boolean | No | Remove the video background. Default `false`. |
+| `data.remove_silence` | boolean | No | Trim silence from synthesized speech. Default `false`. |
+
+Exactly one of `audio.value` or `voice_generation_data` must be supplied. No other top-level fields are accepted.
 
 <Aside type="tip">
-  The audio resource is usually the output from a [Speech from Text](/reference/cards/speech-from-text/) generation. Chain them together: generate speech first, then pass the audio resource ID into the lipsync step.
+  Resource URLs come from `GET /v1/content_resources`. Chain the steps: generate speech first, then pass its output URL as `audio.value`.
 </Aside>
 
 ### Example
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000/generate?agent_id=42" \
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/generate?agent_id=42" \
   -H "X-API-Key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
     "generation_type": "lipsync",
     "data": {
-      "model": "sync_so",
-      "video_resource_id": "video_res_123",
-      "audio_resource_id": "audio_res_456"
+      "talking_avatar_video_data": {
+        "video": { "value": "https://cdn.gen.pro/uploads/talking-head.mp4" },
+        "audio": { "value": "https://cdn.gen.pro/outputs/voiceover-abc123.mp3" }
+      },
+      "lip_sync_model": "gen"
     }
   }'
 ```
 
-You can also generate on the cell directly if it holds the video:
+You can also generate on a layer within the cell:
 
 ```
-POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/generate?agent_id={agent_id}
 ```
 
 The request body is identical.
@@ -98,7 +95,7 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 
 | Status | Error code | Description |
 |--------|------------|-------------|
-| `422` | `validation_error` | Missing or invalid video/audio resource. |
+| `422` | `validation_error` | Missing `video.value`, or neither `audio.value` nor `voice_generation_data` supplied. |
 | `404` | `not_found` | Sheet, cell, or layer not found. |
 
 ---
@@ -111,5 +108,5 @@ Poll [Check generation status](/reference/generations/#check-generation-status) 
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `lipSyncModel` | string | Default model: `"sync_so"` or `"gen"`. |
+| `lipSyncModel` | string | Default model: `"gen"` or `"sync.so"`. |
 | `autoGenerate` | boolean | Auto-trigger generation when source video/audio changes. |
