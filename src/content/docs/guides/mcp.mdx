@@ -41,19 +41,26 @@ claude mcp add --transport http gen https://mcp.gen.pro --header "Authorization:
 
 The GEN MCP is hosted-only — there is no package to install or local process to run.
 
+## How the MCP fits with the GEN agent
+
+The MCP owns the Vidsheet surface — sheets, cards, cells, layers, generation, render, publish. GEN's own agent (the chat at gen.pro, and `gen_chat` / `gen_ask` here) plans over those same tools; there is no second implementation of Vidsheet logic behind the chat. If a capability crosses the network with your credentials, it is an MCP tool. The agent keeps only its local loop: resolving what you meant, refusing, asking when a request is ambiguous.
+
+- Exact operation → call the `gen_*` tool (`gen_get_vidsheet_full`, `gen_card_catalog`, `gen_update_cell`, …).
+- Fuzzy goal → `gen_chat` (build something) or `gen_ask` (question about social data). The agent plans, calls the tools, and returns a `run_id` you poll with `gen_get_run_status`.
+
 ## Previously used the local package?
 
-The downloadable `gen-mcp-server` package (PyPI, `uvx gen-mcp-server`) is **deprecated** — its final release only points here. It still works so existing setups have a migration window, but it no longer receives new tools, fixes, or API updates. Switch to the hosted config above. If your client is already configured with `https://mcp.gen.pro/mcp`, that URL keeps working — no change needed beyond removing the local package when convenient.
+The downloadable `gen-mcp-server` package (PyPI, `uvx gen-mcp-server`) is **retired** and no longer served. Remove it and use the hosted config above. A client already configured with `https://mcp.gen.pro/mcp` keeps working — that path is still accepted.
 
 ## What It Can Do
 
-The current GEN MCP exposes **100 tools**, **9 prompts**, and **3 guidance resources**.
+The current GEN MCP exposes **155 tools** and one guidance resource, `gen://api-reference` (read it first).
 
 | Area | What your assistant can do |
 |---|---|
-| **Ask GEN** | Use `gen_chat`, `gen_ask`, `gen_research`, `gen_make_video`, and `gen_generate_content_ideas` for natural-language work |
+| **Ask GEN** | Use `gen_chat`, `gen_ask`, `gen_run_research`, and `gen_generate_content_ideas` for natural-language work |
 | **Create media** | Generate videos, images, songs, song mixes, voices, voice samples, and rendered final videos |
-| **Build Vidsheets** | Create or clone engines, manage rows, columns, cells, layers, variables, and templates |
+| **Build Vidsheets** | Read a whole sheet (`gen_get_vidsheet_full`), browse creation cards (`gen_card_catalog`, `gen_card_schema`), create or clone engines, manage rows, columns, cells, layers, variables, and templates |
 | **Manage assets** | List libraries, create direct uploads, import media from URLs, rename assets, and delete assets |
 | **Run strategy workflows** | Create content ideas, query watchlists, research trends, and manage recurring jobs |
 | **Publish** | Connect social accounts, schedule posts, update schedules, and remove scheduled posts |
@@ -66,9 +73,9 @@ GEN MCP tools use workspace credits for paid generation, research, voice, song, 
 To add credits:
 
 - Use `gen_buy_credits` for Stripe checkout.
-- Use `gen_create_x402_credit_quote` for USDC via x402.
+- For USDC via x402, call the API directly: `POST /v1/x402_credit_purchase` (see [Credits](/step-5-export/credits/)).
 
-`gen_create_x402_credit_quote` returns the same `payment_methods` and `payment_required.accepts` fields as the API. If you omit `network`, GEN lists every configured option instead of assuming one chain. Show the Sui, Solana, and Base options to the user or calling agent, then sign and retry using the chosen `payment_required.accepts[]` entry.
+`POST /v1/x402_credit_purchase` returns `payment_methods` and `payment_required.accepts`. If you omit `network`, GEN lists every configured option instead of assuming one chain. Show the Sui, Solana, and Base options to the user or calling agent, then sign and retry using the chosen `payment_required.accepts[]` entry.
 
 Workspace funding wallets are backend infrastructure for settlement and sweeping. MCP clients should present the returned payment methods, not ask users to hunt for hidden workspace wallets.
 

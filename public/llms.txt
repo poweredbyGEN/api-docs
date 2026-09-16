@@ -791,21 +791,23 @@ The official GEN MCP is the hosted remote server (Streamable HTTP):
 { "name": "gen", "url": "https://mcp.gen.pro", "headers": { "Authorization": "Bearer your-pat" } }
 ```
 
-`https://mcp.gen.pro/mcp` also still works for previously configured clients. There is no local package to install: the downloadable `gen-mcp-server` PyPI package is deprecated (its final release only points at the hosted server) — anyone still running it via `uvx`/`pip` should switch to the hosted URL above.
+`https://mcp.gen.pro/mcp` also still works for previously configured clients. There is no local package to install: the downloadable `gen-mcp-server` PyPI package is retired and no longer served — never `pip install` or `uvx` it; use the hosted URL above.
 
-The current MCP exposes 150 `gen_*` tools, 9 prompts, and 3 guidance resources. Key tools by category:
+**How the MCP fits with the GEN agent.** The MCP owns the Vidsheet surface (sheets, cards, cells, layers, generation, render, publish). GEN's own agent — the chat at gen.pro, and `gen_chat` / `gen_ask` here — plans over those same tools; there is no second implementation of Vidsheet logic behind the chat. If a capability crosses the network with your credentials, it is an MCP tool; the agent keeps only its local loop (resolving what you meant, refusing, asking when ambiguous). Exact operation → call the `gen_*` tool. Fuzzy goal → `gen_chat` (build) or `gen_ask` (data question); the agent returns a `run_id` you poll with `gen_get_run_status`.
 
-**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_research` (topic research across social + web), `gen_make_video` (finished multi-scene video from a brief), `gen_generate_content_ideas`.
+The current MCP exposes 155 `gen_*` tools and one guidance resource, `gen://api-reference` (read it first). Key tools by category:
+
+**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_run_research` (topic research across social + web), `gen_generate_content_ideas`.
 
 **Creation:** `gen_create_video` (single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok), `gen_create_image` (nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`, `gen_render_video`.
 
-**Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_upload_asset`, `gen_complete_asset_upload`, `gen_delete_asset`.
+**Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_create_direct_upload`, `gen_complete_asset_upload`, `gen_delete_asset`.
 
-**Voices:** `gen_list_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_create_voice`.
+**Voices:** `gen_list_agent_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_preview_voice`.
 
 **Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
 
-**Vidsheets:** `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
+**Vidsheets:** `gen_get_vidsheet_full` (whole sheet in one read), `gen_card_catalog` / `gen_card_schema` (creation cards, per-field `accepts`, model choices), `gen_list_templates`, `gen_clone_template`, `gen_create_engine`, `gen_get_engine`, `gen_clone_engine`, `gen_list_columns`, `gen_create_column`, `gen_list_rows`, `gen_create_row`, `gen_get_cell`, `gen_update_cell`, `gen_create_variable`, `gen_update_variable`, `gen_delete_variable`.
 
 **Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
 

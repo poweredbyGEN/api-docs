@@ -15,7 +15,7 @@ gen.pro/mcpapi, quickstarts, the MCP setup page) follows this. Modeled on Sakana
 7. **Single column**, ~700–800px max width. No sidebar clutter on a quickstart; left-nav only on the full reference.
 8. **One language per block, sequential** (curl → Python → TS) rather than tab-overload. Inline-code (`backticks`) for names: `fugu`, `gen_create_image`.
 9. **Prerequisites first, edge cases last.** Warnings as a short `Note:` / callout, not a paragraph.
-10. **Show, don't tell, the choice.** Hosted vs download = two labeled code blocks side by side, not a prose explanation of the difference.
+10. **Show, don't tell.** Remote-config JSON and the CLI one-liner are two labeled code blocks, not a prose explanation. The MCP is hosted-only — never document a download/local install path.
 
 ## Page skeleton (quickstart / get-started)
 
@@ -36,7 +36,7 @@ gen.pro/mcpapi, quickstarts, the MCP setup page) follows this. Modeled on Sakana
 
 - Heading: `### 1. Install` → then the install code. No "In this step you will…".
 - Intro: "Connect GEN to your agent over MCP." (6 words) → code block.
-- Choice: a **Hosted** code block and a **Download (local)** code block, each labeled, no comparison paragraph.
+- Choice: a **Remote MCP** JSON block and a **Command-line** block, each labeled, no comparison paragraph.
 
 ## Anti-patterns (do NOT do)
 
@@ -52,7 +52,7 @@ gen.pro/mcpapi, quickstarts, the MCP setup page) follows this. Modeled on Sakana
   agent must author/maintain pages to this standard.
 - **gen.pro/mcpapi** and any dev landing page — hero may keep one marketing line, but
   the body is code-first per the rules above.
-- The forthcoming **MCP setup page** (hosted vs download) — two labeled code blocks.
+- The **MCP setup page** (`guides/mcp.mdx`) — hosted only, two labeled code blocks.
 
 ## api.gen.pro layout removals (2026-06-24 — mav)
 
