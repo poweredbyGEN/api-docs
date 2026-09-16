@@ -46,7 +46,6 @@ const SURFACES = {
   "public/llms.txt": ALL,
   "public/llms-full.txt": ALL,
   "src/content/docs/reference/generation-types.mdx": ALL,
-  "src/content/docs/guides/typescript-sdk.mdx": Object.keys(ROUTES),
   "src/content/docs/reference/cards/speech-from-text.mdx": ["speech_from_text"],
   "src/content/docs/reference/cards/lipsync.mdx": ["lipsync"],
   "src/content/docs/reference/cards/captions.mdx": ["captions"],
@@ -81,7 +80,7 @@ for (const [file, canonicals] of Object.entries(SURFACES)) {
   const named = [
     ...text.matchAll(/generation_type["']?\s*[:=]\s*["'](\w+)["']/g),
     ...(text.match(/generation_type:\n(?:.*\n)*?\s+enum:\n((?:\s+- \w+\n)+)/)?.[1].matchAll(/- (\w+)/g) ?? []),
-    ...(file.endsWith("generation-types.mdx") || file.endsWith("typescript-sdk.mdx") ? text.matchAll(/^\|[^|]*\| `(\w+)` \|/gm) : []),
+    ...(file.endsWith("generation-types.mdx") ? text.matchAll(/^\|[^|]*\| `(\w+)` \|/gm) : []),
   ];
   for (const [, t] of named) if (!ACCEPTED.has(t)) errors.push(`${file}: documents generation_type ${t}, which Rails rejects`);
 }

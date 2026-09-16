@@ -3,7 +3,7 @@ title: Content Ideas API
 description: Generate data-driven video content ideas powered by trending data analysis.
 ---
 
-import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
 The Content Ideas API generates video content ideas by analyzing trending videos with engagement-weighted hooks and transcripts. Ideas include hooks, scripts, scene breakdowns, and inspiration sources with real creator data.
 
@@ -13,8 +13,6 @@ The Content Ideas API generates video content ideas by analyzing trending videos
 
 ### 1. Generate Ideas
 
-<Tabs>
-<TabItem label="curl">
 ```bash
 curl -X POST https://agent.gen.pro/v1/agent/run \
   -H "X-API-Key: $GEN_API_KEY" \
@@ -24,16 +22,6 @@ curl -X POST https://agent.gen.pro/v1/agent/run \
     "agent_id": "YOUR_AGENT_ID"
   }'
 ```
-</TabItem>
-<TabItem label="TypeScript SDK">
-```typescript
-const run = await client.agent.generateIdeas(agentId, {
-  numIdeas: 5,
-  requirements: ["focus on before/after", "under 12 seconds"],
-});
-```
-</TabItem>
-</Tabs>
 
 **Response (202):**
 ```json

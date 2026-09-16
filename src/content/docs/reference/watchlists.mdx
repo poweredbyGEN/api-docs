@@ -42,12 +42,6 @@ curl "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists" \
   -H "X-API-Key: $GEN_API_KEY"
 ```
 
-```typescript
-import { gen } from "@poweredbygen/gen-sdk";
-const { sdk } = gen({ apiKey: process.env.GEN_API_KEY! });
-const watchlists = await sdk.monitoring.listWatchlists(agentId);
-```
-
 ### POST /v1/agents/:agent_id/watchlists
 
 Create a watchlist, optionally with initial sources. Idempotent on `name`.
@@ -63,16 +57,6 @@ curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists" \
       { "platform": "tiktok", "target_type": "keyword", "target_value": "sui" }
     ]
   }'
-```
-
-```typescript
-const watchlist = await sdk.monitoring.createWatchlist(agentId, {
-  name: "crypto watch",
-  sources: [
-    { platform: "tiktok", target_type: "keyword", target_value: "btc" },
-    { platform: "tiktok", target_type: "keyword", target_value: "sui" },
-  ],
-});
 ```
 
 **Request body:**
@@ -103,12 +87,6 @@ curl -X PATCH "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID"
   -d '{ "intent_active": false }'
 ```
 
-```typescript
-await sdk.monitoring.pauseWatchlist(agentId, watchlistId);
-await sdk.monitoring.resumeWatchlist(agentId, watchlistId);
-await sdk.monitoring.updateWatchlist(agentId, watchlistId, { name: "crypto watch v2" });
-```
-
 **Updatable fields:** `name`, `intent_active`, `project_id`.
 
 ### DELETE /v1/agents/:agent_id/watchlists/:watchlist_id
@@ -126,14 +104,6 @@ curl -X POST "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/s
   -d '{ "platform": "tiktok", "target_type": "hashtag", "target_value": "ethereum" }'
 ```
 
-```typescript
-await sdk.monitoring.addWatchlistSource(agentId, watchlistId, {
-  platform: "tiktok",
-  target_type: "hashtag",
-  target_value: "ethereum",
-});
-```
-
 ### DELETE source
 
 Two equivalent forms — by source id (preferred), or by the (platform, target_type, target_value) key.
@@ -146,16 +116,6 @@ curl -X DELETE "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID
 # by key
 curl -X DELETE "https://agent-core.gen.pro/v1/agents/$AGENT_ID/watchlists/$WL_ID/sources?platform=tiktok&target_type=keyword&target_value=btc" \
   -H "X-API-Key: $GEN_API_KEY"
-```
-
-```typescript
-await sdk.monitoring.removeWatchlistSource(agentId, watchlistId, { sourceId });
-// or
-await sdk.monitoring.removeWatchlistSource(agentId, watchlistId, {
-  platform: "tiktok",
-  target_type: "keyword",
-  target_value: "btc",
-});
 ```
 
 ## Schemas
@@ -215,7 +175,7 @@ After creating a watchlist, query the captured data through the agent chat — e
 
 ## Query a watchlist with typed filters
 
-For programmatic asks where you'd rather build a typed parameter object than a natural-language prompt, the SDK and MCP both ship a `queryWatchlist` primitive that wraps the chat path with structured fields.
+For programmatic asks where you'd rather build a typed parameter object than a natural-language prompt, the MCP server ships a `gen_query_watchlist` tool that wraps the chat path with structured fields.
 
 ```bash
 # Equivalent natural-language ask: "top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"
@@ -223,18 +183,6 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d "{\"agent_id\":\"$AGENT_ID\",\"message\":\"top 30 videos from @list:$WL_ID by engagement rate in the last 90 days\"}"
-```
-
-```typescript
-import { gen } from "@poweredbygen/gen-sdk";
-const { sdk } = gen({ apiKey: process.env.GEN_API_KEY! });
-
-const run = await sdk.monitoring.queryWatchlist(agentId, watchlistId, {
-  question: "top videos",
-  limit: 30,
-  days: 90,
-  sort_by: "engagement_rate",
-});
 ```
 
 **Parameters** (all optional except `question`):
@@ -248,7 +196,7 @@ const run = await sdk.monitoring.queryWatchlist(agentId, watchlistId, {
 | `min_engagement_rate` | number 0.0-1.0 | Threshold as a fraction. `0.05` filters to videos with engagement rate above 5%. |
 | `return_all` | boolean | Walk every matching row up to the maximum of 1000 results. Without an explicit limit, lifts the per-call ceiling. |
 
-**Response:** a run record with a `run_id`. Poll the run with `getRunStatus` until `status === "completed"`; the final answer payload contains a video grid block plus a natural-language summary that respects the filters.
+**Response:** a run record with a `run_id`. Poll `GET /v1/agent/runs/{run_id}` until `status == "completed"`; the final answer payload contains a video grid block plus a natural-language summary that respects the filters.
 
 **Filter semantics — no silent caps:**
 
