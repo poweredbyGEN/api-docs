@@ -1,9 +1,11 @@
 // Every documented generation type and model must be one Rails accepts, derived
-// from scripts/user-job-enums.json (vendored from gen-backend-v2 by
-// gen-mcp-server/scripts/vendor_user_job_enums.py; its keys are the job types the
-// Rails validator accepts). Fails when a surface documents a generation_type
-// Rails rejects, lists a model value Rails rejects, omits one it accepts, or
-// omits a field Rails requires for a routed type. Run: npm test
+// from scripts/user-job-enums.json (a byte copy of gen-backend-v2's generated
+// docs/generated/user-job-enums.json, held identical to main by
+// check-enums-freshness.mjs; its keys are the job types the Rails validator
+// accepts). Fails when a surface documents a generation_type Rails rejects,
+// lists a model value Rails rejects, omits one it accepts, or omits a field
+// Rails requires for a routed type. Run: npm test
+
 import { readFileSync } from "node:fs";
 
 const jobs = JSON.parse(readFileSync(new URL("./user-job-enums.json", import.meta.url))).user_jobs;
