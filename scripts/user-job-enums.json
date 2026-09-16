@@ -1,6 +1,5 @@
 {
-  "x-generated-by": "scripts/vendor_user_job_enums.py",
-  "x-source": "gen-backend-v2@e80b9629b29ec1cd5a3f9fc00d8d746cdd174b5f",
+  "x-generated-by": "bin/rails user_job_enums:generate",
   "x-fields": [
     "model",
     "version",
