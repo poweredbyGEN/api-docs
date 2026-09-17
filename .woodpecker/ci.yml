@@ -1,0 +1,33 @@
+# GEN-6691: the documentation contract gates bind here, on Gitea, the forge
+# that controls merges. The GitHub deploy workflow also runs `npm test`, but on
+# a one-way mirror that lags or freezes, so a pass there proves nothing about
+# main. Both steps are stdlib-only Node: no install step. `push` is scoped to
+# main so a PR does not run twice, and no `path:` filter is set because a
+# squash merge can match no filter and then produce no pipeline at all.
+#
+# model-enums (npm test): every documented generation type and model is one
+#   Rails accepts, derived from the vendored scripts/user-job-enums.json, plus
+#   the MDX table check.
+# enums-freshness (GEN-6697): that vendored copy is byte-identical to
+#   gen-backend-v2 main on git.gen.pro, read with the org secret
+#   gen_gitea_read_token (a Gitea read token; gen_backend_v2_read_token is a
+#   GitHub PAT, which Gitea answers with 401). A missing secret or fetch
+#   failure is red, never a skip.
+when:
+  - event: pull_request
+  - event: push
+    branch: main
+
+steps:
+  model-enums:
+    image: node:20-slim
+    commands:
+      - npm test
+
+  enums-freshness:
+    image: node:20-slim
+    environment:
+      GEN_BACKEND_V2_TOKEN:
+        from_secret: gen_gitea_read_token
+    commands:
+      - node scripts/check-enums-freshness.mjs
