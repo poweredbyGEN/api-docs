@@ -535,6 +535,13 @@ GET /v1/vidsheet/{id}?agent_id={id}&with_execution_cost=true
 POST /v1/vidsheet/{id}/clone?agent_id={id}
 Body: { target_agent_id? }
 → new engine, optionally under a different agent
+
+PATCH /v1/vidsheet/{id}?agent_id={id}
+Body: { project: { title, is_default? } }
+→ renamed engine (no nested columns / rows)
+
+DELETE /v1/vidsheet/{id}?agent_id={id}
+→ 200, empty body; deletes the engine with all columns, rows, cells, layers, variables and automations (not undoable)
 ```
 
 ---
