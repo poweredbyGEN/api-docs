@@ -1746,7 +1746,7 @@ paths:
         Create a background job. Use `user_job_type` to select the job kind:
 
         - **`train_social`** — scrape social media content into the agent's knowledge base. Supports TikTok, Instagram, and YouTube. Send as multipart/form-data with `user_job[user_job_type]` and `user_job[data]` (JSON-stringified).
-        - **`publish_content`** — post or schedule content to a social platform. Send as JSON with top-level `user_job_type` and `data` fields.
+        - **`publish_content`** — legacy single-platform TikTok publish. Send as JSON with top-level `user_job_type` and `data` fields. New integrations should use `POST /schedule/with-post`, which covers every platform, validates up front and returns the live `post_url`.
       tags: [Content Monitoring, Publishing]
       parameters:
         - $ref: '#/components/parameters/AgentId'
@@ -1919,6 +1919,232 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # ── Templates ─────────────────────────────────────────────
+  /schedule/platforms:
+    get:
+      operationId: listPublishPlatforms
+      x-phase: [export]
+      summary: Publishing platform rules
+      description: |
+        Per-platform publishing rules: which media each platform takes and how many items, whether text-only posts are allowed, caption and title character limits, and which fields are required, optional or ignored. `POST /schedule/with-post` validates against exactly these rules. Public — no authentication.
+      tags: [Publishing]
+      security: []
+      responses:
+        '200':
+          description: Rules for every publishable platform.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  platforms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PublishPlatformRule'
+
+  /schedule/with-post:
+    post:
+      operationId: createScheduledPost
+      x-phase: [export]
+      summary: Publish now or schedule a post (all platforms)
+      description: |
+        Post content to one or more connected social accounts — TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn — immediately (`schedule_type: now`), at a time (`specific_time`), or in the agent's next free calendar slot (`next_available`, default).
+
+        The request is validated per platform before anything is queued (media type and count, caption/title limits, required fields such as the YouTube title); a violation is a `422 platform_validation_failed` naming the platform and field. Publishing is asynchronous even for `now`: a `200` means accepted and queued. Poll `GET /schedule/post/{post_id}` for the per-platform outcome and the live `post_url`.
+
+        The agent must have connected each target platform first (GEN app → Setup → Accounts).
+      tags: [Publishing]
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: |
+            Any string up to 128 characters, unique per agent. A retry with the same key returns the original post (`idempotent_replay: true`) instead of creating a duplicate.
+          schema:
+            type: string
+            maxLength: 128
+        - name: X-Timezone-Offset
+          in: header
+          required: false
+          description: Local UTC offset in hours (e.g. `-7`) used to render times in the response. Defaults to the agent's time zone.
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchedulePostRequest'
+            examples:
+              youtubeNow:
+                summary: YouTube video, now
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [youtube]
+                  schedule_type: now
+                  media_url: "https://cdn.gen.pro/outputs/render_xyz.mp4"
+                  title: "Factory price reveal"
+                  description: "What your $12 beauty sponge really costs."
+                  strict: true
+              linkedinText:
+                summary: LinkedIn, text only
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [linkedin]
+                  schedule_type: now
+                  description: "Three things we learned shipping our publishing API this week..."
+                  strict: true
+              xThread:
+                summary: X thread
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [x]
+                  schedule_type: now
+                  thread:
+                    - text: "1/ Here is a thread about our launch."
+                    - text: "2/ With a screenshot"
+                      media_urls: ["https://cdn.example.com/shot.jpg"]
+                    - text: "3/ Wrapping up."
+              multiScheduled:
+                summary: One video to several platforms, scheduled
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [tiktok, instagram, youtube, x, linkedin]
+                  schedule_type: specific_time
+                  scheduled_time: "2026-09-20T15:00:00Z"
+                  media_url: "https://cdn.gen.pro/outputs/render_xyz.mp4"
+                  title: "Factory price reveal"
+                  description: "What your $12 beauty sponge really costs. #sourcing"
+                  tiktok_privacy_level: PUBLIC_TO_EVERYONE
+                  tiktok_disable_comment: false
+                  tiktok_disable_duet: false
+                  tiktok_disable_stitch: false
+      responses:
+        '200':
+          description: Accepted and queued (or replayed for a matching Idempotency-Key).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleCreateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: A platform would reject this content, or the body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformValidationError'
+              example:
+                detail:
+                  error: "YouTube requires a title"
+                  error_code: platform_validation_failed
+                  platform: youtube
+                  field: title
+                  errors:
+                    - platform: youtube
+                      field: title
+                      error: "YouTube requires a title"
+
+  /schedule/posts:
+    get:
+      operationId: listScheduledPosts
+      x-phase: [export]
+      summary: List scheduled posts (content calendar)
+      tags: [Publishing]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+        - name: start_date
+          in: query
+          required: true
+          description: Start of the window (ISO 8601 date).
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          required: true
+          description: End of the window (ISO 8601 date). At most 60 days after `start_date`.
+          schema:
+            type: string
+        - name: X-Timezone-Offset
+          in: header
+          required: false
+          description: Local UTC offset in hours used to interpret the dates and render times.
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Posts in the window, each with `platforms_status`.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScheduledPost'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /schedule/post/{post_id}:
+    parameters:
+      - name: post_id
+        in: path
+        required: true
+        description: The `post_id` returned by `POST /schedule/with-post`.
+        schema:
+          type: integer
+    get:
+      operationId: getScheduledPost
+      x-phase: [export]
+      summary: Post outcome per platform (did it publish? where is it?)
+      description: |
+        The post with `platforms_status`: one entry per platform with `normalized_status` (`accepted` → `publishing` → `published` | `failed`), `platform_post_id`, the live `post_url` when published, and `error` / `error_code` / `failed_step` when failed.
+      tags: [Publishing]
+      responses:
+        '200':
+          description: The post and its per-platform outcome.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledPost'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateScheduledPost
+      x-phase: [export]
+      summary: Update a scheduled post before it goes out
+      description: |
+        Sparse update of the content fields, `scheduled_time` and `schedule_type`. Refused once the post has been sent or when it was created with `schedule_type: now`.
+      tags: [Publishing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchedulePostUpdate'
+      responses:
+        '200':
+          description: The updated post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledPost'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteScheduledPost
+      x-phase: [export]
+      summary: Delete a scheduled post
+      tags: [Publishing]
+      responses:
+        '200':
+          description: Deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /templates/projects:
     get:
       operationId: listTemplates
@@ -5114,6 +5340,297 @@ components:
         error_code:
           type: string
           description: Machine-readable error code.
+
+    # ── Publishing (schedule) schemas ─────────────────────────
+    PublishPlatform:
+      type: string
+      enum: [tiktok, instagram, facebook, youtube, x, linkedin]
+
+    PublishPlatformRule:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PublishPlatform'
+        label:
+          type: string
+          example: LinkedIn
+        text_only:
+          type: boolean
+          description: Whether a post with no media is accepted.
+        media:
+          type: array
+          items:
+            type: string
+            enum: [video, image]
+        max_media_items:
+          type: integer
+          example: 1
+        max_text:
+          type: integer
+          description: Caption / description character limit.
+          example: 3000
+        max_title:
+          type: integer
+          nullable: true
+          description: Title character limit; null when the platform ignores `title`.
+          example: 400
+        required:
+          type: array
+          items:
+            type: string
+        optional:
+          type: array
+          items:
+            type: string
+        ignored:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+
+    SchedulePostContent:
+      type: object
+      properties:
+        media_type:
+          type: string
+          enum: [VIDEO, IMAGE, REELS, TWEET_VIDEO]
+          default: VIDEO
+        media_url:
+          type: string
+          format: uri
+          description: Public URL of a single video or image. Required for TikTok, Instagram, Facebook and YouTube.
+        media_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Image URLs for one post. Up to 4 on X; other platforms take one media item.
+        description:
+          type: string
+          description: Caption / post text. Per-platform limit (X 280, TikTok/Instagram 2,200, LinkedIn 3,000, YouTube 5,000, Facebook 63,206). Required for a text-only X or LinkedIn post.
+        title:
+          type: string
+          description: Required for YouTube (max 100). Optional for Facebook (255) and LinkedIn (400). Ignored elsewhere.
+        thumbnail_url:
+          type: string
+          format: uri
+        thread:
+          type: array
+          description: X only. Ordered tweet segments, each limited to 280 characters.
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              media_urls:
+                type: array
+                items:
+                  type: string
+                  format: uri
+        reply_to_tweet_id:
+          type: string
+          description: X only. Post as a reply to this tweet id.
+        tiktok_privacy_level:
+          type: string
+          enum: [PUBLIC_TO_EVERYONE, MUTUAL_FOLLOW_FRIENDS, FOLLOWER_OF_CREATOR, SELF_ONLY]
+        tiktok_disable_comment:
+          type: boolean
+        tiktok_disable_duet:
+          type: boolean
+        tiktok_disable_stitch:
+          type: boolean
+        tiktok_disclose_commercial_content:
+          type: boolean
+          default: false
+        tiktok_your_brand:
+          type: boolean
+          default: false
+        tiktok_branded_content:
+          type: boolean
+          default: false
+
+    SchedulePostRequest:
+      allOf:
+        - $ref: '#/components/schemas/SchedulePostContent'
+        - type: object
+          required: [agent_id, platform]
+          properties:
+            agent_id:
+              type: string
+            platform:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/PublishPlatform'
+            schedule_type:
+              type: string
+              enum: [now, specific_time, next_available]
+              default: next_available
+            scheduled_time:
+              type: string
+              description: ISO 8601 UTC (e.g. `2026-09-20T15:00:00Z`). Required for `specific_time`; must be in the future.
+              example: "2026-09-20T15:00:00Z"
+            strict:
+              type: boolean
+              default: false
+              description: When true, a platform that cannot take this content (e.g. Instagram with no media) is a 422 instead of a reported skip. Recommended for API clients.
+
+    SchedulePostUpdate:
+      allOf:
+        - $ref: '#/components/schemas/SchedulePostContent'
+        - type: object
+          properties:
+            platform:
+              type: array
+              items:
+                $ref: '#/components/schemas/PublishPlatform'
+            schedule_type:
+              type: string
+              enum: [now, specific_time, next_available]
+            scheduled_time:
+              type: string
+
+    PostPlatformStatus:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PublishPlatform'
+        status:
+          type: string
+          description: Raw worker status.
+        normalized_status:
+          type: string
+          enum: [accepted, publishing, published, failed]
+        platform_post_id:
+          type: string
+          nullable: true
+          description: The platform's id for the live post.
+        post_url:
+          type: string
+          nullable: true
+          format: uri
+          description: Public link to the live post (YouTube watch URL, Instagram permalink, Facebook Page video, TikTok video, X status, LinkedIn post). Set when published.
+        published_at:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        error_code:
+          type: string
+          nullable: true
+        failed_step:
+          type: string
+          nullable: true
+        scheduled_time:
+          type: string
+        media_url:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+
+    ScheduleCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        post_id:
+          type: integer
+          example: 48213
+        platforms:
+          type: array
+          description: The platforms requested.
+          items:
+            $ref: '#/components/schemas/PublishPlatform'
+        platforms_status:
+          type: array
+          description: One entry per platform that will be published; fills in as the worker completes.
+          items:
+            $ref: '#/components/schemas/PostPlatformStatus'
+        platforms_skipped:
+          type: array
+          description: Platforms that cannot take this content (only when `strict` is false).
+          items:
+            type: object
+            properties:
+              platform:
+                $ref: '#/components/schemas/PublishPlatform'
+              reason:
+                type: string
+        status_url:
+          type: string
+          example: /schedule/post/48213
+        idempotent_replay:
+          type: boolean
+        post:
+          $ref: '#/components/schemas/ScheduledPost'
+
+    ScheduledPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        agent_id:
+          type: string
+        status:
+          type: string
+        schedule_type:
+          type: string
+          enum: [now, specific_time, next_available]
+        scheduled_time:
+          type: string
+        media_type:
+          type: string
+        media_url:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        thumbnail_url:
+          type: string
+          nullable: true
+        platforms_status:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostPlatformStatus'
+
+    PlatformValidationError:
+      type: object
+      properties:
+        detail:
+          type: object
+          properties:
+            error:
+              type: string
+            error_code:
+              type: string
+              example: platform_validation_failed
+            platform:
+              $ref: '#/components/schemas/PublishPlatform'
+            field:
+              type: string
+              example: title
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  platform:
+                    type: string
+                  field:
+                    type: string
+                  error:
+                    type: string
 
     # ── Agent Core schemas ──────────────────────────────────
     # Flat schema — every field name mirrors the public Agent Core setup fields.

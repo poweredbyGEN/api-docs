@@ -481,9 +481,9 @@ Only `ingredient` role columns can be created / updated / deleted.
 
 ## Step 5 — Export & Publish
 
-**What it is.** Composite all layers on the final_video cell into one MP4 (render), download it, optionally publish to TikTok (Instagram / YouTube coming).
+**What it is.** Composite all layers on the final_video cell into one MP4 (render), download it, publish to TikTok, Instagram, Facebook, YouTube, X or LinkedIn, and read the live post link back.
 
-**Mental model.** Render is an async generation like any other — trigger it on the final_video cell, poll until completed, then the `output_resources[0].url` is a public CDN URL. Publishing is a user_job that takes a `media_url` (the render URL works directly).
+**Mental model.** Render is an async generation like any other — trigger it on the final_video cell, poll until completed, then the `output_resources[0].url` is a public CDN URL. Publishing is `POST /v1/schedule/with-post` with a `media_url` (the render URL works directly); it is asynchronous, so poll `GET /v1/schedule/post/{post_id}` for the per-platform outcome.
 
 **Render:**
 
@@ -520,45 +520,50 @@ curl "https://api.gen.pro/v1/generations/56789" \
 curl -L -o final_video.mp4 "https://cdn.gen.pro/outputs/render_xyz.mp4"
 ```
 
-**Publish to TikTok now** (chain from the render URL):
+**Publish** (chain from the render URL). Platforms: `tiktok`, `instagram`, `facebook`, `youtube`, `x`, `linkedin` — one request can target several. Validated per platform before queueing (media, caption/title limits, required fields); the live `post_url` comes back from the status endpoint. Full schema, limits and per-platform examples: `/reference/publishing`.
 
 ```bash
-curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=$AGENT_ID" \
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "user_job_type": "publish_content",
-    "data": "{\"platform\":\"tiktok\",\"media_url\":\"https://cdn.gen.pro/outputs/render_xyz.mp4\",\"description\":\"The $2 taco at 2am #streetfood #tacotok\",\"schedule_type\":\"now\",\"media_type\":\"VIDEO\"}"
+    "agent_id": "'$AGENT_ID'",
+    "platform": ["youtube", "linkedin"],
+    "schedule_type": "now",
+    "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+    "title": "The $2 taco at 2am",
+    "description": "Street food economics. #streetfood",
+    "strict": true
   }'
-# → { "user_job_id": 138860 }
+# → { "post_id": 48213, "platforms_status": [ { "platform": "youtube", "normalized_status": "publishing", ... }, ... ],
+#     "platforms_skipped": [], "status_url": "/schedule/post/48213" }
 ```
 
-**Schedule for later:**
+**Schedule for later:** `"schedule_type": "specific_time", "scheduled_time": "2026-09-20T15:00:00Z"` (ISO 8601 UTC, future). Retry-safe with an `Idempotency-Key` header.
+
+**Did it go out?**
 
 ```bash
-# same body but:
-# "schedule_type": "scheduled",
-# "scheduled_time": "2026-04-20T15:00:00Z"
+curl "https://api.gen.pro/v1/schedule/post/48213" -H "X-API-Key: $GEN_API_KEY"
+# platforms_status[].normalized_status: accepted → publishing → published | failed
+# published: platform_post_id + post_url (the live link). failed: error, error_code, failed_step.
 ```
 
-**Poll publish job:**
+**Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000; TikTok/Instagram 2,200; LinkedIn 3,000; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. A 422 `platform_validation_failed` names the `platform` and `field`. `GET /v1/schedule/platforms` (no auth) serves the rules.
 
-```bash
-curl "https://api.gen.pro/v1/user_jobs/138860?agent_id=$AGENT_ID" \
-  -H "X-API-Key: $GEN_API_KEY"
-# pending → processing → completed | failed
-# on completed: result.post_id is the TikTok post ID
-```
-
-**Prerequisites for publish.** The agent must have a connected TikTok account. The media URL must be publicly accessible at post time.
+**Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_get_social_connect_url`). Media URLs must be publicly accessible at post time.
 
 ### Step 5 endpoints
 
 ```
 POST   /v1/vidsheet/:id/cells/:cell_id/render?agent_id=   — kick off render
 GET    /v1/generations/:id                                          — poll render
-POST   /v1/user_jobs?agent_id= (publish_content)                    — publish now / schedule
-GET    /v1/user_jobs/:id?agent_id=                                  — poll publish job
+GET    /v1/schedule/platforms                                       — per-platform rules + limits (no auth)
+POST   /v1/schedule/with-post                                       — publish now / schedule (all platforms)
+GET    /v1/schedule/post/:post_id                                   — outcome per platform + post_url
+GET    /v1/schedule/posts?agent_id=&start_date=&end_date=           — content calendar
+PATCH  /v1/schedule/post/:post_id · DELETE /v1/schedule/post/:post_id
+POST   /v1/social/upload_asset                                      — upload a local file → hosted URL
 ```
 
 ---
