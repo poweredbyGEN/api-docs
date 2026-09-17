@@ -997,7 +997,7 @@ Platforms: TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn. One request c
 | Facebook Page | `facebook` | one video | 1 | 63,206 | 255 | posts to the connected Page |
 | YouTube | `youtube` | one video | 1 | 5,000 | 100, **required** | `thumbnail_url` uploaded as the thumbnail (https .jpg/.png <2 MB); `youtube_options` visibility/shorts/tags/made_for_kids/notify_subscribers/category_id |
 | X | `x` | text, up to 4 images, or one video; threads, replies | 4 | 280/tweet | ignored | text-only allowed |
-| LinkedIn | `linkedin` | text, one video, 1-9 images, or one document (PDF/PPT/PPTX/DOC/DOCX) | 9 | 3,000 | 400 | text-only allowed; no mixing images with video/document; `linkedin_options` visibility/alt_text |
+| LinkedIn | `linkedin` | text, one video, 1-9 images (grid, or carousel = PDF built from them with `linkedin_options.carousel`), or one document (PDF/PPT/PPTX/DOC/DOCX) | 9 | 3,000 | 400 | text-only allowed; images + video -> images posted, video in `warning`; document exclusive; `linkedin_options` visibility/alt_text/carousel |
 
 ### Platform rules (live, no auth)
 
@@ -1031,7 +1031,7 @@ Body:
   "thumbnail_url": "...",                       // optional; generated from the video when omitted; YouTube uploads it (https .jpg/.jpeg/.png, <2 MB)
   "instagram_music": { "mode": "auto" },        // Instagram only; or { "track_url": "https://...mp3" }; needs a video item
   "youtube_options": { "visibility": "public", "shorts": false, "tags": ["a","b"], "made_for_kids": false, "notify_subscribers": true, "category_id": 22 },
-  "linkedin_options": { "visibility": "public", "alt_text": ["per image, in order"] },   // visibility: public | connections | loggedin
+  "linkedin_options": { "visibility": "public", "alt_text": ["per image, in order"], "carousel": false },   // visibility: public | connections | loggedin; carousel: 2-9 images -> one PDF document (LinkedIn has no image carousel; several images render as a grid)
   "thread": [{ "text": "1/ ...", "media_urls": ["..."] }],   // X only, each ≤280 chars
   "reply_to_tweet_id": "178...",               // X only
   "tiktok_privacy_level": "PUBLIC_TO_EVERYONE", // TikTok: PUBLIC_TO_EVERYONE | MUTUAL_FOLLOW_FRIENDS | FOLLOWER_OF_CREATOR | SELF_ONLY
@@ -1060,7 +1060,7 @@ Validation failure (422, before anything is queued):
               "errors": [ { "platform": "youtube", "field": "title", "error": "YouTube requires a title" } ] } }
 ```
 
-Checked: caption > max_text, title > max_title, missing YouTube title, too many media items (>10 Instagram, >4 images X, >9 images LinkedIn, >1 elsewhere), images on video-only platforms (Facebook, YouTube), documents anywhere but LinkedIn, LinkedIn mixing images with a video/document, >30 Instagram hashtags, `instagram_music` without a video item, bad YouTube `thumbnail_url` (not https, or a non .jpg/.jpeg/.png extension), bad option values (`youtube_options.visibility|tags|category_id`, `linkedin_options.visibility|alt_text`; `field` is dotted), tweet segments > 280, unknown platform; with `strict`, also no media on a media-only platform.
+Checked: caption > max_text, title > max_title, missing YouTube title, too many media items (>10 Instagram, >4 images X, >9 images LinkedIn, >1 elsewhere), images on video-only platforms (Facebook, YouTube), documents anywhere but LinkedIn, LinkedIn mixing a document with other media (images + video: images posted, video in `warning`), >30 Instagram hashtags, `instagram_music` without a video item, bad YouTube `thumbnail_url` (not https, or a non .jpg/.jpeg/.png extension), bad option values (`youtube_options.visibility|tags|category_id`, `linkedin_options.visibility|alt_text`; `field` is dotted), tweet segments > 280, unknown platform; with `strict`, also no media on a media-only platform.
 
 ### Outcome + post link
 

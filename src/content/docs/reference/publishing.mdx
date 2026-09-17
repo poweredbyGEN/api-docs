@@ -22,7 +22,7 @@ One request can target several platforms at once. Every request is validated aga
 | Facebook Page | `facebook` | one video | 1 | 63,206 | 255 | Posts to the connected Page. |
 | YouTube | `youtube` | one video | 1 | 5,000 (description) | 100, **required** | `thumbnail_url` (https, .jpg/.jpeg/.png, under 2 MB) becomes the custom thumbnail. `youtube_options`: visibility, shorts, tags, made_for_kids, notify_subscribers, category_id. |
 | X | `x` | text, up to 4 images, or one video; threads and replies | 4 | 280 per tweet | ignored | Text-only posts allowed. |
-| LinkedIn | `linkedin` | text, one video, 1-9 images, or one document (PDF, PPT, PPTX, DOC, DOCX) | 9 | 3,000 | 400 | Text-only posts allowed. Posts as the connected member. Images cannot be mixed with a video or a document. `linkedin_options`: visibility, alt_text. |
+| LinkedIn | `linkedin` | text, one video, 1-9 images (a multi-image grid, or a swipeable carousel with `linkedin_options.carousel`), or one document (PDF, PPT, PPTX, DOC, DOCX) | 9 | 3,000 | 400 | Text-only posts allowed. Posts as the connected member. LinkedIn has no image carousel for organic posts: `carousel: true` builds one PDF from the images and posts it as a document. Images sent with a video: the images post, the video is left out and reported in `warning`. A document cannot be mixed with other media. `linkedin_options`: visibility, alt_text, carousel. |
 
 These rules are served live and are what the API validates against:
 
@@ -53,10 +53,11 @@ curl "https://api.gen.pro/v1/schedule/platforms"
       "options": {
         "linkedin_options": {
           "visibility": "public (default) | connections | loggedin",
-          "alt_text": "string[] — alternative text per image, in media order (images only)"
+          "alt_text": "string[] — alternative text per image, in media order (images only)",
+          "carousel": "bool — post 2-9 images as a swipeable LinkedIn carousel (a PDF document built from the images, one page each) instead of the multi-image grid"
         }
       },
-      "notes": "Posts as the connected member. Text-only, one video, 1-9 images, or one document (PDF, PPT, PPTX, DOC, DOCX — LinkedIn's swipeable document post; title is the document title, max 400). Images cannot be mixed with a video or a document in one post."
+      "notes": "Posts as the connected member. Text-only, one video, 1-9 images (a multi-image grid, or with linkedin_options.carousel a swipeable carousel = a PDF document built from the images), or one document URL (PDF, PPT, PPTX, DOC, DOCX; title is the document title, max 400). LinkedIn has no image carousel for organic posts. When images and a video are sent together LinkedIn gets the images and the video is left out (reported in `warning`). A document cannot be mixed with other media."
     }
   ]
 }
@@ -102,7 +103,7 @@ POST /v1/schedule/with-post
 | `tiktok_branded_content` | boolean | No | Paid partnership. Default `false`. |
 | `instagram_music` | object | No | **Instagram only.** `{ "mode": "auto" }` mixes a track from the GEN music library under every video item; `{ "track_url": "https://...mp3" }` mixes that file instead. Needs at least one video item (Instagram cannot attach audio to images). The track used comes back as `music_track` on the platform status; when no library track is available the post publishes without music and `music_track` is `null`. |
 | `youtube_options` | object | No | **YouTube only.** `visibility`: `public` (default), `unlisted` or `private`. `shorts`: `true` posts as a Short (adds `#shorts`; keep the video vertical and under 3 minutes). `tags`: string[], each 2+ characters, 400 characters in total. `made_for_kids` (default `false`), `notify_subscribers` (default `true`), `category_id` (default `22`). |
-| `linkedin_options` | object | No | **LinkedIn only.** `visibility`: `public` (default), `connections` or `loggedin`. `alt_text`: string[] with one entry per image, in media order (images only). |
+| `linkedin_options` | object | No | **LinkedIn only.** `visibility`: `public` (default), `connections` or `loggedin`. `alt_text`: string[] with one entry per image, in media order (images only). `carousel`: `true` posts 2-9 images as a swipeable carousel, which on LinkedIn is a PDF document built from the images (one page each), instead of the multi-image grid; the post `title` becomes the document title. |
 | `strict` | boolean | No | Default `false`: a platform that cannot take this content (for example Instagram with no media) is skipped and reported in `platforms_skipped`. Set `true` to get a `422` instead. Recommended for API clients. |
 
 ### Response
@@ -176,7 +177,7 @@ Anything a platform would reject is refused before queueing with `422`:
 }
 ```
 
-Checked per platform: caption over `max_text`, title over `max_title`, missing YouTube title, more media items than `max_media_items` (more than 10 on Instagram, 4 images on X, 9 images on LinkedIn, more than one elsewhere), images on a video-only platform (Facebook, YouTube), a document on a platform other than LinkedIn, mixing images with a video or a document on LinkedIn, more than 30 Instagram hashtags, `instagram_music` without a video item, a YouTube `thumbnail_url` that is not https or has a non-image extension (anything but `.jpg`/`.jpeg`/`.png`; extension-less URLs are checked by content type at upload), invalid option values (`youtube_options.visibility`, `youtube_options.tags`, `youtube_options.category_id`, `linkedin_options.visibility`, `linkedin_options.alt_text` on non-image media), tweet segments over 280 characters, unknown platform. The `field` is dotted for option objects, for example `youtube_options.visibility`. With `strict: true`, "no media on a media-only platform" is also a `422`.
+Checked per platform: caption over `max_text`, title over `max_title`, missing YouTube title, more media items than `max_media_items` (more than 10 on Instagram, 4 images on X, 9 images on LinkedIn, more than one elsewhere), images on a video-only platform (Facebook, YouTube), a document on a platform other than LinkedIn, mixing a document with other media on LinkedIn, more than 30 Instagram hashtags, `instagram_music` without a video item, a YouTube `thumbnail_url` that is not https or has a non-image extension (anything but `.jpg`/`.jpeg`/`.png`; extension-less URLs are checked by content type at upload), invalid option values (`youtube_options.visibility`, `youtube_options.tags`, `youtube_options.category_id`, `linkedin_options.visibility`, `linkedin_options.alt_text` on non-image media), tweet segments over 280 characters, unknown platform. The `field` is dotted for option objects, for example `youtube_options.visibility`. With `strict: true`, "no media on a media-only platform" is also a `422`.
 
 ## Check the outcome
 
@@ -423,7 +424,29 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
   }'
 ```
 
-### LinkedIn with several images and alt text
+### LinkedIn carousel from images
+
+LinkedIn renders several images as a grid; its swipeable carousel is a document. `carousel: true` builds one PDF from the picked images and posts it as that document.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["linkedin"],
+    "schedule_type": "now",
+    "media_type": "IMAGE",
+    "media_url": "https://cdn.gen.pro/outputs/slide-1.png",
+    "media_urls": ["https://cdn.gen.pro/outputs/slide-2.png", "https://cdn.gen.pro/outputs/slide-3.png"],
+    "title": "Q3 in three slides",
+    "description": "Swipe through our Q3.",
+    "linkedin_options": { "carousel": true },
+    "strict": true
+  }'
+```
+
+### LinkedIn with several images and alt text (grid)
 
 ```bash
 curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
