@@ -1947,7 +1947,7 @@ paths:
       x-phase: [export]
       summary: Publish now or schedule a post (all platforms)
       description: |
-        Post content to one or more connected social accounts — TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn — immediately (`schedule_type: now`), at a time (`specific_time`), or in the agent's next free calendar slot (`next_available`, default).
+        Post content to one or more connected social accounts — TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn — immediately (`schedule_type: now`), at a time (`specific_time`), or in the agent's next free calendar slot (`next_available`, default). Instagram takes 2-10 items as a carousel (optional `instagram_music`), YouTube uploads `thumbnail_url` and takes `youtube_options` (visibility, shorts, tags, ...), LinkedIn takes a PDF/PPTX/DOCX document or up to 9 images and `linkedin_options` (visibility, alt_text).
 
         The request is validated per platform before anything is queued (media type and count, caption/title limits, required fields such as the YouTube title); a violation is a `422 platform_validation_failed` naming the platform and field. Publishing is asynchronous even for `now`: a `200` means accepted and queued. Poll `GET /schedule/post/{post_id}` for the per-platform outcome and the live `post_url`.
 
@@ -2004,6 +2004,39 @@ paths:
                     - text: "2/ With a screenshot"
                       media_urls: ["https://cdn.example.com/shot.jpg"]
                     - text: "3/ Wrapping up."
+              instagramCarousel:
+                summary: Instagram carousel with auto music
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [instagram]
+                  schedule_type: now
+                  media_url: "https://cdn.gen.pro/outputs/clip_1.mp4"
+                  media_urls: ["https://cdn.gen.pro/outputs/still_2.jpg", "https://cdn.gen.pro/outputs/still_3.png"]
+                  description: "Three looks, one drop #carousel"
+                  instagram_music: { mode: auto }
+                  strict: true
+              youtubeShort:
+                summary: YouTube Short with a custom thumbnail
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [youtube]
+                  schedule_type: now
+                  media_url: "https://cdn.gen.pro/outputs/render_xyz.mp4"
+                  thumbnail_url: "https://cdn.gen.pro/outputs/cover.jpg"
+                  title: "Factory price reveal"
+                  youtube_options: { visibility: public, shorts: true, tags: [sourcing, beauty] }
+                  strict: true
+              linkedinDocument:
+                summary: LinkedIn PDF document, connections only
+                value:
+                  agent_id: "agent_abc123"
+                  platform: [linkedin]
+                  schedule_type: now
+                  media_url: "https://cdn.gen.pro/outputs/q3-deck.pdf"
+                  title: "Q3 in ten slides"
+                  description: "Our Q3 numbers, one slide at a time."
+                  linkedin_options: { visibility: connections }
+                  strict: true
               multiScheduled:
                 summary: One video to several platforms, scheduled
                 value:
@@ -5361,10 +5394,10 @@ components:
           type: array
           items:
             type: string
-            enum: [video, image]
+            enum: [video, image, document]
         max_media_items:
           type: integer
-          example: 1
+          example: 9
         max_text:
           type: integer
           description: Caption / description character limit.
@@ -5386,8 +5419,76 @@ components:
           type: array
           items:
             type: string
+        options:
+          type: object
+          description: The platform's options object (`instagram_music`, `youtube_options` or `linkedin_options`) mapped to its fields and the values each accepts. Empty for platforms without options.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: string
+          example:
+            linkedin_options:
+              visibility: "public (default) | connections | loggedin"
+              alt_text: "string[] — alternative text per image, in media order (images only)"
         notes:
           type: string
+
+    InstagramMusic:
+      type: object
+      description: Instagram only. Mixes a music track under every video item before upload (Instagram cannot attach audio to images or carousels via API). Needs at least one video item.
+      properties:
+        mode:
+          type: string
+          enum: [auto, none]
+          default: auto
+          description: '`auto` picks a track from the GEN music library; when none is available the post publishes without music and `music_track` is null.'
+        track_url:
+          type: string
+          format: uri
+          description: An https audio file to mix instead of an auto-picked track.
+
+    YouTubeOptions:
+      type: object
+      description: YouTube only.
+      properties:
+        visibility:
+          type: string
+          enum: [public, unlisted, private]
+          default: public
+        shorts:
+          type: boolean
+          default: false
+          description: Post as a YouTube Short (adds `#shorts` to the description; keep the video vertical and under 3 minutes). The published `post_url` is then `https://www.youtube.com/shorts/{id}`.
+        tags:
+          type: array
+          items:
+            type: string
+            minLength: 2
+          description: 400 characters in total.
+        made_for_kids:
+          type: boolean
+          default: false
+        notify_subscribers:
+          type: boolean
+          default: true
+        category_id:
+          type: integer
+          default: 22
+          description: YouTube video category (22 = People & Blogs).
+
+    LinkedInOptions:
+      type: object
+      description: LinkedIn only.
+      properties:
+        visibility:
+          type: string
+          enum: [public, connections, loggedin]
+          default: public
+        alt_text:
+          type: array
+          items:
+            type: string
+          description: One entry per image, in media order. Images only.
 
     SchedulePostContent:
       type: object
@@ -5399,13 +5500,13 @@ components:
         media_url:
           type: string
           format: uri
-          description: Public URL of a single video or image. Required for TikTok, Instagram, Facebook and YouTube.
+          description: Public URL of the first (or only) media file — a video, an image, or for LinkedIn a PDF/PPT/PPTX/DOC/DOCX document. Required for TikTok, Instagram, Facebook and YouTube. The file extension decides image vs video vs document.
         media_urls:
           type: array
           items:
             type: string
             format: uri
-          description: Image URLs for one post. Up to 4 on X; other platforms take one media item.
+          description: Further media URLs for the same post. Instagram — `media_url` plus `media_urls` totalling 2-10 images and videos post as one carousel. X — up to 4 images. LinkedIn — up to 9 images. One item elsewhere.
         description:
           type: string
           description: Caption / post text. Per-platform limit (X 280, TikTok/Instagram 2,200, LinkedIn 3,000, YouTube 5,000, Facebook 63,206). Required for a text-only X or LinkedIn post.
@@ -5415,6 +5516,13 @@ components:
         thumbnail_url:
           type: string
           format: uri
+          description: Custom thumbnail; generated from the video when omitted. YouTube uploads it as the video's thumbnail (https, .jpg/.jpeg/.png, under 2 MB) — a thumbnail problem is reported as `warning`, the video still publishes.
+        instagram_music:
+          $ref: '#/components/schemas/InstagramMusic'
+        youtube_options:
+          $ref: '#/components/schemas/YouTubeOptions'
+        linkedin_options:
+          $ref: '#/components/schemas/LinkedInOptions'
         thread:
           type: array
           description: X only. Ordered tweet segments, each limited to 280 characters.
@@ -5523,11 +5631,24 @@ components:
         failed_step:
           type: string
           nullable: true
+        warning:
+          type: string
+          nullable: true
+          description: 'Non-fatal problem recorded by the worker while the post itself succeeded (e.g. `thumbnail_failed: ...` on YouTube).'
+        platform_options:
+          type: object
+          nullable: true
+          description: The `instagram_music` / `youtube_options` / `linkedin_options` objects as sent.
         scheduled_time:
           type: string
         media_url:
           type: string
           nullable: true
+        media_urls:
+          type: array
+          nullable: true
+          items:
+            type: string
         description:
           type: string
           nullable: true
@@ -5598,6 +5719,14 @@ components:
           nullable: true
         thumbnail_url:
           type: string
+          nullable: true
+        media_urls:
+          type: array
+          nullable: true
+          items:
+            type: string
+        platform_options:
+          type: object
           nullable: true
         platforms_status:
           type: array

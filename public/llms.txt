@@ -549,7 +549,7 @@ curl "https://api.gen.pro/v1/schedule/post/48213" -H "X-API-Key: $GEN_API_KEY"
 # published: platform_post_id + post_url (the live link). failed: error, error_code, failed_step.
 ```
 
-**Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000; TikTok/Instagram 2,200; LinkedIn 3,000; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. A 422 `platform_validation_failed` names the `platform` and `field`. `GET /v1/schedule/platforms` (no auth) serves the rules.
+**Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000, `thumbnail_url` https .jpg/.png <2 MB; TikTok/Instagram 2,200 (Instagram ≤30 hashtags, 2-10 items = carousel); LinkedIn 3,000, ≤9 images or one PDF/PPTX/DOCX document, no mixing; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. Per-platform knobs: `instagram_music`, `youtube_options` (visibility, shorts, tags), `linkedin_options` (visibility, alt_text). A 422 `platform_validation_failed` names the `platform` and `field` (dotted for options). `GET /v1/schedule/platforms` (no auth) serves the rules incl. each `options` object.
 
 **Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_get_social_connect_url`). Media URLs must be publicly accessible at post time.
 

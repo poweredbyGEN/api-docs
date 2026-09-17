@@ -18,11 +18,11 @@ One request can target several platforms at once. Every request is validated aga
 | Platform | `platform` | Content | Media per post | Caption limit | Title | Notes |
 |----------|------------|---------|----------------|---------------|-------|-------|
 | TikTok | `tiktok` | one video or one image | 1 | 2,200 | ignored | Privacy level and interaction settings are required by TikTok. |
-| Instagram | `instagram` | one video (posts as a Reel) or one image | 1 | 2,200 | ignored | Carousels are not supported yet. |
+| Instagram | `instagram` | one video (posts as a Reel), one image, or a carousel of 2-10 images and videos | 10 | 2,200 | ignored | Up to 30 hashtags. Optional `instagram_music` mixes a track under the video items. |
 | Facebook Page | `facebook` | one video | 1 | 63,206 | 255 | Posts to the connected Page. |
-| YouTube | `youtube` | one video | 1 | 5,000 (description) | 100, **required** | |
+| YouTube | `youtube` | one video | 1 | 5,000 (description) | 100, **required** | `thumbnail_url` (https, .jpg/.jpeg/.png, under 2 MB) becomes the custom thumbnail. `youtube_options`: visibility, shorts, tags, made_for_kids, notify_subscribers, category_id. |
 | X | `x` | text, up to 4 images, or one video; threads and replies | 4 | 280 per tweet | ignored | Text-only posts allowed. |
-| LinkedIn | `linkedin` | text, one image, or one video | 1 | 3,000 | 400 | Text-only posts allowed. Posts as the connected member. |
+| LinkedIn | `linkedin` | text, one video, 1-9 images, or one document (PDF, PPT, PPTX, DOC, DOCX) | 9 | 3,000 | 400 | Text-only posts allowed. Posts as the connected member. Images cannot be mixed with a video or a document. `linkedin_options`: visibility, alt_text. |
 
 These rules are served live and are what the API validates against:
 
@@ -30,7 +30,7 @@ These rules are served live and are what the API validates against:
 GET /v1/schedule/platforms
 ```
 
-No authentication required. Each entry has `platform`, `label`, `text_only`, `media` (`video`, `image`), `max_media_items`, `max_text`, `max_title`, `required`, `optional`, `ignored` and `notes`.
+No authentication required. Each entry has `platform`, `label`, `text_only`, `media` (`video`, `image`, `document`), `max_media_items`, `max_text`, `max_title`, `required`, `optional`, `ignored`, `options` (the platform's options object and the values each field accepts) and `notes`.
 
 ```bash
 curl "https://api.gen.pro/v1/schedule/platforms"
@@ -43,14 +43,20 @@ curl "https://api.gen.pro/v1/schedule/platforms"
       "platform": "linkedin",
       "label": "LinkedIn",
       "text_only": true,
-      "media": ["video", "image"],
-      "max_media_items": 1,
+      "media": ["video", "image", "document"],
+      "max_media_items": 9,
       "max_text": 3000,
       "max_title": 400,
       "required": [],
-      "optional": ["description", "media_url", "title", "thumbnail_url"],
-      "ignored": ["media_urls", "thread", "reply_to_tweet_id"],
-      "notes": "Posts as the connected member. Text-only, one image, or one video; title captions the media."
+      "optional": ["description", "media_url", "media_urls", "title", "thumbnail_url", "linkedin_options"],
+      "ignored": ["thread", "reply_to_tweet_id"],
+      "options": {
+        "linkedin_options": {
+          "visibility": "public (default) | connections | loggedin",
+          "alt_text": "string[] — alternative text per image, in media order (images only)"
+        }
+      },
+      "notes": "Posts as the connected member. Text-only, one video, 1-9 images, or one document (PDF, PPT, PPTX, DOC, DOCX — LinkedIn's swipeable document post; title is the document title, max 400). Images cannot be mixed with a video or a document in one post."
     }
   ]
 }
@@ -82,9 +88,9 @@ POST /v1/schedule/with-post
 | `description` | string | Conditional | Caption or post text. Hashtags inline. Required for a text-only X or LinkedIn post. Limited per platform (see the table above). |
 | `title` | string | Conditional | Required for YouTube (max 100). Optional caption for Facebook (255) and LinkedIn (400). Ignored elsewhere. |
 | `media_type` | string | No | `VIDEO` (default), `IMAGE`, `REELS`, or `TWEET_VIDEO`. Use `IMAGE` when sending images. |
-| `media_url` | string | Conditional | Public URL of a single video or image. Required for TikTok, Instagram, Facebook and YouTube. |
-| `media_urls` | string[] | No | Image URLs for one post. Up to 4 on X. Other platforms take one media item. |
-| `thumbnail_url` | string | No | Custom thumbnail. Generated from the video when omitted. |
+| `media_url` | string | Conditional | Public URL of the first (or only) media file: a video, an image, or for LinkedIn a PDF/PPT/PPTX/DOC/DOCX document. Required for TikTok, Instagram, Facebook and YouTube. |
+| `media_urls` | string[] | No | Further media URLs for the same post. Instagram: `media_url` plus `media_urls` totalling 2-10 images and videos post as one carousel. X: up to 4 images. LinkedIn: up to 9 images. One item elsewhere. The file extension decides image vs video vs document. |
+| `thumbnail_url` | string | No | Custom thumbnail. Generated from the video when omitted. YouTube uploads it as the video's thumbnail (https, `.jpg`, `.jpeg` or `.png`, under 2 MB); a thumbnail problem is reported as `warning`, the video still publishes. |
 | `thread` | object[] | No | **X only.** Ordered tweet segments, each `{ "text": "...", "media_urls": ["..."] }`. Each segment is limited to 280 characters. |
 | `reply_to_tweet_id` | string | No | **X only.** Post as a reply to this tweet id. |
 | `tiktok_privacy_level` | string | TikTok | `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR` or `SELF_ONLY`. |
@@ -94,6 +100,9 @@ POST /v1/schedule/with-post
 | `tiktok_disclose_commercial_content` | boolean | No | The post promotes goods or services. Default `false`. |
 | `tiktok_your_brand` | boolean | No | Promotes the creator's own brand. Default `false`. |
 | `tiktok_branded_content` | boolean | No | Paid partnership. Default `false`. |
+| `instagram_music` | object | No | **Instagram only.** `{ "mode": "auto" }` mixes a track from the GEN music library under every video item; `{ "track_url": "https://...mp3" }` mixes that file instead. Needs at least one video item (Instagram cannot attach audio to images). The track used comes back as `music_track` on the platform status; when no library track is available the post publishes without music and `music_track` is `null`. |
+| `youtube_options` | object | No | **YouTube only.** `visibility`: `public` (default), `unlisted` or `private`. `shorts`: `true` posts as a Short (adds `#shorts`; keep the video vertical and under 3 minutes). `tags`: string[], each 2+ characters, 400 characters in total. `made_for_kids` (default `false`), `notify_subscribers` (default `true`), `category_id` (default `22`). |
+| `linkedin_options` | object | No | **LinkedIn only.** `visibility`: `public` (default), `connections` or `loggedin`. `alt_text`: string[] with one entry per image, in media order (images only). |
 | `strict` | boolean | No | Default `false`: a platform that cannot take this content (for example Instagram with no media) is skipped and reported in `platforms_skipped`. Set `true` to get a `422` instead. Recommended for API clients. |
 
 ### Response
@@ -124,6 +133,8 @@ POST /v1/schedule/with-post
       "published_at": null,
       "error": null,
       "error_code": null,
+      "warning": null,
+      "platform_options": { "linkedin_options": { "visibility": "connections" } },
       "scheduled_time": "2026-09-20 08:00:00 -07:00"
     }
   ],
@@ -138,7 +149,7 @@ POST /v1/schedule/with-post
 |-------|-------------|
 | `post_id` | Use it with the status, update and delete endpoints. |
 | `platforms` | The platforms you requested. |
-| `platforms_status` | One entry per platform that will be published. `normalized_status`, `platform_post_id`, `post_url` and `published_at` fill in as each platform completes. |
+| `platforms_status` | One entry per platform that will be published. `normalized_status`, `platform_post_id`, `post_url` and `published_at` fill in as each platform completes. `warning` carries a non-fatal problem (for example `thumbnail_failed: ...` on YouTube while the video is live). `platform_options` echoes the options object you sent. |
 | `platforms_skipped` | Platforms that cannot take this content, with a `reason`. Empty when `strict` is `true` (they return `422` instead). |
 | `status_url` | Poll this (under `/v1`) for the final outcome. |
 | `idempotent_replay` | `true` when an `Idempotency-Key` matched an earlier post and that post was returned. |
@@ -165,7 +176,7 @@ Anything a platform would reject is refused before queueing with `422`:
 }
 ```
 
-Checked per platform: caption over `max_text`, title over `max_title`, missing YouTube title, more media items than `max_media_items` (carousels on single-item platforms, more than 4 images on X), images on a video-only platform (Facebook, YouTube), tweet segments over 280 characters, unknown platform. With `strict: true`, "no media on a media-only platform" is also a `422`.
+Checked per platform: caption over `max_text`, title over `max_title`, missing YouTube title, more media items than `max_media_items` (more than 10 on Instagram, 4 images on X, 9 images on LinkedIn, more than one elsewhere), images on a video-only platform (Facebook, YouTube), a document on a platform other than LinkedIn, mixing images with a video or a document on LinkedIn, more than 30 Instagram hashtags, `instagram_music` without a video item, a YouTube `thumbnail_url` that is not https or has a non-image extension (anything but `.jpg`/`.jpeg`/`.png`; extension-less URLs are checked by content type at upload), invalid option values (`youtube_options.visibility`, `youtube_options.tags`, `youtube_options.category_id`, `linkedin_options.visibility`, `linkedin_options.alt_text` on non-image media), tweet segments over 280 characters, unknown platform. The `field` is dotted for option objects, for example `youtube_options.visibility`. With `strict: true`, "no media on a media-only platform" is also a `422`.
 
 ## Check the outcome
 
@@ -301,6 +312,47 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
   }'
 ```
 
+### Instagram carousel with auto-selected music
+
+Two to ten items (`media_url` plus `media_urls`, images and videos mixed) post as one carousel. `instagram_music` lays a track under every video item before upload.
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["instagram"],
+    "schedule_type": "now",
+    "media_url": "https://cdn.gen.pro/outputs/clip_1.mp4",
+    "media_urls": ["https://cdn.gen.pro/outputs/still_2.jpg", "https://cdn.gen.pro/outputs/still_3.png"],
+    "description": "Three looks, one drop #carousel",
+    "instagram_music": { "mode": "auto" },
+    "strict": true
+  }'
+```
+
+### YouTube Short with a custom thumbnail
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["youtube"],
+    "schedule_type": "now",
+    "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
+    "thumbnail_url": "https://cdn.gen.pro/outputs/cover.jpg",
+    "title": "Factory price reveal",
+    "description": "What your $12 beauty sponge really costs.",
+    "youtube_options": { "visibility": "public", "shorts": true, "tags": ["sourcing", "beauty"] },
+    "strict": true
+  }'
+```
+
+The published `post_url` is `https://www.youtube.com/shorts/{id}` for a Short and `https://www.youtube.com/watch?v={id}` otherwise. If the thumbnail could not be set (wrong type, over 2 MB, channel not verified for custom thumbnails), the platform status carries `warning: "thumbnail_failed: ..."` and the video is still live.
+
 ### Facebook Page video
 
 ```bash
@@ -347,6 +399,45 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
     "media_url": "https://cdn.gen.pro/outputs/chart.png",
     "title": "Q3 in one chart",
     "description": "Our Q3 numbers, in one chart.",
+    "strict": true
+  }'
+```
+
+### LinkedIn document (PDF carousel)
+
+A PDF, PPT, PPTX, DOC or DOCX in `media_url` posts as LinkedIn's swipeable document. `title` is the document title (max 400; the file name when omitted).
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["linkedin"],
+    "schedule_type": "now",
+    "media_url": "https://cdn.gen.pro/outputs/q3-deck.pdf",
+    "title": "Q3 in ten slides",
+    "description": "Our Q3 numbers, one slide at a time.",
+    "linkedin_options": { "visibility": "connections" },
+    "strict": true
+  }'
+```
+
+### LinkedIn with several images and alt text
+
+```bash
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-id",
+    "platform": ["linkedin"],
+    "schedule_type": "now",
+    "media_type": "IMAGE",
+    "media_url": "https://cdn.gen.pro/outputs/chart-1.png",
+    "media_urls": ["https://cdn.gen.pro/outputs/chart-2.png", "https://cdn.gen.pro/outputs/chart-3.png"],
+    "description": "Q3 in three charts.",
+    "linkedin_options": { "alt_text": ["Revenue by month", "Retention by cohort", "Pipeline by stage"] },
     "strict": true
   }'
 ```

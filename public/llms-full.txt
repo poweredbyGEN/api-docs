@@ -993,18 +993,19 @@ Platforms: TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn. One request c
 | Platform | `platform` | Content | Media/post | Caption limit | Title | Notes |
 |----------|------------|---------|-----------|---------------|-------|-------|
 | TikTok | `tiktok` | one video or image | 1 | 2,200 | ignored | privacy level + interaction flags required by TikTok |
-| Instagram | `instagram` | one video (Reel) or image | 1 | 2,200 | ignored | carousels not supported yet |
+| Instagram | `instagram` | one video (Reel), one image, or a 2-10 item carousel (images + videos) | 10 | 2,200 | ignored | ≤30 hashtags; `instagram_music` mixes a track under video items |
 | Facebook Page | `facebook` | one video | 1 | 63,206 | 255 | posts to the connected Page |
-| YouTube | `youtube` | one video | 1 | 5,000 | 100, **required** | |
+| YouTube | `youtube` | one video | 1 | 5,000 | 100, **required** | `thumbnail_url` uploaded as the thumbnail (https .jpg/.png <2 MB); `youtube_options` visibility/shorts/tags/made_for_kids/notify_subscribers/category_id |
 | X | `x` | text, up to 4 images, or one video; threads, replies | 4 | 280/tweet | ignored | text-only allowed |
-| LinkedIn | `linkedin` | text, one image, or one video | 1 | 3,000 | 400 | text-only allowed; posts as the member |
+| LinkedIn | `linkedin` | text, one video, 1-9 images, or one document (PDF/PPT/PPTX/DOC/DOCX) | 9 | 3,000 | 400 | text-only allowed; no mixing images with video/document; `linkedin_options` visibility/alt_text |
 
 ### Platform rules (live, no auth)
 
 ```
 GET /v1/schedule/platforms
-→ { "platforms": [ { "platform": "linkedin", "label": "LinkedIn", "text_only": true, "media": ["video","image"],
-      "max_media_items": 1, "max_text": 3000, "max_title": 400, "required": [], "optional": [...], "ignored": [...], "notes": "..." }, ... ] }
+→ { "platforms": [ { "platform": "linkedin", "label": "LinkedIn", "text_only": true, "media": ["video","image","document"],
+      "max_media_items": 9, "max_text": 3000, "max_title": 400, "required": [], "optional": [...], "ignored": [...],
+      "options": { "linkedin_options": { "visibility": "public (default) | connections | loggedin", "alt_text": "string[] ..." } }, "notes": "..." }, ... ] }
 ```
 
 This is exactly what the API validates against (and what the MCP tool schemas derive from).
@@ -1023,11 +1024,14 @@ Body:
   "schedule_type": "now",                       // now | specific_time | next_available (default)
   "scheduled_time": "2026-09-20T15:00:00Z",     // ISO 8601 UTC; required for specific_time; future
   "media_type": "VIDEO",                        // VIDEO (default) | IMAGE | REELS | TWEET_VIDEO
-  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
-  "media_urls": ["..."],                        // images; up to 4 on X, 1 elsewhere
-  "title": "...",                               // YouTube required (≤100); Facebook ≤255; LinkedIn ≤400; ignored elsewhere
-  "description": "caption #hashtags",           // per-platform limit above; required for text-only X/LinkedIn
-  "thumbnail_url": "...",                       // optional; generated from the video when omitted
+  "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",   // first/only media: video, image, or (LinkedIn) PDF/PPT/PPTX/DOC/DOCX
+  "media_urls": ["..."],                        // more media: Instagram 2-10 total = carousel; X ≤4 images; LinkedIn ≤9 images; 1 elsewhere
+  "title": "...",                               // YouTube required (≤100); Facebook ≤255; LinkedIn ≤400 (document title); ignored elsewhere
+  "description": "caption #hashtags",           // per-platform limit above; required for text-only X/LinkedIn; Instagram ≤30 hashtags
+  "thumbnail_url": "...",                       // optional; generated from the video when omitted; YouTube uploads it (https .jpg/.jpeg/.png, <2 MB)
+  "instagram_music": { "mode": "auto" },        // Instagram only; or { "track_url": "https://...mp3" }; needs a video item
+  "youtube_options": { "visibility": "public", "shorts": false, "tags": ["a","b"], "made_for_kids": false, "notify_subscribers": true, "category_id": 22 },
+  "linkedin_options": { "visibility": "public", "alt_text": ["per image, in order"] },   // visibility: public | connections | loggedin
   "thread": [{ "text": "1/ ...", "media_urls": ["..."] }],   // X only, each ≤280 chars
   "reply_to_tweet_id": "178...",               // X only
   "tiktok_privacy_level": "PUBLIC_TO_EVERYONE", // TikTok: PUBLIC_TO_EVERYONE | MUTUAL_FOLLOW_FRIENDS | FOLLOWER_OF_CREATOR | SELF_ONLY
@@ -1038,7 +1042,7 @@ Body:
 → {
   "post_id": 48213,
   "platforms": ["youtube", "x"],
-  "platforms_status": [ { "platform": "youtube", "normalized_status": "publishing", "platform_post_id": null, "post_url": null, "published_at": null, "error": null, "error_code": null, ... }, ... ],
+  "platforms_status": [ { "platform": "youtube", "normalized_status": "publishing", "platform_post_id": null, "post_url": null, "published_at": null, "error": null, "error_code": null, "warning": null, "platform_options": {...}, ... }, ... ],
   "platforms_skipped": [],                      // [{ "platform", "reason" }] when strict=false and a platform cannot take the content
   "status_url": "/schedule/post/48213",
   "idempotent_replay": false,
@@ -1056,7 +1060,7 @@ Validation failure (422, before anything is queued):
               "errors": [ { "platform": "youtube", "field": "title", "error": "YouTube requires a title" } ] } }
 ```
 
-Checked: caption > max_text, title > max_title, missing YouTube title, too many media items (carousels on 1-item platforms, >4 images on X), images on video-only platforms (Facebook, YouTube), tweet segments > 280, unknown platform; with `strict`, also no media on a media-only platform.
+Checked: caption > max_text, title > max_title, missing YouTube title, too many media items (>10 Instagram, >4 images X, >9 images LinkedIn, >1 elsewhere), images on video-only platforms (Facebook, YouTube), documents anywhere but LinkedIn, LinkedIn mixing images with a video/document, >30 Instagram hashtags, `instagram_music` without a video item, bad YouTube `thumbnail_url` (not https, or a non .jpg/.jpeg/.png extension), bad option values (`youtube_options.visibility|tags|category_id`, `linkedin_options.visibility|alt_text`; `field` is dotted), tweet segments > 280, unknown platform; with `strict`, also no media on a media-only platform.
 
 ### Outcome + post link
 
@@ -1070,7 +1074,7 @@ GET /v1/schedule/post/{post_id}
         "error": "Media download failed: 403 Forbidden", "error_code": "media_fetch_failed", "failed_step": "download" } ] }
 ```
 
-`normalized_status`: `accepted` (stored) → `publishing` (scheduled / uploading) → `published` (live; `post_url` + `platform_post_id` set) | `failed` (`error`, `error_code`, `failed_step`). `post_url` is the public link: YouTube watch URL, Instagram permalink, Facebook Page video, TikTok video, X status, LinkedIn post.
+`normalized_status`: `accepted` (stored) → `publishing` (scheduled / uploading) → `published` (live; `post_url` + `platform_post_id` set) | `failed` (`error`, `error_code`, `failed_step`). `post_url` is the public link: YouTube watch URL (or `/shorts/{id}` when `youtube_options.shorts`), Instagram permalink, Facebook Page video, TikTok video, X status, LinkedIn post. `warning` = non-fatal (e.g. YouTube `thumbnail_failed: ...`, video still live). Instagram reports the `music_track` used (or null).
 
 ### Calendar: list / update / delete
 
@@ -1100,6 +1104,18 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H
 # YouTube, scheduled, idempotent
 curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" -H "Idempotency-Key: launch-2026-09-20" \
   -d '{"agent_id":"'$AGENT'","platform":["youtube"],"schedule_type":"specific_time","scheduled_time":"2026-09-20T15:00:00Z","media_url":"https://cdn.gen.pro/outputs/render_xyz.mp4","title":"Factory price reveal","description":"...","strict":true}'
+
+# Instagram carousel (2-10 items) with auto music
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  -d '{"agent_id":"'$AGENT'","platform":["instagram"],"schedule_type":"now","media_url":"https://cdn.gen.pro/outputs/clip_1.mp4","media_urls":["https://cdn.gen.pro/outputs/still_2.jpg"],"description":"Two looks #drop","instagram_music":{"mode":"auto"},"strict":true}'
+
+# YouTube Short, custom thumbnail, unlisted
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  -d '{"agent_id":"'$AGENT'","platform":["youtube"],"schedule_type":"now","media_url":"https://cdn.gen.pro/outputs/render_xyz.mp4","thumbnail_url":"https://cdn.gen.pro/outputs/cover.jpg","title":"Factory price reveal","youtube_options":{"visibility":"unlisted","shorts":true,"tags":["sourcing"]},"strict":true}'
+
+# LinkedIn PDF document, connections only
+curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  -d '{"agent_id":"'$AGENT'","platform":["linkedin"],"schedule_type":"now","media_url":"https://cdn.gen.pro/outputs/q3-deck.pdf","title":"Q3 in ten slides","description":"One slide at a time.","linkedin_options":{"visibility":"connections"},"strict":true}'
 
 # X thread
 curl -X POST "https://api.gen.pro/v1/schedule/with-post" -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
