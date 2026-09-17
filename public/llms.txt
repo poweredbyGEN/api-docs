@@ -321,6 +321,8 @@ POST   /v1/templates/spreadsheets/:slug/clone        — clone into agent
 POST   /v1/vidsheet?agent_id=               — create blank engine
 GET    /v1/vidsheet/:id?agent_id=           — read engine with all nested data
 POST   /v1/vidsheet/:id/clone?agent_id=     — clone engine (same or diff agent)
+PATCH  /v1/vidsheet/:id?agent_id=           — rename engine ({ project: { title } })
+DELETE /v1/vidsheet/:id?agent_id=           — delete engine and everything in it (not undoable)
 ```
 
 ---

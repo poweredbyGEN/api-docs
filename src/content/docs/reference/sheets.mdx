@@ -1,6 +1,6 @@
 ---
 title: Auto Content Engine
-description: Create, read, and clone Auto Content Engines — the top-level workspace for video content.
+description: Create, read, clone, rename, and delete Auto Content Engines — the top-level workspace for video content.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -174,3 +174,79 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
 |--------|------------|-------------|
 | `404` | `not_found` | Engine not found or agent does not have access. |
 | `422` | `validation_error` | Target agent not accessible or insufficient credits. |
+
+---
+
+## Rename
+
+Updates the title of an Auto Content Engine. `PUT` and `PATCH` are equivalent.
+
+```
+PATCH /v1/vidsheet/{id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer or uuid | The engine ID. |
+
+### Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `project.title` | string | Yes | New name for the engine. |
+| `project.is_default` | boolean | No | Set as the agent's default engine. Clears the flag on the agent's other engines. |
+
+### Response (200)
+
+Returns the updated engine object (`id`, `uuid`, `title`, `is_default`, timestamps) without nested columns or rows.
+
+### Example
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/vidsheet/101?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"project": {"title": "April Campaign"}}'
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `project_not_found` | Engine not found or agent does not have access. |
+| `422` | `validation_error` | Missing or blank title. |
+
+---
+
+## Delete
+
+Permanently deletes an Auto Content Engine together with all of its columns, rows, cells, layers, global variables, and automations. This cannot be undone. Rendered output resources are detached, not deleted (see [Download](/step-5-export/download/)).
+
+```
+DELETE /v1/vidsheet/{id}?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer or uuid | The engine ID to delete. |
+
+### Response (200)
+
+Empty body.
+
+### Example
+
+```bash
+curl -X DELETE "https://api.gen.pro/v1/vidsheet/101?agent_id=42" \
+  -H "X-API-Key: your-api-key"
+```
+
+### Errors
+
+| Status | Error code | Description |
+|--------|------------|-------------|
+| `404` | `project_not_found` | Engine not found or agent does not have access. |
