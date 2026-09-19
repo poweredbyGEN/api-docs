@@ -4,6 +4,14 @@
 
 For a teaching-style introduction with runnable curl chains, read `https://api.gen.pro/llms.txt` first. This file is the full spec.
 
+## Canonical Vidsheet workflow
+
+Start at https://api.gen.pro/guides/vidsheet-actions/ for `gen_vidsheet_discover` and `gen_vidsheet_action`: current field schemas, creation-card drafts, exact-owner generation, media prerequisites, retries, and deletion confirmation. Configure hosted MCP with `Authorization: Bearer <your-PAT>`; no per-session JWT minting is required.
+
+Existing-job lifecycle is separate: `gen_continue_generation(generation_id, agent_id, idempotency_key)` continues an owned stopped job using credits, without a creation-card body. The key is nonblank, 1–255 characters, and may contain spaces. Retry the identical job, agent, and key after timeout or `generation_busy`; changed input under the same key conflicts. The response retains the same `generation_id` with status `pending`; poll `gen_get_generation`. This is not a promise to resume a provider's partial work.
+
+Per-target Vidsheet mutation examples in this reference describe legacy direct-HTTP routes, not the canonical action contract. Migrate editing integrations to the guide. Hosted MCP does not provide final-video rendering; use the Vidsheet editor. Read-only and non-Vidsheet endpoint references remain applicable.
+
 ## Base URLs and Auth
 
 - `https://api.gen.pro/v1` — agent setup, vidsheets, generations, renders, content monitoring, publishing
@@ -13,7 +21,7 @@ Auth on both surfaces:
 - `X-API-Key: <your-PAT>` — recommended; create via `POST /v1/persisted_tokens` or in the GEN dashboard
 - `Authorization: Bearer <jwt>` — for browser-login apps
 
-All `/vidsheet/*` endpoints require `agent_id` as a query parameter and an active GEN credit balance on the agent's workspace.
+Vidsheet requests identify the acting `agent_id`. Canonical action requests carry it in the body; discovery uses a query parameter. Generation requires usable workspace credits; draft and property updates do not start generation.
 
 Credits: paid generation/research/voice/render work spends workspace credits. Buy arbitrary credit amounts with x402 by calling `POST /v1/x402_credit_purchase` with `workspace_id` plus `amount_usd` or `credits`. If no `network` is supplied, the response lists every configured payment option in `payment_methods` and `payment_required.accepts`: Sui, Solana, and Base when configured. Show those options to the user/agent, sign one accept entry, then retry/settle with `PAYMENT-SIGNATURE`, `X402-Checkout-Session-Id`, and the chosen `X402-Network`. Workspace funding wallets are backend infrastructure; the user-facing wallet choices are the returned payment methods.
 
@@ -1436,8 +1444,9 @@ next cadence tick.
 
 # Integrations
 
-- MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` path also still accepted for older configs; the downloadable `gen-mcp-server` PyPI package is retired and no longer served — never `pip install`/`uvx` it). Exposes 155 gen_* tools and one guidance resource, `gen://api-reference`.
-- MCP vs agent: The MCP owns the Vidsheet surface (sheets, cards, cells, layers, generation, render, publish). GEN's own agent — the chat at gen.pro, and `gen_chat` / `gen_ask` here — plans over those same tools; there is no second implementation of Vidsheet logic behind the chat. If a capability crosses the network with your credentials, it is an MCP tool; the agent keeps only its local loop (resolving what you meant, refusing, asking when ambiguous). Exact operation → call the `gen_*` tool. Fuzzy goal → `gen_chat` (build) or `gen_ask` (data question); the agent returns a `run_id` you poll with `gen_get_run_status`.
+- MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` also accepts older configurations). The downloadable package is retired. Use live `tools/list` for available tools and `gen://api-reference` for guidance.
+- MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_vidsheet_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
+- MCP payment recovery: low-credit failures return `status: "payment_required"`, `status_code: 402`, Stripe and x402 `payment_options`, and a same-call retry instruction. Payment requires approval. After funding succeeds, retry the same tool once with the same arguments; the funding result is not accepted or completed work.
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
 - Full Docs (5-step journey): https://api.gen.pro

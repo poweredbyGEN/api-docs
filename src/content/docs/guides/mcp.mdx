@@ -43,10 +43,15 @@ The GEN MCP is hosted-only — there is no package to install or local process t
 
 ## How the MCP fits with the GEN agent
 
-The MCP owns the Vidsheet surface — sheets, cards, cells, layers, generation, render, publish. GEN's own agent (the chat at gen.pro, and `gen_chat` / `gen_ask` here) plans over those same tools; there is no second implementation of Vidsheet logic behind the chat. If a capability crosses the network with your credentials, it is an MCP tool. The agent keeps only its local loop: resolving what you meant, refusing, asking when a request is ambiguous.
+For Vidsheet editing, MCP forwards typed actions to the GEN API, which owns validation, creation-card behavior, ownership, and persistence. GEN's chat plans over that MCP surface. Natural-language tools such as `gen_chat` and `gen_ask` delegate to GEN's agent service; this delegation is separate from the Vidsheet editing path.
 
-- Exact operation → call the `gen_*` tool (`gen_get_vidsheet_full`, `gen_card_catalog`, `gen_update_cell`, …).
+- Exact edit → discover supported fields with `gen_vidsheet_discover`, then call `gen_vidsheet_action`. Read saved state with `gen_get_vidsheet_full`. See [Work with a Vidsheet](/guides/vidsheet-actions/) for draft, generation, and layer examples.
 - Fuzzy goal → `gen_chat` (build something) or `gen_ask` (question about social data). The agent plans, calls the tools, and returns a `run_id` you poll with `gen_get_run_status`.
+
+Older per-target Vidsheet mutation tools are retired; use the action/discovery
+workflow above. Job lifecycle remains separate: `gen_stop_generation` stops a
+job, and `gen_continue_generation` continues an owned stopped job using credits
+and a stable retry key. See [lifecycle and retry details](/guides/vidsheet-actions/#readback-lifecycle-and-older-integrations).
 
 ## Previously used the local package?
 
@@ -54,28 +59,38 @@ The downloadable `gen-mcp-server` package (PyPI, `uvx gen-mcp-server`) is **reti
 
 ## What It Can Do
 
-The current GEN MCP exposes **155 tools** and one guidance resource, `gen://api-reference` (read it first).
+Use your client's `tools/list` for the current tool set and `gen://api-reference` for guidance. For Vidsheet edits, start with [the action and discovery guide](/guides/vidsheet-actions/).
 
 | Area | What your assistant can do |
 |---|---|
 | **Ask GEN** | Use `gen_chat`, `gen_ask`, `gen_run_research`, and `gen_generate_content_ideas` for natural-language work |
-| **Create media** | Generate videos, images, songs, song mixes, voices, voice samples, and rendered final videos |
-| **Build Vidsheets** | Read a whole sheet (`gen_get_vidsheet_full`), browse creation cards (`gen_card_catalog`, `gen_card_schema`), create or clone engines, manage rows, columns, cells, layers, variables, and templates |
+| **Create media** | Generate supported videos, images, songs, and voices; final-video rendering is unavailable through hosted MCP |
+| **Build Vidsheets** | Read a sheet with `gen_get_vidsheet_full`, discover card/settings schemas with `gen_vidsheet_discover`, and use `gen_vidsheet_action` for supported structure, drafts, media, and generation |
 | **Manage assets** | List libraries, create direct uploads, import media from URLs, rename assets, and delete assets |
 | **Run strategy workflows** | Create content ideas, query watchlists, research trends, and manage recurring jobs |
-| **Publish** | Connect social accounts, schedule posts, update schedules, and remove scheduled posts |
+| **Publish** | Connect social accounts, schedule posts, update schedules, edit supported metadata on published posts, and remove scheduled posts |
 | **Manage account data** | List agents, workspaces, organizations, API keys, avatars, credit balance, usage, and plans |
 
 ## Credits and x402
 
-GEN MCP tools use workspace credits for paid generation, research, voice, song, and render work. Check balance with `gen_get_credit_balance` and estimate paid jobs with `gen_estimate_job`.
+GEN MCP tools use workspace credits for paid generation, research, voice, and song work. Saving a Vidsheet draft or changing its properties does not start generation. Check balance with `gen_get_credit_balance` and estimate paid jobs with `gen_estimate_job`.
 
 To add credits:
 
-- Use `gen_buy_credits` for Stripe checkout.
-- For USDC via x402, call the API directly: `POST /v1/x402_credit_purchase` (see [Credits](/step-5-export/credits/)).
+- For Stripe, use `gen_list_credit_plans`, then `gen_buy_credits`.
+- For USDC via x402, use `gen_create_x402_credit_purchase`, then
+  `gen_settle_x402_credit_purchase` with the signed payment.
 
-`POST /v1/x402_credit_purchase` returns `payment_methods` and `payment_required.accepts`. If you omit `network`, GEN lists every configured option instead of assuming one chain. Show the Sui, Solana, and Base options to the user or calling agent, then sign and retry using the chosen `payment_required.accepts[]` entry.
+When a paid tool cannot run because the workspace lacks credits, MCP returns a
+structured result with `status: "payment_required"`, `status_code: 402`,
+`funding_error_kind: "out_of_credits"`, Stripe and x402 `payment_options`, and
+the original call under `retry`. This is not a completed operation. Show the
+payment choices and obtain approval; after payment succeeds, retry the same MCP
+tool once with the same arguments. MCP never purchases credits automatically.
+
+The x402 quote lists every configured network when you omit `network`. Present
+those choices instead of assuming one chain. See [Credits](/step-5-export/credits/)
+for signing and settlement details.
 
 Workspace funding wallets are backend infrastructure for settlement and sweeping. MCP clients should present the returned payment methods, not ask users to hunt for hidden workspace wallets.
 

@@ -110,6 +110,7 @@ export default defineConfig({
 					collapsed: false,
 					items: [
 						{ label: 'Overview', slug: 'step-4-edit/overview' },
+						{ label: 'Work with a Vidsheet (API & MCP)', slug: 'guides/vidsheet-actions' },
 						{ label: 'Vidsheet Anatomy', slug: 'step-4-edit/anatomy' },
 						{
 							label: 'Creation Cards (10 types)',
