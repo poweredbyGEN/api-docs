@@ -2178,6 +2178,111 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /schedule/post/{post_id}/published:
+    parameters:
+      - name: post_id
+        in: path
+        required: true
+        description: The `post_id` of a post that has already published.
+        schema:
+          type: integer
+    patch:
+      operationId: updatePublishedPost
+      x-phase: [export]
+      summary: Edit the metadata of a post that is already live
+      description: |
+        Change a published post's metadata where the destination network supports it — today, a YouTube video's `title`, `description`, `tags` and `category_id`. `GET /schedule/platforms` names the editable fields per platform in `editable_after_publish`.
+
+        The edit is **sparse**: only the fields in the request body change. GEN reads the platform's current metadata, merges your change onto it, writes it back, and returns what the platform held afterwards — so a title you did not send is not cleared, and the same request sent twice converges on the same result rather than stacking edits.
+
+        The response is `200` with one result per platform the post went out on, each `updated`, `unsupported_after_publish`, `reauthorization_required` or `failed`. A network with no edit path is reported as `unsupported_after_publish` and nothing is touched; it is never an authentication error. A `422` means the body itself is wrong — a field the platform cannot change after publishing, or one that breaks the platform's limits.
+
+        Use `PATCH /schedule/post/{post_id}` for a post that has **not** gone out yet; that endpoint still refuses published posts.
+
+        Each YouTube update consumes 50 units of the connected channel's YouTube API quota.
+      tags: [Publishing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishedPostUpdate'
+            examples:
+              fixDescription:
+                summary: Fix a typo in a live YouTube description
+                value:
+                  description: "What your $12 beauty sponge really costs — corrected sourcing figures in the pinned comment."
+              retitleAndRetag:
+                summary: Retitle, retag and recategorise
+                value:
+                  title: "Factory price reveal (2026 update)"
+                  tags: [sourcing, beauty, supply chain]
+                  category_id: 24
+      responses:
+        '200':
+          description: One result per platform the post published to.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishedPostUpdateResponse'
+              examples:
+                updated:
+                  summary: YouTube accepted the edit
+                  value:
+                    post_id: 120750
+                    results:
+                      - platform: youtube
+                        platform_post_id: "dQw4w9WgXcQ"
+                        result: updated
+                        updated_fields: [description]
+                        metadata:
+                          title: "Factory price reveal"
+                          description: "What your $12 beauty sponge really costs — corrected sourcing figures in the pinned comment."
+                          tags: [sourcing, beauty]
+                          category_id: 22
+                        quota_units: 50
+                unsupported:
+                  summary: The platform has no post-publication edit
+                  value:
+                    post_id: 120751
+                    results:
+                      - platform: tiktok
+                        platform_post_id: "7412..."
+                        result: unsupported_after_publish
+                        message: "tiktok has no supported post-publication edit for this content."
+                reauthorization:
+                  summary: The connected account must be reconnected
+                  value:
+                    post_id: 120750
+                    results:
+                      - platform: youtube
+                        platform_post_id: "dQw4w9WgXcQ"
+                        result: reauthorization_required
+                        message: "Reconnect the YouTube account: GEN's saved authorization is no longer usable."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: You do not have permission to edit this post.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: |
+            The post has not published yet (`post_not_published`), the body is empty, or a field is not editable after publishing / breaks the platform's limits (`platform_validation_failed`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformValidationError'
+              example:
+                detail:
+                  error: "YouTube cannot change visibility after publishing"
+                  error_code: platform_validation_failed
+                  platform: youtube
+                  field: visibility
+                  errors:
+                    - platform: youtube
+                      field: visibility
+                      error: "YouTube cannot change visibility after publishing"
+
   /templates/projects:
     get:
       operationId: listTemplates
@@ -5430,8 +5535,81 @@ components:
             linkedin_options:
               visibility: "public (default) | connections | loggedin"
               alt_text: "string[] — alternative text per image, in media order (images only)"
+        editable_after_publish:
+          type: array
+          description: |
+            Fields `PATCH /schedule/post/{post_id}/published` can still change once the post is live. Empty means the network has no supported post-publication edit and that endpoint answers `unsupported_after_publish` for it.
+          items:
+            type: string
+          example: [title, description, tags, category_id]
         notes:
           type: string
+
+    PublishedPostUpdate:
+      type: object
+      description: |
+        A sparse metadata edit for a post that has already published. Send only the fields you want changed; every other field on the live post is preserved. At least one field is required.
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          description: New title. YouTube allows up to 100 characters and rejects a blank title.
+        description:
+          type: string
+          description: |
+            New description / caption. YouTube allows up to 5,000 **bytes** (not characters — emoji and CJK cost several bytes each). An explicit `null` clears the description.
+        tags:
+          type: array
+          description: YouTube only — replaces the video's tags. Each tag is 2+ characters and all tags together are at most 400 characters.
+          items:
+            type: string
+        category_id:
+          type: integer
+          description: YouTube only — video category ID (for example 22 People & Blogs, 24 Entertainment).
+
+    PublishedPostUpdateResult:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PublishPlatform'
+        platform_post_id:
+          type: string
+          nullable: true
+          description: The platform's own ID for the live post (a YouTube video ID).
+        result:
+          type: string
+          enum: [updated, unsupported_after_publish, reauthorization_required, failed]
+          description: |
+            `updated` — the platform accepted the edit and `metadata` is what it holds now.
+            `unsupported_after_publish` — this network has no post-publication edit for this content; nothing was touched.
+            `reauthorization_required` — GEN's saved authorization for this account can no longer edit the post; the user must reconnect it (GEN app → Setup → Accounts).
+            `failed` — the platform rejected the edit; `message` carries its reason.
+        updated_fields:
+          type: array
+          description: Present on `updated` — the fields that were sent to the platform.
+          items:
+            type: string
+        metadata:
+          type: object
+          description: Present on `updated` — the metadata read back from the platform after the write, not the values that were sent.
+        quota_units:
+          type: integer
+          description: Present on `updated` — the platform API quota the update consumed (YouTube charges 50 units per update).
+          example: 50
+        message:
+          type: string
+          description: Why this platform could not be updated. Absent on `updated`.
+
+    PublishedPostUpdateResponse:
+      type: object
+      properties:
+        post_id:
+          type: integer
+        results:
+          type: array
+          description: One entry per platform the post went out on, in the post's platform order.
+          items:
+            $ref: '#/components/schemas/PublishedPostUpdateResult'
 
     InstagramMusic:
       type: object
