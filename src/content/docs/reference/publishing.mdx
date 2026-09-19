@@ -254,6 +254,10 @@ Which fields each platform can change is served as `editable_after_publish` on e
 
 The edit is **sparse**: only the fields in the body change. GEN reads the platform's current metadata, merges your change onto it, writes it back, and returns what the platform held afterwards — so a title you did not send is never cleared, and sending the same request twice converges on the same result instead of stacking edits.
 
+To *clear* a field rather than change it, send an explicit `null` (`"description": null`) or an empty list (`"tags": []`). `title` and `category_id` cannot be cleared: YouTube requires both, so a null there is a `422`.
+
+YouTube's description limit is 5,000 **bytes**, not characters — emoji and CJK cost several bytes each, so a 2,000-character description of emoji is over the limit.
+
 ```bash
 curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" \
   -H "X-API-Key: $GEN_API_KEY" \
@@ -288,8 +292,8 @@ One entry per platform the post went out on:
 |----------|---------|
 | `updated` | The platform accepted the edit. `metadata` is read back **from the platform** after the write, not echoed from the request. |
 | `unsupported_after_publish` | This network has no post-publication edit for this content. Nothing was touched — this is a capability answer, not an authentication failure. |
-| `reauthorization_required` | GEN's saved authorization for that account can no longer edit the post. The user reconnects it in the GEN app under **Setup → Accounts**. |
-| `failed` | The platform rejected the edit; `message` carries its reason (for example `quotaExceeded`). |
+| `reauthorization_required` | GEN's saved authorization for that account can no longer edit the post — the connection is missing, expired beyond refresh, or was granted without the write scope. The user reconnects it in the GEN app under **Setup → Accounts**. |
+| `failed` | The platform rejected the edit; `message` carries its reason. This covers the 403s that reconnecting would *not* fix — `quotaExceeded`, a video the connected channel does not own, a suspended channel, a policy restriction. |
 
 A `422` means the request body itself is wrong: `post_not_published` (the post has not gone out — use `PATCH /schedule/post/{post_id}`), an empty body, or `platform_validation_failed` naming the `field`, either because the platform cannot change it after publishing or because it breaks the platform's limits (the same limits a fresh publish is held to).
 

@@ -5556,7 +5556,8 @@ components:
           description: New title. YouTube allows up to 100 characters and rejects a blank title.
         description:
           type: string
-          description: New description / caption. YouTube allows up to 5,000 characters.
+          description: |
+            New description / caption. YouTube allows up to 5,000 **bytes** (not characters — emoji and CJK cost several bytes each). An explicit `null` clears the description.
         tags:
           type: array
           description: YouTube only — replaces the video's tags. Each tag is 2+ characters and all tags together are at most 400 characters.
