@@ -1091,6 +1091,26 @@ PATCH  /v1/schedule/post/{post_id}   // same content fields as create + schedule
 DELETE /v1/schedule/post/{post_id}
 ```
 
+### Edit a post that is already live
+
+```
+PATCH /v1/schedule/post/{post_id}/published
+{ "description": "Corrected sourcing figures in the pinned comment." }
+→ { "post_id": 48213,
+    "results": [ { "platform": "youtube", "platform_post_id": "dQw4w9WgXcQ", "result": "updated",
+                   "updated_fields": ["description"], "quota_units": 50,
+                   "metadata": { "title": "Factory price reveal", "description": "Corrected sourcing figures...",
+                                 "tags": ["sourcing","beauty"], "category_id": 22 } } ] }
+```
+
+Editable fields per platform come from `editable_after_publish` in `GET /v1/schedule/platforms`. Today: **YouTube** `title` (≤100, not blank), `description` (≤5,000), `tags` (each 2+ chars, ≤400 chars total), `category_id` (positive int). Every other platform is `[]` — TikTok, Instagram and Facebook have no post-publication edit for this content, editing a sent tweet is a paid X plan feature, and LinkedIn's `commentary` PARTIAL_UPDATE is not wired yet.
+
+**Sparse and idempotent.** Only the fields in the body change. GEN reads the platform's current metadata, merges the change onto it and writes it back, so an unsent title is never cleared and the same request twice converges rather than stacking. `metadata` is read back *from the platform* after the write, not echoed from the request.
+
+`result` per platform: `updated` · `unsupported_after_publish` (that network has no edit path; nothing was touched — not an auth error) · `reauthorization_required` (GEN's saved authorization can no longer edit it; reconnect via GEN app → Setup → Accounts) · `failed` (`message` carries the platform's reason, e.g. `quotaExceeded`).
+
+`422`: `post_not_published` (it has not gone out — use `PATCH /v1/schedule/post/{post_id}`), an empty body, or `platform_validation_failed` naming the `field` (a field the platform cannot change after publishing, or one over its limit). Each YouTube update costs 50 units of the connected channel's YouTube API quota.
+
 ### Upload media (upload_asset)
 
 Posts reference media by URL (public at post time; a render URL works directly). Upload a local file to get a hosted URL, also saved to the agent's Assets.

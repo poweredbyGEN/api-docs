@@ -551,6 +551,15 @@ curl "https://api.gen.pro/v1/schedule/post/48213" -H "X-API-Key: $GEN_API_KEY"
 # published: platform_post_id + post_url (the live link). failed: error, error_code, failed_step.
 ```
 
+**Already live and wrong?** `PATCH /v1/schedule/post/:post_id/published` edits a published post's metadata where the network supports it — today YouTube `title`, `description`, `tags`, `category_id`. Sparse: only the fields you send change, everything else on the live post is preserved, and the same request twice converges instead of stacking. The reply is one result per platform — `updated` (with the platform's readback), `unsupported_after_publish` (that network has no edit path; nothing touched), `reauthorization_required` (reconnect the account) or `failed`. `editable_after_publish` in `GET /v1/schedule/platforms` names the editable fields per platform. Each YouTube update costs 50 units of the channel's YouTube quota. For a post that has *not* gone out yet, use `PATCH /v1/schedule/post/:post_id` instead.
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" -d '{"description": "Corrected sourcing figures in the pinned comment."}'
+# { "post_id": 48213, "results": [ { "platform": "youtube", "result": "updated",
+#   "updated_fields": ["description"], "metadata": {...}, "quota_units": 50 } ] }
+```
+
 **Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000, `thumbnail_url` https .jpg/.png <2 MB; TikTok/Instagram 2,200 (Instagram ≤30 hashtags, 2-10 items = carousel); LinkedIn 3,000, ≤9 images or one PDF/PPTX/DOCX document, no mixing; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. Per-platform knobs: `instagram_music`, `youtube_options` (visibility, shorts, tags), `linkedin_options` (visibility, alt_text, carousel = PDF of the images; several images alone render as a grid). A 422 `platform_validation_failed` names the `platform` and `field` (dotted for options). `GET /v1/schedule/platforms` (no auth) serves the rules incl. each `options` object.
 
 **Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_get_social_connect_url`). Media URLs must be publicly accessible at post time.
@@ -564,7 +573,8 @@ GET    /v1/schedule/platforms                                       — per-plat
 POST   /v1/schedule/with-post                                       — publish now / schedule (all platforms)
 GET    /v1/schedule/post/:post_id                                   — outcome per platform + post_url
 GET    /v1/schedule/posts?agent_id=&start_date=&end_date=           — content calendar
-PATCH  /v1/schedule/post/:post_id · DELETE /v1/schedule/post/:post_id
+PATCH  /v1/schedule/post/:post_id · DELETE /v1/schedule/post/:post_id — before it goes out
+PATCH  /v1/schedule/post/:post_id/published                         — edit a LIVE post's metadata (YouTube)
 POST   /v1/social/upload_asset                                      — upload a local file → hosted URL
 ```
 

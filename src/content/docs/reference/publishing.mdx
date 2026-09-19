@@ -30,7 +30,7 @@ These rules are served live and are what the API validates against:
 GET /v1/schedule/platforms
 ```
 
-No authentication required. Each entry has `platform`, `label`, `text_only`, `media` (`video`, `image`, `document`), `max_media_items`, `max_text`, `max_title`, `required`, `optional`, `ignored`, `options` (the platform's options object and the values each field accepts) and `notes`.
+No authentication required. Each entry has `platform`, `label`, `text_only`, `media` (`video`, `image`, `document`), `max_media_items`, `max_text`, `max_title`, `required`, `optional`, `ignored`, `options` (the platform's options object and the values each field accepts), `editable_after_publish` (the fields that can still be changed once the post is live — see [Edit a post that is already live](#edit-a-post-that-is-already-live)) and `notes`.
 
 ```bash
 curl "https://api.gen.pro/v1/schedule/platforms"
@@ -50,6 +50,7 @@ curl "https://api.gen.pro/v1/schedule/platforms"
       "required": [],
       "optional": ["description", "media_url", "media_urls", "title", "thumbnail_url", "linkedin_options"],
       "ignored": ["thread", "reply_to_tweet_id"],
+      "editable_after_publish": [],
       "options": {
         "linkedin_options": {
           "visibility": "public (default) | connections | loggedin",
@@ -231,6 +232,70 @@ DELETE /v1/schedule/post/{post_id}
 ```
 
 `GET /schedule/posts` lists the content calendar for a window of at most 60 days. `PATCH` accepts the same content fields as create plus `scheduled_time` and `schedule_type`; it only works before the post goes out (a post already sent, or created with `schedule_type: now`, cannot be edited). `DELETE` removes a scheduled post.
+
+## Edit a post that is already live
+
+```
+PATCH /v1/schedule/post/{post_id}/published
+```
+
+Fix a typo in a published description, retitle a video, change its tags or category — where the destination network supports it. This is the published-post counterpart to `PATCH /schedule/post/{post_id}`, which still refuses posts that have gone out.
+
+Which fields each platform can change is served as `editable_after_publish` on every entry of `GET /v1/schedule/platforms`:
+
+| Platform | Editable after publishing | Why |
+|----------|---------------------------|-----|
+| YouTube | `title`, `description`, `tags`, `category_id` | The Data API supports updating a live video's snippet. |
+| TikTok | — | No post-publication edit for this content. |
+| Instagram | — | No post-publication edit for this content. |
+| Facebook Page | — | No post-publication edit for this content. |
+| X | — | Editing a sent tweet is a paid plan feature and is not exposed. |
+| LinkedIn | — | The Posts API can partially update `commentary`; GEN has not wired that adapter yet. |
+
+The edit is **sparse**: only the fields in the body change. GEN reads the platform's current metadata, merges your change onto it, writes it back, and returns what the platform held afterwards — so a title you did not send is never cleared, and sending the same request twice converges on the same result instead of stacking edits.
+
+```bash
+curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" \
+  -H "X-API-Key: $GEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Corrected sourcing figures in the pinned comment."}'
+```
+
+```json
+{
+  "post_id": 48213,
+  "results": [
+    {
+      "platform": "youtube",
+      "platform_post_id": "dQw4w9WgXcQ",
+      "result": "updated",
+      "updated_fields": ["description"],
+      "metadata": {
+        "title": "Factory price reveal",
+        "description": "Corrected sourcing figures in the pinned comment.",
+        "tags": ["sourcing", "beauty"],
+        "category_id": 22
+      },
+      "quota_units": 50
+    }
+  ]
+}
+```
+
+One entry per platform the post went out on:
+
+| `result` | Meaning |
+|----------|---------|
+| `updated` | The platform accepted the edit. `metadata` is read back **from the platform** after the write, not echoed from the request. |
+| `unsupported_after_publish` | This network has no post-publication edit for this content. Nothing was touched — this is a capability answer, not an authentication failure. |
+| `reauthorization_required` | GEN's saved authorization for that account can no longer edit the post. The user reconnects it in the GEN app under **Setup → Accounts**. |
+| `failed` | The platform rejected the edit; `message` carries its reason (for example `quotaExceeded`). |
+
+A `422` means the request body itself is wrong: `post_not_published` (the post has not gone out — use `PATCH /schedule/post/{post_id}`), an empty body, or `platform_validation_failed` naming the `field`, either because the platform cannot change it after publishing or because it breaks the platform's limits (the same limits a fresh publish is held to).
+
+<Aside type="caution">
+  Each YouTube update consumes 50 units of the connected channel's YouTube API quota, plus 1 for reading the current metadata.
+</Aside>
 
 ## Upload media
 
