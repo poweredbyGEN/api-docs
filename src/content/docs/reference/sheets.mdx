@@ -1,6 +1,6 @@
 ---
 title: Auto Content Engine
-description: Create, read, clone, rename, and delete Auto Content Engines — the top-level workspace for video content.
+description: Create, read, rename, and delete Auto Content Engines — the top-level workspace for video content.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -130,50 +130,11 @@ curl "https://api.gen.pro/v1/vidsheet/101?agent_id=42&with_execution_cost=true" 
 
 ---
 
-## Clone
+## Duplicate
 
-Creates a copy of an existing Auto Content Engine. Optionally clone into a different agent.
-
-```
-POST /v1/vidsheet/{id}/clone?agent_id={agent_id}
-```
-
-### Path parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | integer | The engine ID to clone. |
-
-### Request body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `target_agent_id` | integer | No | Clone into a different agent. Defaults to the same agent. |
-
-### Response (201)
-
-Returns the newly created engine object.
-
-### Example
-
-```bash
-# Clone within the same agent
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
-  -H "X-API-Key: your-api-key"
-
-# Clone into a different agent
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/clone?agent_id=42" \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{"target_agent_id": 87}'
-```
-
-### Errors
-
-| Status | Error code | Description |
-|--------|------------|-------------|
-| `404` | `not_found` | Engine not found or agent does not have access. |
-| `422` | `validation_error` | Target agent not accessible or insufficient credits. |
+Use `gen_vidsheet_discover`, then call `gen_vidsheet_action` with
+`action: "duplicate"` and `target.kind: "vidsheet"`.
+See [Work with a Vidsheet](/guides/vidsheet-actions/) for the current schema.
 
 ---
 

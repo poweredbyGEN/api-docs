@@ -26,7 +26,7 @@ A vidsheet (Auto Content Engine) has two sides that produce one thing: **a final
 Each row is one video. If you want 20 videos in a batch, create 20 rows.
 
 - `POST /v1/vidsheet/:id/rows?agent_id=` — create
-- `POST /v1/vidsheet/:id/rows/:row_id/duplicate` — clone a row
+- `gen_vidsheet_action` with `action: "duplicate"` and `target.kind: "row"` — duplicate
 - `PUT /v1/vidsheet/:id/rows/mass_update` — bulk update
 
 ## Columns — one per content type

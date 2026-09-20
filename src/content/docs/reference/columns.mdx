@@ -125,29 +125,9 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/columns?agent_id=42" \
 
 ## Duplicate column
 
-Creates a copy of a column and all its cell values.
-
-```
-POST /v1/vidsheet/{id}/columns/{col_id}/duplicate?agent_id={agent_id}
-```
-
-### Path parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | integer | The sheet ID. |
-| `col_id` | integer | The column ID to duplicate. |
-
-### Response (201)
-
-Returns the newly created column.
-
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/columns/200/duplicate?agent_id=42" \
-  -H "X-API-Key: your-api-key"
-```
+Use `gen_vidsheet_discover`, then call `gen_vidsheet_action` with
+`action: "duplicate"` and `target.kind: "column"`.
+See [Work with a Vidsheet](/guides/vidsheet-actions/) for the current schema.
 
 ---
 
