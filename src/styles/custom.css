@@ -669,7 +669,9 @@ nav.sidebar-pane,
 .sidebar-content details > summary svg,
 .sidebar-content summary .caret,
 .sidebar-content details > summary::after { display: none !important; }
-.sidebar-content details > summary { list-style: none; cursor: default; }
+/* The caret above is hidden by design, but the summary still toggles the
+ * details on click, so it needs the one affordance it has left. */
+.sidebar-content details > summary { list-style: none; cursor: pointer; }
 .sidebar-content details > summary::-webkit-details-marker { display: none; }
 
 /* Body text — z.ai feel: slightly smaller, lighter, tighter measure. */
