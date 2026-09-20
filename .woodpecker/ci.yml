@@ -31,3 +31,11 @@ steps:
         from_secret: gen_gitea_read_token
     commands:
       - node scripts/check-enums-freshness.mjs
+
+  mcp-tools:
+    image: node:20-slim
+    environment:
+      GEN_MCP_PAT:
+        from_secret: gen_mcp_pat
+    commands:
+      - node scripts/check-mcp-tools.mjs
