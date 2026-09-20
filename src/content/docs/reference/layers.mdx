@@ -276,30 +276,9 @@ curl -X DELETE "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000?agent
 
 ## Duplicate layer
 
-Creates a copy of a layer.
-
-```
-POST /v1/vidsheet/{id}/cells/{cell_id}/layers/{layer_id}/duplicate?agent_id={agent_id}
-```
-
-### Path parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | integer | The sheet ID. |
-| `cell_id` | integer | The cell ID. |
-| `layer_id` | integer | The layer ID to duplicate. |
-
-### Response (201)
-
-Returns the newly created layer.
-
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3000/layers/4000/duplicate?agent_id=42" \
-  -H "X-API-Key: your-api-key"
-```
+Use `gen_vidsheet_discover`, then call `gen_vidsheet_action` with
+`action: "duplicate"` and `target.kind: "layer"`.
+See [Work with a Vidsheet](/guides/vidsheet-actions/) for the current schema.
 
 ---
 

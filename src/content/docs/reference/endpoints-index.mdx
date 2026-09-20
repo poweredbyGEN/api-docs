@@ -124,11 +124,13 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 
 ## Auto Content Engine
 
+Duplicate a Vidsheet, row, column, or layer through `gen_vidsheet_action`
+after `gen_vidsheet_discover`; per-target duplicate routes are legacy.
+
 | Method | Path | Phase |
 |--------|------|-------|
 | POST | /v1/vidsheet | convert |
 | GET | /v1/vidsheet/:id | convert |
-| POST | /v1/vidsheet/:id/clone | convert |
 | PATCH | /v1/vidsheet/:id | convert |
 | DELETE | /v1/vidsheet/:id | convert |
 
@@ -139,7 +141,6 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | GET | /v1/vidsheet/:id/rows | edit |
 | POST | /v1/vidsheet/:id/rows | edit |
 | GET | /v1/vidsheet/:id/rows/:row_id | edit |
-| POST | /v1/vidsheet/:id/rows/:row_id/duplicate | edit |
 | PUT | /v1/vidsheet/:id/rows/update_positions | edit |
 | PUT | /v1/vidsheet/:id/rows/mass_update | edit |
 
@@ -149,7 +150,6 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 |--------|------|-------|
 | GET | /v1/vidsheet/:id/columns | edit |
 | POST | /v1/vidsheet/:id/columns | edit |
-| POST | /v1/vidsheet/:id/columns/:col_id/duplicate | edit |
 | PATCH | /v1/vidsheet/:id/columns/update_positions | edit |
 | PUT | /v1/vidsheet/:id/columns/mass_update | edit |
 
@@ -170,7 +170,6 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | GET | /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id | edit |
 | PATCH | /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id | edit |
 | DELETE | /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id | edit |
-| POST | /v1/vidsheet/:id/cells/:cell_id/layers/:layer_id/duplicate | edit |
 | PUT | /v1/vidsheet/:id/cells/:cell_id/layers/update_positions | edit |
 
 ## Generations

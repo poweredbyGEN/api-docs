@@ -126,29 +126,9 @@ curl "https://api.gen.pro/v1/vidsheet/101/rows/500?agent_id=42" \
 
 ## Duplicate row
 
-Creates a copy of a row, including all cell values.
-
-```
-POST /v1/vidsheet/{id}/rows/{row_id}/duplicate?agent_id={agent_id}
-```
-
-### Path parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | integer | The sheet ID. |
-| `row_id` | integer | The row ID to duplicate. |
-
-### Response (201)
-
-Returns the newly created row.
-
-### Example
-
-```bash
-curl -X POST "https://api.gen.pro/v1/vidsheet/101/rows/500/duplicate?agent_id=42" \
-  -H "X-API-Key: your-api-key"
-```
+Use `gen_vidsheet_discover`, then call `gen_vidsheet_action` with
+`action: "duplicate"` and `target.kind: "row"`.
+See [Work with a Vidsheet](/guides/vidsheet-actions/) for the current schema.
 
 ---
 
