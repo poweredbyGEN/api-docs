@@ -5,6 +5,13 @@ description: Fill cells, configure layers, pick creation cards, trigger generati
 
 import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
 
+<Aside type="caution" title="Legacy direct-HTTP examples">
+  For new API and MCP integrations, use [Work with a Vidsheet](/guides/vidsheet-actions/).
+  It covers the canonical `gen_vidsheet_action` workflow and live schema discovery.
+  The per-target calls below describe legacy routes; canonical generation saves
+  the card and attaches its job in one action.
+</Aside>
+
 You have a vidsheet from [Step 3](/step-3-convert/overview/). Now you drive it:
 
 - **Fill ingredient cells** with the idea's content (script, topic, B-roll prompt)

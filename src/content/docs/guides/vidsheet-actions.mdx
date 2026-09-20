@@ -1,0 +1,284 @@
+---
+title: Work with a Vidsheet
+description: Discover supported edits, save creation-card drafts, and generate on an exact cell or layer.
+---
+
+A **Vidsheet** holds content in rows and columns. A **cell** is one
+row-and-column intersection. A video cell contains **layers**, such as clips,
+text, and audio. A **creation card** holds the inputs used to make content for
+a cell or layer.
+
+Use `gen_vidsheet_discover` to learn what is supported, then
+`gen_vidsheet_action` to make changes. These tools use the API's shared
+validation and save the card and layer state you see in the website.
+
+## Connect and find your target
+
+[Connect to the hosted MCP](/guides/mcp/) at `https://mcp.gen.pro` with
+`Authorization: Bearer YOUR_GEN_PAT`. Configure your personal access token once;
+there is no local package or SDK and no need to mint a JWT each session.
+Every call identifies the agent with `agent_id`; your token must have access
+to that agent and the requested content.
+
+Use `gen_get_vidsheet_full` to read the Vidsheet and obtain its cell and layer
+IDs. Example IDs below are placeholders: replace them with your own IDs.
+A layer ID is not interchangeable with its parent cell ID.
+
+For direct HTTP integrations, the same contract is available at
+`GET /v1/vidsheet/action_schema` and `POST /v1/vidsheet/actions` on
+`https://api.gen.pro`. Send your PAT in `X-API-Key`. Discovery arguments are query
+parameters; action arguments are a JSON body. Send `idempotency_key` as the
+`Idempotency-Key` HTTP header instead of a JSON property.
+
+## Discover fields before editing
+
+Call `gen_vidsheet_discover` with:
+
+```json
+{"agent_id":"YOUR_AGENT_ID"}
+```
+
+The overview lists actions, targets, creation cards, layer types, and batching
+rules. Narrow to one focus per call:
+
+| To learn about | Add these arguments |
+|---|---|
+| A supported operation | `"action":"update", "target_kind":"creation_card"` |
+| A creation card | `"card_type":"image-from-text"` |
+| A model's card fields | `"card_type":"image-from-text", "model":"gemini_2"` |
+| Layer settings | `"layer_type":"sound"` |
+| Library audio | `"audio_library":"recommended"` or `"audio_library":"trending"` |
+
+Card discovery returns `draft_schema`, `generation_schema`, `models`, `modes`,
+and `generation_available`. Settings discovery returns `settings_schema`.
+These JSON Schemas describe nested fields, allowed values, required inputs,
+and conditional rules. A draft can be incomplete; generation must satisfy the
+active mode's requirements. A save-only card is not a generation option.
+
+Retain `contract_version` with cached schemas and refresh discovery when it
+changes. Use current model lists instead of embedding an old list in your
+application. Unknown cards, models, and unsupported combinations are rejected.
+Omitted fields, `null`, and empty values have distinct meanings. Follow the
+field's schema rather than using them interchangeably. You do not need to
+rediscover the same unchanged contract before every edit.
+
+## Choose an action
+
+`gen_vidsheet_action` takes `agent_id` and an `actions` array, even for one edit.
+Each item has `action`, `target`, and the fields for that operation.
+
+| Action | Supported targets | Purpose |
+|---|---|---|
+| `create` | Vidsheet, column, row, layer, variable | Add structure; supported insertion uses an action-level `position`. |
+| `update` | Vidsheet, column, row, cell, layer, creation card, variable | Change supported values or save a draft without generation. |
+| `generate` | Cell, layer, creation card | Generate with an explicit card on that exact owner. |
+| `duplicate` | Vidsheet, column, row, layer | Copy existing structure. |
+| `delete` | Vidsheet, column, row, layer, variable | Preview and confirm removal. |
+| `reorder` | Column, row, layer | Order siblings using their IDs. |
+| `undo` / `redo` | Vidsheet | Apply supported recorded edits. |
+
+Cells arise from row/column structure. Clear their content with an explicit
+`update` using `values.clear_content: true`; do not delete the cell or combine
+clearing with replacement values. Layer timeline order and visual stacking
+settings are separate controls.
+
+### Rename a Vidsheet
+
+```json
+{
+  "agent_id": "YOUR_AGENT_ID",
+  "actions": [{
+    "action": "update",
+    "target": {"kind": "vidsheet", "id": "YOUR_VIDSHEET_ID"},
+    "values": {"name": "Launch videos"}
+  }]
+}
+```
+
+### Insert a column
+
+This inserts a text column at zero-based position `1`:
+
+```json
+{
+  "agent_id": "YOUR_AGENT_ID",
+  "actions": [{
+    "action": "create",
+    "target": {"kind": "column", "vidsheet_id": "YOUR_VIDSHEET_ID"},
+    "values": {"title": "Hook", "type": "text"},
+    "position": 1
+  }]
+}
+```
+
+### Save a prompt without generating
+
+For an existing Image from Text card, update only its manual prompt text.
+Other saved card fields are preserved. The owner identifies the actual cell
+or layer; `slot: "draftForm"` identifies its saved card.
+The nested prompt path is `values.inputs.prompt.manual.text`; a flat `prompt`
+string does not match the creation-card schema.
+
+```json
+{
+  "agent_id": "YOUR_AGENT_ID",
+  "actions": [{
+    "action": "update",
+    "target": {
+      "kind": "creation_card",
+      "owner": {"kind": "layer", "vidsheet_id": "YOUR_VIDSHEET_ID", "id": 123},
+      "slot": "draftForm"
+    },
+    "values": {"inputs": {"prompt": {"manual": {"text": "A mountain at sunrise"}}}}
+  }]
+}
+```
+
+To select a different card or configure an empty owner, provide its explicit
+`values.type` and corresponding `values.inputs`. Do not invent a separate
+creation-card ID. Complete manual text or a selected media asset can be
+applied immediately by an update; saving never starts paid generation.
+Incomplete generation settings remain saved drafts that reload in the editor.
+
+### Generate on a specific layer
+
+Supply `card.type`, complete `card.inputs`, and a stable `idempotency_key`.
+Check this example model's availability in current Image from Text discovery.
+
+```json
+{
+  "agent_id": "YOUR_AGENT_ID",
+  "idempotency_key": "launch-layer-123-image-1",
+  "actions": [{
+    "action": "generate",
+    "target": {"kind": "layer", "vidsheet_id": "YOUR_VIDSHEET_ID", "id": 123},
+    "card": {
+      "type": "image-from-text",
+      "inputs": {
+        "model": "gemini_2",
+        "prompt": {"activeMode": "manual", "manual": {"text": "A mountain at sunrise", "var": []}}
+      }
+    }
+  }]
+}
+```
+
+The API saves the card and attaches the job to that layer. You do not need a
+separate save, create-job, or select-default-job sequence. For a supported
+ingredient cell, use `target.kind: "cell"` and that cell's ID instead.
+Generation uses credits. Read the returned job's status and then reread the
+Vidsheet to verify the result on the requested owner.
+
+### Update layer settings
+
+Discover the actual layer type first. For an existing sound layer:
+
+```json
+{
+  "agent_id": "YOUR_AGENT_ID",
+  "actions": [{
+    "action": "update",
+    "target": {"kind": "layer", "vidsheet_id": "YOUR_VIDSHEET_ID", "id": 456},
+    "values": {"settings": {"styles": {"volume": 0.5}}}
+  }]
+}
+```
+
+The settings schema varies by layer type. Timeline fields such as `from` and
+`durationInFrames` use frames, not seconds. Source duration is read-only;
+the API checks trims against the actual media. Caption text edits use
+`values.caption_text` on an existing timed caption layer; styling uses
+`values.settings`. Discover `layer_type: "caption"` for both schemas.
+
+## Media and library prerequisites
+
+Upload bytes with `gen_create_direct_upload`, then finish the upload with
+`gen_complete_asset_upload`. Select the returned owned asset using the
+discovered media shape in `values.media` or a Media creation card. A remote URL
+alone does not establish ownership or a trustworthy duration.
+
+For recommended or trending audio, use the media object from `audio_library`
+discovery, including its `library_reference`. The reference is scoped and
+expires; rediscover it when expired. Some library items lack a duration:
+selection can succeed, but trimming requires an owned source with a verified
+duration. Do not fill that gap with a guessed `duration`.
+
+`gen_analyze_source_video` is a separate source-analysis prerequisite. It takes
+an owned `content_resource_id` and stable `idempotency_key`. The Media card's
+generation mode performs the supported clipping workflow on an exact video
+layer; ordinary asset selection is an update.
+
+## Batches and retryable results
+
+Up to 50 independent updates in one Vidsheet save all or none of their changes.
+For example, put the rename and sound-volume operations above in the same
+`actions` array to save both together.
+Put multiple fields for one owner in one action. Updating the same owner twice,
+or spanning Vidsheets, is rejected. A scene batch may create layers and update
+their one existing video cell or its existing layers atomically. Other
+structural operations, generation, deletion, reorder, and undo/redo each require
+a single-action request. Unsupported combinations fail before changes apply.
+
+Errors identify the affected action and field, for example
+`actions[1].target`. Inspect the structured error before retrying.
+
+| Result | What to do |
+|---|---|
+| `source_not_ready` | Analysis is pending and the edit has not applied. Wait `retry_after_seconds`, then retry the identical payload and key within a bounded retry budget. |
+| `generation_pending` | An AI input prerequisite is running. Keep the same payload and key to resume without duplicate jobs. |
+| `payment_required` | `status_code: 402` means the workspace needs credits. Present the returned Stripe and x402 options, obtain approval, complete payment, then retry this same tool once with the same arguments. Do not treat the result as an accepted edit or generation. |
+| `idempotency_conflict` | The key was used with a different payload. Restore the original request, or use a new key only for an intentionally new operation. |
+| `invalid_action` | Correct the indexed field error; repeating invalid input will not help. |
+
+Use a stable key for media edits that may need analysis as well as generation.
+An HTTP 202 pending result is not completion. Retain returned job IDs; do not
+start another generation merely because the first is running. An edit
+transaction cannot roll back external compute, and undo does not reverse
+credits already used.
+
+## Confirm deletion
+
+Send one `delete` action without `confirm_token` to obtain a preview.
+The API responds with HTTP 428 and `confirmation_required`; hosted MCP returns
+the structured preview with `would_destroy`, `confirm_token`, and `expires_in`.
+Show what will be removed and obtain approval.
+
+Retry the same delete action with the returned `confirm_token` **inside that
+action**. An expired or used token, different target, or changed content
+requires a fresh preview and approval. A boolean such as `confirmed: true`
+does not replace the token. GEN chat requires approval through its confirmation
+card; an unattended task cannot approve its own deletion.
+
+## Readback, lifecycle, and older integrations
+
+Use read-only Vidsheet and generation tools to check saved state and job
+results. `gen_stop_generation` is a separate lifecycle tool; a stop or refund
+request does not by itself prove that external work stopped or credits were
+refunded.
+
+To continue an existing stopped job, call `gen_continue_generation` with its
+`generation_id`, owning `agent_id`, and a stable `idempotency_key`. The key must
+contain 1–255 characters and cannot be whitespace-only; spaces within it are
+allowed. Continue uses credits, keeps the same job ID and history, and takes
+no creation-card body. It returns that `generation_id` with status `pending`;
+poll `gen_get_generation` to check completion.
+
+After a timeout or `generation_busy` response, retry the identical generation
+ID, agent, and key. Preserve the key exactly. Reusing a key for a different
+request conflicts. Continue rejects jobs that are not stopped and can refuse
+insufficient credits. It does not promise that a provider resumes partial work
+from where it stopped. Use the `generate` action when you intend a new job with
+a new creation card.
+
+Final-video rendering is unavailable through hosted MCP; prepare the layers
+here and render in the Vidsheet editor.
+
+Older per-target Vidsheet mutation tools are retired. Use `gen_vidsheet_action`
+for their supported replacements and `gen_vidsheet_discover` for the required
+fields. For example, cloning a template is `create` with a `vidsheet` target and
+`values.template_slug`. Read-only Vidsheet tools and generation lifecycle tools
+remain separate. Older direct-HTTP examples describe legacy routes, not the
+canonical editing workflow.
+The API owns validation, MCP forwards requests, and GEN chat plans using that
+MCP surface. Natural-language chat and research can still delegate to GEN's
+agent service. The website continues using its existing routes.
