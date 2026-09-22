@@ -1445,6 +1445,7 @@ next cadence tick.
 # Integrations
 
 - MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` also accepts older configurations). The downloadable package is retired. Use live `tools/list` for available tools and `gen://api-reference` for guidance.
+- MCP migration: Retired MCP tool names are hidden compatibility aliases until 2026-10-22 and answer with a `deprecation` pointer; the full legacy-name → replacement table is the migration guide: https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 - MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
 - MCP payment recovery: low-credit failures return `status: "payment_required"`, `status_code: 402`, Stripe and x402 `payment_options`, and a same-call retry instruction. Payment requires approval. After funding succeeds, retry the same tool once with the same arguments; the funding result is not accepted or completed work.
 - n8n: HTTP Request node with `X-API-Key` header

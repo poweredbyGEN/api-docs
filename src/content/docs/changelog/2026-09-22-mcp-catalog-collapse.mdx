@@ -1,0 +1,212 @@
+---
+title: MCP catalog collapse — migration guide
+description: The hosted GEN MCP catalog collapses to family action tools plus gen_discover. Every retired tool name maps to one replacement; aliases answer until 2026-10-22.
+---
+
+**Date:** 2026-09-22. **Applies to:** the hosted GEN MCP at `https://mcp.gen.pro` (`Authorization: Bearer <your-PAT>`).
+
+## What changed
+
+The MCP catalog collapses from ~70 one-tool-per-endpoint names to a small fixed set: one universal read tool, `gen_discover` (a `domain` plus a short `view` noun), and one `gen_<noun>_action` write tool per domain that takes an `actions[]` list of typed entries. The target catalog is `gen_discover`, `gen_vidsheet_action`, `gen_agent_action`, `gen_voice_action`, `gen_watchlist_action`, `gen_publish_action`, `gen_task_action`, `gen_content_action`, `gen_media_action`, `gen_asset_action`, `gen_billing_action`, `gen_platform_action`, `gen_avatars` and `gen_ask`. The retire of the legacy names lands with the `release/GEN-6890-final` deploy; the exact served count and revision hash are published by `tools/list` once that release is live, so re-list tools rather than trusting a baked-in catalog.
+
+## The alias window
+
+- **Until 2026-10-22** every retired name below stays callable as a hidden compatibility alias. It runs the same implementation, returns the same result, and adds a machine-readable pointer: `structuredContent.deprecation` and `_meta.deprecation` carry `{"deprecated": true, "tool": "<old name>", "replacement": {"tool": ..., "op" | "view": ...}, "next_action": "..."}`. A name whose implementation no longer exists returns that pointer as a structured error instead of a result.
+- Calling a name that never existed returns `unknown_tool` with up to three `suggestions` drawn from the served catalog and the alias map.
+- **After 2026-10-22** the aliases are removed; retired names return `unknown_tool`.
+
+## How to verify your integration
+
+1. Call `tools/list` and read `instructions` from `initialize`: they describe the new catalog.
+2. Call `gen_discover` with `domain="platform"`, `view="me"`; a 200 there proves your PAT and transport are fine.
+3. Grep your client for any `gen_` name that is not in the target catalog above and replace it using the table. Watch for the `deprecation` key in responses; when it stops appearing you are migrated.
+4. `gen_discover` domain=`vidsheet` view=`card_types` (creation cards) and view=`card_schema` (one card) replace all card-catalog reads; `gen_vidsheet_action` op `generate` with a required card pick replaces every direct create-job path.
+
+## Migration table
+
+Generated from `tests/fixtures/vidsheet-alias-replacements.json` on `release/GEN-6890-final` (aliases, compat, discover_views and pending_retirement) plus the six extra discover views and the `gen_vidsheet_discover` rename served by the compat layer. One row per legacy name.
+
+| Legacy tool | Kind | Call instead | Notes |
+|---|---|---|---|
+| `gen_add_agent_account` | Write → family action | `gen_agent_action` actions[] `{action: "add_agent_account"}` | Write via gen_agent_action branch(es) add_agent_account; duplex-proven identical to the legacy tool. |
+| `gen_add_agent_inspiration` | Write → family action | `gen_agent_action` actions[] `{action: "add_agent_inspiration"}` | Write via gen_agent_action branch(es) add_agent_inspiration; duplex-proven identical to the legacy tool. |
+| `gen_add_agent_look` | Write → family action | `gen_agent_action` actions[] `{action: "add_agent_look"}` | Write via gen_agent_action branch(es) add_agent_look; duplex-proven identical to the legacy tool. |
+| `gen_add_watchlist_source` | Write → family action | `gen_watchlist_action` actions[] `{action: "add_watchlist_source"}` | Write via gen_watchlist_action branch(es) add_watchlist_source; duplex-proven identical to the legacy tool. |
+| `gen_analyze_source_video` | Vidsheet compat | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card source_video_analysis on the generate op (engine_id as project_id + content_resource_id + idempotency_key, mode recreate\|reimagine); paid async job, not a read view. |
+| `gen_bind_avatar` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card on the generate op (creation_card_type video_from_avatar + avatar_id/video_url/audio_url); avatars come from gen_avatars list. |
+| `gen_bind_sound_as_song` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "cell"}` | set_cell media bind (media_key audio + media_url/media_name) binds an existing song without generating; generate creation_card_type recommend_song runs the paid recommend job. |
+| `gen_buy_credits` | Write → family action | `gen_billing_action` actions[] `{action: "buy_credits"}` | Write via gen_billing_action branch(es) buy_credits; duplex-proven identical to the legacy tool. |
+| `gen_card_catalog` | Vidsheet alias | `gen_discover` view=`card_types` | Creation-card listing via gen_discover card_types view (produces/container/model filters). |
+| `gen_card_schema` | Vidsheet alias | `gen_discover` view=`card_schema` | Single-card lookup via gen_discover card_schema view. |
+| `gen_clone_engine` | Vidsheet alias | `gen_vidsheet_action` `{op: "duplicate", target.kind: "vidsheet"}` | Exact source sheet; preserve optional target_agent_id. |
+| `gen_clone_template` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "vidsheet"}` | values.template_slug identifies the selected template; optional values.name. Return the created sheet identity; never call a separate template mutation. |
+| `gen_clone_voice` | Write → family action | `gen_voice_action` actions[] `{action: "clone_voice"}` | Write via gen_voice_action branch(es) clone_voice; duplex-proven identical to the legacy tool. |
+| `gen_complete_asset_upload` | Write → family action | `gen_asset_action` actions[] `{action: "complete_asset_upload"}` | Write via gen_asset_action branch(es) complete_asset_upload; duplex-proven identical to the legacy tool. |
+| `gen_connect_agent_elevenlabs` | Write → family action | `gen_agent_action` actions[] `{action: "connect_agent_elevenlabs"}` | Write via gen_agent_action branch(es) connect_agent_elevenlabs; duplex-proven identical to the legacy tool. |
+| `gen_continue_generation` | Vidsheet compat | `gen_vidsheet_action` op `continue_generation` | gen_vidsheet_action op continue_generation (generation_id + idempotency_key); resumes the same stopped job, never a new card. |
+| `gen_create_agent` | Write → family action | `gen_agent_action` actions[] `{action: "create_agent"}` | Write via gen_agent_action branch(es) create_agent; duplex-proven identical to the legacy tool. |
+| `gen_create_agent_avatar` | Write → family action | `gen_agent_action` actions[] `{action: "create_agent_avatar"}` | Write via gen_agent_action branch(es) create_agent_avatar; duplex-proven identical to the legacy tool. |
+| `gen_create_agent_profile` | Write → family action | `gen_agent_action` actions[] `{action: "create_agent_profile"}` | Write via gen_agent_action branch(es) create_agent_profile; duplex-proven identical to the legacy tool. |
+| `gen_create_api_key` | Write → family action | `gen_platform_action` actions[] `{action: "create_api_key"}` | Write via gen_platform_action branch(es) create_api_key; duplex-proven identical to the legacy tool. |
+| `gen_create_column` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "column"}` | values.title/type/description plus top-level position; stable idempotency key. |
+| `gen_create_content_resource` | Write → family action | `gen_content_action` actions[] `{action: "create_content_resource"}` | Write via gen_content_action branch(es) create_content_resource; duplex-proven identical to the legacy tool. |
+| `gen_create_direct_upload` | Write → family action | `gen_asset_action` actions[] `{action: "create_direct_upload"}` | Write via gen_asset_action branch(es) create_direct_upload; duplex-proven identical to the legacy tool. |
+| `gen_create_engine` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "vidsheet"}` | values.name; template and idea fields are discovered, never inferred. |
+| `gen_create_engine_from_idea` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "vidsheet"}` | values.idea_id and template_slug; backend preserves the established identity for exact upstream idea ownership. |
+| `gen_create_image` | Write → family action | `gen_media_action` actions[] `{action: "create_image"}` | Write via gen_media_action branch(es) create_image; duplex-proven identical to the legacy tool. |
+| `gen_create_layer` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "layer"}` | Exact parent cell; top-level position; typed name/type/settings/card/media. Source totals/runtime remain server-owned. |
+| `gen_create_look` | Write → family action | `gen_agent_action` actions[] `{action: "create_look"}` | Write via gen_agent_action branch(es) create_look; duplex-proven identical to the legacy tool. |
+| `gen_create_monitoring_job` | Write → family action | `gen_task_action` actions[] `{action: "create_monitoring_job"}` | Write via gen_task_action branch(es) create_monitoring_job; duplex-proven identical to the legacy tool. |
+| `gen_create_organization` | Write → family action | `gen_platform_action` actions[] `{action: "create_organization"}` | Write via gen_platform_action branch(es) create_organization; duplex-proven identical to the legacy tool. |
+| `gen_create_proof_of_genesis_backup` | Write → family action | `gen_platform_action` actions[] `{action: "create_proof_of_genesis_backup"}` | Write via gen_platform_action branch(es) create_proof_of_genesis_backup; duplex-proven identical to the legacy tool. |
+| `gen_create_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "create_recurring_job"}` | Write via gen_task_action branch(es) create_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_create_row` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "row"}` | Optional top-level position; stable idempotency key and returned row/cell identities. |
+| `gen_create_song` | Write → family action | `gen_media_action` actions[] `{action: "create_song"}` | Write via gen_media_action branch(es) create_song; duplex-proven identical to the legacy tool. |
+| `gen_create_song_mix` | Write → family action | `gen_media_action` actions[] `{action: "create_song_mix"}` | Write via gen_media_action branch(es) create_song_mix; duplex-proven identical to the legacy tool. |
+| `gen_create_variable` | Vidsheet alias | `gen_vidsheet_action` `{op: "create", target.kind: "variable"}` | values.name and typed value/media; preserve child-project undo ownership. |
+| `gen_create_video` | Write → family action | `gen_media_action` actions[] `{action: "create_video"}` | Write via gen_media_action branch(es) create_video; duplex-proven identical to the legacy tool. |
+| `gen_create_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "create_watchlist"}` | Write via gen_watchlist_action branch(es) create_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_create_x402_credit_purchase` | Write → family action | `gen_billing_action` actions[] `{action: "create_x402_credit_purchase"}` | Write via gen_billing_action branch(es) create_x402_credit_purchase; duplex-proven identical to the legacy tool. |
+| `gen_decide_agent_run` | Write → family action | `gen_task_action` actions[] `{action: "decide_agent_run"}` | Write via gen_task_action branch(es) decide_agent_run; duplex-proven identical to the legacy tool. |
+| `gen_delete_agent` | Write → family action | `gen_agent_action` actions[] `{action: "delete_agent"}` | Write via gen_agent_action branch(es) delete_agent; duplex-proven identical to the legacy tool. |
+| `gen_delete_agent_avatar` | Write → family action | `gen_agent_action` actions[] `{action: "delete_agent_avatar"}` | Write via gen_agent_action branch(es) delete_agent_avatar; duplex-proven identical to the legacy tool. |
+| `gen_delete_asset` | Write → family action | `gen_asset_action` actions[] `{action: "delete_asset"}` | Write via gen_asset_action branch(es) delete_asset; duplex-proven identical to the legacy tool. |
+| `gen_delete_column` | Vidsheet alias | `gen_vidsheet_action` `{op: "delete", target.kind: "column"}` | Exact column; Rails singleton content-bound consent. |
+| `gen_delete_content_resource` | Write → family action | `gen_content_action` actions[] `{action: "delete_content_resource"}` | Write via gen_content_action branch(es) delete_content_resource; duplex-proven identical to the legacy tool. |
+| `gen_delete_engine` | Vidsheet alias | `gen_vidsheet_action` `{op: "delete", target.kind: "vidsheet"}` | Exact sheet; Rails content-bound 428 preview and confirm_token, never a boolean approval. |
+| `gen_delete_layer` | Vidsheet alias | `gen_vidsheet_action` `{op: "delete", target.kind: "layer"}` | Exact layer; Rails singleton content-bound consent. |
+| `gen_delete_organization` | Write → family action | `gen_platform_action` actions[] `{action: "delete_organization"}` | Write via gen_platform_action branch(es) delete_organization; duplex-proven identical to the legacy tool. |
+| `gen_delete_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "delete_recurring_job"}` | Write via gen_task_action branch(es) delete_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_delete_row` | Vidsheet alias | `gen_vidsheet_action` `{op: "delete", target.kind: "row"}` | Exact row; Rails singleton content-bound consent. |
+| `gen_delete_scheduled_post` | Write → family action | `gen_publish_action` actions[] `{action: "delete_scheduled_post"}` | Publish-plane op via the gen_publish_action delete_scheduled_post branch; fans out to the same legacy function in-process. |
+| `gen_delete_variable` | Vidsheet alias | `gen_vidsheet_action` `{op: "delete", target.kind: "variable"}` | Exact global row; Rails content-bound consent and child-project history ownership. |
+| `gen_delete_voice` | Write → family action | `gen_voice_action` actions[] `{action: "delete_voice"}` | Write via gen_voice_action branch(es) delete_voice; duplex-proven identical to the legacy tool. |
+| `gen_delete_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "delete_watchlist"}` | Write via gen_watchlist_action branch(es) delete_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_design_voice` | Write → family action | `gen_voice_action` actions[] `{action: "design_voice"}` | Write via gen_voice_action branch(es) design_voice; duplex-proven identical to the legacy tool. |
+| `gen_disconnect_social` | Write → family action | `gen_publish_action` actions[] `{action: "disconnect_social"}` | Publish-plane op via the gen_publish_action disconnect_social branch; fans out to the same legacy function in-process. |
+| `gen_duplicate_column` | Vidsheet alias | `gen_vidsheet_action` `{op: "duplicate", target.kind: "column"}` | Exact source column, returned identity and history receipt. |
+| `gen_duplicate_last_row` | Vidsheet alias | `gen_vidsheet_action` `{op: "duplicate", target.kind: "row"}` | Resolve the final visible row, then duplicate its exact ID; empty sheet is a refusal. |
+| `gen_duplicate_layer` | Vidsheet alias | `gen_vidsheet_action` `{op: "duplicate", target.kind: "layer"}` | Exact source layer; optional values.name, returned identity and history receipt. |
+| `gen_duplicate_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "duplicate_recurring_job"}` | Write via gen_task_action branch(es) duplicate_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_duplicate_row` | Vidsheet alias | `gen_vidsheet_action` `{op: "duplicate", target.kind: "row"}` | Exact source row; preserve returned row and child-cell identities. |
+| `gen_ensure_default_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "ensure_default_recurring_job"}` | Write via gen_task_action branch(es) ensure_default_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_estimate_job` | Vidsheet compat | `gen_discover` view=`generation_estimate` | Free credit-cost estimate for jobs[] via the gen_discover generation_estimate view. |
+| `gen_generate_content` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "cell"}` | Exact cell plus explicit discovered card type/inputs, stable idempotency key; pending retries preserve full payload/key. No raw provider-job bags. Poll the receipt's user_job_id with the gen_discover generation view. |
+| `gen_generate_layer` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "layer"}` | Read exact persisted draft card, submit explicit card and exact owner; stable key. Continue/stop are separate existing-job lifecycles. Poll the receipt's user_job_id with the gen_discover generation view. |
+| `gen_generate_voice_description` | Write → family action | `gen_voice_action` actions[] `{action: "generate_voice_description"}` | Write via gen_voice_action branch(es) generate_voice_description; duplex-proven identical to the legacy tool. |
+| `gen_generate_voice_samples` | Write → family action | `gen_voice_action` actions[] `{action: "generate_voice_samples"}` | Write via gen_voice_action branch(es) generate_voice_samples; duplex-proven identical to the legacy tool. |
+| `gen_generate_voice_script` | Write → family action | `gen_voice_action` actions[] `{action: "generate_voice_script"}` | Write via gen_voice_action branch(es) generate_voice_script; duplex-proven identical to the legacy tool. |
+| `gen_get_agent` | Read → discover view | `gen_discover` domain=`agent` view=`detail` | Read via gen_discover domain=agent view=detail; duplex-proven identical to the legacy tool. |
+| `gen_get_agent_capabilities` | Read → discover view | `gen_discover` domain=`agent` view=`capabilities` | Read via gen_discover domain=agent view=capabilities; duplex-proven identical to the legacy tool. |
+| `gen_get_agent_core` | Read → discover view | `gen_discover` domain=`agent` view=`core` | Read via gen_discover domain=agent view=core; duplex-proven identical to the legacy tool. |
+| `gen_get_agent_profile` | Read → discover view | `gen_discover` domain=`agent` view=`profile` | Read via gen_discover domain=agent view=profile; duplex-proven identical to the legacy tool. |
+| `gen_get_asset` | Read → discover view | `gen_discover` domain=`asset` view=`detail` | Read via gen_discover domain=asset view=detail; duplex-proven identical to the legacy tool. |
+| `gen_get_audio_match_status` | Vidsheet compat | `gen_discover` view=`audio_matches` | Read a sound_matching job's matches by job_id via the gen_discover audio_matches view. |
+| `gen_get_cell` | Vidsheet alias | `gen_discover` view=`cell` | Exact cell read via gen_discover cell view. |
+| `gen_get_content_resource` | Read → discover view | `gen_discover` domain=`content` view=`resource` | Read via gen_discover domain=content view=resource; duplex-proven identical to the legacy tool. |
+| `gen_get_conversation` | Read → discover view | `gen_discover` domain=`platform` view=`conversation` | Read via gen_discover domain=platform view=conversation; duplex-proven identical to the legacy tool. |
+| `gen_get_credit_balance` | Read → discover view | `gen_discover` domain=`billing` view=`balance` | Read via gen_discover domain=billing view=balance; duplex-proven identical to the legacy tool. |
+| `gen_get_credit_usage` | Read → discover view | `gen_discover` domain=`billing` view=`usage` | Read via gen_discover domain=billing view=usage; duplex-proven identical to the legacy tool. |
+| `gen_get_engine` | Vidsheet alias | `gen_discover` view=`engine` | Engine metadata via gen_discover engine view. |
+| `gen_get_generation` | Vidsheet compat | `gen_discover` view=`generation` | Poll one generation by generation_id via the gen_discover generation view. |
+| `gen_get_last_operation` | Read → discover view | `gen_discover` domain=`vidsheet` view=`last_operation` |  |
+| `gen_get_layer` | Vidsheet alias | `gen_discover` view=`layer` | Exact layer read via gen_discover layer view. |
+| `gen_get_me` | Read → discover view | `gen_discover` domain=`platform` view=`me` | Read via gen_discover domain=platform view=me; duplex-proven identical to the legacy tool. |
+| `gen_get_organization` | Read → discover view | `gen_discover` domain=`platform` view=`organization` | Read via gen_discover domain=platform view=organization; duplex-proven identical to the legacy tool. |
+| `gen_get_post_status` | Read → discover view | `gen_discover` domain=`publish` view=`post_status` | Read via gen_discover domain=publish view=post_status; duplex-proven identical to the legacy tool. |
+| `gen_get_publish_rules` | Read → discover view | `gen_discover` domain=`publish` view=`rules` | Read via gen_discover domain=publish view=rules; duplex-proven identical to the legacy tool. |
+| `gen_get_recurring_job` | Read → discover view | `gen_discover` domain=`task` view=`job` | Read via gen_discover domain=task view=job; duplex-proven identical to the legacy tool. |
+| `gen_get_row` | Read → discover view | `gen_discover` domain=`vidsheet` view=`row` |  |
+| `gen_get_run_status` | Read → discover view | `gen_discover` domain=`task` view=`run_status` | Read via gen_discover domain=task view=run_status; duplex-proven identical to the legacy tool. |
+| `gen_get_session_preferences` | Read → discover view | `gen_discover` domain=`platform` view=`preferences` | Read via gen_discover domain=platform view=preferences; duplex-proven identical to the legacy tool. |
+| `gen_get_social_connect_url` | Read → discover view | `gen_discover` domain=`publish` view=`connect_url` | Read via gen_discover domain=publish view=connect_url; duplex-proven identical to the legacy tool. |
+| `gen_get_template` | Vidsheet alias | `gen_discover` view=`template` | Template inspect via gen_discover template view. |
+| `gen_get_vidsheet_full` | Read → discover view | `gen_discover` domain=`vidsheet` view=`sheet` with `include=["full"]` | Whole-sheet dump is the sheet view with include=["full"]. |
+| `gen_get_voice_preview_status` | Read → discover view | `gen_discover` domain=`voice` view=`preview_status` | Read via gen_discover domain=voice view=preview_status; duplex-proven identical to the legacy tool. |
+| `gen_get_voice_resource` | Read → discover view | `gen_discover` domain=`voice` view=`resource` | Read via gen_discover domain=voice view=resource; duplex-proven identical to the legacy tool. |
+| `gen_get_voice_sample_status` | Read → discover view | `gen_discover` domain=`voice` view=`sample_status` | Read via gen_discover domain=voice view=sample_status; duplex-proven identical to the legacy tool. |
+| `gen_get_watchlist` | Read → discover view | `gen_discover` domain=`watchlist` view=`detail` | Read via gen_discover domain=watchlist view=detail; duplex-proven identical to the legacy tool. |
+| `gen_import_asset_from_url` | Write → family action | `gen_asset_action` actions[] `{action: "import_asset_from_url"}` | Write via gen_asset_action branch(es) import_asset_from_url; duplex-proven identical to the legacy tool. |
+| `gen_import_variables` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "vidsheet"}` | Existing binary direct-upload and asset registration first; values.global_variables_workbook_asset_id references an owned XLSX. No base64 JSON. |
+| `gen_list_agent_avatars` | Read → discover view | `gen_discover` domain=`agent` view=`avatars` | Read via gen_discover domain=agent view=avatars; duplex-proven identical to the legacy tool. |
+| `gen_list_agent_voices` | Read → discover view | `gen_discover` domain=`voice` view=`list` | Read via gen_discover domain=voice view=list; duplex-proven identical to the legacy tool. |
+| `gen_list_agents` | Read → discover view | `gen_discover` domain=`agent` view=`list` | Read via gen_discover domain=agent view=list; duplex-proven identical to the legacy tool. |
+| `gen_list_api_keys` | Read → discover view | `gen_discover` domain=`platform` view=`api_keys` | Read via gen_discover domain=platform view=api_keys; duplex-proven identical to the legacy tool. |
+| `gen_list_asset_libraries` | Read → discover view | `gen_discover` domain=`asset` view=`libraries` | Read via gen_discover domain=asset view=libraries; duplex-proven identical to the legacy tool. |
+| `gen_list_assets` | Read → discover view | `gen_discover` domain=`asset` view=`list` | Read via gen_discover domain=asset view=list; duplex-proven identical to the legacy tool. |
+| `gen_list_available_variables` | Read → discover view | `gen_discover` domain=`vidsheet` view=`available_variables` |  |
+| `gen_list_columns` | Vidsheet alias | `gen_discover` view=`columns` | Column listing via gen_discover columns view. |
+| `gen_list_connected_socials` | Read → discover view | `gen_discover` domain=`publish` view=`connections` | Read via gen_discover domain=publish view=connections; duplex-proven identical to the legacy tool. |
+| `gen_list_content_resources` | Read → discover view | `gen_discover` domain=`content` view=`list` | Read via gen_discover domain=content view=list; duplex-proven identical to the legacy tool. |
+| `gen_list_conversations` | Read → discover view | `gen_discover` domain=`platform` view=`conversations` | Read via gen_discover domain=platform view=conversations; duplex-proven identical to the legacy tool. |
+| `gen_list_credit_plans` | Read → discover view | `gen_discover` domain=`billing` view=`plans` | Read via gen_discover domain=billing view=plans; duplex-proven identical to the legacy tool. |
+| `gen_list_layers` | Vidsheet alias | `gen_discover` view=`layers` | Layer listing via gen_discover layers view. |
+| `gen_list_my_voices` | Read → discover view | `gen_discover` domain=`voice` view=`mine` | Read via gen_discover domain=voice view=mine; duplex-proven identical to the legacy tool. |
+| `gen_list_operations` | Read → discover view | `gen_discover` domain=`vidsheet` view=`operations` |  |
+| `gen_list_organizations` | Read → discover view | `gen_discover` domain=`platform` view=`organizations` | Read via gen_discover domain=platform view=organizations; duplex-proven identical to the legacy tool. |
+| `gen_list_proof_of_genesis_backups` | Read → discover view | `gen_discover` domain=`platform` view=`backups` | Read via gen_discover domain=platform view=backups; duplex-proven identical to the legacy tool. |
+| `gen_list_recommended_sounds` | Read → discover view | `gen_discover` domain=`media` view=`recommended_sounds` | Read via gen_discover domain=media view=recommended_sounds; duplex-proven identical to the legacy tool. |
+| `gen_list_recurring_jobs` | Read → discover view | `gen_discover` domain=`task` view=`list` | Read via gen_discover domain=task view=list; duplex-proven identical to the legacy tool. |
+| `gen_list_rows` | Vidsheet alias | `gen_discover` view=`rows` | Row listing via gen_discover rows view. |
+| `gen_list_scheduled_posts` | Read → discover view | `gen_discover` domain=`publish` view=`scheduled` | Read via gen_discover domain=publish view=scheduled; duplex-proven identical to the legacy tool. |
+| `gen_list_sound_library` | Read → discover view | `gen_discover` domain=`media` view=`sound_library` | Read via gen_discover domain=media view=sound_library (query/commercial/page/per_page). |
+| `gen_list_talking_avatars` | Vidsheet alias | `gen_avatars` | Avatar listing via gen_avatars op list (source library\|my). |
+| `gen_list_templates` | Vidsheet alias | `gen_discover` view=`templates` | Template browse via gen_discover templates view. |
+| `gen_list_tools` | Pending retirement | host tool-search / gen_discover | Tool discovery belongs to the host's tool-search; record, id, and option discovery is gen_discover. Still served until the GEN-6923 alias layer hides it (Migration fate: FOLD). |
+| `gen_list_variables` | Vidsheet alias | `gen_discover` view=`variables` | Variable listing via gen_discover variables view. |
+| `gen_list_watchlists` | Read → discover view | `gen_discover` domain=`watchlist` view=`list` | Read via gen_discover domain=watchlist view=list; duplex-proven identical to the legacy tool. |
+| `gen_mass_update_cells` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "cell"}` | One actions array with exact cells and sparse values; atomic receipt and change_set, no silent skipped foreign IDs. |
+| `gen_mass_update_columns` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "column"}` | One actions array with sparse typed column values and exact receipt count. |
+| `gen_mass_update_rows` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "row"}` | One actions array; typed row_height and admitted row values, exact receipt count. |
+| `gen_match_row_sounds` | Vidsheet compat | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card sound_matching on the generate op with row_id (instead of overlays); same spreadsheet_audio_matching user job. |
+| `gen_match_sounds` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card on the generate op (creation_card_type sound_matching + overlays); never a standalone tool. |
+| `gen_pause_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "pause_recurring_job"}` | Write via gen_task_action branch(es) pause_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_pause_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "pause_watchlist"}` | Write via gen_watchlist_action branch(es) pause_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_preview_voice` | Write → family action | `gen_voice_action` actions[] `{action: "preview_voice"}` | Write via gen_voice_action branch(es) preview_voice; duplex-proven identical to the legacy tool. |
+| `gen_publish_content` | Write → family action | `gen_publish_action` actions[] `{action: "publish_content"}` | Publish-plane op via the gen_publish_action publish_content branch; fans out to the same legacy function in-process. |
+| `gen_query_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "query_watchlist"}` | Write via gen_watchlist_action branch(es) query_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_redo_operation` | Vidsheet alias | `gen_vidsheet_action` `{op: "redo", target.kind: "vidsheet"}` | Exact sheet/history owner and action.change_set_id. |
+| `gen_remove_proof_of_genesis_backup` | Write → family action | `gen_platform_action` actions[] `{action: "remove_proof_of_genesis_backup"}` | Write via gen_platform_action branch(es) remove_proof_of_genesis_backup; duplex-proven identical to the legacy tool. |
+| `gen_remove_watchlist_source` | Write → family action | `gen_watchlist_action` actions[] `{action: "remove_watchlist_source"}` | Write via gen_watchlist_action branch(es) remove_watchlist_source; duplex-proven identical to the legacy tool. |
+| `gen_reorder_columns` | Vidsheet alias | `gen_vidsheet_action` `{op: "reorder", target.kind: "column"}` | Ordered exact IDs in ids, not user-authored integer position bags. |
+| `gen_reorder_layers` | Vidsheet alias | `gen_vidsheet_action` `{op: "reorder", target.kind: "layer"}` | Ordered exact child-layer IDs scoped to one video cell. |
+| `gen_reorder_rows` | Vidsheet alias | `gen_vidsheet_action` `{op: "reorder", target.kind: "row"}` | Ordered exact row IDs in ids. |
+| `gen_reset_agent_profile` | Write → family action | `gen_agent_action` actions[] `{action: "reset_agent_profile"}` | Write via gen_agent_action branch(es) reset_agent_profile; duplex-proven identical to the legacy tool. |
+| `gen_resume_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "resume_recurring_job"}` | Write via gen_task_action branch(es) resume_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_resume_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "resume_watchlist"}` | Write via gen_watchlist_action branch(es) resume_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_revoke_all_api_keys` | Write → family action | `gen_platform_action` actions[] `{action: "revoke_all_api_keys"}` | Write via gen_platform_action branch(es) revoke_all_api_keys; duplex-proven identical to the legacy tool. |
+| `gen_revoke_api_key` | Write → family action | `gen_platform_action` actions[] `{action: "revoke_api_key"}` | Write via gen_platform_action branch(es) revoke_api_key; duplex-proven identical to the legacy tool. |
+| `gen_run_recurring_job_now` | Write → family action | `gen_task_action` actions[] `{action: "run_recurring_job_now"}` | Write via gen_task_action branch(es) run_recurring_job_now; duplex-proven identical to the legacy tool. |
+| `gen_set_agent_primary_photo` | Write → family action | `gen_agent_action` actions[] `{action: "set_agent_primary_photo"}` | Write via gen_agent_action branch(es) set_agent_primary_photo; duplex-proven identical to the legacy tool. |
+| `gen_set_card` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "creation_card"}` | set_cell with creation_card_type (+ creation_card_inputs) persists the cell's draftForm draft without generating; generate runs it. |
+| `gen_set_default_user_job` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "cell"}` | values.take carries exact id and type; validate against this owner's history, never generate. |
+| `gen_set_variable_media` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "variable"}` | Exact variable ID and values.media; owned source prerequisite and same-payload/key source_not_ready replay. |
+| `gen_settle_x402_credit_purchase` | Write → family action | `gen_billing_action` actions[] `{action: "settle_x402_credit_purchase"}` | Write via gen_billing_action branch(es) settle_x402_credit_purchase; duplex-proven identical to the legacy tool. |
+| `gen_stop_generation` | Vidsheet compat | `gen_vidsheet_action` op `stop_generation` | gen_vidsheet_action op stop_generation (generation_id); refund is requested, not confirmed. |
+| `gen_transcribe` | Write → family action | `gen_media_action` actions[] `{action: "transcribe"}` | Write via gen_media_action branch(es) transcribe; duplex-proven identical to the legacy tool. |
+| `gen_undo_operation` | Vidsheet alias | `gen_vidsheet_action` `{op: "undo", target.kind: "vidsheet"}` | Exact sheet/history owner and action.change_set_id; do not confuse action selector with envelope grouping ID. |
+| `gen_update_agent` | Write → family action | `gen_agent_action` actions[] `{action: "update_agent"}` | Write via gen_agent_action branch(es) update_agent; duplex-proven identical to the legacy tool. |
+| `gen_update_agent_core` | Write → family action | `gen_agent_action` actions[] `{action: "update_agent_core"}` | Write via gen_agent_action branch(es) update_agent_core; duplex-proven identical to the legacy tool. |
+| `gen_update_agent_profile` | Write → family action | `gen_agent_action` actions[] `{action: "update_agent_profile"}` | Write via gen_agent_action branch(es) update_agent_profile; duplex-proven identical to the legacy tool. |
+| `gen_update_api_key` | Write → family action | `gen_platform_action` actions[] `{action: "update_api_key"}` | Write via gen_platform_action branch(es) update_api_key; duplex-proven identical to the legacy tool. |
+| `gen_update_cell` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "cell"}` or `{op: "update", target.kind: "creation_card"}` | Typed value/media/clear_content or explicit draftForm card; static projection is Rails-owned. |
+| `gen_update_cell_layers` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "cell"}` or `{op: "create", target.kind: "layer"}` or `{op: "update", target.kind: "layer"}` | Flat same-cell atomic scene batch; no nested values.layers, implicit delete, generate, or reorder. New layers omit IDs; existing layers use exact IDs. |
+| `gen_update_column` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "column"}` | Exact column ID and sparse admitted values. |
+| `gen_update_content_resource` | Write → family action | `gen_content_action` actions[] `{action: "update_content_resource"}` | Write via gen_content_action branch(es) update_content_resource; duplex-proven identical to the legacy tool. |
+| `gen_update_engine` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "vidsheet"}` | Sparse values.name; omitted values remain omitted. |
+| `gen_update_layer` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "layer"}` or `{op: "update", target.kind: "creation_card"}` | Exact layer; sparse admitted settings/card/media/name. Discover layer_type settings; static reset follows FE projection. |
+| `gen_update_monitoring_job` | Write → family action | `gen_task_action` actions[] `{action: "update_monitoring_job"}` | Write via gen_task_action branch(es) update_monitoring_job; duplex-proven identical to the legacy tool. |
+| `gen_update_organization` | Write → family action | `gen_platform_action` actions[] `{action: "update_organization"}` | Write via gen_platform_action branch(es) update_organization; duplex-proven identical to the legacy tool. |
+| `gen_update_published_post` | Write → family action | `gen_publish_action` actions[] `{action: "update_published_post"}` | Publish-plane op via the gen_publish_action update_published_post branch; fans out to the same legacy function in-process. |
+| `gen_update_recurring_job` | Write → family action | `gen_task_action` actions[] `{action: "update_recurring_job"}` | Write via gen_task_action branch(es) update_recurring_job; duplex-proven identical to the legacy tool. |
+| `gen_update_row` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "row"}` | Typed row values, including numeric row_height; no raw additional_attributes. |
+| `gen_update_scheduled_post` | Write → family action | `gen_publish_action` actions[] `{action: "update_scheduled_post"}` | Publish-plane op via the gen_publish_action update_scheduled_post branch; fans out to the same legacy function in-process. |
+| `gen_update_session_preferences` | Write → family action | `gen_platform_action` actions[] `{action: "update_session_preferences"}` | Write via gen_platform_action branch(es) update_session_preferences; duplex-proven identical to the legacy tool. |
+| `gen_update_variable` | Vidsheet alias | `gen_vidsheet_action` `{op: "update", target.kind: "variable"}` | Exact global-variable row ID; sparse name/value/media, not a guessed child value-cell ID. |
+| `gen_update_watchlist` | Write → family action | `gen_watchlist_action` actions[] `{action: "update_watchlist"}` | Write via gen_watchlist_action branch(es) update_watchlist; duplex-proven identical to the legacy tool. |
+| `gen_upgrade_workspace` | Write → family action | `gen_platform_action` actions[] `{action: "upgrade_workspace"}` | Write via gen_platform_action branch(es) upgrade_workspace; duplex-proven identical to the legacy tool. |
+| `gen_validate_video_layout` | Read → discover view | `gen_discover` domain=`vidsheet` view=`layout_validation` |  |
+| `gen_vidsheet_discover` | Renamed | `gen_discover` (same views; `domain` defaults to `vidsheet`) | Renamed in GEN-6919; every former view is served unchanged under gen_discover. |
+| `gen_vidsheet_recommend_song` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card on the generate op (card_type recommend_song + audio_url); never a standalone tool. |
+| `gen_vidsheet_sound_matching` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card on the generate op (card_type sound_matching + overlays); never a standalone tool. |
+| `gen_vidsheet_video_from_talking_avatar` | Vidsheet alias | `gen_vidsheet_action` `{op: "generate", target.kind: "creation_card"}` | Job card on the generate op (card_type video_from_talking_avatar + avatar ids/urls); never a standalone tool. |

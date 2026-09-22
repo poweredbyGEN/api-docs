@@ -837,6 +837,7 @@ Use live `tools/list` for available tools and `gen://api-reference` for guidance
 <!-- gen-removed-tools:start -->
 Retired Vidsheet tool names (do not call): `gen_vidsheet_discover` was renamed to `gen_discover`; `gen_get_vidsheet_full` was removed — read saved state with the `gen_discover` sheet view instead.
 <!-- gen-removed-tools:end -->
+Retired MCP tool names are hidden compatibility aliases until 2026-10-22 and answer with a `deprecation` pointer; the full legacy-name → replacement table is the migration guide: https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 
 **Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
 
