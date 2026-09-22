@@ -512,7 +512,14 @@
       "required": [
         "image"
       ],
-      "one_of_required": [],
+      "one_of_required": [
+        [
+          "model"
+        ],
+        [
+          "model"
+        ]
+      ],
       "properties": [
         "prompt",
         "prompt_var",
@@ -734,7 +741,14 @@
     },
     "seedance_video_generation": {
       "required": [],
-      "one_of_required": [],
+      "one_of_required": [
+        [
+          "model"
+        ],
+        [
+          "model"
+        ]
+      ],
       "properties": [
         "image",
         "image_tail",
@@ -743,6 +757,7 @@
         "prompt_var",
         "aspect_ratio",
         "duration",
+        "resolution",
         "camera_fixed",
         "model",
         "native_audio",
