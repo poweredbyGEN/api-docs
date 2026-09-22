@@ -45,7 +45,7 @@ The GEN MCP is hosted-only — there is no package to install or local process t
 
 For Vidsheet editing, MCP forwards typed actions to the GEN API, which owns validation, creation-card behavior, ownership, and persistence. GEN's chat plans over that MCP surface. Natural-language tools such as `gen_chat` and `gen_ask` delegate to GEN's agent service; this delegation is separate from the Vidsheet editing path.
 
-- Exact edit → discover supported fields with `gen_vidsheet_discover`, then call `gen_vidsheet_action`. Read saved state with `gen_get_vidsheet_full`. See [Work with a Vidsheet](/guides/vidsheet-actions/) for draft, generation, and layer examples.
+- Exact edit → discover supported fields with `gen_discover`, then call `gen_vidsheet_action`. Read saved state with the `gen_discover` sheet view (`include=["full"]` for the whole dump). See [Work with a Vidsheet](/guides/vidsheet-actions/) for draft, generation, and layer examples.
 - Fuzzy goal → `gen_chat` (build something) or `gen_ask` (question about social data). The agent plans, calls the tools, and returns a `run_id` you poll with `gen_get_run_status`.
 
 Older per-target Vidsheet mutation tools are retired; use the action/discovery
@@ -65,7 +65,11 @@ Use your client's `tools/list` for the current tool set and `gen://api-reference
 |---|---|
 | **Ask GEN** | Use `gen_chat`, `gen_ask`, `gen_run_research`, and `gen_generate_content_ideas` for natural-language work |
 | **Create media** | Generate supported videos, images, songs, and voices; final-video rendering is unavailable through hosted MCP |
-| **Build Vidsheets** | Read a sheet with `gen_get_vidsheet_full`, discover card/settings schemas with `gen_vidsheet_discover`, and use `gen_vidsheet_action` for supported structure, drafts, media, and generation |
+| **Build Vidsheets** | Read a sheet with the `gen_discover` sheet view, discover card/settings schemas with `gen_discover`, and use `gen_vidsheet_action` for supported structure, drafts, media, and generation |
+
+<!-- gen-removed-tools:start -->
+Retired Vidsheet tool names (do not call): `gen_vidsheet_discover` was renamed to `gen_discover`; `gen_get_vidsheet_full` was removed — read saved state with the `gen_discover` sheet view instead.
+<!-- gen-removed-tools:end -->
 | **Manage assets** | List libraries, create direct uploads, import media from URLs, rename assets, and delete assets |
 | **Run strategy workflows** | Create content ideas, query watchlists, research trends, and manage recurring jobs |
 | **Publish** | Connect social accounts, schedule posts, update schedules, edit supported metadata on published posts, and remove scheduled posts |

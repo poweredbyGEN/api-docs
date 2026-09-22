@@ -6,7 +6,7 @@ For a teaching-style introduction with runnable curl chains, read `https://api.g
 
 ## Canonical Vidsheet workflow
 
-Start at https://api.gen.pro/guides/vidsheet-actions/ for `gen_vidsheet_discover` and `gen_vidsheet_action`: current field schemas, creation-card drafts, exact-owner generation, media prerequisites, retries, and deletion confirmation. Configure hosted MCP with `Authorization: Bearer <your-PAT>`; no per-session JWT minting is required.
+Start at https://api.gen.pro/guides/vidsheet-actions/ for `gen_discover` and `gen_vidsheet_action`: current field schemas, creation-card drafts, exact-owner generation, media prerequisites, retries, and deletion confirmation. Configure hosted MCP with `Authorization: Bearer <your-PAT>`; no per-session JWT minting is required.
 
 Existing-job lifecycle is separate: `gen_continue_generation(generation_id, agent_id, idempotency_key)` continues an owned stopped job using credits, without a creation-card body. The key is nonblank, 1–255 characters, and may contain spaces. Retry the identical job, agent, and key after timeout or `generation_busy`; changed input under the same key conflicts. The response retains the same `generation_id` with status `pending`; poll `gen_get_generation`. This is not a promise to resume a provider's partial work.
 
@@ -533,7 +533,7 @@ Cloning is **free** — no credits consumed.
 If no template matches, build manually.
 
 Duplicate an existing Vidsheet through `gen_vidsheet_action` after
-`gen_vidsheet_discover`; use `action=duplicate` with `target.kind=vidsheet`.
+`gen_discover`; use `action=duplicate` with `target.kind=vidsheet`.
 
 ```
 POST /v1/vidsheet?agent_id={id}
@@ -558,7 +558,7 @@ DELETE /v1/vidsheet/{id}?agent_id={id}
 Everything related to filling the vidsheet: cells, layers, creation cards, generations, variables, assets, automation.
 
 Duplicate a Vidsheet, row, column, or layer through `gen_vidsheet_action`
-after `gen_vidsheet_discover`; per-target duplicate routes are not the current
+after `gen_discover`; per-target duplicate routes are not the current
 user-facing contract.
 
 ## Rows
@@ -1445,7 +1445,7 @@ next cadence tick.
 # Integrations
 
 - MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` also accepts older configurations). The downloadable package is retired. Use live `tools/list` for available tools and `gen://api-reference` for guidance.
-- MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_vidsheet_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
+- MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
 - MCP payment recovery: low-credit failures return `status: "payment_required"`, `status_code: 402`, Stripe and x402 `payment_options`, and a same-call retry instruction. Payment requires approval. After funding succeeds, retry the same tool once with the same arguments; the funding result is not accepted or completed work.
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

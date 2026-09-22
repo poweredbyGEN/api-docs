@@ -7,7 +7,7 @@ This is a system-prompt style teaching document. Read it top-to-bottom and you w
 ## Vidsheet editing: start here
 
 Canonical API/MCP workflow: https://api.gen.pro/guides/vidsheet-actions/
-Use `gen_vidsheet_discover` for current action, card, model, and layer-setting schemas, then `gen_vidsheet_action` for typed mutations. `update` saves without generation; `generate` requires an explicit card, exact owner, and stable idempotency key. Hosted MCP uses `Authorization: Bearer <your-PAT>`.
+Use `gen_discover` for current action, card, model, and layer-setting schemas, then `gen_vidsheet_action` for typed mutations. `update` saves without generation; `generate` requires an explicit card, exact owner, and stable idempotency key. Hosted MCP uses `Authorization: Bearer <your-PAT>`.
 
 Per-target Vidsheet mutation examples below describe legacy direct-HTTP routes. Migrate editing integrations to the canonical guide; do not reconstruct save/create-job/attach sequences from those older examples. Hosted MCP final-video rendering is unavailable; use the Vidsheet editor for final rendering. Read-only and non-Vidsheet endpoint references remain applicable.
 
@@ -327,7 +327,7 @@ POST   /v1/templates/spreadsheets/:slug/clone        — clone into agent
 
 POST   /v1/vidsheet?agent_id=               — create blank engine
 GET    /v1/vidsheet/:id?agent_id=           — read engine with all nested data
-# Duplicate: gen_vidsheet_discover → gen_vidsheet_action
+# Duplicate: gen_discover → gen_vidsheet_action
 # Use action=duplicate with target.kind=vidsheet.
 PATCH  /v1/vidsheet/:id?agent_id=           — rename engine ({ project: { title } })
 DELETE /v1/vidsheet/:id?agent_id=           — delete engine and everything in it (not undoable)
@@ -415,7 +415,7 @@ Checksum = `openssl md5 -binary hero.mp4 | base64`. Max 1 GB.
 ### Step 4 endpoints
 
 Duplicate a Vidsheet, row, column, or layer through `gen_vidsheet_action`
-after `gen_vidsheet_discover`; do not call per-target duplicate routes.
+after `gen_discover`; do not call per-target duplicate routes.
 
 ```
 # Rows
@@ -832,7 +832,11 @@ Use live `tools/list` for available tools and `gen://api-reference` for guidance
 
 **Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_update_published_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
 
-**Vidsheets:** `gen_get_vidsheet_full` reads saved state; `gen_vidsheet_discover` returns current action, card, model, and layer-setting schemas; `gen_vidsheet_action` performs supported structure, draft, media, and generation operations. See https://api.gen.pro/guides/vidsheet-actions/ for migration from per-target mutation tools.
+**Vidsheets:** `gen_discover` reads saved state (sheet view; `include=["full"]` for the whole dump) and returns current action, card, model, and layer-setting schemas; `gen_vidsheet_action` performs supported structure, draft, media, and generation operations. See https://api.gen.pro/guides/vidsheet-actions/ for migration from per-target mutation tools.
+
+<!-- gen-removed-tools:start -->
+Retired Vidsheet tool names (do not call): `gen_vidsheet_discover` was renamed to `gen_discover`; `gen_get_vidsheet_full` was removed — read saved state with the `gen_discover` sheet view instead.
+<!-- gen-removed-tools:end -->
 
 **Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
 

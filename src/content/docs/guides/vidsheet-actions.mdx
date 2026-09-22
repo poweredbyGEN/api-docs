@@ -8,7 +8,7 @@ row-and-column intersection. A video cell contains **layers**, such as clips,
 text, and audio. A **creation card** holds the inputs used to make content for
 a cell or layer.
 
-Use `gen_vidsheet_discover` to learn what is supported, then
+Use `gen_discover` to learn what is supported, then
 `gen_vidsheet_action` to make changes. These tools use the API's shared
 validation and save the card and layer state you see in the website.
 
@@ -20,7 +20,7 @@ there is no local package or SDK and no need to mint a JWT each session.
 Every call identifies the agent with `agent_id`; your token must have access
 to that agent and the requested content.
 
-Use `gen_get_vidsheet_full` to read the Vidsheet and obtain its cell and layer
+Use `gen_discover` (sheet view; `include=["full"]` for the whole dump) to read the Vidsheet and obtain its cell and layer
 IDs. Example IDs below are placeholders: replace them with your own IDs.
 A layer ID is not interchangeable with its parent cell ID.
 
@@ -32,7 +32,7 @@ parameters; action arguments are a JSON body. Send `idempotency_key` as the
 
 ## Discover fields before editing
 
-Call `gen_vidsheet_discover` with:
+Call `gen_discover` with:
 
 ```json
 {"agent_id":"YOUR_AGENT_ID"}
@@ -274,7 +274,7 @@ Final-video rendering is unavailable through hosted MCP; prepare the layers
 here and render in the Vidsheet editor.
 
 Older per-target Vidsheet mutation tools are retired. Use `gen_vidsheet_action`
-for their supported replacements and `gen_vidsheet_discover` for the required
+for their supported replacements and `gen_discover` for the required
 fields. For example, cloning a template is `create` with a `vidsheet` target and
 `values.template_slug`. Read-only Vidsheet tools and generation lifecycle tools
 remain separate. Older direct-HTTP examples describe legacy routes, not the
