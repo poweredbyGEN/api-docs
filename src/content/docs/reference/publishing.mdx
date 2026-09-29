@@ -10,7 +10,7 @@ Publishing posts content to the social accounts an agent has connected, immediat
 One request can target several platforms at once. Every request is validated against each platform's rules (media type, item count, caption and title limits, required fields) before anything is queued, so a bad request fails fast with the platform and field named.
 
 <Aside type="note">
-  Publishing requires authentication via the `X-API-Key` header. The agent must have connected the target platform first: in the GEN app under **Setup → Accounts**, or through the MCP tools `gen_get_social_connect_url` and `gen_list_connected_socials`.
+  Publishing requires authentication via the `X-API-Key` header. The agent must have connected the target platform first: in the GEN app under **Setup → Accounts**, or through the MCP `gen_discover` domain=publish views, which replace the retired `gen_get_social_connect_url` and `gen_list_connected_socials` tools.
 </Aside>
 
 ## Platforms

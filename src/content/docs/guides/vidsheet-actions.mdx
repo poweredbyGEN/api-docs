@@ -192,8 +192,8 @@ the API checks trims against the actual media. Caption text edits use
 
 ## Media and library prerequisites
 
-Upload bytes with `gen_create_direct_upload`, then finish the upload with
-`gen_complete_asset_upload`. Select the returned owned asset using the
+Upload bytes with the `gen_asset_action` action `create_direct_upload`, then finish the upload with
+`complete_asset_upload`. Select the returned owned asset using the
 discovered media shape in `values.media` or a Media creation card. A remote URL
 alone does not establish ownership or a trustworthy duration.
 
@@ -203,7 +203,7 @@ expires; rediscover it when expired. Some library items lack a duration:
 selection can succeed, but trimming requires an owned source with a verified
 duration. Do not fill that gap with a guessed `duration`.
 
-`gen_analyze_source_video` is a separate source-analysis prerequisite. It takes
+The `gen_vidsheet_action` generate op with creation card `source_video_analysis` (the retired `gen_analyze_source_video`) is a separate source-analysis prerequisite. It takes
 an owned `content_resource_id` and stable `idempotency_key`. The Media card's
 generation mode performs the supported clipping workflow on an exact video
 layer; ordinary asset selection is an update.
@@ -252,16 +252,16 @@ card; an unattended task cannot approve its own deletion.
 ## Readback, lifecycle, and older integrations
 
 Use read-only Vidsheet and generation tools to check saved state and job
-results. `gen_stop_generation` is a separate lifecycle tool; a stop or refund
+results. The `gen_vidsheet_action` op `stop_generation` (the retired `gen_stop_generation`) is a separate lifecycle call; a stop or refund
 request does not by itself prove that external work stopped or credits were
 refunded.
 
-To continue an existing stopped job, call `gen_continue_generation` with its
+To continue an existing stopped job, call the `gen_vidsheet_action` op `continue_generation` (the retired `gen_continue_generation`) with its
 `generation_id`, owning `agent_id`, and a stable `idempotency_key`. The key must
 contain 1–255 characters and cannot be whitespace-only; spaces within it are
 allowed. Continue uses credits, keeps the same job ID and history, and takes
 no creation-card body. It returns that `generation_id` with status `pending`;
-poll `gen_get_generation` to check completion.
+poll it with the `gen_discover` generation view to check completion.
 
 After a timeout or `generation_busy` response, retry the identical generation
 ID, agent, and key. Preserve the key exactly. Reusing a key for a different
@@ -281,4 +281,6 @@ remain separate. Older direct-HTTP examples describe legacy routes, not the
 canonical editing workflow.
 The API owns validation, MCP forwards requests, and GEN chat plans using that
 MCP surface. Natural-language chat and research can still delegate to GEN's
-agent service. The website continues using its existing routes.
+agent service. The website continues using its existing routes. The four-host
+map and the composer boundary are stated once in the
+[MCP guide](/guides/mcp/#hosts-and-the-composer-boundary).

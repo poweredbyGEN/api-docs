@@ -175,7 +175,7 @@ After creating a watchlist, query the captured data through the agent chat — e
 
 ## Query a watchlist with typed filters
 
-For programmatic asks where you'd rather build a typed parameter object than a natural-language prompt, the MCP tool `gen_query_watchlist` takes the same ask as structured fields and returns the `run_id` to poll with `gen_get_run_status`.
+For programmatic asks where you'd rather build a typed parameter object than a natural-language prompt, the MCP `gen_watchlist_action` action `query_watchlist` takes the same ask as structured fields and returns the `run_id` to poll with the `gen_discover` run view. It replaces the retired `gen_query_watchlist` (and `gen_get_run_status`) tools.
 
 ```bash
 # Equivalent natural-language ask: "top 30 videos from @list:<watchlist_id> by engagement rate in the last 90 days"

@@ -117,13 +117,13 @@ with your API key until `status` is `"completed"`.
 
 ## MCP Server
 
-All content ideas operations are available as MCP tools:
+Content ideas go through the `gen_content_action` dispatcher (`actions[]`) plus the `gen_discover` reads. The per-endpoint tool names are retired:
 
-| Tool | Purpose |
+| Call | Purpose |
 |------|---------|
-| `gen_generate_content_ideas` | Generate ideas with optional requirements and video type filter |
-| `gen_refine_content_ideas` | Iterate on ideas in conversation context |
-| `gen_set_content_preference` | Set persistent generation rules |
-| `gen_get_run_status` | Poll run status |
-| `gen_list_content_ideas` | List ideas with optional status filter |
-| `gen_update_idea_status` | Update idea status |
+| `gen_content_action` action `generate_ideas` | Generate ideas with optional requirements and video type filter; reply to `needs_input` / `proposal` with `feedback`, or `confirm: true` to start the job |
+| `gen_content_action` action `generate_ideas` with `from_ideas` + `feedback` | Refine ideas in conversation context (replaces the retired `gen_refine_content_ideas`) |
+| `gen_content_action` action `set_content_preference` | Set persistent generation rules |
+| `gen_content_action` action `set_idea_status` | Move an idea through `generated` / `approve_to_create` / `ready_for_review` / `rejected` / `posted` (replaces the retired `gen_update_idea_status`) |
+| `gen_discover` domain=content view=idea_job | Poll the returned `job_id` (replaces the retired `gen_get_run_status`) |
+| `gen_discover` domain=content view=ideas | List ideas with an optional status filter (replaces the retired `gen_list_content_ideas`) |

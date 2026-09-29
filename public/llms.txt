@@ -570,7 +570,7 @@ curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" -H "X-API-K
 
 **Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000, `thumbnail_url` https .jpg/.png <2 MB; TikTok/Instagram 2,200 (Instagram ≤30 hashtags, 2-10 items = carousel); LinkedIn 3,000, ≤9 images or one PDF/PPTX/DOCX document, no mixing; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. Per-platform knobs: `instagram_music`, `youtube_options` (visibility, shorts, tags), `linkedin_options` (visibility, alt_text, carousel = PDF of the images; several images alone render as a grid). A 422 `platform_validation_failed` names the `platform` and `field` (dotted for options). `GET /v1/schedule/platforms` (no auth) serves the rules incl. each `options` object.
 
-**Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_get_social_connect_url`). Media URLs must be publicly accessible at post time.
+**Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_discover` domain=publish view=connections for the connect URL). Media URLs must be publicly accessible at post time.
 
 ### Step 5 endpoints
 
@@ -730,10 +730,10 @@ DELETE /v1/agents/:agent_id/watchlists/:id/sources/:source_id       — remove s
 DELETE /v1/agents/:agent_id/watchlists/:id/sources?platform=&target_type=&target_value=
 ```
 
-**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the MCP server ships a `gen_query_watchlist` tool so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
+**Querying a watchlist (typed filters).** Watchlist analysis runs through agent chat, but the MCP server ships `gen_watchlist_action` with the `query_watchlist` action so you can pass a typed parameter object instead of hand-building a prompt. It posts to `/v1/agent/run` with a `@list:<watchlist_id>` reference and returns a `run_id` you poll until `status == "completed"` (final payload = video grid + summary).
 
 ```bash
-# Equivalent to MCP: gen_query_watchlist(agent_id, watchlist_id, question="top videos", limit=30, days=90, sort_by="engagement_rate")
+# Equivalent to MCP: gen_watchlist_action action=query_watchlist (agent_id, watchlist_id, question="top videos", limit=30, days=90, sort_by="engagement_rate")
 curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -H "X-API-Key: $GEN_API_KEY" \
   -H "Content-Type: application/json" \
@@ -810,27 +810,31 @@ Common codes:
 
 ### MCP Server
 
-The official GEN MCP is the hosted remote server (Streamable HTTP):
+The official GEN MCP is the hosted remote server (Streamable HTTP) at `https://mcp.gen.pro`.
+
+**OAuth first.** Add `https://mcp.gen.pro` by URL and sign in to GEN when the host opens the consent page. No header or key is needed; the server supports dynamic client registration, authorization code with PKCE, and refresh tokens. Claude connector, ChatGPT connector and Claude Code (`claude mcp add --transport http gen https://mcp.gen.pro`) all use this path.
+
+**PAT fallback (headless and CI).** Clients without OAuth send a personal access token as a header:
 
 ```json
-{ "name": "gen", "url": "https://mcp.gen.pro", "headers": { "Authorization": "Bearer your-pat" } }
+{ "name": "gen", "url": "https://mcp.gen.pro", "headers": { "Authorization": "Bearer gen_pat_your_key_here" } }
 ```
 
 `https://mcp.gen.pro/mcp` also still works for previously configured clients. There is no local package to install: the downloadable `gen-mcp-server` PyPI package is retired and no longer served — never `pip install` or `uvx` it; use the hosted URL above.
 
-**How the MCP fits with the GEN agent.** The GEN API owns Vidsheet validation and persistence. MCP forwards typed actions to it; GEN chat plans over that same MCP surface. Natural-language tools such as `gen_chat` and `gen_ask` delegate to GEN's agent service. Poll their returned `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
+**How the MCP fits with the GEN agent.** The GEN API owns Vidsheet validation and persistence. MCP forwards typed actions to it; GEN chat plans over that same MCP surface. Natural-language tools such as `gen_ask` (op `chat`) delegate to GEN's agent service. Poll the returned `run_id` with the `gen_discover` run view. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor. The four-host map and the composer boundary are stated once in https://api.gen.pro/guides/mcp/#hosts-and-the-composer-boundary.
 
-Use live `tools/list` for available tools and `gen://api-reference` for guidance. Key tools by category:
+Use live `tools/list` for available tools and `gen://api-reference` for guidance. The served catalog is 16 tools (15 model-visible plus the app-only `gen_card_page`): `gen_discover` reads, one `gen_<noun>_action` dispatcher per domain, `gen_ask`, `gen_analyze`, `gen_generate`, and `gen_avatars`. Key tools by category:
 
-**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_run_research` (topic research across social + web), `gen_generate_content_ideas`.
+**Natural-language delegation (start here for fuzzy goals):** `gen_ask` (`ask` for questions about social data — links, accounts, hashtags, trends; `chat` for open-ended build goals), `gen_analyze` (`run_research` for topic research across social + web, plus trends, comments, hooks, creators, transcripts), `gen_content_action` (`generate_ideas`, `expand_idea`, `recreate_video`, `reimagine_video`).
 
-**Creation:** `gen_create_video` (single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok), `gen_create_image` (nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`. For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
+**Creation:** `gen_generate` (`create_video` — single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok; `create_image` — nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite; `create_song` — suno-v5-beta/suno-v4.5plus-beta; `create_song_mix`; `transcribe`). For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
 
-**Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_create_direct_upload`, `gen_complete_asset_upload`, `gen_delete_asset`.
+**Assets:** read with `gen_discover` asset views; write with `gen_asset_action` (`import_asset_from_url`, `create_direct_upload`, `complete_asset_upload`, `delete_asset`).
 
-**Voices:** `gen_list_agent_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_preview_voice`.
+**Voices:** read with `gen_discover` voice views; write with `gen_voice_action` (`design_voice`, `clone_voice`, `preview_voice`, `delete_voice`) and `gen_avatars` (`list`, `create`, `rename`).
 
-**Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_update_published_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
+**Social publishing:** connect and read connections with `gen_discover` domain=publish views (the connect URL replaces the retired `gen_get_social_connect_url`); write with `gen_publish_action` (`publish_content` for platforms tiktok|instagram|facebook|youtube|x, `update_scheduled_post`, `update_published_post`, `delete_scheduled_post`, `delete_published_post`, `disconnect_social`). On **X**, the schedule branch also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
 
 **Vidsheets:** `gen_discover` reads saved state (sheet view; `include=["full"]` for the whole dump) and returns current action, card, model, and layer-setting schemas; `gen_vidsheet_action` performs supported structure, draft, media, and generation operations. See https://api.gen.pro/guides/vidsheet-actions/ for migration from per-target mutation tools.
 
@@ -839,21 +843,19 @@ Retired Vidsheet tool names (do not call): `gen_vidsheet_discover` was renamed t
 <!-- gen-removed-tools:end -->
 Retired MCP tool names are hidden compatibility aliases until 2026-10-22 and answer with a `deprecation` pointer; the full legacy-name → replacement table is the migration guide: https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 
-**Watchlists:** `gen_create_watchlist`, `gen_list_watchlists`, `gen_query_watchlist`, `gen_add_watchlist_source`, `gen_remove_watchlist_source`.
+**Watchlists:** read with `gen_discover` watchlist views; write with `gen_watchlist_action` (`create_watchlist`, `update_watchlist`, `delete_watchlist`, `pause_watchlist`, `resume_watchlist`, `add_watchlist_source`, `remove_watchlist_source`, `query_watchlist`). The `query_watchlist` action replaces the retired `gen_query_watchlist` tool.
 
-**Recurring automation:** `gen_create_recurring_job`, `gen_list_recurring_jobs`, `gen_run_recurring_job_now`, `gen_pause_recurring_job`, `gen_resume_recurring_job`.
+**Recurring automation:** read with `gen_discover` task views; write with `gen_task_action` (`create_recurring_job`, `update_recurring_job`, `delete_recurring_job`, `duplicate_recurring_job`, `pause_recurring_job`, `resume_recurring_job`, `run_recurring_job_now`, plus the monitoring-job actions).
 
-**Credits/billing:** `gen_get_credit_balance`, `gen_estimate_job`,
-`gen_list_credit_plans`, `gen_buy_credits`, `gen_upgrade_workspace`,
-`gen_create_x402_credit_purchase`, `gen_settle_x402_credit_purchase`. A
+**Credits/billing:** read balance, usage and plans with `gen_discover` domain=billing; write with `gen_billing_action` (`buy_credits`, `create_x402_credit_purchase`, `settle_x402_credit_purchase`) and `gen_platform_action` (`upgrade_workspace`). A
 low-credit MCP result has `status: "payment_required"`, `status_code: 402`,
 Stripe and x402 options, and a retry instruction. Obtain approval, fund the
 workspace, then retry the same tool once with the same arguments; do not treat
 that result as accepted work.
 
-**Agent setup:** `gen_get_me`, `gen_list_agents`, `gen_get_agent_core`, `gen_update_agent_core`, `gen_set_agent_primary_photo`, `gen_add_agent_look`.
+**Agent setup:** read settings with `gen_discover` agent views; write with `gen_agent_action` (`set_profile`, `set_name`, `set_location`, `set_primary_voice`, `set_primary_photo`, `add_reference_images`, `add_linked_account`, `create_agent`, `update_agent`, `delete_agent`, `create_agent_avatar`, `create_look`, sharing actions). These branches replace the retired per-endpoint agent tools.
 
-**Job control:** `gen_get_generation` (poll), `gen_stop_generation` (record a stop and request a refund; verify the actual outcome), `gen_continue_generation` (continue an owned stopped job using credits; supply generation_id, agent_id, and a stable nonblank 1–255-character idempotency_key, preserving spaces; retry the same inputs/key after timeout or generation_busy; returns the same generation_id pending, not a new card-generated job), `gen_get_run_status`. Continue takes no card body; poll the same job to establish completion.
+**Job control:** poll a generation with the `gen_discover` generation view; `gen_vidsheet_action` op `stop_generation` (record a stop and request a refund; verify the actual outcome) and op `continue_generation` (continue an owned stopped job using credits; supply generation_id, agent_id, and a stable nonblank 1–255-character idempotency_key, preserving spaces; retry the same inputs/key after timeout or generation_busy; returns the same generation_id pending, not a new card-generated job). `continue_generation` takes no card body; poll the same job with `gen_discover` to establish completion; a run_id is read with the `gen_discover` run view.
 
 Full install guide: https://api.gen.pro/guides/mcp/
 
