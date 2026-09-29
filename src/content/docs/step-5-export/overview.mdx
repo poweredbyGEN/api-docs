@@ -1,6 +1,6 @@
 ---
 title: Step 5 — Export & Publish
-description: Render the final composite, download the MP4, and optionally publish to TikTok / Instagram / YouTube.
+description: Render the final composite, download the MP4, and optionally publish to TikTok, Instagram, Facebook, YouTube, X or LinkedIn.
 ---
 
 import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
@@ -47,7 +47,7 @@ CDN URLs are public — no auth required to download. See [Download the Video](/
 
 ## Publish to social
 
-Currently TikTok is fully supported (Instagram / YouTube coming):
+[Publishing](/reference/publishing/) covers TikTok, Instagram, Facebook, YouTube, X and LinkedIn through `POST /v1/schedule/with-post`. This legacy job path still publishes a single TikTok post:
 
 ```bash
 curl -X POST "https://api.gen.pro/v1/user_jobs?agent_id=$AGENT_ID" \
@@ -74,7 +74,7 @@ Renders charge credits — same pre-charge / reconcile pattern as every other ge
 <CardGrid>
   <LinkCard title="Render the Final Video" href="/reference/rendering/" description="Trigger, poll, handle render failures." />
   <LinkCard title="Download the Video" href="/step-5-export/download/" description="CDN URL, streaming, TypeScript + curl patterns." />
-  <LinkCard title="Publish to Social" href="/reference/publishing/" description="Post now or schedule for later; TikTok supported." />
+  <LinkCard title="Publish to Social" href="/reference/publishing/" description="Post now or schedule for later to TikTok, Instagram, Facebook, YouTube, X or LinkedIn." />
   <LinkCard title="Credits & Billing" href="/step-5-export/credits/" description="How credits are charged and reconciled across the whole journey." />
 </CardGrid>
 

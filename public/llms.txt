@@ -559,7 +559,7 @@ curl "https://api.gen.pro/v1/schedule/post/48213" -H "X-API-Key: $GEN_API_KEY"
 # published: platform_post_id + post_url (the live link). failed: error, error_code, failed_step.
 ```
 
-**Already live and wrong?** `PATCH /v1/schedule/post/:post_id/published` edits a published post's metadata where the network supports it — today YouTube `title`, `description`, `tags`, `category_id`. Sparse: only the fields you send change, everything else on the live post is preserved, and the same request twice converges instead of stacking. The reply is one result per platform — `updated` (with the platform's readback), `unsupported_after_publish` (that network has no edit path; nothing touched), `reauthorization_required` (reconnect the account) or `failed`. `editable_after_publish` in `GET /v1/schedule/platforms` names the editable fields per platform. Each YouTube update costs 50 units of the channel's YouTube quota. For a post that has *not* gone out yet, use `PATCH /v1/schedule/post/:post_id` instead.
+**Already live and wrong?** `PATCH /v1/schedule/post/:post_id/published` edits a published post's metadata where the network supports it — today YouTube `title`, `description`, `tags`, `category_id` and LinkedIn `description`. Sparse: only the fields you send change, everything else on the live post is preserved, and the same request twice converges instead of stacking. The reply is one result per platform — `updated` (with the platform's readback), `unsupported_after_publish` (that network has no edit path; nothing touched), `reauthorization_required` (reconnect the account) or `failed`. `editable_after_publish` in `GET /v1/schedule/platforms` names the editable fields per platform. Each YouTube update costs 50 units of the channel's YouTube quota. For a post that has *not* gone out yet, use `PATCH /v1/schedule/post/:post_id` instead.
 
 ```bash
 curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" -H "X-API-Key: $GEN_API_KEY" \
@@ -570,7 +570,7 @@ curl -X PATCH "https://api.gen.pro/v1/schedule/post/48213/published" -H "X-API-K
 
 **Limits that bite:** X 280 chars/tweet + max 4 images; YouTube title required (≤100), description ≤5,000, `thumbnail_url` https .jpg/.png <2 MB; TikTok/Instagram 2,200 (Instagram ≤30 hashtags, 2-10 items = carousel); LinkedIn 3,000, ≤9 images or one PDF/PPTX/DOCX document, no mixing; Facebook video only. Instagram/TikTok/Facebook/YouTube need media; X and LinkedIn allow text-only. Per-platform knobs: `instagram_music`, `youtube_options` (visibility, shorts, tags), `linkedin_options` (visibility, alt_text, carousel = PDF of the images; several images alone render as a grid). A 422 `platform_validation_failed` names the `platform` and `field` (dotted for options). `GET /v1/schedule/platforms` (no auth) serves the rules incl. each `options` object.
 
-**Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_get_social_connect_url`). Media URLs must be publicly accessible at post time.
+**Prerequisites for publish.** The agent must have connected the platform (GEN app → Setup → Accounts, or MCP `gen_discover` domain=`publish` view=`connect_url`). Media URLs must be publicly accessible at post time.
 
 ### Step 5 endpoints
 
@@ -837,7 +837,7 @@ Use live `tools/list` for available tools and `gen://api-reference` for guidance
 
 **Voices:** `gen_list_agent_voices`, `gen_list_my_voices`, `gen_design_voice`, `gen_clone_voice`, `gen_preview_voice`.
 
-**Social publishing:** `gen_get_social_connect_url` (OAuth connect flow), `gen_list_connected_socials`, `gen_schedule_post` (platforms: tiktok|instagram|facebook|youtube|x), `gen_list_scheduled_posts`, `gen_get_post_status`, `gen_update_scheduled_post`, `gen_update_published_post`, `gen_delete_scheduled_post`, `gen_disconnect_social`. On **X**, `gen_schedule_post` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only.
+**Social publishing:** `gen_discover` domain=`publish` views `connect_url` (OAuth connect flow), `connections`, `scheduled`, `post_status` and `metrics` (per-platform views/likes/comments/shares for a published post). Writes go through `gen_publish_action` actions `schedule_post_<platform>` (platforms: tiktok|instagram|facebook|youtube|x|linkedin), `update_scheduled_post`, `delete_scheduled_post`, `update_published_post`, `delete_published_post` and `disconnect_social`. On **X**, `schedule_post_x` also supports up to 4 images per tweet (`media_urls`), **threads** (`thread`: an ordered list of `{text, media_urls?}` segments), and **replies** (`reply_to_tweet_id`). `thread` and `reply_to_tweet_id` are X-only. TikTok posts are private-only (`SELF_ONLY`) until the app review passes; other privacy levels answer 422 `tiktok_private_only`.
 
 **Vidsheets:** `gen_discover` reads saved state (sheet view; `include=["full"]` for the whole dump) and returns current action, card, model, and layer-setting schemas; `gen_vidsheet_action` performs supported structure, draft, media, and generation operations. See https://api.gen.pro/guides/vidsheet-actions/ for migration from per-target mutation tools.
 

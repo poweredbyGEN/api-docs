@@ -10,7 +10,7 @@ Publishing posts content to the social accounts an agent has connected, immediat
 One request can target several platforms at once. Every request is validated against each platform's rules (media type, item count, caption and title limits, required fields) before anything is queued, so a bad request fails fast with the platform and field named.
 
 <Aside type="note">
-  Publishing requires authentication via the `X-API-Key` header. The agent must have connected the target platform first: in the GEN app under **Setup → Accounts**, or through the MCP tools `gen_get_social_connect_url` and `gen_list_connected_socials`.
+  Publishing requires authentication via the `X-API-Key` header. The agent must have connected the target platform first: in the GEN app under **Setup → Accounts**, or through the MCP `gen_discover` publish views `connect_url` and `connections`.
 </Aside>
 
 ## Platforms
@@ -50,7 +50,7 @@ curl "https://api.gen.pro/v1/schedule/platforms"
       "required": [],
       "optional": ["description", "media_url", "media_urls", "title", "thumbnail_url", "linkedin_options"],
       "ignored": ["thread", "reply_to_tweet_id"],
-      "editable_after_publish": [],
+      "editable_after_publish": ["description"],
       "options": {
         "linkedin_options": {
           "visibility": "public (default) | connections | loggedin",
@@ -63,6 +63,10 @@ curl "https://api.gen.pro/v1/schedule/platforms"
   ]
 }
 ```
+
+## TikTok is private-only for now
+
+TikTok posts go out as **Only me** (`tiktok_privacy_level: "SELF_ONLY"`) until GEN's TikTok app passes TikTok's app review. Any other level is refused before queueing with `422` and `error_code: "tiktok_private_only"`. The creator-info lookup behind the privacy picker returns `privacy_level_options: ["SELF_ONLY"]` and a `privacy_restriction_reason` naming the review as the cause, so a picker built from it offers Only me only.
 
 ## Create a post
 
@@ -95,7 +99,7 @@ POST /v1/schedule/with-post
 | `thumbnail_url` | string | No | Custom thumbnail. Generated from the video when omitted. YouTube uploads it as the video's thumbnail (https, `.jpg`, `.jpeg` or `.png`, under 2 MB); a thumbnail problem is reported as `warning`, the video still publishes. |
 | `thread` | object[] | No | **X only.** Ordered tweet segments, each `{ "text": "...", "media_urls": ["..."] }`. Each segment is limited to 280 characters. |
 | `reply_to_tweet_id` | string | No | **X only.** Post as a reply to this tweet id. |
-| `tiktok_privacy_level` | string | TikTok | `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR` or `SELF_ONLY`. |
+| `tiktok_privacy_level` | string | TikTok | `SELF_ONLY` only while TikTok's app review is pending (see [TikTok is private-only for now](#tiktok-is-private-only-for-now)); after the review, `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR` or `SELF_ONLY`. |
 | `tiktok_disable_comment` | boolean | TikTok | Disable comments. |
 | `tiktok_disable_duet` | boolean | TikTok | Disable duets. |
 | `tiktok_disable_stitch` | boolean | TikTok | Disable stitches. |
@@ -223,6 +227,44 @@ Returns the post with `platforms_status`, the same per-platform block as the cre
 
 `post_url` is the public link to the live post: a YouTube watch URL, an Instagram permalink, a Facebook Page video URL, a TikTok video URL, an X status URL, or a LinkedIn post URL.
 
+## Read post metrics
+
+```
+GET /v1/schedule/post/{post_id}/metrics
+```
+
+Per-platform numbers for a post that went out — `views`, `likes`, `comments` and `shares` — read from the destination platform rather than from GEN's own analytics.
+
+```json
+{
+  "post_id": 48213,
+  "platforms": [
+    {
+      "platform": "tiktok",
+      "status": "ok",
+      "post_url": "https://www.tiktok.com/@santiago_real/video/7300123456789",
+      "metrics": { "views": 12050, "likes": 830, "comments": 42, "shares": 17 }
+    },
+    {
+      "platform": "linkedin",
+      "status": "unsupported",
+      "post_url": null,
+      "metrics": null
+    }
+  ]
+}
+```
+
+| `status` | Meaning |
+|----------|---------|
+| `ok` | `metrics` holds the platform's current counts. |
+| `not_published` | This platform has not gone out yet — poll `GET /v1/schedule/post/{post_id}`. |
+| `unsupported` | GEN cannot read numbers for this network. Facebook and LinkedIn report this. |
+| `reauthorization_required` | The saved connection can no longer read the post; reconnect the account under **Setup → Accounts**. |
+| `failed` | The platform refused the read. |
+
+Counts are a live snapshot read from the platform, so they change between calls. Over MCP the same read is `gen_discover` domain=`publish` view=`metrics` with `post_id`.
+
 ## List, update and delete
 
 ```
@@ -250,7 +292,9 @@ Which fields each platform can change is served as `editable_after_publish` on e
 | Instagram | — | No post-publication edit for this content. |
 | Facebook Page | — | No post-publication edit for this content. |
 | X | — | Editing a sent tweet is a paid plan feature and is not exposed. |
-| LinkedIn | — | The Posts API can partially update `commentary`; GEN has not wired that adapter yet. |
+| LinkedIn | `description` | The Posts API partially updates the post's commentary. |
+
+`editable_after_publish` now lists `linkedin: description`: the commentary is rewritten in place with the Posts API `PARTIAL_UPDATE`, and a connection that can no longer write comes back `reauthorization_required`.
 
 The edit is **sparse**: only the fields in the body change. GEN reads the platform's current metadata, merges your change onto it, writes it back, and returns what the platform held afterwards — so a title you did not send is never cleared, and sending the same request twice converges on the same result instead of stacking edits.
 
@@ -357,7 +401,7 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
     "scheduled_time": "2026-09-20T15:00:00Z",
     "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
     "description": "The $2 taco at 2am #streetfood #tacotok",
-    "tiktok_privacy_level": "PUBLIC_TO_EVERYONE",
+    "tiktok_privacy_level": "SELF_ONLY",
     "tiktok_disable_comment": false,
     "tiktok_disable_duet": false,
     "tiktok_disable_stitch": false,
@@ -607,7 +651,7 @@ curl -X POST "https://api.gen.pro/v1/schedule/with-post" \
     "media_url": "https://cdn.gen.pro/outputs/render_xyz.mp4",
     "title": "Factory price reveal",
     "description": "What your $12 beauty sponge really costs. #sourcing",
-    "tiktok_privacy_level": "PUBLIC_TO_EVERYONE",
+    "tiktok_privacy_level": "SELF_ONLY",
     "tiktok_disable_comment": false,
     "tiktok_disable_duet": false,
     "tiktok_disable_stitch": false
@@ -644,6 +688,7 @@ curl -s "https://api.gen.pro/v1/schedule/post/$POST_ID" -H "X-API-Key: $KEY" \
 | `403` | `permission_denied` | You do not have access to this agent. |
 | `404` | `not_found` | Unknown `post_id`. |
 | `422` | `platform_validation_failed` | A platform would reject this content. `detail.platform`, `detail.field` and `detail.errors` say which and why. |
+| `422` | `tiktok_private_only` | TikTok's app review is still pending, so only `SELF_ONLY` (Only me) posts are accepted. |
 | `422` | `validation_error` | Invalid or missing fields. |
 | `422` | `no_active_credit_purchase` | The agent's workspace has no active credit purchase. |
 

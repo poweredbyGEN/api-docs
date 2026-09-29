@@ -1025,7 +1025,9 @@ CDN URLs are public and permanent until you explicitly delete the content resour
 
 ## Publish to Social
 
-Platforms: TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn. One request can target several. Every request is validated per platform BEFORE queueing (media type/count, caption + title limits, required fields) and the outcome per platform — including the live `post_url` — is read back from the status endpoint. The agent must have connected the platform first (GEN app Setup → Accounts, or MCP `gen_get_social_connect_url` / `gen_list_connected_socials`).
+Platforms: TikTok, Instagram, Facebook Page, YouTube, X, LinkedIn. One request can target several. Every request is validated per platform BEFORE queueing (media type/count, caption + title limits, required fields) and the outcome per platform — including the live `post_url` — is read back from the status endpoint. The agent must have connected the platform first (GEN app Setup → Accounts, or MCP `gen_discover` domain=`publish` view=`connect_url` / view=`connections`).
+
+TikTok is private-only until GEN's TikTok app passes TikTok's app review: send `tiktok_privacy_level: "SELF_ONLY"` (Only me) — any other level is refused before queueing with 422 `error_code: "tiktok_private_only"`, and the creator-info lookup behind the privacy picker returns `privacy_level_options: ["SELF_ONLY"]` with a `privacy_restriction_reason`.
 
 | Platform | `platform` | Content | Media/post | Caption limit | Title | Notes |
 |----------|------------|---------|-----------|---------------|-------|-------|
@@ -1071,7 +1073,7 @@ Body:
   "linkedin_options": { "visibility": "public", "alt_text": ["per image, in order"], "carousel": false },   // visibility: public | connections | loggedin; carousel: 2-9 images -> one PDF document (LinkedIn has no image carousel; several images render as a grid)
   "thread": [{ "text": "1/ ...", "media_urls": ["..."] }],   // X only, each ≤280 chars
   "reply_to_tweet_id": "178...",               // X only
-  "tiktok_privacy_level": "PUBLIC_TO_EVERYONE", // TikTok: PUBLIC_TO_EVERYONE | MUTUAL_FOLLOW_FRIENDS | FOLLOWER_OF_CREATOR | SELF_ONLY
+  "tiktok_privacy_level": "SELF_ONLY",          // TikTok: SELF_ONLY only until the app review passes (other levels → 422 tiktok_private_only); after review PUBLIC_TO_EVERYONE | MUTUAL_FOLLOW_FRIENDS | FOLLOWER_OF_CREATOR | SELF_ONLY
   "tiktok_disable_comment": false, "tiktok_disable_duet": false, "tiktok_disable_stitch": false,
   "tiktok_disclose_commercial_content": false, "tiktok_your_brand": false, "tiktok_branded_content": false,
   "strict": true                                // recommended: a platform that cannot take this content → 422 instead of a reported skip
@@ -1113,6 +1115,17 @@ GET /v1/schedule/post/{post_id}
 
 `normalized_status`: `accepted` (stored) → `publishing` (scheduled / uploading) → `published` (live; `post_url` + `platform_post_id` set) | `failed` (`error`, `error_code`, `failed_step`). `post_url` is the public link: YouTube watch URL (or `/shorts/{id}` when `youtube_options.shorts`), Instagram permalink, Facebook Page video, TikTok video, X status, LinkedIn post. `warning` = non-fatal (e.g. YouTube `thumbnail_failed: ...`, video still live). Instagram reports the `music_track` used (or null).
 
+### Post metrics
+
+```
+GET /v1/schedule/post/{post_id}/metrics
+→ { "post_id": 48213, "platforms": [ { "platform": "tiktok", "status": "ok", "post_url": "https://www.tiktok.com/@u/video/7300",
+      "metrics": { "views": 12050, "likes": 830, "comments": 42, "shares": 17 } },
+    { "platform": "linkedin", "status": "unsupported", "post_url": null, "metrics": null } ] }
+```
+
+Per-platform `views`, `likes`, `comments`, `shares` for a post that went out, read from the destination platform — not from GEN's own analytics. `status`: `ok` (`metrics` are current) | `not_published` | `unsupported` (GEN cannot read that network's numbers; Facebook and LinkedIn) | `reauthorization_required` (reconnect the account) | `failed`. Counts are a live snapshot, so they move between calls. Over MCP: `gen_discover` domain=`publish` view=`metrics` with `post_id`.
+
 ### Calendar: list / update / delete
 
 ```
@@ -1133,7 +1146,7 @@ PATCH /v1/schedule/post/{post_id}/published
                                  "tags": ["sourcing","beauty"], "category_id": 22 } } ] }
 ```
 
-Editable fields per platform come from `editable_after_publish` in `GET /v1/schedule/platforms`. Today: **YouTube** `title` (≤100, not blank), `description` (≤5,000 **bytes**, not characters; explicit `null` clears it), `tags` (each 2+ chars, ≤400 chars total), `category_id` (positive int). Every other platform is `[]` — TikTok, Instagram and Facebook have no post-publication edit for this content, editing a sent tweet is a paid X plan feature, and LinkedIn's `commentary` PARTIAL_UPDATE is not wired yet.
+Editable fields per platform come from `editable_after_publish` in `GET /v1/schedule/platforms`. Today: **YouTube** `title` (≤100, not blank), `description` (≤5,000 **bytes**, not characters; explicit `null` clears it), `tags` (each 2+ chars, ≤400 chars total), `category_id` (positive int), and **LinkedIn** `description` (the commentary, rewritten in place with the Posts API PARTIAL_UPDATE). Every other platform is `[]` — TikTok, Instagram and Facebook have no post-publication edit for this content, and editing a sent tweet is a paid X plan feature.
 
 **Sparse and idempotent.** Only the fields in the body change. GEN reads the platform's current metadata, merges the change onto it and writes it back, so an unsent title is never cleared and the same request twice converges rather than stacking. `metadata` is read back *from the platform* after the write, not echoed from the request.
 

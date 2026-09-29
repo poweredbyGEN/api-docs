@@ -13,6 +13,12 @@
 #   gen_gitea_read_token (a Gitea read token; gen_backend_v2_read_token is a
 #   GitHub PAT, which Gitea answers with 401). A missing secret or fetch
 #   failure is red, never a skip.
+# publish-platforms (GEN-6715, GEN-7755): every platform the live publishing
+#   rules endpoint serves has a row in the publishing page and llms-full.txt and
+#   a value in the publish platform enum of both OpenAPI copies, and no doc
+#   surface still names a retired publish tool. Stdlib-only Python, no install;
+#   a fetch failure is red, never a skip. The MCP half of the same rule is in
+#   gen-mcp-server .woodpecker/ci.yml.
 when:
   - event: pull_request
   - event: push
@@ -31,3 +37,8 @@ steps:
         from_secret: gen_gitea_read_token
     commands:
       - node scripts/check-enums-freshness.mjs
+
+  publish-platforms:
+    image: python:3.12-slim
+    commands:
+      - python3 scripts/check_publish_platforms.py
