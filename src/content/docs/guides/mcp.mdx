@@ -89,7 +89,7 @@ After a new deploy, a request with an old session id returns HTTP 404 and JSON-R
 
 On 404 with `-32001`, send `initialize` for a new session, then call `tools/list` again. The server advertises `capabilities.tools.listChanged: true`.
 
-Claude and ChatGPT connectors do this automatically. A client that sends no session id stays stateless and is unaffected.
+The MCP spec requires clients to start a new session on 404. A client that sends no session id stays stateless and is unaffected.
 
 ## Errors
 
