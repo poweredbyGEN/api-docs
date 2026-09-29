@@ -29,6 +29,7 @@ const ROUTES = {
   lipsync: "infinite_voice_lip_sync",
   captions: "assemblyai_audio_caption_generation",
   video_from_ingredients: "generate_pika_video",
+  song: "song_generation",
 };
 for (const [c, job] of Object.entries(ROUTES)) if (!jobs[job]) throw new Error(`${c}: Rails does not accept job type ${job}`);
 const requiredGroups = (job) => [
@@ -56,6 +57,7 @@ const SURFACES = {
   "src/content/docs/reference/cards/image-from-text.mdx": ["image_from_text"],
   "src/content/docs/reference/cards/video-from-text.mdx": ["video_from_text"],
   "src/content/docs/reference/cards/video-from-image.mdx": ["video_from_image"],
+  "src/content/docs/reference/cards/song.mdx": ["song"],
   "public/openapi.yaml": [],
   "public/.well-known/openapi.yaml": [],
   "src/content/docs/step-4-edit/overview.mdx": [],

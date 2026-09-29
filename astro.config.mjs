@@ -114,7 +114,7 @@ export default defineConfig({
 						{ label: 'Work with a Vidsheet (API & MCP)', slug: 'guides/vidsheet-actions' },
 						{ label: 'Vidsheet Anatomy', slug: 'step-4-edit/anatomy' },
 						{
-							label: 'Creation Cards (10 types)',
+							label: 'Creation Cards (11 types)',
 							collapsed: false,
 							items: [
 								{ label: 'Creation Cards Overview', slug: 'reference/creation-cards' },
@@ -124,6 +124,7 @@ export default defineConfig({
 								{ label: 'Video from Image', slug: 'reference/cards/video-from-image' },
 								{ label: 'Video from Ingredients', slug: 'reference/cards/video-from-ingredients' },
 								{ label: 'Speech from Text', slug: 'reference/cards/speech-from-text' },
+								{ label: 'Song', slug: 'reference/cards/song' },
 								{ label: 'Lipsync', slug: 'reference/cards/lipsync' },
 								{ label: 'Captions', slug: 'reference/cards/captions' },
 								{ label: 'Transcription', slug: 'reference/cards/transcription' },

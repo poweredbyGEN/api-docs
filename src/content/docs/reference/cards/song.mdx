@@ -1,0 +1,152 @@
+---
+title: "Song"
+description: Generate a song from a text prompt, optionally conditioned on a source audio track.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Generate a song from a text prompt. Optionally supply a source audio track to condition the result on it — Suno keeps the source's melody, style or vocal character while writing a new track (cover / style match). Without a source audio the request is a plain text-to-song generation.
+
+<Aside type="caution">
+  Credits are pre-charged when a generation is created. If the generation fails or is stopped, credits are automatically refunded.
+</Aside>
+
+## Endpoint
+
+```
+POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
+```
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The sheet ID. |
+| `cell_id` | integer | The cell ID. |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | integer | The agent ID. |
+
+---
+
+## Models
+
+| Model | `generation_type` | `data.model` | Max duration (s) |
+|-------|--------------------|--------------|------------------|
+| Suno V5 | `song` | `"suno-v5-beta"` | 240 |
+| Suno V4.5 Plus | `song` | `"suno-v4.5plus-beta"` | 480 |
+| Suno V5.5 | `song` | `"suno-v5.5-beta"` | 360 |
+
+`"suno-v5-beta"` is the default. A `data.duration` above the selected model's maximum is clamped to it.
+
+---
+
+## Request body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `generation_type` | string | Yes | `"song"`. |
+| `data.prompt` | string | Yes | What the song is about, plus any lyric direction. Supports `{{variable_name}}` syntax. |
+| `data.model` | string | No | Model variant. See [Models](#models) table. Default `"suno-v5-beta"`. |
+| `data.duration` | integer | No | Target length in seconds. Defaults to the selected model's maximum. |
+| `data.instrumental` | boolean | No | Generate an instrumental track with no vocals. Defaults to `false`. |
+| `data.style` | string | No | Style, genre and mood description, up to 1000 characters. |
+| `data.title` | string | No | Track title, up to 80 characters. |
+| `data.negative_tags` | string | No | Styles, instruments or moods to avoid, up to 500 characters. |
+| `data.vocal_gender` | string | No | `"m"` or `"f"`. |
+| `data.source_audio_resource_id` | integer | No | Existing audio content resource ID to use as the source audio. |
+| `data.source_audio_url` | string | No | Public HTTPS URL of the source audio. The MCP `gen_create_song` tool imports this URL as a content resource first; in card `data` the same value is sent as `reference_audio.value` or `reference_audio_url`. |
+| `data.audio_weight` | number | No | How closely the result follows the source audio, `0.0`–`1.0`. |
+| `data.prompt_var` | string | No | Variable name to map the prompt from a column. |
+| `data.duration_var` | string | No | Variable name to map the duration from a column. |
+
+The API switches Suno into custom mode for you when the request carries `style`, `negative_tags`, `vocal_gender`, `instrumental: true`, a non-default `model` or a non-default `duration`.
+
+---
+
+## Source audio
+
+Pass at most one source audio reference: an existing GEN audio asset by its content resource ID (`data.source_audio_resource_id`), or a public HTTPS URL (`data.source_audio_url`). The URL form goes through the existing asset import (`gen_import_asset_from_url` / `gen_create_direct_upload`), so there is no separate upload path.
+
+Source audio may be at most **8 minutes (480 s)** long. A longer input is refused before any credits are charged.
+
+<Aside type="tip">
+  `data.audio_weight` controls fidelity to the source: a higher value follows the source more closely, a lower value leaves the model more room to reinterpret it.
+</Aside>
+
+---
+
+## Response (201)
+
+```json
+{
+  "generation_id": 9040,
+  "status": "pending"
+}
+```
+
+Once complete, the generated audio is available in `output_resources`. Poll with `GET /v1/generations/{generation_id}` to check status.
+
+---
+
+## Example
+
+```bash
+curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3400/generate?agent_id=42" \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "generation_type": "song",
+    "data": {
+      "prompt": "An upbeat indie-pop track about a late-night drive through San Antonio",
+      "model": "suno-v5-beta",
+      "duration": 180,
+      "style": "indie pop, jangly guitars, warm analog synth",
+      "title": "Neon Mile",
+      "negative_tags": "heavy metal, screaming",
+      "vocal_gender": "f",
+      "instrumental": false,
+      "source_audio_resource_id": 4821,
+      "audio_weight": 0.6
+    }
+  }'
+```
+
+### Completed generation
+
+```json
+{
+  "id": 9040,
+  "status": "completed",
+  "user_job_type": "song_generation",
+  "result": null,
+  "failed_reason": null,
+  "output_resources": [
+    {
+      "id": 1900,
+      "url": "https://cdn.gen.pro/outputs/song_001.mp3",
+      "thumbnail_url": "https://cdn.gen.pro/thumbnails/song_001.jpg",
+      "object_type": "audio",
+      "type": "output"
+    }
+  ],
+  "execution_cost": 1.08
+}
+```
+
+---
+
+## Cell configuration
+
+<Aside type="tip">
+  Cell configuration is set via `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `additional_attributes` in the request body. These defaults are used when generation is triggered.
+</Aside>
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model` | string | Default model: one of `"suno-v5-beta"`, `"suno-v4.5plus-beta"`, `"suno-v5.5-beta"`. |
+| `duration` | number | Default duration in seconds. |
+| `autoGenerate` | boolean | Auto-trigger generation when dependent variables change. |

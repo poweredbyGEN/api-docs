@@ -117,46 +117,6 @@
         "dress_resolution"
       ]
     },
-    "create_person_ear_product_avatar": {
-      "required": [
-        "person_train_avatar_node_id",
-        "product_train_avatar_node_id",
-        "person_prompt",
-        "product_prompt",
-        "product_ear_prompt"
-      ],
-      "one_of_required": [],
-      "properties": [
-        "person_train_avatar_node_id",
-        "product_train_avatar_node_id",
-        "person_prompt",
-        "person_prompt_var",
-        "product_prompt",
-        "product_prompt_var",
-        "product_ear_prompt",
-        "product_ear_prompt_var",
-        "person_model_strength",
-        "product_model_strength"
-      ]
-    },
-    "create_person_product_avatar": {
-      "required": [
-        "person_train_avatar_node_id",
-        "product_train_avatar_node_id",
-        "prompt"
-      ],
-      "one_of_required": [],
-      "properties": [
-        "person_train_avatar_node_id",
-        "product_train_avatar_node_id",
-        "prompt",
-        "prompt_var",
-        "skin_noise_scale",
-        "skin_blend_opacity",
-        "person_model_strength",
-        "product_model_strength"
-      ]
-    },
     "create_talking_avatar_and_lip_sync": {
       "required": [
         "infinite_voice_lip_sync_data"
@@ -498,10 +458,9 @@
           "null"
         ],
         "enum": [
-          "kling-v3",
-          "kling-v1-6"
+          "kling-v3"
         ],
-        "default": "kling-v1-6"
+        "default": "kling-v3"
       },
       "duration": {
         "type": "integer",
@@ -513,9 +472,6 @@
         "image"
       ],
       "one_of_required": [
-        [
-          "model"
-        ],
         [
           "model"
         ]
@@ -544,8 +500,6 @@
         "enum": [
           "kling-v3",
           "kling-v2-6",
-          "kling-v2-1",
-          "kling-v1-6",
           null
         ],
         "default": "kling-v3"
@@ -565,6 +519,52 @@
         "prompt_var",
         "aspect_ratio"
       ]
+    },
+    "minimax_h3_max_video_generation": {
+      "required": [
+        "prompt"
+      ],
+      "one_of_required": [
+        [
+          "image"
+        ],
+        [
+          "images"
+        ]
+      ],
+      "properties": [
+        "prompt",
+        "prompt_var",
+        "model",
+        "image",
+        "image_tail",
+        "images",
+        "aspect_ratio",
+        "resolution",
+        "duration",
+        "native_audio",
+        "voice_replace_data",
+        "metadata",
+        "minimax_request_id",
+        "minimax_status_url",
+        "minimax_response_url"
+      ],
+      "model": {
+        "type": "string",
+        "enum": [
+          "minimax-h3-max"
+        ],
+        "default": "minimax-h3-max"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "minimum": 5,
+        "maximum": 15,
+        "default": 5
+      }
     },
     "openai_image_generation": {
       "required": [],

@@ -741,6 +741,28 @@ Errors: 422 { error, error_code: "validation_error" }          (no source, both 
 Poll GET /v1/generations/{generation_id} until status is "completed", then read `result`.
 ```
 
+### song
+
+```
+generation_type: "song"
+data: { prompt, model?, duration?, instrumental?, style?, title?, negative_tags?, vocal_gender?,
+        source_audio_resource_id?, source_audio_url?, audio_weight? }
+prompt: what the song is about, plus any lyric direction, up to 5000 chars.
+model: "suno-v5-beta" (default) | "suno-v4.5plus-beta" | "suno-v5.5-beta", each with its own duration ceiling.
+duration: target seconds, default the model maximum — 240 (suno-v5-beta), 480 (suno-v4.5plus-beta), 360 (suno-v5.5-beta); clamped to the ceiling.
+instrumental: true generates a track with no vocals (default false).
+style: style/genre/mood, up to 1000 chars. title: up to 80 chars.
+negative_tags: styles or instruments to avoid, up to 500 chars. vocal_gender: "m" | "f".
+Source audio (audio-to-audio cover / style match), at most one of:
+  source_audio_resource_id: an existing audio content resource id.
+  source_audio_url: a public HTTPS URL, imported as a content resource first (the MCP gen_create_song tool),
+    or reference_audio.value / reference_audio_url in card data.
+  audio_weight: 0.0–1.0 fidelity to the source.
+Source audio is capped at 8 minutes (480 s); longer input is refused before any charge.
+custom_mode is set for you when style, negative_tags, vocal_gender, instrumental, model or duration is non-default.
+Output: audio content resource
+```
+
 Uploaded media is a cell value, not a generation:
 `PATCH /v1/vidsheet/{id}/cells/{cell_id}` with `{ "spreadsheet_cell": { "value": "<url>" } }`.
 
