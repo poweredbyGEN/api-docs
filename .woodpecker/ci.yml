@@ -13,6 +13,11 @@
 #   gen_gitea_read_token (a Gitea read token; gen_backend_v2_read_token is a
 #   GitHub PAT, which Gitea answers with 401). A missing secret or fetch
 #   failure is red, never a skip.
+# mcp-tools (GEN-6919): every gen_* name in the MCP-facing docs is served by
+#   tools/list or is a retired name whose replacement the line names, and no
+#   stale tool count is claimed. It reads the committed
+#   scripts/mcp-tools-snapshot.json: CI has no MCP credential, so the live
+#   surface is refreshed by scripts/update-mcp-tools-snapshot.mjs with a PAT.
 when:
   - event: pull_request
   - event: push
@@ -31,3 +36,8 @@ steps:
         from_secret: gen_gitea_read_token
     commands:
       - node scripts/check-enums-freshness.mjs
+
+  mcp-tools:
+    image: node:20-slim
+    commands:
+      - node scripts/check-mcp-tools.mjs
