@@ -214,6 +214,7 @@
         "aspect_ratio",
         "duration",
         "image",
+        "image_tail",
         "images",
         "voice_replace_data",
         "native_audio"
@@ -530,6 +531,9 @@
         ],
         [
           "images"
+        ],
+        [
+          "image_tail"
         ]
       ],
       "properties": [
@@ -539,6 +543,7 @@
         "image",
         "image_tail",
         "images",
+        "audio",
         "aspect_ratio",
         "resolution",
         "duration",
