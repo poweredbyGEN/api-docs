@@ -21,6 +21,7 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 | `video_from_image` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
 | `video_from_ingredients` | video | pika |
 | `speech_from_text` | audio | (uses a saved `voice_id`) |
+| `song` | audio (song) | suno-v5-beta, suno-v4.5plus-beta, suno-v5.5-beta |
 | `lipsync` | video | `lip_sync_model`: sync.so, gen |
 | `captions` | caption layer (timed segments) | — |
 | `transcription` | transcript text + sentence timings | — |
@@ -175,6 +176,26 @@ Pass exactly one source: `audio` or `video` (`{ "value": "<uri>" }`). `trim` is 
 ```
 
 Pass exactly one source: `audio`, `video`, or `content_resource_id`. Add `trim` with `start_seconds` and `duration_seconds` to transcribe only part of it. Returns `full_text`, `sentences` with `startMs`/`endMs`, and `audio_duration`. Also available without a sheet via `POST /v1/transcriptions?agent_id=`. See [Transcription](/reference/cards/transcription/).
+
+## Song
+
+```json
+{
+  "generation_type": "song",
+  "data": {
+    "prompt": "An upbeat indie-pop track about a late-night drive through San Antonio",
+    "model": "suno-v5-beta",
+    "duration": 180,
+    "style": "indie pop, jangly guitars, warm analog synth",
+    "title": "Neon Mile",
+    "negative_tags": "heavy metal, screaming",
+    "vocal_gender": "f",
+    "instrumental": false
+  }
+}
+```
+
+Models with their duration ceiling: `suno-v5-beta` (240s), `suno-v4.5plus-beta` (480s), `suno-v5.5-beta` (360s); `suno-v5-beta` is the default. Add a source audio to condition the track on it — `source_audio_resource_id` (an existing audio content resource) or `source_audio_url` (a public HTTPS URL, imported as an asset first) — plus `audio_weight` (`0.0`–`1.0`) for fidelity to the source. Source audio is capped at 8 minutes (480s); a longer input is refused before any charge. See [Song](/reference/cards/song/).
 
 ## Render (composite)
 

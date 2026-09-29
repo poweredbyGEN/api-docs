@@ -1313,7 +1313,7 @@ paths:
                     The type of AI generation to run. Canonical names:
                     text, image_from_text, video_from_text, video_from_image,
                     video_from_ingredients, speech_from_text, lipsync, captions,
-                    transcription.
+                    transcription, song.
                     Use canonical names for new integrations. Uploaded media is a
                     cell value (PATCH the cell), not a generation.
                   enum:
@@ -1326,6 +1326,7 @@ paths:
                     - lipsync
                     - captions
                     - transcription
+                    - song
                   example: "text"
                 data:
                   type: object
@@ -1334,6 +1335,20 @@ paths:
                     `aspect_ratio`, `duration`, optional `resolution` (`1080p` or `720p` where
                     supported), and optional `native_audio` for models that support native audio.
                     Omitted optional fields use the cell defaults or the closest supported model defaults.
+
+                    Video generation accepts the Veo, Kling, Seedance and Grok models plus
+                    `gemini-omni-flash-preview` (Gemini Omni Flash, 1-10s). Image generation with
+                    `model: "gemini"` takes `version`: `nano-banana`, `nano-banana-pro`,
+                    `nano-banana-2` or `nano-banana-2-lite`. The full per-card model lists are on
+                    the card reference pages.
+
+                    Song data (`generation_type: "song"`) takes `prompt`, `model` (`suno-v5-beta`,
+                    `suno-v4.5plus-beta` or `suno-v5.5-beta`), `duration`, `instrumental`, `style`,
+                    `title`, `negative_tags` and `vocal_gender`, plus optional source audio:
+                    `source_audio_resource_id` (an existing audio content resource) or a public
+                    HTTPS URL as `source_audio_url` (imported as a content resource first), and
+                    `audio_weight` (0.0-1.0) for fidelity to the source. Source audio is capped at
+                    8 minutes (480 s); longer input is refused before any charge.
                   example:
                     prompt: "A handheld product demo video"
                     model: "veo-3.1"

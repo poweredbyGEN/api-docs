@@ -602,7 +602,7 @@ If none match, build custom with `POST /v1/vidsheet` and add columns / layers by
 
 ---
 
-## Creation Card Types (all 9)
+## Creation Card Types (all 10)
 
 Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server maps them to the platform's internal model identifiers automatically.
 
@@ -668,6 +668,13 @@ Pass exactly one source: `audio` or `video` (`{ "value": "<uri>" }`); `trim` opt
   "data": { "audio": { "value": "https://cdn.example.com/episode-12.mp3" } } }
 ```
 Pass exactly one source: `audio` (`{ "value": "<uri>" }`), `video` (`{ "value": "<uri>" }`), or `content_resource_id`. Optional `trim: { "start_seconds": 15, "duration_seconds": 30 }` alongside `audio`/`video`. Result: `{ full_text, sentences: [{ text, startMs, endMs }], audio_duration }`. Uses credits based on the audio duration transcribed. Also available without a sheet: `POST /v1/transcriptions?agent_id=`. Use `captions` instead when you want word-level timings for subtitle overlays.
+
+### song
+```json
+{ "generation_type": "song",
+  "data": { "prompt": "...", "model": "suno-v5-beta", "duration": 180, "style": "indie pop, jangly guitars", "title": "...", "negative_tags": "...", "vocal_gender": "f", "instrumental": false } }
+```
+Models (max `duration` in seconds): `suno-v5-beta` (240, default), `suno-v4.5plus-beta` (480), `suno-v5.5-beta` (360). Optional source audio conditions the track on it: `source_audio_resource_id` (an existing audio content resource) or `source_audio_url` (public HTTPS URL, imported as an asset first), plus `audio_weight` (0.0–1.0) for fidelity to the source. Source audio is capped at 8 minutes (480s); longer input is refused before any charge.
 
 Uploaded media is a cell value, not a generation: `PATCH /v1/vidsheet/:id/cells/:cell_id` with `{ "spreadsheet_cell": { "value": "<url>" } }`.
 
@@ -824,7 +831,7 @@ Use live `tools/list` for available tools and `gen://api-reference` for guidance
 
 **Natural-language delegation (start here for fuzzy goals):** `gen_ask` (questions about social data — links, accounts, hashtags, trends), `gen_chat` (open-ended build goals), `gen_run_research` (topic research across social + web), `gen_generate_content_ideas`.
 
-**Creation:** `gen_create_video` (single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok), `gen_create_image` (nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta), `gen_create_song_mix`. For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
+**Creation:** `gen_create_video` (single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok), `gen_create_image` (nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite), `gen_create_song` (suno-v5-beta/suno-v4.5plus-beta/suno-v5.5-beta; optional `source_audio_resource_id` or `source_audio_url` plus `audio_weight` 0.0–1.0 for audio-to-audio), `gen_create_song_mix`. For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
 
 **Assets:** `gen_list_assets`, `gen_get_asset`, `gen_import_asset_from_url`, `gen_create_direct_upload`, `gen_complete_asset_upload`, `gen_delete_asset`.
 
