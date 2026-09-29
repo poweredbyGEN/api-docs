@@ -8,7 +8,7 @@ For a teaching-style introduction with runnable curl chains, read `https://api.g
 
 Start at https://api.gen.pro/guides/vidsheet-actions/ for `gen_discover` and `gen_vidsheet_action`: current field schemas, creation-card drafts, exact-owner generation, media prerequisites, retries, and deletion confirmation. Configure hosted MCP with `Authorization: Bearer <your-PAT>`; no per-session JWT minting is required.
 
-Existing-job lifecycle is separate: `gen_continue_generation(generation_id, agent_id, idempotency_key)` continues an owned stopped job using credits, without a creation-card body. The key is nonblank, 1–255 characters, and may contain spaces. Retry the identical job, agent, and key after timeout or `generation_busy`; changed input under the same key conflicts. The response retains the same `generation_id` with status `pending`; poll `gen_get_generation`. This is not a promise to resume a provider's partial work.
+Existing-job lifecycle is separate: `gen_vidsheet_action` op `continue_generation` (generation_id, agent_id, idempotency_key) continues an owned stopped job using credits, without a creation-card body. The key is nonblank, 1–255 characters, and may contain spaces. Retry the identical job, agent, and key after timeout or `generation_busy`; changed input under the same key conflicts. The response retains the same `generation_id` with status `pending`; poll it with the `gen_discover` generation view. This is not a promise to resume a provider's partial work.
 
 Per-target Vidsheet mutation examples in this reference describe legacy direct-HTTP routes, not the canonical action contract. Migrate editing integrations to the guide. Hosted MCP does not provide final-video rendering; use the Vidsheet editor. Read-only and non-Vidsheet endpoint references remain applicable.
 
@@ -755,7 +755,7 @@ style: style/genre/mood, up to 1000 chars. title: up to 80 chars.
 negative_tags: styles or instruments to avoid, up to 500 chars. vocal_gender: "m" | "f".
 Source audio (audio-to-audio cover / style match), at most one of:
   source_audio_resource_id: an existing audio content resource id.
-  source_audio_url: a public HTTPS URL, imported as a content resource first (the MCP gen_create_song tool),
+  source_audio_url: a public HTTPS URL, imported as a content resource first (the MCP gen_generate create_song action),
     or reference_audio.value / reference_audio_url in card data.
   audio_weight: 0.0–1.0 fidelity to the source.
 Source audio is capped at 8 minutes (480 s); longer input is refused before any charge.
@@ -1331,8 +1331,8 @@ DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources?platform=&target_
 ### Querying a watchlist with typed filters (`https://agent.gen.pro/v1`)
 
 Watchlist *analysis* runs through agent chat, not the agent-core CRUD surface.
-The MCP tool `gen_query_watchlist` takes the same ask as a typed parameter
-object so you don't hand-build a prompt. It is the `/v1/agent/run` call below
+The MCP action `gen_watchlist_action` `query_watchlist` takes the same ask as a typed parameter
+object so you don't hand-build a prompt. It replaces the retired `gen_query_watchlist` tool: `gen_watchlist_action` is the `/v1/agent/run` call below
 with a `@list:<watchlist_id>` reference; the
 chat layer parses the filters and applies them byte-identically across all of
 the watchlist's sources, and returns a `run_id`. Poll the run until
@@ -1340,7 +1340,7 @@ the watchlist's sources, and returns a `run_id`. Poll the run until
 plus a natural-language summary that respects every filter.
 
 ```bash
-# Equivalent to MCP: gen_query_watchlist(agent_id, watchlist_id,
+# Equivalent to MCP: gen_watchlist_action action=query_watchlist (agent_id, watchlist_id,
 #   question="top videos", limit=30, days=90, sort_by="engagement_rate")
 curl -X POST "https://agent.gen.pro/v1/agent/run" \
   -H "X-API-Key: $GEN_API_KEY" \
@@ -1349,7 +1349,7 @@ curl -X POST "https://agent.gen.pro/v1/agent/run" \
 # → { "run_id": "run_abc", "status": "running", ... }
 ```
 
-`gen_query_watchlist` typed fields (all optional except `question`):
+`gen_watchlist_action` `query_watchlist` typed fields (all optional except `question`):
 
 | Field | Type | Notes |
 |---|---|---|
@@ -1481,7 +1481,7 @@ next cadence tick.
 
 - MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` also accepts older configurations). The downloadable package is retired. Use live `tools/list` for available tools and `gen://api-reference` for guidance.
 - MCP migration: Retired MCP tool names are hidden compatibility aliases until 2026-10-22 and answer with a `deprecation` pointer; the full legacy-name → replacement table is the migration guide: https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
-- MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with `gen_get_run_status`. Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor.
+- MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with the `gen_discover` run view (the retired `gen_get_run_status` name is a compatibility alias until 2026-10-22). Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor. The four-host map and the composer boundary are stated once at https://api.gen.pro/guides/mcp/#hosts-and-the-composer-boundary.
 - MCP payment recovery: low-credit failures return `status: "payment_required"`, `status_code: 402`, Stripe and x402 `payment_options`, and a same-call retry instruction. Payment requires approval. After funding succeeds, retry the same tool once with the same arguments; the funding result is not accepted or completed work.
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)

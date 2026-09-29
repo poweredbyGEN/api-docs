@@ -24,6 +24,8 @@ Add `https://mcp.gen.pro` by URL, then sign in to GEN. OAuth needs no header or 
 - **ChatGPT connector** — add `https://mcp.gen.pro` by URL as a remote MCP server, then sign in to GEN. The host asks for approval on each write.
 - **Other OAuth clients** — add the same URL; the server supports dynamic client registration, authorization code with PKCE, and refresh tokens.
 
+**Verify the connection.** In a new conversation, ask the client to call `gen_discover` with `domain="platform"`, `view="me"`. A 200 proves the credential and transport are working; if the client answers without calling a tool, check that the connector is enabled for that conversation and reconnect.
+
 ## Claude Code
 
 ```bash
@@ -56,15 +58,28 @@ The GEN MCP is hosted-only — there is no package to install or local process t
 
 ## How the MCP fits with the GEN agent
 
-For Vidsheet editing, MCP forwards typed actions to the GEN API, which owns validation, creation-card behavior, ownership, and persistence. GEN's chat plans over that MCP surface. Natural-language tools such as `gen_chat` and `gen_ask` delegate to GEN's agent service; this delegation is separate from the Vidsheet editing path.
+For Vidsheet editing, MCP forwards typed actions to the GEN API, which owns validation, creation-card behavior, ownership, and persistence. GEN's chat plans over that MCP surface. Natural-language tools such as `gen_ask` (op `chat`) delegate to GEN's agent service; this delegation is separate from the Vidsheet editing path.
 
 - Exact edit → discover supported fields with `gen_discover`, then call `gen_vidsheet_action`. Read saved state with the `gen_discover` sheet view (`include=["full"]` for the whole dump). See [Work with a Vidsheet](/guides/vidsheet-actions/) for draft, generation, and layer examples.
-- Fuzzy goal → `gen_chat` (build something) or `gen_ask` (question about social data). The agent plans, calls the tools, and returns a `run_id` you poll with `gen_get_run_status`.
+- Fuzzy goal → `gen_ask` (op `chat` to build something, op `ask` for a question about social data). The agent plans, calls the tools, and returns a `run_id` you poll with the `gen_discover` run view. The retired `gen_chat` and `gen_get_run_status` names are hidden compatibility aliases until 2026-10-22.
 
 Older per-target Vidsheet mutation tools are retired; use the action/discovery
-workflow above. Job lifecycle remains separate: `gen_stop_generation` stops a
-job, and `gen_continue_generation` continues an owned stopped job using credits
-and a stable retry key. See [lifecycle and retry details](/guides/vidsheet-actions/#readback-lifecycle-and-older-integrations).
+workflow above. Job lifecycle remains separate: the `gen_vidsheet_action` op
+`stop_generation` stops a job, and op `continue_generation` continues an owned
+stopped job using credits and a stable retry key. The retired `gen_stop_generation` and `gen_continue_generation` names are hidden compatibility aliases of `gen_vidsheet_action` until 2026-10-22. See [lifecycle and retry details](/guides/vidsheet-actions/#readback-lifecycle-and-older-integrations).
+
+## Hosts and the composer boundary
+
+The public developer surfaces are four hosts, each with one owner:
+
+| Host | Owner | Serves |
+|---|---|---|
+| `mcp.gen.pro` | gen-mcp-server | The hosted MCP tool surface described on this page; the only public MCP entry point |
+| `api.gen.pro` | Rails | The REST API: content engine, Vidsheets, agents, organizations. It owns Vidsheet validation, ownership, creation-card behavior, and persistence |
+| `agent.gen.pro` | gen-agentic | Chat, content ideas, research, conversations |
+| `agent-core.gen.pro` | agent-core | Agent profile/settings reads and writes, and watchlists |
+
+The composer boundary (GEN-6891): the GEN composer — GEN chat and the Vidsheet editor — is a client of this same surface, not a privileged path. It sends the canonical Rails action envelope, which the MCP relays to `api.gen.pro` verbatim; the MCP does not reconstruct product intent. For Vidsheet edits the agent calls the MCP, never the reverse. The MCP does call `agent.gen.pro` for work that needs judgement or conversation (chat, ideas, research), and Vidsheet ask stays a composer call with Rails as a normal client of the public run API.
 
 ## Previously used the local package?
 
@@ -76,7 +91,7 @@ Use your client's `tools/list` for the current tool set and `gen://api-reference
 
 | Area | What your assistant can do |
 |---|---|
-| **Ask GEN** | Use `gen_chat`, `gen_ask`, `gen_run_research`, and `gen_generate_content_ideas` for natural-language work |
+| **Ask GEN** | Use `gen_ask` (op `ask` or `chat`), `gen_analyze` (`run_research`), and `gen_content_action` (`generate_ideas`) for natural-language work |
 | **Create media** | Generate supported videos, images, songs, and voices; final-video rendering is unavailable through hosted MCP |
 | **Build Vidsheets** | Read a sheet with the `gen_discover` sheet view, discover card/settings schemas with `gen_discover`, and use `gen_vidsheet_action` for supported structure, drafts, media, and generation |
 | **Manage assets** | List libraries, create direct uploads, import media from URLs, rename assets, and delete assets |
@@ -86,13 +101,13 @@ Use your client's `tools/list` for the current tool set and `gen://api-reference
 
 ## Credits and x402
 
-GEN MCP tools use workspace credits for paid generation, research, voice, and song work. Saving a Vidsheet draft or changing its properties does not start generation. Check balance with `gen_get_credit_balance` and estimate paid jobs with `gen_estimate_job`.
+GEN MCP tools use workspace credits for paid generation, research, voice, and song work. Saving a Vidsheet draft or changing its properties does not start generation. Check balance with the `gen_discover` billing views (`balance`, `usage`, `plans`) and estimate paid jobs with `gen_discover` too — the retired `gen_get_credit_balance`, `gen_estimate_job`, and `gen_list_credit_plans` names are compatibility aliases until 2026-10-22.
 
 To add credits:
 
-- For Stripe, use `gen_list_credit_plans`, then `gen_buy_credits`.
-- For USDC via x402, use `gen_create_x402_credit_purchase`, then
-  `gen_settle_x402_credit_purchase` with the signed payment.
+- For Stripe, read the plans with `gen_discover` domain=billing view=plans, then call `gen_billing_action` action `buy_credits`.
+- For USDC via x402, use `gen_billing_action` action `create_x402_credit_purchase`, then
+  action `settle_x402_credit_purchase` with the signed payment.
 
 When a paid tool cannot run because the workspace lacks credits, MCP returns a
 structured result with `status: "payment_required"`, `status_code: 402`,
