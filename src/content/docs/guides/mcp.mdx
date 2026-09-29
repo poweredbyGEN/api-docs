@@ -68,6 +68,49 @@ workflow above. Job lifecycle remains separate: the `gen_vidsheet_action` op
 `stop_generation` stops a job, and op `continue_generation` continues an owned
 stopped job using credits and a stable retry key. The retired `gen_stop_generation` and `gen_continue_generation` names are hidden compatibility aliases of `gen_vidsheet_action` until 2026-10-22. See [lifecycle and retry details](/guides/vidsheet-actions/#readback-lifecycle-and-older-integrations).
 
+## Sessions and deploys
+
+`initialize` returns an `Mcp-Session-Id` bound to the running deploy (`<sha12>.<nonce>.<sig>`).
+
+```bash
+curl -si https://mcp.gen.pro \
+  -H "Authorization: Bearer gen_pat_your_key_here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"my-client","version":"1.0.0"}}}' \
+  | grep -i '^mcp-session-id'
+```
+
+After a new deploy, a request with an old session id returns HTTP 404 and JSON-RPC error `-32001`.
+
+```json
+{"jsonrpc":"2.0","id":2,"error":{"code":-32001,"message":"Session not found ... Send initialize to get the current catalog"}}
+```
+
+On 404 with `-32001`, send `initialize` for a new session, then call `tools/list` again. The server advertises `capabilities.tools.listChanged: true`.
+
+Claude and ChatGPT connectors do this automatically. A client that sends no session id stays stateless and is unaffected.
+
+## Errors
+
+Reddit is not supported. A call that names Reddit as a platform or source, or carries a reddit.com URL in any field, is refused before anything is billed. In `gen_analyze`, a request whose only source is a Reddit mention is refused the same way.
+
+```json
+{"code":"unsupported_platform","message":"gen_analyze/collect: PLATFORM_UNSUPPORTED: Reddit is not supported (field 'targets.0.target')","field_path":"/actions/0/targets.0.target"}
+```
+
+For `gen_vidsheet_action` errors see [Batches and retryable results](/guides/vidsheet-actions/#batches-and-retryable-results).
+
+## Verified writes
+
+Every completed `gen_vidsheet_action` write returns a `verified` block. Report a change only from `verified`.
+
+```json
+{"changed":1,"changes":[{"index":0,"action":"update","target":{"kind":"column","vidsheet_id":145435,"id":242367},"verified_by":"read","values":{"title":"HOOK"}}]}
+```
+
+See [Verified writes](/guides/vidsheet-actions/#verified-writes) for `unchecked` and `WRITE_NOT_VERIFIED`.
+
 ## Hosts and the composer boundary
 
 The public developer surfaces are four hosts, each with one owner:

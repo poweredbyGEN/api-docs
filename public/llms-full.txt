@@ -651,9 +651,9 @@ Output: image content resource
 
 ```
 generation_type: "video_from_text"
-Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
+Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
 Aspect ratios: "1:1", "9:16", "16:9"; grok also supports "4:3", "3:4", "3:2", "2:3"
-Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3, kling-v1-6; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
+Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
 data: { prompt, negative_prompt?, model, aspect_ratio, resolution?, duration, native_audio?, variables }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -663,8 +663,8 @@ Output: video content resource
 
 ```
 generation_type: "video_from_image"
-Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
-Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3, kling-v2-6, kling-v2-1, kling-v1-6; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
+Models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok
+Durations (seconds): veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite (4|6|8s); gemini-omni-flash-preview (1–10s); kling-v3, kling-v2-6; seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro (3–12s); seedance-2.0 (4–15s); seedance-2.5 (4–15s); grok (1–15s)
 data: { prompt, negative_prompt?, model, image_resource_id, image_tail_resource_id?, aspect_ratio, resolution?, duration, native_audio? }
 Resolution values: `1080p` or `720p` when supported by the selected model. Native audio is optional and defaults to false when omitted.
 Output: video content resource
@@ -1483,6 +1483,9 @@ next cadence tick.
 - MCP migration: Retired MCP tool names are hidden compatibility aliases until 2026-10-22 and answer with a `deprecation` pointer; the full legacy-name → replacement table is the migration guide: https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 - MCP vs agent: The GEN API owns Vidsheet validation and persistence. MCP forwards `gen_vidsheet_action` to it; GEN chat plans over the same tools. `gen_discover` provides the current schema. Natural-language chat/research tools delegate to GEN's agent service; poll their `run_id` with the `gen_discover` run view (the retired `gen_get_run_status` name is a compatibility alias until 2026-10-22). Final-video rendering is unavailable through hosted MCP; use the Vidsheet editor. The four-host map and the composer boundary are stated once at https://api.gen.pro/guides/mcp/#hosts-and-the-composer-boundary.
 - MCP payment recovery: low-credit failures return `status: "payment_required"`, `status_code: 402`, Stripe and x402 `payment_options`, and a same-call retry instruction. Payment requires approval. After funding succeeds, retry the same tool once with the same arguments; the funding result is not accepted or completed work.
+- MCP sessions: `initialize` returns an `Mcp-Session-Id` scoped to the running deploy. After a deploy, an old id gets HTTP 404 with JSON-RPC error -32001; send `initialize`, then `tools/list` again. No session id = stateless. https://api.gen.pro/guides/mcp/#sessions-and-deploys
+- MCP verified writes: every completed `gen_vidsheet_action` write returns `verified` (`changed`, `changes[]` with `verified_by` `read`|`receipt`, `unchecked`). A contradicted write fails with `WRITE_NOT_VERIFIED` and a `change_set_id` to undo. Report a change only from `verified`.
+- MCP Reddit: Reddit is not supported; such calls are refused with `unsupported_platform` before billing.
 - n8n: HTTP Request node with `X-API-Key` header
 - OpenAPI 3.1: https://api.gen.pro/openapi.yaml  (every operation carries `x-phase`)
 - Full Docs (5-step journey): https://api.gen.pro

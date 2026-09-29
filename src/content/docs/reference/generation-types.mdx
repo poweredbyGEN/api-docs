@@ -17,8 +17,8 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 |---|---|---|
 | `text` | text | openai, gemini |
 | `image_from_text` | image | gemini, gemini_pro, gemini_2, gemini_2_lite, imagen, seedream-4.0, seedream-4.5, gpt-image-2, gpt-image-2.5-flare, gpt-image-2.5-sunburst, midjourney, grok |
-| `video_from_text` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
-| `video_from_image` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, kling-v2-1, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
+| `video_from_text` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
+| `video_from_image` | video | veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v2-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok |
 | `video_from_ingredients` | video | pika |
 | `speech_from_text` | audio | (uses a saved `voice_id`) |
 | `song` | audio (song) | suno-v5-beta, suno-v4.5plus-beta, suno-v5.5-beta |
@@ -76,7 +76,7 @@ Aspect ratios: `1:1`, `9:16`, `16:9`, `4:3`, `3:4`; Grok also supports `3:2`, `2
 }
 ```
 
-Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Accepted `duration` (seconds) per model: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Resolution is model-dependent. Use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
+Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Accepted `duration` (seconds) per model: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Resolution is model-dependent. Use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ## Video from Image
 

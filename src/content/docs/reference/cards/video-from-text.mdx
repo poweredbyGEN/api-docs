@@ -43,7 +43,6 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Veo 3.1 Lite | `video_from_text` | `"veo-3.1-lite"` | 4, 6, 8 |
 | Gemini Omni Flash | `video_from_text` | `"gemini-omni-flash-preview"` | 1–10 |
 | Kling v3 | `video_from_text` | `"kling-v3"` | — |
-| Kling v1.6 | `video_from_text` | `"kling-v1-6"` | — |
 | Seedance Lite (legacy alias) | `video_from_text` | `"seedance-lite"` | 3–12 |
 | Seedance Pro (legacy alias) | `video_from_text` | `"seedance-pro"` | 3–12 |
 | Seedance 1.0 Lite | `video_from_text` | `"seedance-1.0-lite"` | 3–12 |
@@ -52,6 +51,8 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Seedance 2.0 | `video_from_text` | `"seedance-2.0"` | 4–15 |
 | Seedance 2.5 | `video_from_text` | `"seedance-2.5"` | 4–15 |
 | Grok | `video_from_text` | `"grok"` | 1–15 |
+
+`kling-v1-6` and `kling-v2-1` are retired for new generation. Saved layers that name them still read back.
 
 ---
 
@@ -137,7 +138,7 @@ curl -X POST "https://api.gen.pro/v1/vidsheet/101/cells/3100/generate?agent_id=4
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model: one of `"veo-3"`, `"veo-3-fast"`, `"veo-3.1"`, `"veo-3.1-fast"`, `"veo-3.1-lite"`, `"gemini-omni-flash-preview"`, `"kling-v3"`, `"kling-v1-6"`, `"seedance-lite"`, `"seedance-pro"`, `"seedance-1.0-lite"`, `"seedance-1.0-pro"`, `"seedance-1.5-pro"`, `"seedance-2.0"`, `"seedance-2.5"`, `"grok"`. |
+| `model` | string | Default model: one of `"veo-3"`, `"veo-3-fast"`, `"veo-3.1"`, `"veo-3.1-fast"`, `"veo-3.1-lite"`, `"gemini-omni-flash-preview"`, `"kling-v3"`, `"seedance-lite"`, `"seedance-pro"`, `"seedance-1.0-lite"`, `"seedance-1.0-pro"`, `"seedance-1.5-pro"`, `"seedance-2.0"`, `"seedance-2.5"`, `"grok"`. |
 | `ratio` | string | Default aspect ratio: `"1:1"`, `"9:16"`, `"16:9"`. Grok also supports `"4:3"`, `"3:4"`, `"3:2"`, and `"2:3"`. |
 | `resolution` | string | Default output resolution for supported video models: `"1080p"` or `"720p"`. |
 | `duration` | number | Default duration in seconds. |

@@ -1,0 +1,42 @@
+---
+title: MCP session refresh, verified writes, and Reddit refusal
+description: Sessions are scoped to the running deploy, Vidsheet writes return a verified block, Reddit is refused, Kling 1.6 and 2.1 are retired.
+---
+
+**Date:** 2026-09-29. **Applies to:** the hosted GEN MCP at `https://mcp.gen.pro`.
+
+## Session refresh after a deploy
+
+`initialize` returns an `Mcp-Session-Id` scoped to the running deploy. After a new deploy, an old session id gets HTTP 404 with JSON-RPC error `-32001`.
+
+```json
+{"jsonrpc":"2.0","id":2,"error":{"code":-32001,"message":"Session not found ... Send initialize to get the current catalog"}}
+```
+
+Send `initialize`, then `tools/list`. The server advertises `capabilities.tools.listChanged: true`. A client that sends no session id is unaffected. See [Sessions and deploys](/guides/mcp/#sessions-and-deploys).
+
+## Verified writes
+
+Every completed `gen_vidsheet_action` write returns a `verified` block.
+
+```json
+{"changed":1,"changes":[{"index":0,"action":"update","target":{"kind":"column","vidsheet_id":145435,"id":242367},"verified_by":"read","values":{"title":"HOOK"}}]}
+```
+
+A contradicted write fails with `WRITE_NOT_VERIFIED` and the `change_set_id` to undo. See [Verified writes](/guides/vidsheet-actions/#verified-writes).
+
+## Reddit is not supported
+
+A call naming Reddit, or carrying a reddit.com URL, is refused with `unsupported_platform` before anything is billed.
+
+```json
+{"code":"unsupported_platform","message":"gen_analyze/collect: PLATFORM_UNSUPPORTED: Reddit is not supported (field 'targets.0.target')","field_path":"/actions/0/targets.0.target"}
+```
+
+## Retired models
+
+`kling-v1-6` and `kling-v2-1` are not offered for new generation. Saved layers that name them still read back.
+
+## Video from ingredients
+
+Images on a `video-from-ingredients` card, including global-variable references, now reach the generation job in order. Veo 3.1 accepts up to 3.

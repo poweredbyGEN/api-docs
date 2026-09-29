@@ -169,6 +169,14 @@ ingredient cell, use `target.kind: "cell"` and that cell's ID instead.
 Generation uses credits. Read the returned job's status and then reread the
 Vidsheet to verify the result on the requested owner.
 
+Images on a `video-from-ingredients` card reach the generation job in order. This includes a global-variable reference:
+
+```json
+{"key":"var","references":{"type":"global_variable","value":123}}
+```
+
+`value` is the variable id. Veo 3.1 accepts up to 3 images.
+
 ### Update layer settings
 
 Discover the actual layer type first. For an existing sound layer:
@@ -229,12 +237,25 @@ Errors identify the affected action and field, for example
 | `payment_required` | `status_code: 402` means the workspace needs credits. Present the returned Stripe and x402 options, obtain approval, complete payment, then retry this same tool once with the same arguments. Do not treat the result as an accepted edit or generation. |
 | `idempotency_conflict` | The key was used with a different payload. Restore the original request, or use a new key only for an intentionally new operation. |
 | `invalid_action` | Correct the indexed field error; repeating invalid input will not help. |
+| `WRITE_NOT_VERIFIED` | The read contradicts the write. Compare the written and observed values, then undo with the returned `change_set_id`. See [Verified writes](#verified-writes). |
 
 Use a stable key for media edits that may need analysis as well as generation.
 An HTTP 202 pending result is not completion. Retain returned job IDs; do not
 start another generation merely because the first is running. An edit
 transaction cannot roll back external compute, and undo does not reverse
 credits already used.
+
+## Verified writes
+
+Every completed write returns a `verified` block: `changed` is the count, and each entry in `changes` names the `index`, `action`, `target`, and `values` confirmed.
+
+```json
+{"changed":1,"changes":[{"index":0,"action":"update","target":{"kind":"column","vidsheet_id":145435,"id":242367},"verified_by":"read","values":{"title":"HOOK"}}]}
+```
+
+`verified_by` is `"read"` (re-read after the write) or `"receipt"`. Column create and update are re-read. A field the read cannot see is listed in `unchecked`.
+
+If the read contradicts the write, the call fails with `WRITE_NOT_VERIFIED`. The error carries the written and observed values and the `change_set_id` to undo. Report a change only from `verified`.
 
 ## Confirm deletion
 

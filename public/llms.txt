@@ -625,14 +625,14 @@ Models: `gemini`, `gemini_pro`, `gemini_2`, `gemini_2_lite`, `imagen`, `seedream
 { "generation_type": "video_from_text",
   "data": { "prompt": "...", "model": "veo-3.1", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 8, "native_audio": false, "negative_prompt": "no text overlays" } }
 ```
-Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent; use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
+Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). Aspect ratios: `1:1`, `9:16`, `16:9`; Grok also supports `4:3`, `3:4`, `3:2`, `2:3`. Duration and resolution are model-dependent; use `resolution: "1080p"` or `"720p"` where supported. `native_audio` is optional and defaults to `false`.
 
 ### video_from_image
 ```json
 { "generation_type": "video_from_image",
   "data": { "image_resource_id": 4821, "image_tail_resource_id": 4822, "prompt": "...", "model": "kling-v2-6", "aspect_ratio": "9:16", "resolution": "1080p", "duration": 5, "native_audio": false } }
 ```
-Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v2-6`, `kling-v2-1`, `kling-v1-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
+Models (accepted `duration` in seconds): `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite` (4|6|8s); `gemini-omni-flash-preview` (1–10s); `kling-v3`, `kling-v2-6`; `seedance-lite`, `seedance-pro`, `seedance-1.0-lite`, `seedance-1.0-pro`, `seedance-1.5-pro` (3–12s); `seedance-2.0` (4–15s); `seedance-2.5` (4–15s); `grok` (1–15s). `image_tail_resource_id` optional. `resolution` and `native_audio` are optional and model-dependent.
 
 ### video_from_ingredients
 ```json
@@ -835,7 +835,7 @@ Use live `tools/list` for available tools and `gen://api-reference` for guidance
 
 **Natural-language delegation (start here for fuzzy goals):** `gen_ask` (`ask` for questions about social data — links, accounts, hashtags, trends; `chat` for open-ended build goals), `gen_analyze` (`run_research` for topic research across social + web, plus trends, comments, hooks, creators, transcripts), `gen_content_action` (`generate_ideas`, `expand_idea`, `recreate_video`, `reimagine_video`).
 
-**Creation:** `gen_generate` (`create_video` — single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, kling-v1-6, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok; `create_image` — nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite; `create_song` — suno-v5-beta/suno-v4.5plus-beta; `create_song_mix`; `transcribe`). For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
+**Creation:** `gen_generate` (`create_video` — single clip; models: veo-3, veo-3-fast, veo-3.1, veo-3.1-fast, veo-3.1-lite, gemini-omni-flash-preview, kling-v3, seedance-lite, seedance-pro, seedance-1.0-lite, seedance-1.0-pro, seedance-1.5-pro, seedance-2.0, seedance-2.5, grok; `create_image` — nano-banana/nano-banana-pro/nano-banana-2/nano-banana-2-lite; `create_song` — suno-v5-beta/suno-v4.5plus-beta; `create_song_mix`; `transcribe`). For content attached to a Vidsheet cell or layer, use an explicit creation card through `gen_vidsheet_action`.
 
 **Assets:** read with `gen_discover` asset views; write with `gen_asset_action` (`import_asset_from_url`, `create_direct_upload`, `complete_asset_upload`, `delete_asset`).
 
