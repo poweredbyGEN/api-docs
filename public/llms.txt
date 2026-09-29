@@ -7,7 +7,7 @@ This is a system-prompt style teaching document. Read it top-to-bottom and you w
 ## Vidsheet editing: start here
 
 Canonical API/MCP workflow: https://api.gen.pro/guides/vidsheet-actions/
-Use `gen_discover` for current action, card, model, and layer-setting schemas, then `gen_vidsheet_action` for typed mutations. `update` saves without generation; `generate` requires an explicit card, exact owner, and stable idempotency key. Hosted MCP uses `Authorization: Bearer <your-PAT>`.
+Use `gen_discover` for current action, card, model, and layer-setting schemas, then `gen_vidsheet_action` for typed mutations. `update` saves without generation; `generate` requires an explicit card, exact owner, and stable idempotency key. Hosted MCP: Claude and ChatGPT connectors add `https://mcp.gen.pro` by URL and sign in with OAuth (no header); clients that send headers use `Authorization: Bearer <your-PAT>`.
 
 Per-target Vidsheet mutation examples below describe legacy direct-HTTP routes. Migrate editing integrations to the canonical guide; do not reconstruct save/create-job/attach sequences from those older examples. Hosted MCP final-video rendering is unavailable; use the Vidsheet editor for final rendering. Read-only and non-Vidsheet endpoint references remain applicable.
 

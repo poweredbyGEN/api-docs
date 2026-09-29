@@ -6,7 +6,8 @@ description: Connect GEN to an MCP-compatible AI client with the hosted remote s
 The **GEN MCP** gives your AI assistant access to GEN's content studio: trend research, content ideas, Vidsheets, AI video, images, voices, songs, assets, scheduling, watchlists, recurring jobs, and credits.
 
 <div class="mcp-top-actions">
-  <a class="sl-link-button primary" href="https://gen.pro/api" target="_blank" rel="noopener noreferrer">Mint Personal Access Token</a>
+  <a class="sl-link-button primary" href="#connect-with-oauth">Connect a client</a>
+  <a class="sl-link-button" href="https://gen.pro/api" target="_blank" rel="noopener noreferrer">Mint a Personal Access Token</a>
 </div>
 
 <div class="mcp-client-row" aria-label="Compatible MCP clients">
@@ -15,9 +16,25 @@ The **GEN MCP** gives your AI assistant access to GEN's content studio: trend re
   <span class="mcp-client-pill"><img class="mcp-client-icon" src="/mcp-clients/codex.svg" alt="" /> Codex</span>
 </div>
 
-## Remote MCP
+## Connect with OAuth
 
-Use this when your MCP client supports a remote MCP server over Streamable HTTP. Copy this into your MCP client:
+Add `https://mcp.gen.pro` by URL, then sign in to GEN. OAuth needs no header or key.
+
+- **Claude connector** — add `https://mcp.gen.pro` by URL, then sign in to GEN when the host opens the consent page.
+- **ChatGPT connector** — add `https://mcp.gen.pro` by URL as a remote MCP server, then sign in to GEN. The host asks for approval on each write.
+- **Other OAuth clients** — add the same URL; the server supports dynamic client registration, authorization code with PKCE, and refresh tokens.
+
+## Claude Code
+
+```bash
+claude mcp add --transport http gen https://mcp.gen.pro
+```
+
+Run `/mcp` and sign in to GEN.
+
+## Personal access token (headless and CI)
+
+Clients without OAuth — headless scripts, CI, and custom HTTP clients — authenticate with a personal access token (`gen_pat_...`) sent as a header:
 
 ```json
 {
@@ -31,13 +48,9 @@ Use this when your MCP client supports a remote MCP server over Streamable HTTP.
 
 Replace `gen_pat_your_key_here` with a GEN API key from **Settings -> API Keys** in [gen.pro](https://gen.pro).
 
-## Command-line clients
+## Coming from the older tool names?
 
-Claude Code and other CLI clients connect to the same hosted server:
-
-```bash
-claude mcp add --transport http gen https://mcp.gen.pro --header "Authorization: Bearer gen_pat_your_key_here"
-```
+If your client still calls the older per-endpoint tool names, the [MCP catalog collapse migration guide](/changelog/2026-09-22-mcp-catalog-collapse/) maps every retired name to its replacement.
 
 The GEN MCP is hosted-only — there is no package to install or local process to run.
 
