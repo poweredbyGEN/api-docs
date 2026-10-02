@@ -78,6 +78,9 @@ OPENAPI_FILES = ["public/openapi.yaml", "public/.well-known/openapi.yaml"]
 LLMS_FILES = ["public/llms.txt", "public/llms-full.txt"]
 METHODS = ("get", "post", "put", "patch", "delete", "head", "options")
 WRITE_METHODS = ("POST", "PUT", "PATCH")
+# Statuses that carry no response body by definition, so a documented success at
+# one of them is a complete contract without a schema.
+NO_CONTENT_STATUSES = (204, 205)
 
 PATHS_START = "gen:mcp-surface-paths:start"
 PATHS_END = "gen:mcp-surface-paths:end"
@@ -819,7 +822,7 @@ def render_contract_request_body(schema):
 
 
 def merge_operation_schema(lines, schema_entry):
-    """Add the backend-derived request body / 2xx schema to one rendered operation.
+    """Add the backend-derived request body / success schema to one rendered operation.
 
     `scripts/operation-schemas.json` is authoritative for the request body: its
     entries are read straight off the controller, so a body it carries replaces
@@ -828,6 +831,12 @@ def merge_operation_schema(lines, schema_entry):
     when the operation has none: a seeded `$ref` into `components/schemas`
     is the richer contract and is never overwritten. Every property in either
     field is traceable to the backend files its `source` list names.
+
+    An entry may declare where its success body lives with `responseStatus`:
+    the default is the operation's 2xx, but a protocol whose success is a
+    non-2xx status (x402's 402 quote) names that status explicitly. `noContent`
+    and `noRequestBody` carry no schema at all — they assert the backend returns
+    no body (or takes none), so nothing is rendered for them.
     """
     if not schema_entry:
         return list(lines)
@@ -845,11 +854,20 @@ def merge_operation_schema(lines, schema_entry):
         out[at:at] = render_contract_request_body(schema)
     response = schema_entry.get("response")
     if response is not None:
-        success_at = next((i for i, line in enumerate(out) if re.match(r"^        '2\d\d':\s*$", line)), None)
-        if success_at is None:
-            responses_at = next((i for i, line in enumerate(out) if line.startswith("      responses:")))
-            out[responses_at + 1:responses_at + 1] = ["        '200':", "          description: Success."]
-            success_at = responses_at + 1
+        declared = schema_entry.get("responseStatus")
+        status = str(declared) if declared is not None else None
+        if status is not None:
+            success_at = next((i for i, line in enumerate(out) if line.strip() == f"'{status}':"), None)
+            if success_at is None:
+                responses_at = next((i for i, line in enumerate(out) if line.startswith("      responses:")))
+                out[responses_at + 1:responses_at + 1] = [f"        '{status}':", "          description: Success."]
+                success_at = responses_at + 1
+        else:
+            success_at = next((i for i, line in enumerate(out) if re.match(r"^        '2\d\d':\s*$", line)), None)
+            if success_at is None:
+                responses_at = next((i for i, line in enumerate(out) if line.startswith("      responses:")))
+                out[responses_at + 1:responses_at + 1] = ["        '200':", "          description: Success."]
+                success_at = responses_at + 1
         end = next(
             (
                 j
@@ -906,13 +924,18 @@ def strip_server_override(lines):
 def operation_meta(block):
     text = "\n".join(block)
     has_request_body = bool(re.search(r"^      requestBody:", text, re.M))
-    match = re.search(r"^        '2\d\d':\s*$", text, re.M)
+    match = re.search(r"^        '2(\d\d)':\s*$", text, re.M)
     has_response_schema = False
     if match:
+        status = int("2" + match.group(1))
         rest = text[match.end():]
         following = re.search(r"^        '\d", rest, re.M)
         segment = rest[: following.start()] if following else rest
         has_response_schema = bool(re.search(r"schema:|\$ref:", segment, re.M))
+        # 204/205 carry no body by definition: a documented success at one of
+        # them is complete without a schema (`head :no_content`).
+        if not has_response_schema and status in NO_CONTENT_STATUSES:
+            has_response_schema = True
     return has_request_body, has_response_schema
 
 
@@ -1102,8 +1125,20 @@ def render_paths(surface, seed, contract, schemas=None):
                 lines, op_meta = seeded_operation(entry, seed_block)
             else:
                 lines, op_meta = generated_operation(entry, index, contract)
-            lines = merge_operation_schema(lines, schemas.get(f"{entry['method']} {path}"))
+            schema_entry = schemas.get(f"{entry['method']} {path}")
+            lines = merge_operation_schema(lines, schema_entry)
             has_request_body, has_response_schema = operation_meta(lines)
+            if schema_entry:
+                # An explicit declaration is authoritative. `noRequestBody`
+                # asserts a write takes no body (`head :ok` on path params)
+                # and `noContent` that the success has none; `responseStatus`
+                # names a success status that is not 2xx (x402's 402 quote).
+                if schema_entry.get("noRequestBody"):
+                    has_request_body = True
+                if schema_entry.get("noContent"):
+                    has_response_schema = True
+                elif schema_entry.get("responseStatus") is not None and schema_entry.get("response") is not None:
+                    has_response_schema = True
             op_meta = {
                 "has_request_body": has_request_body,
                 "has_response_schema": has_response_schema,

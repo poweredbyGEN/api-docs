@@ -197,7 +197,6 @@ paths:
       operationId: createX402CreditPurchase
       x-mcp-tool: gen_billing_action
       x-mcp-branch: "create_x402_credit_purchase"
-      x-schema-status: missing
       x-phase: export
       summary: Create an x402 credit-purchase quote
       description: |
@@ -441,7 +440,6 @@ paths:
       operationId: deleteAgent
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "delete_agent"
-      x-schema-status: missing
       x-phase: setup
       summary: Delete an agent
       description: Permanently deletes an agent and all associated data.
@@ -573,7 +571,6 @@ paths:
       operationId: createAgentAvatar
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "create_agent_avatar"
-      x-schema-status: missing
       x-phase: setup
       summary: Upload agent avatar
       description: Upload one or more avatar images (JPEG, PNG, WebP) or link a DeGod avatar.
@@ -612,7 +609,6 @@ paths:
       operationId: deleteAgentAvatar
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "delete_agent_avatar"
-      x-schema-status: missing
       x-phase: setup
       summary: Delete avatar(s)
       description: Delete one or more avatars. Pass multiple IDs separated by underscores (e.g. `7_8_9`).
@@ -732,7 +728,6 @@ paths:
       operationId: revokeApiKey
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "revoke_api_key"
-      x-schema-status: missing
       x-phase: setup
       summary: Revoke API key
       description: Permanently revokes a single API key. This cannot be undone.
@@ -1131,7 +1126,6 @@ paths:
       operationId: updateColumnPositions
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "actions[] reorder/column"
-      x-schema-status: missing
       x-phase: edit
       summary: Reorder columns
       tags: [Columns]
@@ -1382,7 +1376,6 @@ paths:
       operationId: deleteLayer
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "actions[] delete/layer"
-      x-schema-status: missing
       x-phase: edit
       summary: Delete a layer
       tags: [Layers]
@@ -1434,7 +1427,6 @@ paths:
       operationId: updateLayerPositions
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "actions[] reorder/layer"
-      x-schema-status: missing
       x-phase: edit
       summary: Reorder layers
       tags: [Layers]
@@ -1765,7 +1757,6 @@ paths:
       operationId: renderVideo
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "generate (cell, creation_card_type=final-video)"
-      x-schema-status: missing
       x-phase: export
       summary: Render final video
       description: |
@@ -1778,6 +1769,21 @@ paths:
         - $ref: '#/components/parameters/AgentId'
         - $ref: '#/components/parameters/SheetId'
         - $ref: '#/components/parameters/CellId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              description: "JSON request body."
+              properties:
+                generation_type:
+                  type: "string"
+                  description: "Canonical generation type for the render; resolved through `VidsheetSchema::CanonicalGenerationType`."
+                data:
+                  type: "object"
+                  additionalProperties: true
+                  description: "Card inputs; accepted as an object or a JSON-encoded string."
       responses:
         '201':
           description: Render started
@@ -2727,7 +2733,6 @@ paths:
       operationId: deleteOrganization
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "delete_organization"
-      x-schema-status: missing
       x-phase: setup
       summary: Delete an organization
       description: Permanently deletes the organization and all associated data. Requires owner role. Irreversible.
@@ -2899,7 +2904,6 @@ paths:
       operationId: updateContentResource
       x-mcp-tool: gen_content_action
       x-mcp-branch: "update_content_resource"
-      x-schema-status: missing
       x-phase: edit
       summary: Rename a content resource
       tags: [Content Resources]
@@ -2943,7 +2947,6 @@ paths:
       operationId: deleteContentResource
       x-mcp-tool: gen_asset_action
       x-mcp-branch: "delete_asset"
-      x-schema-status: missing
       x-phase: edit
       summary: Delete a content resource
       tags: [Content Resources]
@@ -4351,7 +4354,6 @@ paths:
         - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "delete_recurring_job"
-      x-schema-status: missing
       x-phase: monitoring
       summary: Soft-delete a recurring job
       tags: [Recurring Jobs]
@@ -5801,16 +5803,53 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              description: "JSON request body."
+              required:
+                - "content_resource_id"
+              properties:
+                content_resource_id:
+                  type: "string"
+                  description: "Content resource of the uploaded video that becomes the talking loop (`owned_content_resource!(..., kind: \"video\")`)."
+                name:
+                  type: "string"
+                  description: "Talking loop name; defaults to the avatar's name."
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                description: "`Avatars::Presenter.talking_loop`, rendered at `:created`."
+                properties:
+                  avatar_talking_loop_id: {}
+                  name: {}
+                  kind: {}
+                  status:
+                    type: "string"
+                  url:
+                    type:
+                      - "string"
+                      - "null"
+                    description: "CDN URL of the loop video, or null."
+                  thumbnail_url: {}
+                  duration: {}
+                  avatar_id: {}
+                  avatar_look_id: {}
+                  made_from_talking_avatar_id: {}
+                  aspect_ratio: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "create_avatar_talking_loop"
-      x-schema-status: missing
   /avatars/{avatar_id}/looks/{id}:
     get:
       operationId: getAvatarsByAvatarIdLooksById
@@ -5831,13 +5870,49 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                description: "`Avatars::Presenter#look_payload`."
+                properties:
+                  avatar_look_id: {}
+                  name: {}
+                  origin: {}
+                  url:
+                    type:
+                      - "string"
+                      - "null"
+                    description: "CDN URL of the look image, or null."
+                  thumbnail_url: {}
+                  avatar_talking_loops:
+                    type: "array"
+                    items:
+                      type: "object"
+                      description: "`Avatars::Presenter.talking_loop`."
+                      properties:
+                        avatar_talking_loop_id: {}
+                        name: {}
+                        kind: {}
+                        status:
+                          type: "string"
+                        url:
+                          type:
+                            - "string"
+                            - "null"
+                          description: "CDN URL of the loop video, or null."
+                        thumbnail_url: {}
+                        duration: {}
+                        avatar_id: {}
+                        avatar_look_id: {}
+                        made_from_talking_avatar_id: {}
+                        aspect_ratio: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "get (look)"
-      x-schema-status: missing
   /avatars/{avatar_id}/talking_loops:
     post:
       operationId: postAvatarsByAvatarIdTalkingLoops
@@ -6163,7 +6238,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "delete_avatar | delete_avatar_look | delete_avatar_talking_loop"
-      x-schema-status: missing
   /avatars/{id}/copy:
     post:
       operationId: postAvatarsByIdCopy
@@ -7172,7 +7246,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "invite_member"
-      x-schema-status: missing
   /organizations/{organization_id}/user_organizations/{id}:
     delete:
       operationId: deleteOrganizationsByOrganizationIdUserOrganizationsById
@@ -7199,7 +7272,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "leave_workspace"
-      x-schema-status: missing
   /payment:
     post:
       operationId: postPayment
@@ -7757,7 +7829,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "share_agent"
-      x-schema-status: missing
   /user_shared_agents/{id}:
     get:
       operationId: getUserSharedAgentsById
@@ -7832,7 +7903,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "set_agent_share_role"
-      x-schema-status: missing
     delete:
       operationId: deleteUserSharedAgentsById
       x-phase: setup
@@ -7853,7 +7923,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "revoke_agent_share"
-      x-schema-status: missing
   /user_voice_resources:
     get:
       operationId: getUserVoiceResources
@@ -8018,7 +8087,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "delete_voice"
-      x-schema-status: missing
   /video_recreate_job:
     post:
       operationId: postVideoRecreateJob

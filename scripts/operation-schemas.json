@@ -2062,7 +2062,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/agent_avatars_controller.rb#create"
-    ]
+    ],
+    "noContent": true
   },
   "PATCH /content_resources/{id}": {
     "requestBody": {
@@ -2087,7 +2088,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/content_resources_controller.rb#update"
-    ]
+    ],
+    "noContent": true
   },
   "POST /organizations/{organization_id}/user_organizations": {
     "requestBody": {
@@ -2107,7 +2109,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/user_organizations_controller.rb#create"
-    ]
+    ],
+    "noContent": true
   },
   "POST /user_shared_agents": {
     "requestBody": {
@@ -2129,7 +2132,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#create"
-    ]
+    ],
+    "noContent": true
   },
   "PUT /user_shared_agents/{id}": {
     "requestBody": {
@@ -2150,7 +2154,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#update"
-    ]
+    ],
+    "noContent": true
   },
   "PATCH /vidsheet/{sheet_id}/columns/update_positions": {
     "requestBody": {
@@ -2168,7 +2173,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/spreadsheet_columns_controller.rb#update_positions"
-    ]
+    ],
+    "noContent": true
   },
   "PUT /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions": {
     "requestBody": {
@@ -2186,7 +2192,8 @@
     },
     "source": [
       "gen-backend-v2:app/controllers/v1/video_layers_controller.rb#update_positions"
-    ]
+    ],
+    "noContent": true
   },
   "GET /user_shared_agents/{id}": {
     "response": {
@@ -4561,6 +4568,249 @@
     },
     "source": [
       "agent-core:app/routers/agent_core.py#delete_core"
+    ]
+  },
+  "POST /x402_credit_purchase": {
+    "response": {
+      "type": "object",
+      "description": "The x402 402 quote (`X402CreditPurchasesController#create`); 402 is the quote here, not an error.",
+      "required": [
+        "checkout_session_id",
+        "workspace_id",
+        "amount_usd",
+        "credits",
+        "payment_methods",
+        "payment_required"
+      ],
+      "properties": {
+        "checkout_session_id": {},
+        "workspace_id": {},
+        "pricing_mode": {
+          "type": "string",
+          "enum": [
+            "custom_amount",
+            "credit_plan"
+          ]
+        },
+        "reference_credit_plan_id": {},
+        "credit_plan_id": {},
+        "quantity": {
+          "type": "integer"
+        },
+        "amount_usd": {
+          "type": "string"
+        },
+        "credits": {
+          "type": "string"
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {}
+        },
+        "payment_required": {
+          "type": "object"
+        },
+        "status_check": {
+          "type": "object"
+        }
+      }
+    },
+    "responseStatus": 402,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/x402_credit_purchases_controller.rb#create"
+    ]
+  },
+  "DELETE /agents/{agent_id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/agents_controller.rb#destroy"
+    ]
+  },
+  "DELETE /agents/{agent_id}/avatars/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/agent_avatars_controller.rb#destroy"
+    ]
+  },
+  "DELETE /persisted_tokens/{id}/revoke": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/persisted_tokens_controller.rb#revoke"
+    ]
+  },
+  "DELETE /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/video_layers_controller.rb#destroy"
+    ]
+  },
+  "POST /vidsheet/{sheet_id}/cells/{cell_id}/render": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "generation_type": {
+          "type": "string",
+          "description": "Canonical generation type for the render; resolved through `VidsheetSchema::CanonicalGenerationType`."
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Card inputs; accepted as an object or a JSON-encoded string."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`pre_charge_and_enqueue`.",
+      "required": [
+        "generation_id",
+        "status"
+      ],
+      "properties": {
+        "generation_id": {},
+        "status": {}
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/generations_controller.rb#create",
+      "gen-backend-v2:app/controllers/v1/generations_controller.rb#generation_params",
+      "gen-backend-v2:app/controllers/v1/generations_controller.rb#pre_charge_and_enqueue"
+    ]
+  },
+  "DELETE /organizations/{organization_id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/organizations_controller.rb#destroy"
+    ]
+  },
+  "DELETE /content_resources/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/content_resources_controller.rb#destroy"
+    ]
+  },
+  "POST /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "content_resource_id"
+      ],
+      "properties": {
+        "content_resource_id": {
+          "type": "string",
+          "description": "Content resource of the uploaded video that becomes the talking loop (`owned_content_resource!(..., kind: \"video\")`)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Talking loop name; defaults to the avatar's name."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter.talking_loop`, rendered at `:created`.",
+      "properties": {
+        "avatar_talking_loop_id": {},
+        "name": {},
+        "kind": {},
+        "status": {
+          "type": "string"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "CDN URL of the loop video, or null."
+        },
+        "thumbnail_url": {},
+        "duration": {},
+        "avatar_id": {},
+        "avatar_look_id": {},
+        "made_from_talking_avatar_id": {},
+        "aspect_ratio": {}
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatar_talking_loops_controller.rb#create",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#talking_loop"
+    ]
+  },
+  "GET /avatars/{avatar_id}/looks/{id}": {
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter#look_payload`.",
+      "properties": {
+        "avatar_look_id": {},
+        "name": {},
+        "origin": {},
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "CDN URL of the look image, or null."
+        },
+        "thumbnail_url": {},
+        "avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter.talking_loop`.",
+            "properties": {
+              "avatar_talking_loop_id": {},
+              "name": {},
+              "kind": {},
+              "status": {
+                "type": "string"
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "CDN URL of the loop video, or null."
+              },
+              "thumbnail_url": {},
+              "duration": {},
+              "avatar_id": {},
+              "avatar_look_id": {},
+              "made_from_talking_avatar_id": {},
+              "aspect_ratio": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#look_payload",
+      "gen-backend-v2:app/controllers/v1/avatar_looks_controller.rb"
+    ]
+  },
+  "DELETE /avatars/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#destroy"
+    ]
+  },
+  "DELETE /organizations/{organization_id}/user_organizations/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/user_organizations_controller.rb#destroy"
+    ]
+  },
+  "DELETE /user_shared_agents/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#destroy"
+    ]
+  },
+  "DELETE /user_voice_resources/{voice_id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/user_voice_resources_controller.rb#destroy"
     ]
   }
 }

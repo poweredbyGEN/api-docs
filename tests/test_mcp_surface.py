@@ -153,17 +153,27 @@ def test_every_write_has_a_body_or_is_marked_missing():
 
 
 def test_every_operation_has_a_2xx_schema_or_is_marked_missing():
+    schemas = json.loads(SCHEMAS.read_text())
     failures = []
     for key, block in parse_paths(OPENAPI.read_text()).items():
         text = "\n".join(block)
-        match = re.search(r"^        '2\d\d':\s*$", text, re.M)
+        match = re.search(r"^        '2(\d\d)':\s*$", text, re.M)
         has_schema = False
         if match:
+            # 204/205 carry no body by definition, so a documented success at one
+            # of them is complete without a schema (`head :no_content`).
+            if int("2" + match.group(1)) in (204, 205):
+                continue
             rest = text[match.end():]
             following = re.search(r"^        '\d", rest, re.M)
             segment = rest[: following.start()] if following else rest
             has_schema = bool(re.search(r"schema:|\$ref:", segment, re.M))
-        if not has_schema and "x-schema-status: missing" not in text:
+        # An entry may declare the success carries no body (`noContent`) or lives
+        # at a non-2xx status (`responseStatus`, x402's 402 quote); either is an
+        # explicit, sourced contract rather than a missing schema.
+        entry = schemas.get(f"{key[0]} {key[1]}") or {}
+        declared = bool(entry.get("noContent")) or entry.get("responseStatus") is not None
+        if not has_schema and not declared and "x-schema-status: missing" not in text:
             failures.append(key)
     assert failures == []
 
@@ -186,6 +196,62 @@ def test_operation_schemas_key_the_real_surface():
     assert unknown == [], f"operation-schemas.json keys with no surface operation: {unknown}"
 
 
+def test_operation_schemas_use_coherent_markers():
+    """An entry's contract markers are explicit and each is backed by a cited `source`.
+
+    `noContent` and `response` are mutually exclusive (a success either carries a
+    body or does not), `responseStatus` only qualifies a declared `response`, and
+    every marker needs at least one backend file behind it — a marker copied in
+    without the controller line that justifies it is exactly the guess this file
+    exists to prevent.
+    """
+    schemas = json.loads(SCHEMAS.read_text())
+    problems = []
+    for key, entry in schemas.items():
+        if not entry.get("source"):
+            problems.append(f"{key}: no source")
+        if entry.get("noContent") and "response" in entry:
+            problems.append(f"{key}: declares both noContent and response")
+        if entry.get("responseStatus") is not None and "response" not in entry:
+            problems.append(f"{key}: responseStatus without a response")
+    assert problems == [], problems
+
+
+def test_explicit_markers_satisfy_a_bodyless_write():
+    """`noRequestBody`/`noContent` clear a write the backend serves with no body.
+
+    A write whose controller reads only path params (`head :ok`) has no schema to
+    copy; the entry asserts that explicitly instead of guessing one. Without the
+    markers the same operation stays `missing`.
+    """
+    module = load_module()
+    surface = [
+        {
+            "method": "POST",
+            "path": "/zzz_bodyless_probe",
+            "operationId": "postZzzBodylessProbe",
+            "tag": "Discovery",
+            "summary": "Probe",
+            "mcp_tool": "gen_discover",
+            "mcp_branch": "probe",
+            "mcp_owners": [{"tool": "gen_discover", "branch": "probe"}],
+        }
+    ]
+    seed = {"paths": []}
+    contract = json.loads((REPO / "scripts" / "backend" / "public-contract.json").read_text())
+    schemas = {
+        "POST /zzz_bodyless_probe": {
+            "noRequestBody": True,
+            "noContent": True,
+            "source": ["gen-backend-v2:app/controllers/v1/organizations_controller.rb#show"],
+        }
+    }
+    _, marked = module.render_paths(surface, seed, contract, schemas)
+    assert marked[("POST", "/zzz_bodyless_probe")]["missing"] is False
+    _, plain = module.render_paths(surface, seed, contract)
+    assert plain[("POST", "/zzz_bodyless_probe")]["missing"] is True
+
+
 def test_operation_schemas_cite_backend_sources():
     """Every entry names the backend code it was derived from, and a checkout confirms it.
 
@@ -200,9 +266,11 @@ def test_operation_schemas_cite_backend_sources():
     empty = sorted(key for key, entry in schemas.items() if not entry.get("source"))
     assert empty == [], f"operation-schemas.json entries without a `source` list: {empty}"
     incomplete = sorted(
-        key for key, entry in schemas.items() if "requestBody" not in entry and "response" not in entry
+        key
+        for key, entry in schemas.items()
+        if not any(field in entry for field in ("requestBody", "response", "noContent", "noRequestBody"))
     )
-    assert incomplete == [], f"operation-schemas.json entries with neither requestBody nor response: {incomplete}"
+    assert incomplete == [], f"operation-schemas.json entries with no contract field: {incomplete}"
 
     unnamed = []
     for key, entry in schemas.items():
