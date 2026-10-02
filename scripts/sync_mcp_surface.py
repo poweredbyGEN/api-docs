@@ -3,13 +3,17 @@
 
 MCP is GEN's public contract, so `public/openapi.yaml` documents exactly the
 backend routes an MCP tool calls: nothing more, nothing less. This script owns
-two generated regions:
+four generated regions:
 
   public/openapi.yaml          the whole `paths:` body, between the
   public/.well-known/openapi.yaml
                                `gen:mcp-surface-paths` markers
   public/llms.txt              the endpoint list, between the
   public/llms-full.txt         `gen:mcp-surface-endpoints` markers
+  public/openapi.yaml          the shared per-backend error envelopes, between
+  public/.well-known/openapi.yaml
+                               the `gen:error-envelope-schemas` and
+                               `gen:error-envelope-responses` markers
 
 Operation bodies are taken from, in order:
 
@@ -130,6 +134,90 @@ ROUTE_ALIASES = {
     "spreadsheet_columns": "columns",
     "video_layers": "layers",
 }
+
+# ---- shared error envelopes --------------------------------------------------
+#
+# Every backend returns one error envelope. The public contract normalizes the
+# machine-readable code to `code` and the human-readable detail to `message`,
+# then keeps each backend's real extra fields (none invented). Shapes are read
+# from scripts/backend/public-contract.json (Rails: `error_code`/`error` plus
+# `errors`, `retryable`, `new_change_set_required`, `funding_error_kind`) and
+# from the error responses already in the spec (python's `detail` carries
+# `platform`/`field`/`errors`; agent and agent-core use the same simple
+# code/message pair). The `code` enum is left out on purpose: a later lane fills
+# it from the generated error catalogs.
+ERROR_ENVELOPE_SCHEMAS = {
+    "ApiError": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+            "code": {"type": "string", "description": "The stable machine-readable failure code."},
+            "message": {"type": "string", "description": "Human-readable failure detail."},
+            "errors": {
+                "type": "array",
+                "description": "Field-level validation failures.",
+                "items": {"type": "object"},
+            },
+            "retryable": {"type": "boolean", "description": "Whether retrying can succeed without changing the request."},
+            "new_change_set_required": {"type": "boolean", "description": "Whether the caller must begin a new edit group."},
+            "funding_error_kind": {"type": "string", "description": "The credit or payment failure category."},
+        },
+    },
+    "AgentError": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+            "code": {"type": "string", "description": "The stable machine-readable failure code."},
+            "message": {"type": "string", "description": "Human-readable failure detail."},
+        },
+    },
+    "AgentCoreError": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+            "code": {"type": "string", "description": "The stable machine-readable failure code."},
+            "message": {"type": "string", "description": "Human-readable failure detail."},
+        },
+    },
+    "PythonError": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+            "code": {"type": "string", "description": "The stable machine-readable failure code."},
+            "message": {"type": "string", "description": "Human-readable failure detail."},
+            "platform": {"type": "string", "description": "The platform that rejected the content."},
+            "field": {"type": "string", "description": "The field that failed validation."},
+            "errors": {
+                "type": "array",
+                "description": "Per-platform validation failures.",
+                "items": {"type": "object"},
+            },
+        },
+    },
+}
+
+# The shared 401 / validation-error response components each backend uses. Every
+# backend documents a 422 validation error (Rails raises 422, the FastAPI
+# services return 422 on request validation); the response components attach to
+# an operation only when it lacks that status.
+ERROR_RESPONSES = {
+    API_SERVER: ("ApiUnauthorized", "ApiValidationError"),
+    AGENT_SERVER: ("AgentUnauthorized", "AgentValidationError"),
+    AGENT_CORE_SERVER: ("AgentCoreUnauthorized", "AgentCoreValidationError"),
+    PYTHON_SERVER: ("PythonUnauthorized", "PythonValidationError"),
+}
+
+ERROR_RESPONSE_SCHEMA = {
+    API_SERVER: "ApiError",
+    AGENT_SERVER: "AgentError",
+    AGENT_CORE_SERVER: "AgentCoreError",
+    PYTHON_SERVER: "PythonError",
+}
+
+ERROR_SCHEMAS_START = "gen:error-envelope-schemas:start"
+ERROR_SCHEMAS_END = "gen:error-envelope-schemas:end"
+ERROR_RESPONSES_START = "gen:error-envelope-responses:start"
+ERROR_RESPONSES_END = "gen:error-envelope-responses:end"
 
 MCP_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
 
@@ -1135,6 +1223,45 @@ def render_request_body(request_body):
     return lines
 
 
+def attach_error_responses(lines, entry):
+    """Attach the backend's shared 401 and validation-error responses when absent.
+
+    Every operation documents the auth failure and the validation failure of the
+    backend that serves it, so an integrator always sees the error envelope. The
+    responses already present (a seeded 401/404 or an inline 422) are kept; only
+    the missing ones are appended, so an operation with a richer hand-written
+    error keeps it.
+    """
+    server = entry.get("server") or DEFAULT_SERVER
+    resp401, resp422 = ERROR_RESPONSES.get(server, ERROR_RESPONSES[API_SERVER])
+    responses_at = next((i for i, line in enumerate(lines) if line.startswith("      responses:")), None)
+    if responses_at is None:
+        lines.append("      responses:")
+        responses_at = len(lines) - 1
+    # The responses block ends at the first non-blank line at the operation
+    # level (indent <= 6) or shallower: `x-mcp-tool`, the next method, or path.
+    end = len(lines)
+    for i in range(responses_at + 1, len(lines)):
+        stripped = lines[i].lstrip()
+        if stripped == "":
+            continue
+        if len(lines[i]) - len(stripped) <= 6:
+            end = i
+            break
+    block = lines[responses_at:end]
+    insert = []
+    if not any(line.strip() == "'401':" for line in block):
+        insert.extend(["        '401':", f"          $ref: '#/components/responses/{resp401}'"])
+    if not any(line.strip() in ("'422':", "'400':") for line in block):
+        insert.extend(["        '422':", f"          $ref: '#/components/responses/{resp422}'"])
+    if insert:
+        at = end
+        while at > responses_at + 1 and lines[at - 1].strip() == "":
+            at -= 1
+        lines[at:at] = insert
+    return lines
+
+
 def seeded_operation(entry, block):
     lines = strip_server_override(list(block))
     has_request_body, has_response_schema = operation_meta(lines)
@@ -1179,6 +1306,7 @@ def render_paths(surface, seed, contract, schemas=None):
                 lines, op_meta = generated_operation(entry, index, contract)
             schema_entry = schemas.get(f"{entry['method']} {path}")
             lines = merge_operation_schema(lines, schema_entry)
+            lines = attach_error_responses(lines, entry)
             has_request_body, has_response_schema = operation_meta(lines)
             if schema_entry:
                 # An explicit declaration is authoritative. `noRequestBody`
@@ -1270,6 +1398,77 @@ def render_endpoints_file(text, body):
     )
 
 
+def render_marker_region(text, start_marker, end_marker, body, anchor):
+    """Replace a `gen:` marker region, or insert it at `anchor(lines)` once."""
+    lines = text.split("\n")
+    start = next((i for i, line in enumerate(lines) if start_marker in line), -1)
+    if start >= 0:
+        end = next(i for i, line in enumerate(lines) if i > start and end_marker in line)
+        head, tail = lines[:start], lines[end + 1:]
+    else:
+        at = anchor(lines)
+        head, tail = lines[:at], lines[at:]
+    block = [
+        f"    # {start_marker} — generated by scripts/sync_mcp_surface.py; do not edit",
+        "",
+        *body,
+        "",
+        f"    # {end_marker}",
+    ]
+    result = "\n".join([*head, *block, *tail])
+    if not result.endswith("\n"):
+        result += "\n"
+    return result
+
+
+def render_error_envelope_schemas():
+    lines = []
+    for name, schema in ERROR_ENVELOPE_SCHEMAS.items():
+        if lines:
+            lines.append("")
+        lines.append(f"    {name}:")
+        lines.extend(yaml_block(schema, 6))
+    return lines
+
+
+def render_error_envelope_responses():
+    lines = []
+    for server in TOP_LEVEL_SERVERS:
+        resp401, resp422 = ERROR_RESPONSES[server]
+        schema = ERROR_RESPONSE_SCHEMA[server]
+        for name, description in (
+            (resp401, "Missing or invalid authentication."),
+            (resp422, "Validation failed or the request could not be processed."),
+        ):
+            if lines:
+                lines.append("")
+            lines.append(f"    {name}:")
+            lines.append(f"      description: {yaml_scalar(description)}")
+            lines.append("      content:")
+            lines.append("        application/json:")
+            lines.append("          schema:")
+            lines.append(f"            $ref: '#/components/schemas/{schema}'")
+    return lines
+
+
+def render_error_components(text):
+    text = render_marker_region(
+        text,
+        ERROR_SCHEMAS_START,
+        ERROR_SCHEMAS_END,
+        render_error_envelope_schemas(),
+        lambda lines: next(i for i, line in enumerate(lines) if line == "  responses:"),
+    )
+    text = render_marker_region(
+        text,
+        ERROR_RESPONSES_START,
+        ERROR_RESPONSES_END,
+        render_error_envelope_responses(),
+        lambda lines: len(lines),
+    )
+    return text
+
+
 # ---- commands ----------------------------------------------------------------
 
 
@@ -1277,7 +1476,7 @@ def render_all(surface, seed, contract, schemas=None):
     body, meta = render_paths(surface, seed, contract, schemas)
     outputs = {}
     for relative in OPENAPI_FILES:
-        outputs[relative] = render_paths_file(read_file(os.path.join(ROOT, relative)), body)
+        outputs[relative] = render_error_components(render_paths_file(read_file(os.path.join(ROOT, relative)), body))
     for relative in LLMS_FILES:
         verbose = relative.endswith("llms-full.txt")
         outputs[relative] = render_endpoints_file(read_file(os.path.join(ROOT, relative)), render_endpoints(surface, verbose))

@@ -1,0 +1,9 @@
+{
+  "description": 115,
+  "request_schema": 7,
+  "request_example": 94,
+  "response_schema": 30,
+  "response_example": 178,
+  "error_responses": 0,
+  "error_codes": 181
+}

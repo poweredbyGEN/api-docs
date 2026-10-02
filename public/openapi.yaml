@@ -170,6 +170,8 @@ paths:
                 created_at: "2025-01-15T10:30:00Z"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /workspaces:
     get:
@@ -191,6 +193,8 @@ paths:
                   $ref: '#/components/schemas/Workspace'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /x402_credit_purchase:
     post:
@@ -278,6 +282,8 @@ paths:
                   $ref: '#/components/schemas/Agent'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createAgent
@@ -371,6 +377,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
     patch:
       operationId: updateAgent
@@ -435,6 +443,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
     delete:
       operationId: deleteAgent
@@ -455,6 +465,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     put:
       operationId: putAgentsByAgentId
@@ -539,6 +553,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "set_name"
   /agents/{agent_id}/avatars:
@@ -566,6 +582,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Avatar'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createAgentAvatar
@@ -603,6 +623,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
   /agents/{agent_id}/avatars/{id}:
     delete:
@@ -624,6 +646,10 @@ paths:
       responses:
         '200':
           description: Avatar(s) deleted
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   # ── API Keys ───────────────────────────────────────────────
   /persisted_tokens:
@@ -646,6 +672,8 @@ paths:
                   $ref: '#/components/schemas/ApiKey'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createApiKey
@@ -687,6 +715,8 @@ paths:
                         example: "gen_abc123def456..."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /persisted_tokens/{id}:
     patch:
@@ -722,6 +752,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /persisted_tokens/{id}/revoke:
     delete:
@@ -741,6 +773,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /persisted_tokens/revoke_all:
     delete:
@@ -764,6 +798,8 @@ paths:
                     example: "Successfully revoked 3 tokens"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   # ── Sheets ─────────────────────────────────────────────────
   /vidsheet:
@@ -895,6 +931,8 @@ paths:
                   $ref: '#/components/schemas/Row'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createRow
@@ -927,6 +965,8 @@ paths:
                 $ref: '#/components/schemas/Row'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/rows/{row_id}:
     get:
@@ -951,6 +991,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/rows/{row_id}/duplicate:
     post:
@@ -987,6 +1029,8 @@ paths:
                 $ref: '#/components/schemas/Row'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/rows/update_positions:
     put:
@@ -1026,6 +1070,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Row'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/columns:
     get:
@@ -1047,6 +1095,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Column'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createColumn
@@ -1082,6 +1134,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Column'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/columns/{column_id}/duplicate:
     post:
@@ -1120,6 +1176,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Column'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/columns/update_positions:
     patch:
@@ -1148,6 +1208,10 @@ paths:
       responses:
         '200':
           description: Updated columns
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/cells/{cell_id}:
     get:
@@ -1168,6 +1232,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cell'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     patch:
       operationId: updateCell
@@ -1201,6 +1269,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cell'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job:
     patch:
@@ -1277,6 +1349,10 @@ paths:
                     type: "integer"
                   updated_at_ts:
                     type: "integer"
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   # ── Layers ─────────────────────────────────────────────────
   /vidsheet/{sheet_id}/cells/{cell_id}/layers:
@@ -1317,6 +1393,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Layer'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}:
     get:
@@ -1338,6 +1418,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Layer'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     patch:
       operationId: updateLayer
@@ -1371,6 +1455,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Layer'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     delete:
       operationId: deleteLayer
@@ -1387,6 +1475,10 @@ paths:
       responses:
         '204':
           description: Layer deleted
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate:
     post:
@@ -1421,6 +1513,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Layer'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions:
     put:
@@ -1450,6 +1546,10 @@ paths:
       responses:
         '200':
           description: Updated layers
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   # ── Generations ────────────────────────────────────────────
   /vidsheet/{sheet_id}/cells/{cell_id}/generate:
@@ -1589,6 +1689,10 @@ paths:
                   status:
                     type: string
                     example: "pending"
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /generations/{generation_id}:
     get:
@@ -1612,6 +1716,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Generation'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /generations/{generation_id}/stop:
     post:
@@ -1654,6 +1762,10 @@ paths:
                   status:
                     type: string
                     example: "stopped"
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /generations/{generation_id}/continue:
     post:
@@ -1697,6 +1809,10 @@ paths:
                   status:
                     type: string
                     example: "pending"
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /transcriptions:
     post:
@@ -1826,6 +1942,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Sheet'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /user_jobs:
     post:
@@ -1956,6 +2076,8 @@ paths:
                 description: "`head :ok`-style list; `UserJobResource` per job."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "publish_content"
   /user_jobs/{id}:
@@ -2006,6 +2128,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
     put:
       operationId: updateMonitoringJob
       x-mcp-tool: gen_task_action
@@ -2254,6 +2378,8 @@ paths:
                   $ref: '#/components/schemas/ScheduledPost'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
 
   /schedule/post/{post_id}:
     parameters:
@@ -2285,6 +2411,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
     patch:
       operationId: updateScheduledPost
       servers:
@@ -2313,6 +2441,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
     delete:
       operationId: deleteScheduledPost
       servers:
@@ -2338,6 +2468,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
 
   /schedule/post/{post_id}/published:
     parameters:
@@ -2493,6 +2625,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "delete_published_post"
   /templates/projects:
@@ -2521,6 +2655,8 @@ paths:
                   $ref: '#/components/schemas/Template'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /templates/projects/{slug}:
     get:
@@ -2549,6 +2685,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /templates/spreadsheets/{slug}/clone:
     post:
@@ -2610,6 +2748,8 @@ paths:
                   $ref: '#/components/schemas/Organization'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createOrganization
@@ -2679,6 +2819,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
     patch:
       operationId: updateOrganization
@@ -2728,6 +2870,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
     delete:
       operationId: deleteOrganization
@@ -2758,6 +2902,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
   # ── Content Resources ─────────────────────────────────────
   /content_resources:
@@ -2805,6 +2951,8 @@ paths:
                   $ref: '#/components/schemas/ContentResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     post:
       operationId: createContentResource
@@ -2856,6 +3004,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
   /content_resources/{id}:
     get:
@@ -2899,6 +3049,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     patch:
       operationId: updateContentResource
@@ -2942,6 +3096,10 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
     delete:
       operationId: deleteContentResource
@@ -2968,6 +3126,10 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   # ── Asset Libraries ───────────────────────────────────────
   /asset_libraries:
@@ -3045,6 +3207,8 @@ paths:
                       type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
 
   /direct_upload:
     post:
@@ -3104,6 +3268,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
   # ── Agent Profile ─────────────────────────────────────────
   /agent/run:
@@ -3287,6 +3453,10 @@ paths:
                           format: date-time
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agent/runs/{run_id}/approve:
     post:
@@ -3341,6 +3511,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
 
   /agent/conversations:
     get:
@@ -3369,6 +3541,8 @@ paths:
                   $ref: '#/components/schemas/Conversation'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agent/conversations/{id}:
     get:
@@ -3399,6 +3573,10 @@ paths:
                 $ref: '#/components/schemas/Conversation'
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agent/conversations/{id}/session-preferences:
     get:
@@ -3433,6 +3611,10 @@ paths:
                   preferences: { type: string, nullable: true }
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
     patch:
       operationId: updateSessionPreferences
       servers:
@@ -3474,6 +3656,10 @@ paths:
                   preferences: { type: string, nullable: true }
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /ideas/{idea_id}/expand:
     post:
@@ -3505,6 +3691,10 @@ paths:
           description: Idea expanded (project_manifest in the response)
         '404':
           $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agent/ideas:
     get:
@@ -3539,6 +3729,8 @@ paths:
                   $ref: '#/components/schemas/Idea'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agent/ideas/{id}/status/{status}:
     put:
@@ -3582,6 +3774,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
 
   # ── Research (agent.gen.pro) ──────────────────────────────
   /agents/{agent_id}/core:
@@ -3611,6 +3805,10 @@ paths:
                 $ref: '#/components/schemas/AgentCore'
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
     patch:
       operationId: patchAgentCore
       x-mcp-tool: gen_agent_action
@@ -3674,6 +3872,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          $ref: '#/components/responses/ApiUnauthorized'
 
   # ── Agent Voice ───────────────────────────────────────────
     delete:
@@ -3708,6 +3908,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "reset_agent_profile"
   /agents/{agent_id}/proof-of-genesis/backups:
@@ -3738,6 +3940,10 @@ paths:
                 $ref: '#/components/schemas/ProofOfGenesisBackupList'
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
     post:
       operationId: createProofOfGenesisBackup
       servers:
@@ -3783,6 +3989,10 @@ paths:
               schema: { $ref: '#/components/schemas/Error' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   /agents/{agent_id}/proof-of-genesis/backups/{backup_id}:
     delete:
@@ -3810,6 +4020,10 @@ paths:
                 $ref: '#/components/schemas/ProofOfGenesisBackup'
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   # ── Agent Voice ───────────────────────────────────────────
   /agents/{agent_id}/watchlists:
@@ -3832,6 +4046,10 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Watchlist' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
     post:
       operationId: createWatchlist
       servers:
@@ -3859,6 +4077,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Watchlist' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   /agents/{agent_id}/watchlists/{watchlist_id}:
     get:
@@ -3880,6 +4102,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Watchlist' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
     patch:
       operationId: updateWatchlist
       servers:
@@ -3908,6 +4134,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Watchlist' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
     delete:
       operationId: deleteWatchlist
       servers:
@@ -3934,6 +4164,10 @@ paths:
                 properties:
                   ok: { type: boolean }
                   deleted: { type: boolean }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   /agents/{agent_id}/watchlists/{watchlist_id}/sources:
     post:
@@ -3963,6 +4197,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/WatchSource' }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
     delete:
       operationId: removeWatchlistSourceByKey
       servers:
@@ -3988,6 +4226,10 @@ paths:
                 properties:
                   ok: { type: boolean }
                   removed: { type: boolean }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   /agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}:
     delete:
@@ -4013,6 +4255,10 @@ paths:
                 properties:
                   ok: { type: boolean }
                   removed: { type: boolean }
+        '401':
+          $ref: '#/components/responses/AgentCoreUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
 
   # ── Recurring Jobs / Daily Tasks (agent.gen.pro) ──────────────────────────
   /agents/{agent_id}/recurring-jobs:
@@ -4038,6 +4284,10 @@ paths:
                   recurring_jobs:
                     type: array
                     items: { $ref: '#/components/schemas/RecurringJob' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
     post:
       operationId: createRecurringJob
       servers:
@@ -4060,6 +4310,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
     patch:
       operationId: patchAgentsByAgentIdRecurringJobs
@@ -4248,6 +4502,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "update_recurring_job"
     delete:
@@ -4270,6 +4526,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "delete_recurring_job"
       x-schema-status: missing
@@ -4303,6 +4561,10 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/RecurringJob' }
                   created: { type: boolean }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agents/{agent_id}/recurring-jobs/{job_id}:
     get:
@@ -4324,6 +4586,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
     patch:
       operationId: updateRecurringJob
       servers:
@@ -4348,6 +4614,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
     delete:
       operationId: deleteRecurringJob
       servers:
@@ -4364,6 +4634,10 @@ paths:
         '204':
           description: Deleted (no content)
         '404': { $ref: '#/components/responses/NotFound' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agents/{agent_id}/recurring-jobs/{job_id}/pause:
     post:
@@ -4385,6 +4659,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
   /agents/{agent_id}/recurring-jobs/{job_id}/resume:
     post:
@@ -4406,6 +4684,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RecurringJob' }
+        '401':
+          $ref: '#/components/responses/AgentUnauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
 
 
   /agent/ideas/{idea_id}:
@@ -4429,6 +4711,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.idea"
       x-schema-status: missing
@@ -4494,6 +4778,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "complete_profile"
       x-schema-status: missing
@@ -4555,6 +4841,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_account"
   /agents/{agent_id}/core/linked-accounts/{linked_account_id}:
@@ -4583,6 +4871,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "remove_linked_account"
       x-schema-status: missing
@@ -4669,6 +4959,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_look"
     delete:
@@ -4730,6 +5022,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_look"
   /agents/{agent_id}/monitoring/effective:
@@ -4753,6 +5047,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentCoreValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "agent.monitoring"
       x-schema-status: missing
@@ -4810,6 +5106,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "duplicate_recurring_job"
   /agents/{agent_id}/recurring-jobs/{job_id}/test-run:
@@ -4843,6 +5141,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "run_recurring_job_now"
       x-schema-status: missing
@@ -4936,6 +5236,8 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "clip_moments"
       x-schema-status: missing
@@ -4985,6 +5287,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
   /analyze/research:
@@ -5066,6 +5370,8 @@ paths:
                   - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
   /analyze/synthesis:
@@ -5154,6 +5460,8 @@ paths:
                   - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
   /analyze/trends:
@@ -5252,6 +5560,8 @@ paths:
                   - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
   /audio_matching_jobs:
@@ -5292,6 +5602,8 @@ paths:
                   user_job_id: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "<flat ops>"
   /aura/proxy-locations/cities:
@@ -5320,6 +5632,8 @@ paths:
                         time_zone: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "location.cities"
   /aura/proxy-locations/countries:
@@ -5346,6 +5660,8 @@ paths:
                         name: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "location.countries"
   /avatars:
@@ -5412,6 +5728,8 @@ paths:
                   type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "list"
     post:
@@ -5685,6 +6003,8 @@ paths:
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "create"
   /avatars/{avatar_id}/looks:
@@ -5823,6 +6143,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "upload_avatar_look"
   /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops:
@@ -5931,6 +6253,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "create_avatar_talking_loop"
   /avatars/{avatar_id}/looks/{id}:
@@ -6057,6 +6381,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "get (look)"
   /avatars/{avatar_id}/talking_loops:
@@ -6162,6 +6488,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "upload_avatar_talking_loop"
   /avatars/{avatar_id}/talking_loops/{id}:
@@ -6254,6 +6582,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "get_avatar_talking_loop"
   /avatars/{id}:
@@ -6517,6 +6847,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "get | get_avatar_talking_loop"
     patch:
@@ -6796,6 +7128,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "rename | set_primary_voice"
     delete:
@@ -6816,6 +7150,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "delete_avatar | delete_avatar_look | delete_avatar_talking_loop"
   /avatars/{id}/copy:
@@ -7090,6 +7426,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "copy_to_mine"
   /content_resources/from_url:
@@ -7151,6 +7489,8 @@ paths:
                     description: "The UserJob or Job that produced this resource, or null."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_asset_action
       x-mcp-branch: "import_asset_from_url"
   /credit_balance:
@@ -7177,6 +7517,8 @@ paths:
                     description: "`UserJobs::GenerationGate.summary`."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "agent.capabilities"
   /credit_plans:
@@ -7205,6 +7547,8 @@ paths:
                     credit_type: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "billing.plans"
   /credit_transactions:
@@ -7235,6 +7579,8 @@ paths:
                       description: "{service, tool, request_id}, {type, id}, or null."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "billing.usage"
   /eleven_labs_job:
@@ -7274,6 +7620,8 @@ paths:
                   user_job_id: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "preview_voice"
   /generate_voice_description:
@@ -7312,6 +7660,8 @@ paths:
                   voice_description: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "generate_voice_description"
   /generate_voice_sample:
@@ -7346,6 +7696,8 @@ paths:
                     description: "Generated voice-over script."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "generate_voice_script"
   /hume_ai_sample:
@@ -7395,6 +7747,8 @@ paths:
                       description: "Base64/URL audio when Hume AI generated it directly."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "generate_voice_samples"
   /hume_ai_sample/status:
@@ -7425,6 +7779,8 @@ paths:
                   voice_model_provider: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "voice.sample_status"
   /ideas/directions:
@@ -7445,6 +7801,8 @@ paths:
                 additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.directions"
   /ideas/generate:
@@ -7655,6 +8013,8 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "generate_ideas"
       x-schema-status: missing
@@ -7707,6 +8067,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.idea_job"
   /ideas/preferences:
@@ -7757,6 +8119,8 @@ paths:
                 additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "set_content_preference"
     delete:
@@ -7806,6 +8170,8 @@ paths:
                 additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "remove_content_preference"
   /ideas/recreate:
@@ -7847,6 +8213,8 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "recreate_video"
       x-schema-status: missing
@@ -7902,6 +8270,8 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "reimagine_video"
       x-schema-status: missing
@@ -7926,6 +8296,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/AgentValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "create_video_from_idea"
       x-schema-status: missing
@@ -7959,6 +8331,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "platform.members"
     post:
@@ -7993,6 +8367,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "invite_member"
   /organizations/{organization_id}/user_organizations/{id}:
@@ -8019,6 +8395,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "leave_workspace"
   /payment:
@@ -8068,6 +8446,8 @@ paths:
                     description: "Stripe Checkout URL."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_billing_action
       x-mcp-branch: "buy_credits"
   /platform/disconnect/{platform}:
@@ -8111,6 +8491,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "disconnect_social"
   /platform/get_authorization_url:
@@ -8148,6 +8530,8 @@ paths:
                   - "url"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "publish.connect_url"
   /platform/get_oauth_account:
@@ -8295,6 +8679,8 @@ paths:
                   - "created_at"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/PythonValidationError'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "web_asset_scrape"
   /projects/{id}/set_project_share:
@@ -8342,6 +8728,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "set_project_share"
   /recommended_sounds:
@@ -8401,6 +8789,8 @@ paths:
                         type: "boolean"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "media.recommended_sounds"
   /seat_checkout:
@@ -8433,6 +8823,8 @@ paths:
                   payment_url: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "start_seat_checkout"
   /sound_libraries:
@@ -8460,6 +8852,8 @@ paths:
                     video_count: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "media.sound_library"
   /subscription_upgrade:
@@ -8503,6 +8897,8 @@ paths:
                       credit_type: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "upgrade_workspace"
   /user_jobs/estimate:
@@ -8547,6 +8943,8 @@ paths:
                     items: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "create_look"
   /user_shared_agents:
@@ -8576,6 +8974,8 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "share_agent"
   /user_shared_agents/{id}:
@@ -8615,6 +9015,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "revoke_agent_share"
     put:
@@ -8650,6 +9052,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "set_agent_share_role"
     delete:
@@ -8670,6 +9074,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "revoke_agent_share"
   /user_voice_resources:
@@ -8707,6 +9113,8 @@ paths:
                       description: "Backward-compatible alias of `id`."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "voice.list"
     post:
@@ -8771,6 +9179,8 @@ paths:
                     description: "Backward-compatible alias of `id`."
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "clone_voice"
   /user_voice_resources/{voice_id}:
@@ -8814,6 +9224,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "voice.resource"
     delete:
@@ -8834,6 +9246,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_voice_action
       x-mcp-branch: "delete_voice"
   /video_recreate_job:
@@ -8878,6 +9292,8 @@ paths:
                   user_job_id: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "<flat ops>"
   /vidsheet/actions:
@@ -9311,6 +9727,8 @@ paths:
                     additionalProperties: True
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_vidsheet_action
       x-mcp-branch: "<flat ops>"
   /vidsheet/{id}/generations:
@@ -9349,6 +9767,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "vidsheet.running_generations"
   /vidsheet/{sheet_id}/cells/{cell_id}/available_variables:
@@ -9407,6 +9827,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "vidsheet.available_variables"
   /vidsheet/{sheet_id}/operations:
@@ -9454,6 +9876,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "media.operations"
   /vidsheet/{sheet_id}/operations/last:
@@ -9499,6 +9923,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "media.last_operation"
   /vidsheet/{sheet_id}/validate_video_layout:
@@ -9547,6 +9973,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "vidsheet.layout_validation"
   /voice_resources:
@@ -9575,6 +10003,8 @@ paths:
                     billing_source: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "voice.list"
   /voice_resources/{voice_id}:
@@ -9609,6 +10039,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "voice.resource"
   /x402_credit_purchase/settle:
@@ -9665,6 +10097,8 @@ paths:
                         type: "integer"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_billing_action
       x-mcp-branch: "settle_x402_credit_purchase"
 
@@ -11611,6 +12045,82 @@ components:
                     - type: integer
 
     # gen:backend-creation-card-schemas:end
+    # gen:error-envelope-schemas:start — generated by scripts/sync_mcp_surface.py; do not edit
+
+    ApiError:
+      type: "object"
+      required:
+        - "code"
+      properties:
+        code:
+          type: "string"
+          description: "The stable machine-readable failure code."
+        message:
+          type: "string"
+          description: "Human-readable failure detail."
+        errors:
+          type: "array"
+          description: "Field-level validation failures."
+          items:
+            type: "object"
+        retryable:
+          type: "boolean"
+          description: "Whether retrying can succeed without changing the request."
+        new_change_set_required:
+          type: "boolean"
+          description: "Whether the caller must begin a new edit group."
+        funding_error_kind:
+          type: "string"
+          description: "The credit or payment failure category."
+
+    AgentError:
+      type: "object"
+      required:
+        - "code"
+      properties:
+        code:
+          type: "string"
+          description: "The stable machine-readable failure code."
+        message:
+          type: "string"
+          description: "Human-readable failure detail."
+
+    AgentCoreError:
+      type: "object"
+      required:
+        - "code"
+      properties:
+        code:
+          type: "string"
+          description: "The stable machine-readable failure code."
+        message:
+          type: "string"
+          description: "Human-readable failure detail."
+
+    PythonError:
+      type: "object"
+      required:
+        - "code"
+      properties:
+        code:
+          type: "string"
+          description: "The stable machine-readable failure code."
+        message:
+          type: "string"
+          description: "Human-readable failure detail."
+        platform:
+          type: "string"
+          description: "The platform that rejected the content."
+        field:
+          type: "string"
+          description: "The field that failed validation."
+        errors:
+          type: "array"
+          description: "Per-platform validation failures."
+          items:
+            type: "object"
+
+    # gen:error-envelope-schemas:end
   responses:
     Unauthorized:
       description: Missing or invalid authentication.
@@ -11641,3 +12151,63 @@ components:
           example:
             error: "GEN credits are required to use the API."
             error_code: "usable_gen_credit_required"
+
+    # gen:error-envelope-responses:start — generated by scripts/sync_mcp_surface.py; do not edit
+
+    ApiUnauthorized:
+      description: "Missing or invalid authentication."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    ApiValidationError:
+      description: "Validation failed or the request could not be processed."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    AgentUnauthorized:
+      description: "Missing or invalid authentication."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgentError'
+
+    AgentValidationError:
+      description: "Validation failed or the request could not be processed."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgentError'
+
+    AgentCoreUnauthorized:
+      description: "Missing or invalid authentication."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgentCoreError'
+
+    AgentCoreValidationError:
+      description: "Validation failed or the request could not be processed."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgentCoreError'
+
+    PythonUnauthorized:
+      description: "Missing or invalid authentication."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PythonError'
+
+    PythonValidationError:
+      description: "Validation failed or the request could not be processed."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PythonError'
+
+    # gen:error-envelope-responses:end

@@ -78,6 +78,16 @@ steps:
     image: python:3.12-slim
     commands:
       - python3 scripts/sync_mcp_surface.py --check
+  # openapi-completeness (GEN-8157): public/openapi.yaml is the API reference,
+  #   so every operation must give an integrator a description, a request and
+  #   response shape with examples, and an error envelope. The checker scores
+  #   each operation on seven dimensions and fails when any count drops below
+  #   scripts/openapi-completeness-baseline.json (which --update raises, never
+  #   lowers). Stdlib-only Node, no install.
+  openapi-completeness:
+    image: node:20-slim
+    commands:
+      - node scripts/check-openapi-completeness.mjs
   mcp-tools:
     image: node:20-slim
     commands:
