@@ -1223,6 +1223,8 @@
           "status": "active",
           "models": {},
           "talking_loop": {
+            "requires_voice": true,
+            "default_script": "Hey there, this is a sample of me talking with Gen. Use me to create ads, share stories, sell products and more.",
             "clip_count": {
               "min": 3,
               "max": 10
@@ -1517,6 +1519,8 @@
         "suno-v5.5-beta": 360
       },
       "talking_loop": {
+        "requires_voice": true,
+        "default_script": "Hey there, this is a sample of me talking with Gen. Use me to create ads, share stories, sell products and more.",
         "clip_count": {
           "min": 3,
           "max": 10

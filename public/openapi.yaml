@@ -5801,7 +5801,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready (silent) talking loop and its latest voiced preview."
+                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -5951,7 +5951,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6105,7 +6105,7 @@ paths:
                   avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6244,7 +6244,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready (silent) talking loop and its latest voiced preview."
+                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                 properties:
                   aspect_ratio:
                     type:
@@ -6346,7 +6346,7 @@ paths:
                   avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6482,7 +6482,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready (silent) talking loop and its latest voiced preview."
+                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                 properties:
                   aspect_ratio:
                     type:
@@ -6576,7 +6576,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready (silent) talking loop and its latest voiced preview."
+                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                 properties:
                   aspect_ratio:
                     type:
@@ -6684,7 +6684,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready (silent) talking loop and its latest voiced preview."
+                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -6830,7 +6830,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6971,7 +6971,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready (silent) talking loop and its latest voiced preview."
+                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -7117,7 +7117,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -7275,7 +7275,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready (silent) talking loop and its latest voiced preview."
+                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -7421,7 +7421,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready (silent) talking loop and its latest voiced preview."
+                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:

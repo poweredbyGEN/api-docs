@@ -30,7 +30,7 @@
             "avatar_talking_loops": {
               "items": {
                 "additionalProperties": false,
-                "description": "A ready (silent) talking loop and its latest voiced preview.",
+                "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
                 "properties": {
                   "aspect_ratio": {
                     "type": [
@@ -245,7 +245,7 @@
       "uploaded_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready (silent) talking loop and its latest voiced preview.",
+          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -412,7 +412,7 @@
             "avatar_talking_loops": {
               "items": {
                 "additionalProperties": false,
-                "description": "A ready (silent) talking loop and its latest voiced preview.",
+                "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
                 "properties": {
                   "aspect_ratio": {
                     "type": [
@@ -621,7 +621,7 @@
       "uploaded_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready (silent) talking loop and its latest voiced preview.",
+          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -769,7 +769,7 @@
       "avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready (silent) talking loop and its latest voiced preview.",
+          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -972,7 +972,7 @@
   },
   "talking_loop": {
     "additionalProperties": false,
-    "description": "A ready (silent) talking loop and its latest voiced preview.",
+    "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
     "properties": {
       "aspect_ratio": {
         "type": [
