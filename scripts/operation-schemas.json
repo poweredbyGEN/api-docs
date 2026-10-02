@@ -1,0 +1,2159 @@
+{
+  "GET /credit_balance": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "agent_id": {},
+        "organization_id": {},
+        "available_credits": {
+          "type": "number"
+        },
+        "paid_media_access": {
+          "type": "boolean"
+        },
+        "generation_access": {
+          "description": "`UserJobs::GenerationGate.summary`."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/credit_balances_controller.rb#show"
+    ]
+  },
+  "GET /credit_plans": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "`app/resources/credit_plan_resource.rb`.",
+        "properties": {
+          "id": {},
+          "name": {},
+          "price": {},
+          "total_credits": {},
+          "cycle": {},
+          "code": {},
+          "credit_type": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/credit_plans_controller.rb#index",
+      "app/resources/credit_plan_resource.rb"
+    ]
+  },
+  "GET /credit_transactions": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "`app/resources/credit_transaction_resource.rb`.",
+        "properties": {
+          "id": {},
+          "amount": {},
+          "purpose": {},
+          "is_incoming": {},
+          "start_total_used_credits": {},
+          "end_total_used_credits": {},
+          "created_at": {},
+          "source": {
+            "description": "{service, tool, request_id}, {type, id}, or null."
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/credit_transactions_controller.rb#index",
+      "app/resources/credit_transaction_resource.rb"
+    ]
+  },
+  "POST /payment": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "credit_plan_id",
+        "success_url",
+        "cancel_url"
+      ],
+      "properties": {
+        "credit_plan_id": {
+          "description": "Credit plan being purchased."
+        },
+        "organization_id": {
+          "description": "Workspace paying; omit for a blind (new-workspace) payment."
+        },
+        "quantity": {
+          "description": "Seat quantity; defaults to 1.",
+          "type": "integer"
+        },
+        "success_url": {
+          "type": "string"
+        },
+        "cancel_url": {
+          "type": "string"
+        },
+        "social_account_identifier": {
+          "description": "Required for AURA one-time purchases."
+        },
+        "with_trial": {
+          "type": "boolean"
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "payment_link"
+      ],
+      "properties": {
+        "payment_link": {
+          "description": "Stripe Checkout URL."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/payments_controller.rb#create"
+    ]
+  },
+  "POST /seat_checkout": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "return_url"
+      ],
+      "properties": {
+        "return_url": {
+          "type": "string"
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "status": {},
+        "payment_url": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/seat_checkouts_controller.rb#create"
+    ]
+  },
+  "POST /subscription_upgrade": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "return_url"
+      ],
+      "properties": {
+        "credit_plan_id": {},
+        "return_url": {}
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "status": {},
+        "payment_url": {},
+        "credit_plan": {
+          "type": "object",
+          "description": "`app/resources/credit_plan_resource.rb`.",
+          "properties": {
+            "id": {},
+            "name": {},
+            "price": {},
+            "total_credits": {},
+            "cycle": {},
+            "code": {},
+            "credit_type": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/subscription_upgrades_controller.rb#create",
+      "app/resources/credit_plan_resource.rb"
+    ]
+  },
+  "POST /x402_credit_purchase/settle": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON body. The signed payment travels in the `PAYMENT-SIGNATURE` header.",
+      "required": [
+        "workspace_id",
+        "checkout_session_id"
+      ],
+      "properties": {
+        "workspace_id": {
+          "description": "Workspace receiving the credits (alias `organization_id`)."
+        },
+        "checkout_session_id": {
+          "description": "The `checkout_session_id` from the create/quote response (alias `x402_checkout_session_id`)."
+        },
+        "network": {
+          "description": "Payment network the signature was made on.",
+          "enum": [
+            "sui",
+            "solana",
+            "base"
+          ]
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "workspace_id": {},
+        "checkout_session_id": {},
+        "idempotent": {
+          "type": "boolean"
+        },
+        "x402_payment_event_id": {},
+        "credit_purchase": {
+          "type": "object",
+          "properties": {
+            "id": {},
+            "credit_type": {},
+            "total_credits": {},
+            "total_used_credits": {},
+            "status": {},
+            "payment_type": {},
+            "payment_id": {},
+            "created_at": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/x402_credit_purchases_controller.rb#settle",
+      "app/resources/credit_purchase_resource.rb"
+    ]
+  },
+  "GET /user_jobs": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "A UserJob (`app/resources/user_job_resource.rb`).",
+        "properties": {
+          "id": {},
+          "status": {},
+          "user_job_type": {},
+          "failed_reason": {},
+          "user_message": {},
+          "container_id": {},
+          "container_type": {},
+          "result": {},
+          "object_type": {
+            "description": "Always the literal \"UserJob\".",
+            "const": "UserJob"
+          },
+          "seed": {},
+          "raw_data": {},
+          "input_nodes": {
+            "type": "array",
+            "items": {}
+          },
+          "output_nodes": {
+            "type": "array",
+            "items": {}
+          },
+          "output_resources": {
+            "type": "array",
+            "items": {}
+          },
+          "child_jobs": {
+            "type": "array",
+            "items": {}
+          },
+          "credit_outcome": {
+            "enum": [
+              "refunded",
+              "charged",
+              "not_charged"
+            ]
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "stage": {},
+          "processing_started_at": {},
+          "execution_cost": {
+            "description": "Stringified credit cost.",
+            "type": "string"
+          }
+        }
+      },
+      "description": "`head :ok`-style list; `UserJobResource` per job."
+    },
+    "source": [
+      "app/controllers/v1/user_jobs_controller.rb#index",
+      "app/resources/user_job_resource.rb"
+    ]
+  },
+  "POST /user_jobs/estimate": {
+    "requestBody": {
+      "type": "object",
+      "description": "One job (`user_job`) or a batch (`user_jobs`).",
+      "required": [
+        "user_job"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "user_job": {
+          "description": "One job descriptor: `{user_job_type, data}`."
+        },
+        "user_jobs": {
+          "description": "Batch form: array of the same descriptor (max `MAX_ESTIMATE_USER_JOBS`).",
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "estimate_id": {},
+        "estimate_request_key": {},
+        "estimated_credits": {},
+        "status": {},
+        "items": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_jobs_controller.rb#estimate"
+    ]
+  },
+  "GET /organizations/{organization_id}/user_organizations": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {},
+          "email": {},
+          "name": {},
+          "organization_role": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_organizations_controller.rb#index"
+    ]
+  },
+  "PUT /projects/{id}/set_project_share": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "permission"
+      ],
+      "properties": {
+        "permission": {
+          "description": "`public` mints/reuses a share token; `private` removes all shares.",
+          "enum": [
+            "public",
+            "private"
+          ]
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`ProjectShareResource` for `public`; `{message}` for `private`.",
+      "properties": {
+        "share_token": {},
+        "permission": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/projects_controller.rb#set_project_share",
+      "app/resources/project_share_resource.rb"
+    ]
+  },
+  "PUT /agents/{agent_id}": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent"
+      ],
+      "properties": {
+        "agent": {
+          "type": "object",
+          "properties": {
+            "name": {},
+            "description": {},
+            "eleven_lab_api_key": {},
+            "hume_ai_api_key": {},
+            "agent_avatars_attributes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "degod_avatar_id": {},
+                  "file": {},
+                  "is_primary": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "default_user_voice_attributes": {
+              "type": "object",
+              "properties": {
+                "source": {},
+                "voice_id": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "type": "object",
+          "description": "`app/resources/agent_resource.rb` (extends `agent_for_index_resource.rb`).",
+          "properties": {
+            "id": {},
+            "name": {},
+            "description": {},
+            "organization_id": {},
+            "eleven_lab_api_key": {
+              "description": "The literal \"connected\" when a key is stored; the key itself is never echoed."
+            },
+            "primary_avatar_url": {},
+            "primary_avatar_id": {},
+            "agent_setup_project_id": {},
+            "tiktok_integration": {
+              "type": "boolean"
+            },
+            "degods": {
+              "type": "boolean"
+            },
+            "tiktok_social_account": {
+              "type": "boolean"
+            },
+            "role": {},
+            "organization": {},
+            "shared_users": {
+              "type": "array",
+              "items": {}
+            },
+            "default_user_voice": {},
+            "time_zone": {},
+            "time_zone_id": {},
+            "location": {},
+            "organization_uuid": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/agents_controller.rb#update",
+      "app/resources/agent_resource.rb"
+    ]
+  },
+  "GET /avatars": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "`Avatars::Presenter#summary`.",
+        "properties": {
+          "avatar_id": {},
+          "name": {},
+          "source": {
+            "enum": [
+              "my",
+              "library"
+            ]
+          },
+          "cover_url": {},
+          "preview_url": {},
+          "avatar_look_count": {
+            "type": "integer"
+          },
+          "avatar_talking_loop_count": {
+            "type": "integer"
+          },
+          "primary_voice": {},
+          "updated_at": {}
+        }
+      },
+      "description": "`Avatars::Presenter#summary` per avatar; `source` selects my/library/all."
+    },
+    "source": [
+      "app/controllers/v1/avatars_controller.rb#index",
+      "app/presenters/avatars/presenter.rb#summary"
+    ]
+  },
+  "POST /avatars": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "name",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "name": {
+          "description": "Avatar name."
+        },
+        "content_resource_id": {
+          "description": "An uploaded image (becomes the original look) or video (becomes the first talking loop)."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter#detail`.",
+      "properties": {
+        "avatar_id": {},
+        "name": {},
+        "source": {
+          "enum": [
+            "my",
+            "library"
+          ]
+        },
+        "cover_url": {},
+        "preview_url": {},
+        "avatar_look_count": {
+          "type": "integer"
+        },
+        "avatar_talking_loop_count": {
+          "type": "integer"
+        },
+        "primary_voice": {},
+        "updated_at": {},
+        "avatar_looks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter#look_payload`.",
+            "properties": {
+              "avatar_look_id": {},
+              "name": {},
+              "origin": {},
+              "url": {},
+              "thumbnail_url": {},
+              "avatar_talking_loops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "`Avatars::Presenter.talking_loop`.",
+                  "properties": {
+                    "avatar_talking_loop_id": {},
+                    "name": {},
+                    "kind": {},
+                    "status": {},
+                    "url": {},
+                    "thumbnail_url": {},
+                    "duration": {},
+                    "avatar_id": {},
+                    "avatar_look_id": {},
+                    "made_from_talking_avatar_id": {},
+                    "aspect_ratio": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uploaded_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter.talking_loop`.",
+            "properties": {
+              "avatar_talking_loop_id": {},
+              "name": {},
+              "kind": {},
+              "status": {},
+              "url": {},
+              "thumbnail_url": {},
+              "duration": {},
+              "avatar_id": {},
+              "avatar_look_id": {},
+              "made_from_talking_avatar_id": {},
+              "aspect_ratio": {}
+            }
+          }
+        },
+        "generating_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_job_id": {},
+              "avatar_look_id": {},
+              "status": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatars_controller.rb#create",
+      "app/presenters/avatars/presenter.rb#detail",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "GET /avatars/{id}": {
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter#detail`.",
+      "properties": {
+        "avatar_id": {},
+        "name": {},
+        "source": {
+          "enum": [
+            "my",
+            "library"
+          ]
+        },
+        "cover_url": {},
+        "preview_url": {},
+        "avatar_look_count": {
+          "type": "integer"
+        },
+        "avatar_talking_loop_count": {
+          "type": "integer"
+        },
+        "primary_voice": {},
+        "updated_at": {},
+        "avatar_looks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter#look_payload`.",
+            "properties": {
+              "avatar_look_id": {},
+              "name": {},
+              "origin": {},
+              "url": {},
+              "thumbnail_url": {},
+              "avatar_talking_loops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "`Avatars::Presenter.talking_loop`.",
+                  "properties": {
+                    "avatar_talking_loop_id": {},
+                    "name": {},
+                    "kind": {},
+                    "status": {},
+                    "url": {},
+                    "thumbnail_url": {},
+                    "duration": {},
+                    "avatar_id": {},
+                    "avatar_look_id": {},
+                    "made_from_talking_avatar_id": {},
+                    "aspect_ratio": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uploaded_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter.talking_loop`.",
+            "properties": {
+              "avatar_talking_loop_id": {},
+              "name": {},
+              "kind": {},
+              "status": {},
+              "url": {},
+              "thumbnail_url": {},
+              "duration": {},
+              "avatar_id": {},
+              "avatar_look_id": {},
+              "made_from_talking_avatar_id": {},
+              "aspect_ratio": {}
+            }
+          }
+        },
+        "generating_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_job_id": {},
+              "avatar_look_id": {},
+              "status": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatars_controller.rb#show",
+      "app/presenters/avatars/presenter.rb#detail"
+    ]
+  },
+  "PATCH /avatars/{id}": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "name": {},
+        "primary_voice": {
+          "type": "object",
+          "properties": {
+            "source": {},
+            "voice_id": {}
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter#detail`.",
+      "properties": {
+        "avatar_id": {},
+        "name": {},
+        "source": {
+          "enum": [
+            "my",
+            "library"
+          ]
+        },
+        "cover_url": {},
+        "preview_url": {},
+        "avatar_look_count": {
+          "type": "integer"
+        },
+        "avatar_talking_loop_count": {
+          "type": "integer"
+        },
+        "primary_voice": {},
+        "updated_at": {},
+        "avatar_looks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter#look_payload`.",
+            "properties": {
+              "avatar_look_id": {},
+              "name": {},
+              "origin": {},
+              "url": {},
+              "thumbnail_url": {},
+              "avatar_talking_loops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "`Avatars::Presenter.talking_loop`.",
+                  "properties": {
+                    "avatar_talking_loop_id": {},
+                    "name": {},
+                    "kind": {},
+                    "status": {},
+                    "url": {},
+                    "thumbnail_url": {},
+                    "duration": {},
+                    "avatar_id": {},
+                    "avatar_look_id": {},
+                    "made_from_talking_avatar_id": {},
+                    "aspect_ratio": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uploaded_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter.talking_loop`.",
+            "properties": {
+              "avatar_talking_loop_id": {},
+              "name": {},
+              "kind": {},
+              "status": {},
+              "url": {},
+              "thumbnail_url": {},
+              "duration": {},
+              "avatar_id": {},
+              "avatar_look_id": {},
+              "made_from_talking_avatar_id": {},
+              "aspect_ratio": {}
+            }
+          }
+        },
+        "generating_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_job_id": {},
+              "avatar_look_id": {},
+              "status": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatars_controller.rb#update",
+      "app/presenters/avatars/presenter.rb#detail",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{id}/copy": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter#detail`.",
+      "properties": {
+        "avatar_id": {},
+        "name": {},
+        "source": {
+          "enum": [
+            "my",
+            "library"
+          ]
+        },
+        "cover_url": {},
+        "preview_url": {},
+        "avatar_look_count": {
+          "type": "integer"
+        },
+        "avatar_talking_loop_count": {
+          "type": "integer"
+        },
+        "primary_voice": {},
+        "updated_at": {},
+        "avatar_looks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter#look_payload`.",
+            "properties": {
+              "avatar_look_id": {},
+              "name": {},
+              "origin": {},
+              "url": {},
+              "thumbnail_url": {},
+              "avatar_talking_loops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "`Avatars::Presenter.talking_loop`.",
+                  "properties": {
+                    "avatar_talking_loop_id": {},
+                    "name": {},
+                    "kind": {},
+                    "status": {},
+                    "url": {},
+                    "thumbnail_url": {},
+                    "duration": {},
+                    "avatar_id": {},
+                    "avatar_look_id": {},
+                    "made_from_talking_avatar_id": {},
+                    "aspect_ratio": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uploaded_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Avatars::Presenter.talking_loop`.",
+            "properties": {
+              "avatar_talking_loop_id": {},
+              "name": {},
+              "kind": {},
+              "status": {},
+              "url": {},
+              "thumbnail_url": {},
+              "duration": {},
+              "avatar_id": {},
+              "avatar_look_id": {},
+              "made_from_talking_avatar_id": {},
+              "aspect_ratio": {}
+            }
+          }
+        },
+        "generating_avatar_talking_loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_job_id": {},
+              "avatar_look_id": {},
+              "status": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatars_controller.rb#copy",
+      "app/presenters/avatars/presenter.rb#detail",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{avatar_id}/looks": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "content_resource_id": {
+          "description": "An uploaded image."
+        },
+        "name": {}
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`AvatarLooksController#look_payload`.",
+      "properties": {
+        "avatar_look_id": {},
+        "avatar_id": {},
+        "name": {},
+        "origin": {},
+        "url": {},
+        "thumbnail_url": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatar_looks_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{avatar_id}/talking_loops": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "content_resource_id": {
+          "description": "An uploaded video."
+        },
+        "name": {
+          "description": "Defaults to the avatar's name when omitted."
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`Avatars::Presenter.talking_loop`.",
+      "properties": {
+        "avatar_talking_loop_id": {},
+        "name": {},
+        "kind": {},
+        "status": {},
+        "url": {},
+        "thumbnail_url": {},
+        "duration": {},
+        "avatar_id": {},
+        "avatar_look_id": {},
+        "made_from_talking_avatar_id": {},
+        "aspect_ratio": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatar_talking_loops_controller.rb#create",
+      "app/presenters/avatars/presenter.rb",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "GET /avatars/{avatar_id}/talking_loops/{id}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "avatar_talking_loop_id": {},
+        "name": {},
+        "kind": {},
+        "status": {},
+        "url": {},
+        "thumbnail_url": {},
+        "duration": {},
+        "avatar_id": {},
+        "avatar_look_id": {},
+        "made_from_talking_avatar_id": {},
+        "aspect_ratio": {},
+        "talking_loop_clips": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/avatar_talking_loops_controller.rb#show",
+      "app/presenters/avatars/presenter.rb"
+    ]
+  },
+  "GET /hume_ai_sample/status": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "generation_id": {},
+        "status": {
+          "enum": [
+            "pending",
+            "completed",
+            "failed"
+          ]
+        },
+        "queue_position": {
+          "type": "integer"
+        },
+        "error": {},
+        "audio": {},
+        "speaker_embedding_url": {},
+        "voice_model_provider": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/hume_ai_samples_controller.rb#status",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /hume_ai_sample": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "text"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "text": {
+          "description": "Script the sample should speak."
+        },
+        "text_var": {
+          "description": "Prompt-variable substitutions for `text`."
+        },
+        "description": {
+          "description": "Style descriptor."
+        },
+        "voice_model_provider": {
+          "description": "fal.ai voice-design provider; defaults to the platform TTS provider."
+        }
+      }
+    },
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "generation_id": {},
+          "status": {
+            "description": "Present when fal.ai queued the samples.",
+            "enum": [
+              "pending"
+            ]
+          },
+          "audio": {
+            "description": "Base64/URL audio when Hume AI generated it directly."
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/hume_ai_samples_controller.rb#create",
+      "app/controllers/v1/hume_ai_samples_controller.rb#submit_via_fal_ai",
+      "app/controllers/v1/hume_ai_samples_controller.rb#generate_via_hume_ai",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /generate_voice_sample": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "language": {}
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "voice_sample": {
+          "description": "Generated voice-over script."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/generate_voice_samples_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /generate_voice_description": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "gender"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "gender": {
+          "description": "Required; the controller refuses a blank gender."
+        },
+        "voice_description": {},
+        "language": {},
+        "script": {}
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "voice_description": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/generate_voice_descriptions_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "GET /voice_resources": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "`app/resources/voice_resource_resource.rb`.",
+        "properties": {
+          "id": {},
+          "name": {},
+          "provider": {},
+          "url": {},
+          "voice_id": {},
+          "ownership": {},
+          "billing_source": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/voice_resources_controller.rb#index",
+      "app/resources/voice_resource_resource.rb"
+    ]
+  },
+  "GET /voice_resources/{voice_id}": {
+    "response": {
+      "type": "object",
+      "description": "`app/resources/voice_resource_resource.rb`.",
+      "properties": {
+        "id": {},
+        "name": {},
+        "provider": {},
+        "url": {},
+        "voice_id": {},
+        "ownership": {},
+        "billing_source": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/voice_resources_controller.rb#show",
+      "app/resources/voice_resource_resource.rb"
+    ]
+  },
+  "GET /user_voice_resources": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "`app/resources/user_voice_resource_resource.rb`.",
+        "properties": {
+          "id": {},
+          "name": {},
+          "gender": {},
+          "language": {},
+          "description": {},
+          "provider": {},
+          "status": {},
+          "user_job_id": {},
+          "failed_reason": {},
+          "file": {
+            "description": "CDN URL of the attached sample file, or null.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "user_voice_resource_id": {
+            "description": "Backward-compatible alias of `id`."
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_voice_resources_controller.rb#index",
+      "app/resources/user_voice_resource_resource.rb",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "GET /user_voice_resources/{voice_id}": {
+    "response": {
+      "type": "object",
+      "description": "`app/resources/user_voice_resource_resource.rb`.",
+      "properties": {
+        "id": {},
+        "name": {},
+        "gender": {},
+        "language": {},
+        "description": {},
+        "provider": {},
+        "status": {},
+        "user_job_id": {},
+        "failed_reason": {},
+        "file": {
+          "description": "CDN URL of the attached sample file, or null.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "user_voice_resource_id": {
+          "description": "Backward-compatible alias of `id`."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_voice_resources_controller.rb#show",
+      "app/resources/user_voice_resource_resource.rb"
+    ]
+  },
+  "POST /user_voice_resources": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "user_voice_resource"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "user_voice_resource": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "generation_id": {},
+            "name": {},
+            "gender": {},
+            "language": {},
+            "base64_audio": {},
+            "audio_url": {},
+            "description": {},
+            "speaker_embedding_url": {},
+            "provider": {},
+            "voice_model_provider": {},
+            "qwen3_voice_design": {}
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`app/resources/user_voice_resource_resource.rb`.",
+      "properties": {
+        "id": {},
+        "name": {},
+        "gender": {},
+        "language": {},
+        "description": {},
+        "provider": {},
+        "status": {},
+        "user_job_id": {},
+        "failed_reason": {},
+        "file": {
+          "description": "CDN URL of the attached sample file, or null.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "user_voice_resource_id": {
+          "description": "Backward-compatible alias of `id`."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_voice_resources_controller.rb#create",
+      "app/resources/user_voice_resource_resource.rb",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /eleven_labs_job": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "user_job"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "user_job": {
+          "type": "object",
+          "properties": {
+            "data": {},
+            "container_id": {},
+            "container_type": {}
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "user_job_id": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/eleven_labs_jobs_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /content_resources/from_url": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "url"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "url": {
+          "description": "YouTube / TikTok / Instagram URL to download."
+        },
+        "dw_job_id": {
+          "description": "Present when resuming a download that outlived the previous request."
+        },
+        "video_layer_id": {},
+        "asset_folder": {
+          "type": "object",
+          "properties": {
+            "id": {}
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "description": "`app/resources/content_resource_resource.rb`.",
+      "properties": {
+        "content_resource": {
+          "type": "object",
+          "properties": {
+            "id": {},
+            "url": {},
+            "thumbnail_url": {},
+            "file_name": {},
+            "content_type": {},
+            "origin_type": {},
+            "origin_owner_type": {},
+            "origin_owner_id": {},
+            "origin_metadata": {},
+            "enrichment": {}
+          }
+        },
+        "project_node": {
+          "type": "object",
+          "properties": {
+            "id": {}
+          }
+        },
+        "generator": {
+          "description": "The UserJob or Job that produced this resource, or null."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/content_resources_controller.rb#from_url",
+      "app/resources/content_resource_resource.rb",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /audio_matching_jobs": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "user_job"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "user_job": {
+          "type": "object",
+          "properties": {
+            "data": {},
+            "project_id": {},
+            "container_id": {},
+            "container_type": {}
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "user_job_id": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/audio_matching_jobs_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /video_recreate_job": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "user_job"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "user_job": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "description": "JSON object (`JSON.parse`d by the controller)."
+            },
+            "project_id": {},
+            "container_id": {},
+            "container_type": {},
+            "project_node_ids": {
+              "type": "array",
+              "items": {}
+            }
+          }
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "user_job_id": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/video_recreate_jobs_controller.rb#create",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "GET /recommended_sounds": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`DataWarehouse::RecommendedSoundResource`.",
+            "properties": {
+              "id": {},
+              "sound_title": {},
+              "sound_author": {},
+              "sound_url": {},
+              "sound_thumbnail_url": {},
+              "sound_tags": {},
+              "genre": {},
+              "mood": {},
+              "keywords": {},
+              "energy_level": {},
+              "instrumentation": {},
+              "duration_seconds": {},
+              "tempo_bpm": {},
+              "latest_videos": {
+                "type": "array",
+                "items": {}
+              },
+              "video_count": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "window_days": {
+              "type": "integer"
+            },
+            "search_type": {},
+            "dw_audio_ids": {
+              "type": "array",
+              "items": {}
+            },
+            "dw_error": {},
+            "fallback_used": {
+              "type": "boolean"
+            },
+            "degraded": {
+              "type": "boolean"
+            },
+            "degraded_reason": {},
+            "local_only": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/recommended_sounds_controller.rb#index",
+      "app/resources/data_warehouse/recommended_sound_resource.rb"
+    ]
+  },
+  "GET /sound_libraries": {
+    "response": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sound_id": {},
+          "title": {},
+          "sound_url": {},
+          "author": {},
+          "tags": {},
+          "thumbnail_url": {},
+          "video_count": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/sound_libraries_controller.rb#index"
+    ]
+  },
+  "GET /aura/proxy-locations/countries": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "catalog_version": {},
+        "countries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {},
+              "name": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/aura_proxy_locations_controller.rb#countries"
+    ]
+  },
+  "GET /aura/proxy-locations/cities": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "catalog_version": {},
+        "cities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {},
+              "region": {},
+              "time_zone": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/aura_proxy_locations_controller.rb#cities"
+    ]
+  },
+  "POST /vidsheet/{sheet_id}/columns/{column_id}/duplicate": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "with_cells": {
+          "description": "Also duplicate the column's cells (default true).",
+          "type": "boolean"
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/spreadsheet_columns_controller.rb#duplicate",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "name": {},
+        "additional_attributes": {}
+      }
+    },
+    "source": [
+      "app/controllers/v1/video_layers_controller.rb#duplicate",
+      "app/controllers/v1/video_layers_controller.rb#duplicate_additional_attributes",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "PATCH /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job": {
+    "response": {
+      "type": "object",
+      "description": "`app/resources/spreadsheet_cell_resource.rb`.",
+      "properties": {
+        "id": {},
+        "value": {},
+        "additional_attributes": {},
+        "cell_role": {},
+        "spreadsheet_column_id": {},
+        "default_user_job": {},
+        "user_jobs": {
+          "type": "array",
+          "items": {}
+        },
+        "video_layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`app/resources/video_layer_resource.rb`.",
+            "properties": {
+              "id": {},
+              "name": {},
+              "position": {},
+              "type": {},
+              "additional_attributes": {},
+              "default_user_job": {},
+              "user_jobs": {
+                "type": "array",
+                "items": {}
+              },
+              "execution_cost": {},
+              "created_at_ts": {
+                "type": "integer"
+              },
+              "updated_at_ts": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "execution_cost": {},
+        "created_at_ts": {
+          "type": "integer"
+        },
+        "updated_at_ts": {
+          "type": "integer"
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/spreadsheet_cells_controller.rb#set_default_user_job",
+      "app/resources/spreadsheet_cell_resource.rb"
+    ]
+  },
+  "GET /vidsheet/{id}/generations": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "generations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "generation_id": {},
+              "status": {},
+              "user_job_type": {},
+              "container_type": {},
+              "container_id": {},
+              "row_id": {},
+              "created_at": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/vidsheet_generations_controller.rb#index",
+      "app/controllers/v1/vidsheet_generations_controller.rb#generation_entry"
+    ]
+  },
+  "GET /vidsheet/{sheet_id}/cells/{cell_id}/available_variables": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "local_variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {},
+              "value": {},
+              "content_type": {},
+              "column_id": {}
+            }
+          }
+        },
+        "video_layer_variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {},
+              "layer_type": {},
+              "cell_id": {}
+            }
+          }
+        },
+        "global_variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {},
+              "value": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/available_variables_controller.rb#show",
+      "app/services/spreadsheets/available_variables.rb#process"
+    ]
+  },
+  "GET /vidsheet/{sheet_id}/operations": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "change_sets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`Vidsheets::ChangeSetSummary#as_json`.",
+            "properties": {
+              "change_set_id": {},
+              "description": {},
+              "operation_count": {
+                "type": "integer"
+              },
+              "operation_types": {
+                "type": "array",
+                "items": {}
+              },
+              "actor_type": {},
+              "user_id": {},
+              "agent_id": {},
+              "undone": {
+                "type": "boolean"
+              },
+              "undone_at": {},
+              "created_at": {},
+              "updated_at": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/vidsheet_operations_controller.rb#index",
+      "app/services/vidsheets/change_set_summary.rb"
+    ]
+  },
+  "GET /vidsheet/{sheet_id}/operations/last": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "change_set": {
+          "description": "`Vidsheets::ChangeSetSummary#as_json`.",
+          "type": "object",
+          "properties": {
+            "change_set_id": {},
+            "description": {},
+            "operation_count": {
+              "type": "integer"
+            },
+            "operation_types": {
+              "type": "array",
+              "items": {}
+            },
+            "actor_type": {},
+            "user_id": {},
+            "agent_id": {},
+            "undone": {
+              "type": "boolean"
+            },
+            "undone_at": {},
+            "created_at": {},
+            "updated_at": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/vidsheet_operations_controller.rb#last",
+      "app/services/vidsheets/change_set_summary.rb"
+    ]
+  },
+  "POST /vidsheet/{sheet_id}/validate_video_layout": {
+    "response": {
+      "type": "object",
+      "description": "`Spreadsheets::VidsheetRouteContract#payload` merged with `{layout_valid, warnings}`.",
+      "properties": {
+        "spreadsheet_id": {},
+        "vidsheet_project_id": {},
+        "vidsheet_url": {},
+        "layout_valid": {
+          "type": "boolean"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/spreadsheets_controller.rb#validate_video_layout",
+      "app/services/spreadsheets/vidsheet_route_contract.rb#payload"
+    ]
+  },
+  "POST /vidsheet/{sheet_id}/rows/{row_id}/duplicate": {
+    "response": {
+      "type": "object",
+      "description": "`app/resources/spreadsheet_row_resource.rb`.",
+      "properties": {
+        "id": {},
+        "position": {},
+        "additional_attributes": {},
+        "video_settings": {},
+        "spreadsheet_cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "`app/resources/spreadsheet_cell_resource.rb`.",
+            "properties": {
+              "id": {},
+              "value": {},
+              "additional_attributes": {},
+              "cell_role": {},
+              "spreadsheet_column_id": {},
+              "default_user_job": {},
+              "user_jobs": {
+                "type": "array",
+                "items": {}
+              },
+              "video_layers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "`app/resources/video_layer_resource.rb`.",
+                  "properties": {
+                    "id": {},
+                    "name": {},
+                    "position": {},
+                    "type": {},
+                    "additional_attributes": {},
+                    "default_user_job": {},
+                    "user_jobs": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "execution_cost": {},
+                    "created_at_ts": {
+                      "type": "integer"
+                    },
+                    "updated_at_ts": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "execution_cost": {},
+              "created_at_ts": {
+                "type": "integer"
+              },
+              "updated_at_ts": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "created_at_ts": {
+          "type": "integer"
+        },
+        "updated_at_ts": {
+          "type": "integer"
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/spreadsheet_rows_controller.rb#duplicate",
+      "app/resources/spreadsheet_row_resource.rb"
+    ]
+  },
+  "POST /agents/{agent_id}/avatars": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_avatars_attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "degod_avatar_id": {},
+              "file": {},
+              "_destroy": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/agent_avatars_controller.rb#create"
+    ]
+  },
+  "PATCH /content_resources/{id}": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "content_resource"
+      ],
+      "properties": {
+        "content_resource": {
+          "type": "object",
+          "required": [
+            "filename"
+          ],
+          "properties": {
+            "filename": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/content_resources_controller.rb#update"
+    ]
+  },
+  "POST /organizations/{organization_id}/user_organizations": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "username_or_email"
+      ],
+      "properties": {
+        "username_or_email": {
+          "description": "Email or username of the member to invite."
+        },
+        "role": {
+          "description": "One of the `UserOrganization` roles."
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_organizations_controller.rb#create"
+    ]
+  },
+  "POST /user_shared_agents": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "user_shared_agent"
+      ],
+      "properties": {
+        "user_shared_agent": {
+          "type": "object",
+          "properties": {
+            "agent_id": {},
+            "username_or_email": {},
+            "role": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_shared_agents_controller.rb#create"
+    ]
+  },
+  "PUT /user_shared_agents/{id}": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "user_shared_agent"
+      ],
+      "properties": {
+        "user_shared_agent": {
+          "type": "object",
+          "properties": {
+            "username_or_email": {},
+            "role": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_shared_agents_controller.rb#update"
+    ]
+  },
+  "PATCH /vidsheet/{sheet_id}/columns/update_positions": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "id_to_position": {
+          "description": "Map of column id to new position.",
+          "type": "object"
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/spreadsheet_columns_controller.rb#update_positions"
+    ]
+  },
+  "PUT /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "id_to_position": {
+          "description": "Map of layer id to new position.",
+          "type": "object"
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/video_layers_controller.rb#update_positions"
+    ]
+  },
+  "GET /user_shared_agents/{id}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "id": {},
+        "name": {},
+        "time_zone": {},
+        "shared_users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {},
+              "email": {},
+              "role": {},
+              "shared_agent_id": {}
+            }
+          }
+        }
+      }
+    },
+    "source": [
+      "app/controllers/v1/user_shared_agents_controller.rb#show",
+      "app/presenters/user_shared_agent/presenter.rb#as_json"
+    ]
+  }
+}

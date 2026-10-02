@@ -22,6 +22,10 @@ Operation bodies are taken from, in order:
   extracted from that pre-migration spec, never from the generated file: doing
   the latter would fold the generated operations into the seed and the check
   would compare a rendering against itself.
+* `scripts/operation-schemas.json` — request bodies and 2xx responses read out of
+  the backend controllers and resources, keyed `METHOD /path` and citing the
+  backend files each shape came from. These fill only the half an operation is
+  missing: a seeded request body or success schema is never replaced.
 * otherwise the operation is emitted with `x-schema-status: missing` and its
   path parameters only. No field is ever invented.
 
@@ -48,6 +52,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SURFACE_FILE = os.path.join(ROOT, "scripts", "mcp-surface.json")
+SCHEMAS_FILE = os.path.join(ROOT, "scripts", "operation-schemas.json")
 SEED_FILE = os.path.join(ROOT, "scripts", "openapi-operations.json")
 BASELINE_FILE = os.path.join(ROOT, "scripts", "openapi-missing-baseline.json")
 CONTRACT_FILE = os.path.join(ROOT, "scripts", "backend", "public-contract.json")
@@ -334,6 +339,64 @@ def extract_seed(source):
     return seed
 
 
+def render_contract_request_body(schema):
+    """One `requestBody:` block for a schema derived from a controller."""
+    return [
+        "      requestBody:",
+        "        required: true",
+        "        content:",
+        "          application/json:",
+        "            schema:",
+        *yaml_block(schema, 14),
+    ]
+
+
+def merge_operation_schema(lines, schema_entry):
+    """Add the backend-derived request body / 2xx schema to one rendered operation.
+
+    Existing content is never overwritten: a seeded operation that already
+    carries a request body or a success schema keeps it, and only the missing
+    half is filled. `scripts/operation-schemas.json` is the only source of
+    these fields, and every property in it is traceable to the backend files
+    its `source` list names.
+    """
+    if not schema_entry:
+        return list(lines)
+    out = list(lines)
+    schema = schema_entry.get("requestBody")
+    if schema is not None and not any(line.startswith("      requestBody:") for line in out):
+        at = next((i for i, line in enumerate(out) if line.startswith("      responses:")), len(out))
+        out[at:at] = render_contract_request_body(schema)
+    response = schema_entry.get("response")
+    if response is not None:
+        success_at = next((i for i, line in enumerate(out) if re.match(r"^        '2\d\d':\s*$", line)), None)
+        if success_at is None:
+            responses_at = next((i for i, line in enumerate(out) if line.startswith("      responses:")))
+            out[responses_at + 1:responses_at + 1] = ["        '200':", "          description: Success."]
+            success_at = responses_at + 1
+        end = next(
+            (
+                j
+                for j in range(success_at + 1, len(out))
+                if re.match(r"^        '\d", out[j])
+                or re.match(r"^      [A-Za-z]", out[j])
+                or re.match(r"^  \S", out[j])
+            ),
+            len(out),
+        )
+        if not any(re.search(r"schema:|\$ref:", line) for line in out[success_at:end]):
+            insert_at = end
+            while insert_at > success_at + 1 and not out[insert_at - 1].strip():
+                insert_at -= 1
+            out[insert_at:insert_at] = [
+                "          content:",
+                "            application/json:",
+                "              schema:",
+                *yaml_block(response, 16),
+            ]
+    return out
+
+
 def operation_meta(block):
     text = "\n".join(block)
     has_request_body = bool(re.search(r"^      requestBody:", text, re.M))
@@ -362,8 +425,11 @@ def yaml_block(value, indent):
             if key in ("$schema", "title") and not isinstance(item, (dict, list)):
                 continue
             if isinstance(item, (dict, list)):
-                lines.append(f"{pad}{key}:")
-                lines.extend(yaml_block(item, indent + 2))
+                if not item:
+                    lines.append(f"{pad}{key}: {'{}' if isinstance(item, dict) else '[]'}")
+                else:
+                    lines.append(f"{pad}{key}:")
+                    lines.extend(yaml_block(item, indent + 2))
             elif item is None:
                 lines.append(f"{pad}{key}: null")
             elif isinstance(item, bool):
@@ -502,7 +568,8 @@ def seeded_operation(entry, block):
     return out, {"has_request_body": has_request_body, "has_response_schema": has_response_schema, "missing": missing}
 
 
-def render_paths(surface, seed, contract):
+def render_paths(surface, seed, contract, schemas=None):
+    schemas = schemas or {}
     index = contract_index(contract)
     seed_by_path = {entry["path"]: entry for entry in seed["paths"]}
     by_path = {}
@@ -527,6 +594,15 @@ def render_paths(surface, seed, contract):
                 lines, op_meta = seeded_operation(entry, seed_block)
             else:
                 lines, op_meta = generated_operation(entry, index, contract)
+            lines = merge_operation_schema(lines, schemas.get(f"{entry['method']} {path}"))
+            has_request_body, has_response_schema = operation_meta(lines)
+            op_meta = {
+                "has_request_body": has_request_body,
+                "has_response_schema": has_response_schema,
+                "missing": (entry["method"] in WRITE_METHODS and not has_request_body) or not has_response_schema,
+            }
+            if not op_meta["missing"]:
+                lines = [line for line in lines if line != "      x-schema-status: missing"]
             meta[(entry["method"], path)] = op_meta
             body.extend(lines)
     return body, meta
@@ -602,8 +678,8 @@ def render_endpoints_file(text, body):
 # ---- commands ----------------------------------------------------------------
 
 
-def render_all(surface, seed, contract):
-    body, meta = render_paths(surface, seed, contract)
+def render_all(surface, seed, contract, schemas=None):
+    body, meta = render_paths(surface, seed, contract, schemas)
     outputs = {}
     for relative in OPENAPI_FILES:
         outputs[relative] = render_paths_file(read_file(os.path.join(ROOT, relative)), body)
@@ -669,7 +745,15 @@ def main(argv):
     surface = read_json(options.get("mcp_surface", SURFACE_FILE))["operations"]
     seed = read_json(SEED_FILE)
     contract = read_json(CONTRACT_FILE)
-    outputs, meta = render_all(surface, seed, contract)
+    schemas = read_json(SCHEMAS_FILE) if os.path.exists(SCHEMAS_FILE) else {}
+    known = {f"{entry['method']} {entry['path']}" for entry in surface}
+    unknown = sorted(set(schemas) - known)
+    if unknown:
+        print("FAIL: scripts/operation-schemas.json has keys that are not MCP-surface operations:")
+        for key in unknown:
+            print(f"  {key}")
+        return 1
+    outputs, meta = render_all(surface, seed, contract, schemas)
     failures, missing = assert_invariants(surface, meta)
     if failures:
         for failure in failures:
@@ -681,9 +765,9 @@ def main(argv):
             {
                 "missing": missing,
                 "note": (
-                    "Operations in the MCP surface with no full schema in the vendored backend contracts: "
-                    "path parameters only, with x-schema-status: missing. The count may shrink freely; it may "
-                    "only grow with an explicit contract addition."
+                    "Operations in the MCP surface with no full schema in the vendored backend contracts "
+                    "or scripts/operation-schemas.json: path parameters only, with `x-schema-status: missing`. "
+                    "The count may shrink freely; it may only grow with an explicit contract addition."
                 ),
             },
         )

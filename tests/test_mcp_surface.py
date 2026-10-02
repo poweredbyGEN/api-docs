@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -20,6 +21,7 @@ REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "sync_mcp_surface.py"
 OPENAPI = REPO / "public" / "openapi.yaml"
 SURFACE = REPO / "scripts" / "mcp-surface.json"
+SCHEMAS = REPO / "scripts" / "operation-schemas.json"
 BASELINE = REPO / "scripts" / "openapi-missing-baseline.json"
 
 METHODS = ("get", "post", "put", "patch", "delete")
@@ -101,6 +103,44 @@ def test_missing_count_does_not_grow():
     documented = parse_paths(OPENAPI.read_text())
     missing = sum(1 for block in documented.values() if "x-schema-status: missing" in "\n".join(block))
     assert missing <= json.loads(BASELINE.read_text())["missing"]
+
+
+def test_operation_schemas_key_the_real_surface():
+    """Every recorded schema must belong to an operation the surface actually serves.
+
+    A key with no matching `mcp-surface.json` operation would document a route the
+    MCP never calls, and `sync_mcp_surface.py` refuses to render one.
+    """
+    surface = {f"{method} {path}" for method, path in surface_operations()}
+    recorded = set(json.loads(SCHEMAS.read_text()))
+    unknown = sorted(recorded - surface)
+    assert unknown == [], f"operation-schemas.json keys with no surface operation: {unknown}"
+
+
+def test_operation_schemas_cite_backend_sources():
+    """Every entry names the backend code it was derived from, and a backend checkout confirms it.
+
+    The file-existence check runs only when GEN_BACKEND_PATH points at a checkout of
+    the backend repository, so this suite still runs from a docs-only clone.
+    """
+    schemas = json.loads(SCHEMAS.read_text())
+    empty = sorted(key for key, entry in schemas.items() if not entry.get("source"))
+    assert empty == [], f"operation-schemas.json entries without a `source` list: {empty}"
+    incomplete = sorted(
+        key for key, entry in schemas.items() if "requestBody" not in entry and "response" not in entry
+    )
+    assert incomplete == [], f"operation-schemas.json entries with neither requestBody nor response: {incomplete}"
+
+    backend = os.environ.get("GEN_BACKEND_PATH")
+    if not backend:
+        return
+    missing = []
+    for key, entry in schemas.items():
+        for reference in entry["source"]:
+            relative = reference.split("#", 1)[0]
+            if not (Path(backend) / relative).exists():
+                missing.append(f"{key}: {reference}")
+    assert missing == [], f"operation-schemas.json sources not found in GEN_BACKEND_PATH: {missing}"
 
 
 def test_regeneration_adds_a_fake_route():
