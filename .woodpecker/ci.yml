@@ -37,6 +37,14 @@ when:
     branch: main
 
 steps:
+  # The GitHub Pages publish runs `astro build`; the same build runs here so an
+  # MDX page the site cannot compile fails the PR instead of the publish.
+  site-build:
+    image: node:20-slim
+    commands:
+      - npm ci --no-audit --no-fund
+      - npx astro build
+
   model-enums:
     image: node:20-slim
     commands:

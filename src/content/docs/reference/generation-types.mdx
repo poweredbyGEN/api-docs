@@ -25,7 +25,7 @@ Every cell or layer generation declares a `generation_type` and a `data` object.
 | `lipsync` | video | `lip_sync_model`: sync.so, gen |
 | `captions` | caption layer (timed segments) | — |
 | `transcription` | transcript text + sentence timings | — |
-<!-- gen:backend-model-enums:start -->
+{/* gen:backend-model-enums:start */}
 
 Model ids the API accepts, read from the Rails job enums:
 
@@ -34,7 +34,7 @@ Model ids the API accepts, read from the Rails job enums:
 - `video_from_text`: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite`, `gemini-omni-flash-preview`, `kling-v3`, `seedance-2.0`, `seedance-2.0-less-restriction`, `seedance-2.0-fast`, `seedance-2.5`, `seedance-2.5-less-restriction`
 - `video_from_image`: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite`, `gemini-omni-flash-preview`, `kling-v3`, `kling-v2-6`, `seedance-2.0`, `seedance-2.0-less-restriction`, `seedance-2.0-fast`, `seedance-2.5`, `seedance-2.5-less-restriction`
 
-<!-- gen:backend-model-enums:end -->
+{/* gen:backend-model-enums:end */}
 
 Uploaded media is a cell **value**, not a generation — see [Media](/reference/cards/media/). Compositing is the dedicated [render endpoint](#render-composite), with no `generation_type`.
 
