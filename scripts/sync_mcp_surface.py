@@ -983,10 +983,11 @@ def merge_operation_schema(lines, schema_entry):
 
 # ---- avatar response schemas --------------------------------------------------
 #
-# The backend's docs/generated/avatars-api-schema.json pins the five
+# The backend's docs/generated/avatars-api-schema.json pins the
 # Avatars::Presenter output shapes (summary, detail, look, talking_loop,
-# generating_job). Each /avatars operation's success body is one of them: the
-# index list is an array of `summary`, show/create/update/copy return `detail`,
+# generating_job) and the create answer. Each /avatars operation's success body
+# is one of them: the index list is an array of `summary`, create returns
+# `create` (the detail plus what it made), show/update/copy return `detail`,
 # the look routes return `look` and the talking-loop routes return
 # `talking_loop`. The request bodies stay hand-written in
 # scripts/avatars-request-bodies.json because the backend generates only the
@@ -994,7 +995,7 @@ def merge_operation_schema(lines, schema_entry):
 AVATAR_RESPONSES = {
     "GET /avatars": ("summary", "list"),
     "GET /avatars/{id}": ("detail", "object"),
-    "POST /avatars": ("detail", "object"),
+    "POST /avatars": ("create", "object"),
     "PATCH /avatars/{id}": ("detail", "object"),
     "POST /avatars/{id}/copy": ("detail", "object"),
     "POST /avatars/{avatar_id}/looks": ("look", "object"),

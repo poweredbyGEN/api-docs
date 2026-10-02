@@ -109,9 +109,10 @@ function parseArgs(argv) {
 }
 
 // A minimal reader for the YAML shape config/creation_cards.yml uses: block
-// mappings, flow sequences and scalars. It is not a general YAML parser; a
-// construct outside that shape (a block sequence whose items are mappings)
-// raises rather than being guessed at, so an upstream reformat is loud.
+// mappings, flow sequences, flow mappings ({k: v}) and scalars. It is not a
+// general YAML parser; a construct outside that shape (a block sequence whose
+// items are block mappings) raises rather than being guessed at, so an upstream
+// reformat is loud.
 function parseYamlSubset(text) {
   const tokens = [];
   for (const raw of text.split("\n")) {
@@ -139,7 +140,7 @@ function parseYamlSubset(text) {
     const out = [];
     while (i < tokens.length && tokens[i].indent === indent && tokens[i].content.startsWith("- ")) {
       const item = tokens[i].content.slice(2).trim();
-      if (splitKey(item) !== null) throw new Error(`creation_cards.yml: unsupported block-sequence mapping: ${item}`);
+      if (!item.startsWith("{") && splitKey(item) !== null) throw new Error(`creation_cards.yml: unsupported block-sequence mapping: ${item}`);
       out.push(parseScalar(item));
       i += 1;
     }
@@ -183,6 +184,16 @@ function parseScalar(value) {
   if (value === "{}") return {};
   if (value === "[]") return [];
   if (value.startsWith("[")) return splitFlow(value.slice(1, -1)).map(parseScalar);
+  if (value.startsWith("{") && value.endsWith("}")) {
+    // A flow mapping, e.g. a talking loop's default clip {prompt: "...", duration: 10}.
+    return Object.fromEntries(
+      splitFlow(value.slice(1, -1)).map((entry) => {
+        const pair = splitKey(entry);
+        if (pair === null) throw new Error(`creation_cards.yml: not a flow-mapping entry: ${entry}`);
+        return [pair.key, parseScalar(pair.rest)];
+      }),
+    );
+  }
   if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
     return value.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
   }

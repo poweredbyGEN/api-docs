@@ -154,9 +154,9 @@
             "seedance": "seedance-2.0-fast"
           },
           "models": {
-            "gemini-omni-flash-preview": {
+            "gemini-omni-1.1-flash": {
               "family": "gemini",
-              "label": "Gemini Omni Flash",
+              "label": "Gemini Omni 1.1 Flash",
               "status": "active",
               "options": {
                 "ratio": [
@@ -511,9 +511,9 @@
             "seedance": "seedance-2.0-fast"
           },
           "models": {
-            "gemini-omni-flash-preview": {
+            "gemini-omni-1.1-flash": {
               "family": "gemini",
-              "label": "Gemini Omni Flash",
+              "label": "Gemini Omni 1.1 Flash",
               "status": "active",
               "options": {
                 "ratio": [
@@ -916,9 +916,9 @@
             "seedance": "seedance-2.0-fast"
           },
           "models": {
-            "gemini-omni-flash-preview": {
+            "gemini-omni-1.1-flash": {
               "family": "gemini",
-              "label": "Gemini Omni Flash",
+              "label": "Gemini Omni 1.1 Flash",
               "status": "active",
               "options": {
                 "ratio": [
@@ -1221,7 +1221,37 @@
         },
         "video-from-talking-avatar": {
           "status": "active",
-          "models": {}
+          "models": {},
+          "talking_loop": {
+            "clip_count": {
+              "min": 3,
+              "max": 10
+            },
+            "clip_seconds": [
+              5,
+              10
+            ],
+            "aspect_ratios": [
+              "9:16",
+              "16:9",
+              "1:1"
+            ],
+            "default_aspect_ratio": "9:16",
+            "default_clips": [
+              {
+                "prompt": "tiktok influencer talking confidently into the camera",
+                "duration": 10
+              },
+              {
+                "prompt": "tiktok influencer talking confidently into the camera",
+                "duration": 10
+              },
+              {
+                "prompt": "tiktok influencer talking confidently into the camera",
+                "duration": 10
+              }
+            ]
+          }
         },
         "captions": {
           "status": "active",
@@ -1338,7 +1368,7 @@
         },
         {
           "form_type": "video-from-text",
-          "model": "gemini-omni-flash-preview"
+          "model": "gemini-omni-1.1-flash"
         },
         {
           "form_type": "video-from-text",
@@ -1382,7 +1412,7 @@
         },
         {
           "form_type": "video-from-image",
-          "model": "gemini-omni-flash-preview"
+          "model": "gemini-omni-1.1-flash"
         },
         {
           "form_type": "video-from-image",
@@ -1434,7 +1464,7 @@
         },
         {
           "form_type": "video-from-ingredients",
-          "model": "gemini-omni-flash-preview"
+          "model": "gemini-omni-1.1-flash"
         },
         {
           "form_type": "video-from-ingredients",
@@ -1485,6 +1515,36 @@
         "suno-v5-beta": 240,
         "suno-v4.5plus-beta": 480,
         "suno-v5.5-beta": 360
+      },
+      "talking_loop": {
+        "clip_count": {
+          "min": 3,
+          "max": 10
+        },
+        "clip_seconds": [
+          5,
+          10
+        ],
+        "aspect_ratios": [
+          "9:16",
+          "16:9",
+          "1:1"
+        ],
+        "default_aspect_ratio": "9:16",
+        "default_clips": [
+          {
+            "prompt": "tiktok influencer talking confidently into the camera",
+            "duration": 10
+          },
+          {
+            "prompt": "tiktok influencer talking confidently into the camera",
+            "duration": 10
+          },
+          {
+            "prompt": "tiktok influencer talking confidently into the camera",
+            "duration": 10
+          }
+        ]
       },
       "limits": [
         {
@@ -1859,7 +1919,7 @@
         },
         {
           "card": "video-from-text",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
           "max_reference_images": 1,
           "max_reference_videos": null,
@@ -2216,7 +2276,7 @@
         },
         {
           "card": "video-from-image",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
           "max_reference_images": 1,
           "max_reference_videos": null,
@@ -2755,7 +2815,7 @@
         },
         {
           "card": "video-from-ingredients",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
           "max_reference_images": 1,
           "max_reference_videos": null,
@@ -3572,6 +3632,8 @@
                 },
                 "advancedOptAvatar": {
                   "type": "array",
+                  "minItems": 3,
+                  "maxItems": 10,
                   "items": {
                     "type": "object"
                   }
@@ -3641,6 +3703,8 @@
                 },
                 "advancedOptAvatar": {
                   "type": "array",
+                  "minItems": 3,
+                  "maxItems": 10,
                   "items": {
                     "type": "object"
                   }
@@ -3710,6 +3774,8 @@
                 },
                 "advancedOptAvatar": {
                   "type": "array",
+                  "minItems": 3,
+                  "maxItems": 10,
                   "items": {
                     "type": "object"
                   }
@@ -4089,7 +4155,7 @@
         },
         {
           "card": "video-from-text",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "field": "ratio",
           "default": null,
           "allowed": [
@@ -4473,7 +4539,7 @@
         },
         {
           "card": "video-from-image",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "field": "ratio",
           "default": null,
           "allowed": [
@@ -4897,7 +4963,7 @@
         },
         {
           "card": "video-from-ingredients",
-          "model": "gemini-omni-flash-preview",
+          "model": "gemini-omni-1.1-flash",
           "field": "ratio",
           "default": null,
           "allowed": [
@@ -5376,8 +5442,8 @@
       },
       {
         "card": "video-from-text",
-        "model": "gemini-omni-flash-preview",
-        "label": "Gemini Omni Flash",
+        "model": "gemini-omni-1.1-flash",
+        "label": "Gemini Omni 1.1 Flash",
         "status": "active",
         "ratio": [
           "9:16",
@@ -5677,8 +5743,8 @@
       },
       {
         "card": "video-from-image",
-        "model": "gemini-omni-flash-preview",
-        "label": "Gemini Omni Flash",
+        "model": "gemini-omni-1.1-flash",
+        "label": "Gemini Omni 1.1 Flash",
         "status": "active",
         "ratio": [
           "9:16",
@@ -6015,8 +6081,8 @@
       },
       {
         "card": "video-from-ingredients",
-        "model": "gemini-omni-flash-preview",
-        "label": "Gemini Omni Flash",
+        "model": "gemini-omni-1.1-flash",
+        "label": "Gemini Omni 1.1 Flash",
         "status": "active",
         "ratio": [
           "9:16",
@@ -6497,9 +6563,10 @@
       "model": {
         "type": "string",
         "enum": [
+          "gemini-omni-1.1-flash",
           "gemini-omni-flash-preview"
         ],
-        "default": "gemini-omni-flash-preview"
+        "default": "gemini-omni-1.1-flash"
       },
       "duration": {
         "type": [

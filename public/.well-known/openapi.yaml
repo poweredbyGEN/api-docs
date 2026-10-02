@@ -5694,6 +5694,8 @@ paths:
                       type:
                         - "string"
                         - "null"
+                    is_agent_avatar:
+                      type: "boolean"
                     latest_generated_video_url:
                       type:
                         - "string"
@@ -5718,6 +5720,7 @@ paths:
                     - "avatar_id"
                     - "name"
                     - "source"
+                    - "is_agent_avatar"
                     - "cover_url"
                     - "preview_url"
                     - "latest_generated_video_url"
@@ -5743,19 +5746,31 @@ paths:
           application/json:
             schema:
               type: "object"
-              description: "JSON request body."
+              description: "JSON request body. An image becomes the avatar's original look. A video of a person becomes an uploaded talking loop, its first frame becomes the first look (the cover), and, unless clone_voice is false, its audio is cloned into a new voice that becomes the avatar's primary voice. Cloning a voice uses credits and needs a paid plan; uploading and extracting the frame do not. Send an Idempotency-Key header to retry safely. Refusals: 422 video_has_no_audio, video_too_short_for_voice_clone (the clone needs at least 30 seconds of speech) and video_audio_unreadable (each with param content_resource_id) when clone_voice is true; without clone_voice those videos are created without a voice and voice_clone_message says why."
               required:
                 - "agent_id"
-                - "name"
                 - "content_resource_id"
               properties:
                 agent_id:
                   type: "string"
                   description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
                 name:
-                  description: "Avatar name."
+                  type: "string"
+                  description: "Avatar name. Optional: defaults to the file name, else \"New avatar\"."
                 content_resource_id:
-                  description: "An uploaded image (becomes the original look) or video (becomes the first talking loop)."
+                  description: "An uploaded image (becomes the original look) or video of a person (becomes a talking loop, its first frame the first look, and its audio a cloned voice unless clone_voice is false)."
+                clone_voice:
+                  type: "boolean"
+                  description: "Videos only (ignored for images). Default true: clone the person's voice from the video's audio into the avatar's primary voice; this uses credits. false skips it. true refuses a video without audio or shorter than 30 seconds instead of creating it without a voice."
+                voice_gender:
+                  type: "string"
+                  enum:
+                    - "male"
+                    - "female"
+                  description: "The cloned voice's gender label. Default female."
+                voice_language:
+                  type: "string"
+                  description: "The cloned voice's language. Default english."
       responses:
         '200':
           description: Success.
@@ -5763,7 +5778,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "GET /v1/avatars/:id (show): the summary plus looks and talking loops."
+                description: "POST /v1/avatars (create): the detail plus the look, talking loop and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the avatar's primary_voice."
                 properties:
                   avatar_id:
                     minimum: 1
@@ -5771,6 +5786,10 @@ paths:
                   avatar_look_count:
                     minimum: 0
                     type: "integer"
+                  avatar_look_id:
+                    type:
+                      - "integer"
+                      - "null"
                   avatar_looks:
                     items:
                       additionalProperties: false
@@ -5845,6 +5864,8 @@ paths:
                               - "aspect_ratio"
                             type: "object"
                           type: "array"
+                        from_agent_core:
+                          type: "boolean"
                         name:
                           type:
                             - "string"
@@ -5866,6 +5887,7 @@ paths:
                         - "avatar_look_id"
                         - "name"
                         - "origin"
+                        - "from_agent_core"
                         - "url"
                         - "thumbnail_url"
                         - "avatar_talking_loops"
@@ -5874,6 +5896,10 @@ paths:
                   avatar_talking_loop_count:
                     minimum: 0
                     type: "integer"
+                  avatar_talking_loop_id:
+                    type:
+                      - "integer"
+                      - "null"
                   cover_url:
                     type:
                       - "string"
@@ -5900,6 +5926,8 @@ paths:
                         - "status"
                       type: "object"
                     type: "array"
+                  is_agent_avatar:
+                    type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
@@ -5986,10 +6014,30 @@ paths:
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
+                  user_job_ids:
+                    items:
+                      minimum: 1
+                      type: "integer"
+                    type: "array"
+                  voice_clone_message:
+                    type:
+                      - "string"
+                      - "null"
+                  voice_clone_status:
+                    enum:
+                      - "pending"
+                      - "skipped"
+                      - "not_requested"
+                      - "not_applicable"
+                  voice_id:
+                    type:
+                      - "string"
+                      - "null"
                 required:
                   - "avatar_id"
                   - "name"
                   - "source"
+                  - "is_agent_avatar"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
@@ -6000,6 +6048,12 @@ paths:
                   - "avatar_looks"
                   - "uploaded_avatar_talking_loops"
                   - "generating_avatar_talking_loops"
+                  - "avatar_look_id"
+                  - "avatar_talking_loop_id"
+                  - "voice_id"
+                  - "user_job_ids"
+                  - "voice_clone_status"
+                  - "voice_clone_message"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -6114,6 +6168,8 @@ paths:
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
+                  from_agent_core:
+                    type: "boolean"
                   name:
                     type:
                       - "string"
@@ -6135,6 +6191,7 @@ paths:
                   - "avatar_look_id"
                   - "name"
                   - "origin"
+                  - "from_agent_core"
                   - "url"
                   - "thumbnail_url"
                   - "avatar_talking_loops"
@@ -6352,6 +6409,8 @@ paths:
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
+                  from_agent_core:
+                    type: "boolean"
                   name:
                     type:
                       - "string"
@@ -6373,6 +6432,7 @@ paths:
                   - "avatar_look_id"
                   - "name"
                   - "origin"
+                  - "from_agent_core"
                   - "url"
                   - "thumbnail_url"
                   - "avatar_talking_loops"
@@ -6687,6 +6747,8 @@ paths:
                               - "aspect_ratio"
                             type: "object"
                           type: "array"
+                        from_agent_core:
+                          type: "boolean"
                         name:
                           type:
                             - "string"
@@ -6708,6 +6770,7 @@ paths:
                         - "avatar_look_id"
                         - "name"
                         - "origin"
+                        - "from_agent_core"
                         - "url"
                         - "thumbnail_url"
                         - "avatar_talking_loops"
@@ -6742,6 +6805,8 @@ paths:
                         - "status"
                       type: "object"
                     type: "array"
+                  is_agent_avatar:
+                    type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
@@ -6832,6 +6897,7 @@ paths:
                   - "avatar_id"
                   - "name"
                   - "source"
+                  - "is_agent_avatar"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
@@ -6968,6 +7034,8 @@ paths:
                               - "aspect_ratio"
                             type: "object"
                           type: "array"
+                        from_agent_core:
+                          type: "boolean"
                         name:
                           type:
                             - "string"
@@ -6989,6 +7057,7 @@ paths:
                         - "avatar_look_id"
                         - "name"
                         - "origin"
+                        - "from_agent_core"
                         - "url"
                         - "thumbnail_url"
                         - "avatar_talking_loops"
@@ -7023,6 +7092,8 @@ paths:
                         - "status"
                       type: "object"
                     type: "array"
+                  is_agent_avatar:
+                    type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
@@ -7113,6 +7184,7 @@ paths:
                   - "avatar_id"
                   - "name"
                   - "source"
+                  - "is_agent_avatar"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
@@ -7266,6 +7338,8 @@ paths:
                               - "aspect_ratio"
                             type: "object"
                           type: "array"
+                        from_agent_core:
+                          type: "boolean"
                         name:
                           type:
                             - "string"
@@ -7287,6 +7361,7 @@ paths:
                         - "avatar_look_id"
                         - "name"
                         - "origin"
+                        - "from_agent_core"
                         - "url"
                         - "thumbnail_url"
                         - "avatar_talking_loops"
@@ -7321,6 +7396,8 @@ paths:
                         - "status"
                       type: "object"
                     type: "array"
+                  is_agent_avatar:
+                    type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
@@ -7411,6 +7488,7 @@ paths:
                   - "avatar_id"
                   - "name"
                   - "source"
+                  - "is_agent_avatar"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
@@ -11935,7 +12013,7 @@ components:
         - midjourney
         - seedream-4.0
         - seedream-4.5
-        - gemini-omni-flash-preview
+        - gemini-omni-1.1-flash
         - kling-v3
         - seedance-2.0
         - seedance-2.0-fast

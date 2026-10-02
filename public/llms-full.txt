@@ -966,7 +966,7 @@ The creation-card capability matrix: the model ids each creation card accepts, a
 | `image-from-text` | `midjourney` | Midjourney 8.2 | `1:1`, `9:16`, `16:9` | — | — |
 | `image-from-text` | `seedream-4.0` | Seedream 4.0 | `1:1`, `9:16`, `16:9`, `4:3`, `3:4` | — | — |
 | `image-from-text` | `seedream-4.5` | Seedream 4.5 | `1:1`, `9:16`, `16:9` | — | — |
-| `video-from-text` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-text` | `gemini-omni-1.1-flash` | Gemini Omni 1.1 Flash | `9:16`, `16:9` | — | — |
 | `video-from-text` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
 | `video-from-text` | `kling-v3` | Kling 3.0 | `1:1`, `9:16`, `16:9` | 3–15 | — |
 | `video-from-text` | `seedance-2.0` | Seedance 2.0 | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
@@ -977,7 +977,7 @@ The creation-card capability matrix: the model ids each creation card accepts, a
 | `video-from-text` | `veo-3.1` | Veo 3.1 | `9:16`, `16:9` | 4, 6, 8 | — |
 | `video-from-text` | `veo-3.1-fast` | Veo 3.1 Fast | `9:16`, `16:9` | 4, 6, 8 | — |
 | `video-from-text` | `veo-3.1-lite` | Veo 3.1 Lite | `9:16`, `16:9` | 4, 6, 8 | — |
-| `video-from-image` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-image` | `gemini-omni-1.1-flash` | Gemini Omni 1.1 Flash | `9:16`, `16:9` | — | — |
 | `video-from-image` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
 | `video-from-image` | `kling-v2-6` | Kling 2.6 | — | 5, 10 | — |
 | `video-from-image` | `kling-v3` | Kling 3.0 | — | 3–15 | — |
@@ -990,7 +990,7 @@ The creation-card capability matrix: the model ids each creation card accepts, a
 | `video-from-image` | `veo-3.1` | Veo 3.1 | `9:16`, `16:9` | 4, 6, 8 | — |
 | `video-from-image` | `veo-3.1-fast` | Veo 3.1 Fast | `9:16`, `16:9` | 4, 6, 8 | — |
 | `video-from-image` | `veo-3.1-lite` | Veo 3.1 Lite | `9:16`, `16:9` | 4, 6, 8 | — |
-| `video-from-ingredients` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-ingredients` | `gemini-omni-1.1-flash` | Gemini Omni 1.1 Flash | `9:16`, `16:9` | — | — |
 | `video-from-ingredients` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
 | `video-from-ingredients` | `kling-v3` | Kling 3.0 | `1:1`, `9:16`, `16:9` | 3–15 | — |
 | `video-from-ingredients` | `seedance-2.0` | Seedance 2.0 | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
