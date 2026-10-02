@@ -2,7 +2,6 @@
   "/agents/{}/core/linked-accounts/{}": ["agent_id", "linked_account_id"],
   "/agents/{}/monitoring/effective": ["agent_id"],
   "/agents/{}/recurring-jobs": ["agent_id"],
-  "/agents/{}/smas/{}": ["agent_id", "sma_id"],
   "/avatars/{}": ["id"],
   "/avatars/{}/copy": ["id"],
   "/avatars/{}/looks": ["avatar_id"],
