@@ -1745,8 +1745,31 @@
     },
     "source": [
       "app/controllers/v1/spreadsheet_cells_controller.rb#set_default_user_job",
+      "app/controllers/v1/spreadsheet_cells_controller.rb#spreadsheet_cell_default_user_job_params",
       "app/resources/spreadsheet_cell_resource.rb"
-    ]
+    ],
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "default_user_job"
+      ],
+      "properties": {
+        "default_user_job": {
+          "type": "object",
+          "properties": {
+            "user_job_id": {
+              "type": "string",
+              "description": "The generation (UserJob) id to pin as the cell's default."
+            },
+            "is_user_job": {
+              "type": "boolean",
+              "description": "true (default) pins a `UserJob`; false pins a legacy `Job`."
+            }
+          }
+        }
+      }
+    }
   },
   "GET /vidsheet/{id}/generations": {
     "response": {
@@ -1913,8 +1936,22 @@
     },
     "source": [
       "app/controllers/v1/spreadsheets_controller.rb#validate_video_layout",
-      "app/services/spreadsheets/vidsheet_route_contract.rb#payload"
-    ]
+      "app/services/spreadsheets/vidsheet_route_contract.rb#payload",
+      "app/controllers/application_controller.rb#require_agent!"
+    ],
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    }
   },
   "POST /vidsheet/{sheet_id}/rows/{row_id}/duplicate": {
     "response": {
@@ -1987,8 +2024,22 @@
     },
     "source": [
       "app/controllers/v1/spreadsheet_rows_controller.rb#duplicate",
-      "app/resources/spreadsheet_row_resource.rb"
-    ]
+      "app/resources/spreadsheet_row_resource.rb",
+      "app/controllers/application_controller.rb#require_agent!"
+    ],
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    }
   },
   "POST /agents/{agent_id}/avatars": {
     "requestBody": {
@@ -2027,7 +2078,9 @@
             "filename"
           ],
           "properties": {
-            "filename": {}
+            "filename": {
+              "type": "string"
+            }
           }
         }
       }
@@ -2106,7 +2159,10 @@
       "properties": {
         "id_to_position": {
           "description": "Map of column id to new position.",
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
         }
       }
     },
@@ -2121,7 +2177,10 @@
       "properties": {
         "id_to_position": {
           "description": "Map of layer id to new position.",
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
         }
       }
     },
@@ -2154,6 +2213,45 @@
     "source": [
       "app/controllers/v1/user_shared_agents_controller.rb#show",
       "app/presenters/user_shared_agent/presenter.rb#as_json"
+    ]
+  },
+  "POST /generations/{generation_id}/stop": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "app/controllers/v1/generations_controller.rb#stop",
+      "app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /generations/{generation_id}/continue": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body. Every field other than the routing keys is forwarded verbatim to `UserJobs::Continue`.",
+      "additionalProperties": true,
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "app/controllers/v1/generations_controller.rb#continue_generation",
+      "app/controllers/application_controller.rb#require_agent!"
     ]
   }
 }

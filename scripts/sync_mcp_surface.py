@@ -354,17 +354,26 @@ def render_contract_request_body(schema):
 def merge_operation_schema(lines, schema_entry):
     """Add the backend-derived request body / 2xx schema to one rendered operation.
 
-    Existing content is never overwritten: a seeded operation that already
-    carries a request body or a success schema keeps it, and only the missing
-    half is filled. `scripts/operation-schemas.json` is the only source of
-    these fields, and every property in it is traceable to the backend files
-    its `source` list names.
+    `scripts/operation-schemas.json` is authoritative for the request body: its
+    entries are read straight off the controller, so a body it carries replaces
+    the seed's hand-written one (which is where a flat shape that no longer
+    matches `params.expect(...)` comes from). A success schema is only filled
+    when the operation has none: a seeded `$ref` into `components/schemas`
+    is the richer contract and is never overwritten. Every property in either
+    field is traceable to the backend files its `source` list names.
     """
     if not schema_entry:
         return list(lines)
     out = list(lines)
     schema = schema_entry.get("requestBody")
-    if schema is not None and not any(line.startswith("      requestBody:") for line in out):
+    if schema is not None:
+        existing = next((i for i, line in enumerate(out) if line.startswith("      requestBody:")), None)
+        if existing is not None:
+            end = next(
+                (j for j in range(existing + 1, len(out)) if re.match(r"^      \S", out[j])),
+                len(out),
+            )
+            del out[existing:end]
         at = next((i for i, line in enumerate(out) if line.startswith("      responses:")), len(out))
         out[at:at] = render_contract_request_body(schema)
     response = schema_entry.get("response")

@@ -21,7 +21,10 @@ REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "sync_mcp_surface.py"
 OPENAPI = REPO / "public" / "openapi.yaml"
 SURFACE = REPO / "scripts" / "mcp-surface.json"
-SCHEMAS = REPO / "scripts" / "operation-schemas.json"
+# `GEN_OPERATION_SCHEMAS` lets a test (or a reviewer) point the schema checks at
+# a scratch copy, which is how the fake-key sabotage case is exercised without
+# touching the committed file. It defaults to the committed one.
+SCHEMAS = Path(os.environ.get("GEN_OPERATION_SCHEMAS") or (REPO / "scripts" / "operation-schemas.json"))
 BASELINE = REPO / "scripts" / "openapi-missing-baseline.json"
 
 METHODS = ("get", "post", "put", "patch", "delete")
@@ -141,6 +144,20 @@ def test_operation_schemas_cite_backend_sources():
             if not (Path(backend) / relative).exists():
                 missing.append(f"{key}: {reference}")
     assert missing == [], f"operation-schemas.json sources not found in GEN_BACKEND_PATH: {missing}"
+
+
+def test_set_default_user_job_body_is_nested():
+    """The default-take write takes a `default_user_job` wrapper, not a flat body.
+
+    The controller reads `params.expect(default_user_job: [:user_job_id, :is_user_job])`,
+    so a flat `{user_job_id}` body is dropped by strong parameters and the pin
+    silently does nothing. This catches a regression to the flat hand-written shape.
+    """
+    block = parse_paths(OPENAPI.read_text())[("PATCH", "/vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job")]
+    text = "\n".join(block)
+    body = text[text.index("      requestBody:"):text.index("      responses:")]
+    assert "default_user_job:" in body, body
+    assert "user_job_id" in body, body
 
 
 def test_regeneration_adds_a_fake_route():
