@@ -1,4 +1,4 @@
 {
-  "missing": 66,
+  "missing": 47,
   "note": "Operations in the MCP surface with no full schema in the vendored backend contracts or scripts/operation-schemas.json: path parameters only, with `x-schema-status: missing`. The count may shrink freely; it may only grow with an explicit contract addition."
 }

@@ -30,7 +30,12 @@ info:
     ```
     https://api.gen.pro/v1       — agent setup, vidsheets, generations, renders, publishing
     https://agent.gen.pro/v1     — content ideas, research, conversations, chat
+    https://agent-core.gen.pro/v1 — agent core (brand profile, watchlists, scheduled tasks)
+    https://python.gen.pro        — social publishing integration (connect, schedule, remove posts)
     ```
+
+    Each operation carries its own `servers` entry, so a generated client or a
+    hand-written call goes to the backend that serves the route.
 
     ## Credits
 
@@ -59,6 +64,8 @@ servers:
     description: Agent Chat API
   - url: https://agent-core.gen.pro/v1
     description: Agent Core API (watchlists)
+  - url: https://python.gen.pro
+    description: Publishing integration API (social connect and scheduling)
 
 security:
   - apiKey: []
@@ -2063,6 +2070,8 @@ paths:
   /schedule/with-post:
     post:
       operationId: createScheduledPost
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "schedule_post_<platform>"
       x-phase: [export]
@@ -2201,6 +2210,8 @@ paths:
   /schedule/posts:
     get:
       operationId: listScheduledPosts
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_discover
       x-mcp-branch: "publish.scheduled"
       x-phase: [export]
@@ -2248,6 +2259,8 @@ paths:
           type: integer
     get:
       operationId: getScheduledPost
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_discover
       x-mcp-branch: "publish.post_status"
       x-phase: [export]
@@ -2268,6 +2281,8 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       operationId: updateScheduledPost
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "update_scheduled_post"
       x-phase: [export]
@@ -2294,15 +2309,25 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       operationId: deleteScheduledPost
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "delete_scheduled_post"
-      x-schema-status: missing
       x-phase: [export]
       summary: Delete a scheduled post
       tags: [Publishing]
       responses:
         '200':
           description: Deleted.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                required:
+                  - "message"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2318,6 +2343,8 @@ paths:
           type: integer
     patch:
       operationId: updatePublishedPost
+      servers:
+        - url: https://python.gen.pro
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "update_published_post"
       x-phase: [export]
@@ -2417,6 +2444,8 @@ paths:
 
     delete:
       operationId: deleteSchedulePostByPostIdPublished
+      servers:
+        - url: https://python.gen.pro
       x-phase: export
       summary: "Schedule, publish, or remove posts — delete published post"
       tags: [Publishing]
@@ -2429,13 +2458,37 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  post_id:
+                    type: "integer"
+                  results:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        platform:
+                          type: "string"
+                        outcome:
+                          type: "string"
+                        message:
+                          type: "string"
+                      required:
+                        - "platform"
+                        - "outcome"
+                      additionalProperties: true
+                required:
+                  - "post_id"
+                  - "results"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "delete_published_post"
-      x-schema-status: missing
   /templates/projects:
     get:
       operationId: listTemplates
@@ -3053,6 +3106,8 @@ paths:
   /agent/run:
     post:
       operationId: startAgentRun
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_ask
       x-mcp-branch: "ask"
       x-phase: ideas
@@ -3139,6 +3194,8 @@ paths:
   /audio/mixes:
     post:
       operationId: createSongMix
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_generate
       x-mcp-branch: "create_song_mix"
       x-phase: ideas
@@ -3180,6 +3237,8 @@ paths:
   /agent/runs/{run_id}:
     get:
       operationId: getAgentRun
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "task.run_status"
       x-phase: ideas
@@ -3229,6 +3288,8 @@ paths:
   /agent/runs/{run_id}/approve:
     post:
       operationId: approveAgentAction
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "decide_agent_run"
       x-phase: ideas
@@ -3281,6 +3342,8 @@ paths:
   /agent/conversations:
     get:
       operationId: listConversations
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "platform.conversations"
       x-phase: ideas
@@ -3307,6 +3370,8 @@ paths:
   /agent/conversations/{id}:
     get:
       operationId: getConversation
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "platform.conversation"
       x-phase: ideas
@@ -3335,6 +3400,8 @@ paths:
   /agent/conversations/{id}/session-preferences:
     get:
       operationId: getSessionPreferences
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "platform.preferences"
       x-phase: ideas
@@ -3365,6 +3432,8 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       operationId: updateSessionPreferences
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "update_session_preferences"
       x-phase: ideas
@@ -3406,6 +3475,8 @@ paths:
   /ideas/{idea_id}/expand:
     post:
       operationId: expandIdea
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_content_action
       x-mcp-branch: "expand_idea"
       x-schema-status: missing
@@ -3435,6 +3506,8 @@ paths:
   /agent/ideas:
     get:
       operationId: listIdeas
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.ideas"
       x-phase: ideas
@@ -3467,6 +3540,8 @@ paths:
   /agent/ideas/{id}/status/{status}:
     put:
       operationId: setIdeaStatus
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_content_action
       x-mcp-branch: "set_idea_status"
       x-schema-status: missing
@@ -3600,6 +3675,8 @@ paths:
   # ── Agent Voice ───────────────────────────────────────────
     delete:
       operationId: deleteAgentsByAgentIdCore
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — reset agent profile"
       tags: [Agent Chat]
@@ -3612,16 +3689,29 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                  agent_id:
+                    type: "string"
+                required:
+                  - "status"
+                  - "agent_id"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "reset_agent_profile"
-      x-schema-status: missing
   /agents/{agent_id}/proof-of-genesis/backups:
     get:
       operationId: listProofOfGenesisBackups
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "platform.backups"
       x-phase: edit
@@ -3630,8 +3720,6 @@ paths:
         Returns Proof of Genesis backup rows newest first. Removed rows are
         hidden by default; pass `include_removed=true` for audit views.
       tags: [Proof of Genesis]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - name: include_removed
@@ -3649,6 +3737,8 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     post:
       operationId: createProofOfGenesisBackup
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "create_proof_of_genesis_backup"
       x-phase: edit
@@ -3663,8 +3753,6 @@ paths:
         Private assets must be encrypted before upload. Raw private requests
         are rejected before billing or Walrus work.
       tags: [Proof of Genesis]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       requestBody:
@@ -3696,6 +3784,8 @@ paths:
   /agents/{agent_id}/proof-of-genesis/backups/{backup_id}:
     delete:
       operationId: removeProofOfGenesisBackup
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_platform_action
       x-mcp-branch: "remove_proof_of_genesis_backup"
       x-phase: edit
@@ -3705,8 +3795,6 @@ paths:
         the default assets-page list but does not guarantee deletion from Walrus
         or Sui.
       tags: [Proof of Genesis]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: backup_id, in: path, required: true, schema: { type: integer } }
@@ -3724,13 +3812,13 @@ paths:
   /agents/{agent_id}/watchlists:
     get:
       operationId: listWatchlists
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "watchlist.list"
       x-phase: monitoring
       summary: List active watchlists for an agent
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       responses:
@@ -3743,6 +3831,8 @@ paths:
                 items: { $ref: '#/components/schemas/Watchlist' }
     post:
       operationId: createWatchlist
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "create_watchlist"
       x-phase: monitoring
@@ -3753,8 +3843,6 @@ paths:
         exists for this agent, the provided sources are merged into the
         existing watchlist instead of creating a duplicate.
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       requestBody:
@@ -3772,13 +3860,13 @@ paths:
   /agents/{agent_id}/watchlists/{watchlist_id}:
     get:
       operationId: getWatchlist
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "watchlist.detail"
       x-phase: monitoring
       summary: Get a single watchlist with sources
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3791,6 +3879,8 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     patch:
       operationId: updateWatchlist
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "pause_watchlist"
       x-phase: monitoring
@@ -3800,8 +3890,6 @@ paths:
         without deleting the watchlist; `true` to resume. Only fields you
         send are updated.
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3819,6 +3907,8 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
       operationId: deleteWatchlist
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "delete_watchlist"
       x-phase: monitoring
@@ -3828,8 +3918,6 @@ paths:
         rows are retained in the database. Use PATCH with `intent_active=false`
         for a reversible pause.
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3847,6 +3935,8 @@ paths:
   /agents/{agent_id}/watchlists/{watchlist_id}/sources:
     post:
       operationId: addWatchlistSource
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "add_watchlist_source"
       x-phase: monitoring
@@ -3856,8 +3946,6 @@ paths:
         same source returns the existing row (restored if it had been
         soft-deleted).
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3874,13 +3962,13 @@ paths:
               schema: { $ref: '#/components/schemas/WatchSource' }
     delete:
       operationId: removeWatchlistSourceByKey
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "remove_watchlist_source"
       x-phase: monitoring
       summary: Remove a source by (platform, target_type, target_value)
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3901,13 +3989,13 @@ paths:
   /agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}:
     delete:
       operationId: removeWatchlistSource
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-mcp-tool: gen_watchlist_action
       x-mcp-branch: "remove_watchlist_source"
       x-phase: monitoring
       summary: Remove a source by id
       tags: [Watchlists]
-      servers:
-        - url: https://agent-core.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: watchlist_id, in: path, required: true, schema: { type: string } }
@@ -3927,13 +4015,13 @@ paths:
   /agents/{agent_id}/recurring-jobs:
     get:
       operationId: listRecurringJobs
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "task.list"
       x-phase: monitoring
       summary: List recurring jobs (daily tasks) for an agent
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       responses:
@@ -3949,13 +4037,13 @@ paths:
                     items: { $ref: '#/components/schemas/RecurringJob' }
     post:
       operationId: createRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "create_recurring_job"
       x-phase: monitoring
       summary: Create a recurring agent job
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       requestBody:
@@ -3972,6 +4060,8 @@ paths:
 
     patch:
       operationId: patchAgentsByAgentIdRecurringJobs
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage recurring jobs and monitoring tasks — update recurring job"
       tags: [Agent Chat]
@@ -3981,18 +4071,186 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 200
+                      minLength: 1
+                    - type: "null"
+                job_type:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 100
+                      minLength: 1
+                    - type: "null"
+                prompt:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 20000
+                      minLength: 1
+                    - type: "null"
+                vidsheet_url:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 2000
+                      minLength: 1
+                    - type: "null"
+                schedule:
+                  anyOf:
+                    - properties:
+                        cadence:
+                          type: "string"
+                          enum:
+                            - "minutely"
+                            - "hourly"
+                            - "daily"
+                            - "weekly"
+                            - "monthly"
+                        timezone:
+                          type: "string"
+                        time_of_day:
+                          anyOf:
+                            - type: "string"
+                              pattern: "^\\d{2}:\\d{2}$"
+                            - type: "null"
+                        days_of_week:
+                          anyOf:
+                            - items:
+                                type: "integer"
+                              type: "array"
+                            - type: "null"
+                        day_of_month:
+                          anyOf:
+                            - type: "integer"
+                            - type: "null"
+                        interval_value:
+                          anyOf:
+                            - type: "integer"
+                            - type: "null"
+                        freshness_window_minutes:
+                          anyOf:
+                            - type: "integer"
+                              maximum: 1440.0
+                              minimum: 1.0
+                            - type: "null"
+                      type: "object"
+                      required:
+                        - "cadence"
+                        - "timezone"
+                    - type: "null"
+                delivery:
+                  anyOf:
+                    - properties:
+                        type:
+                          type: "string"
+                          enum:
+                            - "chat_only"
+                            - "email"
+                          default: "email"
+                        email:
+                          anyOf:
+                            - type: "string"
+                            - type: "null"
+                        recipients:
+                          anyOf:
+                            - items:
+                                type: "string"
+                              type: "array"
+                            - type: "null"
+                        preferences:
+                          anyOf:
+                            - $ref: "#/components/schemas/RecurringJobDeliveryPreferences"
+                            - type: "null"
+                      type: "object"
+                    - type: "null"
+                status:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "active"
+                        - "paused"
+                    - type: "null"
+                auto_publish:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                actions:
+                  anyOf:
+                    - items:
+                        properties:
+                          position:
+                            type: "integer"
+                            minimum: 1.0
+                          kind:
+                            type: "string"
+                            enum:
+                              - "update_element"
+                              - "update_track"
+                            default: "update_element"
+                          target:
+                            $ref: "#/components/schemas/AutomationActionTarget"
+                          update_with:
+                            type: "string"
+                            maxLength: 4000
+                            default: ""
+                          model:
+                            anyOf:
+                              - type: "string"
+                                maxLength: 100
+                                minLength: 1
+                              - type: "null"
+                        additionalProperties: false
+                        type: "object"
+                        required:
+                          - "position"
+                          - "target"
+                      type: "array"
+                    - type: "null"
+                actions_parallel:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                auto_generate_video:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                next_run_at:
+                  anyOf:
+                    - type: "string"
+                      format: "date-time"
+                    - type: "null"
+                row_strategy:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "duplicate_last_row"
+                        - "add_new_row"
+                    - type: "null"
+              type: "object"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "update_recurring_job"
-      x-schema-status: missing
     delete:
       operationId: deleteAgentsByAgentIdRecurringJobs
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage recurring jobs and monitoring tasks — delete recurring job"
       tags: [Agent Chat]
@@ -4015,6 +4273,8 @@ paths:
   /agents/{agent_id}/recurring-jobs/defaults:
     post:
       operationId: ensureDefaultRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "ensure_default_recurring_job"
       x-schema-status: missing
@@ -4026,8 +4286,6 @@ paths:
         cadence at 09:00 UTC, and `chat_only` delivery. The response `created`
         boolean indicates whether a new job was created.
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
       responses:
@@ -4046,13 +4304,13 @@ paths:
   /agents/{agent_id}/recurring-jobs/{job_id}:
     get:
       operationId: getRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_discover
       x-mcp-branch: "task.job"
       x-phase: monitoring
       summary: Get one recurring job
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: job_id, in: path, required: true, schema: { type: string } }
@@ -4065,13 +4323,13 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     patch:
       operationId: updateRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "update_recurring_job"
       x-phase: monitoring
       summary: Update a recurring job's mutable fields
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: job_id, in: path, required: true, schema: { type: string } }
@@ -4089,14 +4347,14 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
       operationId: deleteRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "delete_recurring_job"
       x-schema-status: missing
       x-phase: monitoring
       summary: Soft-delete a recurring job
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: job_id, in: path, required: true, schema: { type: string } }
@@ -4108,14 +4366,14 @@ paths:
   /agents/{agent_id}/recurring-jobs/{job_id}/pause:
     post:
       operationId: pauseRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "pause_recurring_job"
       x-schema-status: missing
       x-phase: monitoring
       summary: Pause a recurring job
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: job_id, in: path, required: true, schema: { type: string } }
@@ -4129,14 +4387,14 @@ paths:
   /agents/{agent_id}/recurring-jobs/{job_id}/resume:
     post:
       operationId: resumeRecurringJob
+      servers:
+        - url: https://agent.gen.pro/v1
       x-mcp-tool: gen_task_action
       x-mcp-branch: "resume_recurring_job"
       x-schema-status: missing
       x-phase: monitoring
       summary: Resume a paused recurring job
       tags: [Recurring Jobs]
-      servers:
-        - url: https://agent.gen.pro/v1
       parameters:
         - { name: agent_id, in: path, required: true, schema: { type: string } }
         - { name: job_id, in: path, required: true, schema: { type: string } }
@@ -4151,6 +4409,8 @@ paths:
   /agent/ideas/{idea_id}:
     get:
       operationId: getAgentIdeasByIdeaId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — idea"
       tags: [Agent Chat]
@@ -4173,6 +4433,8 @@ paths:
   /agents/{agent_id}/core/complete-profile:
     post:
       operationId: postAgentsByAgentIdCoreCompleteProfile
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — complete profile"
       tags: [Agent Chat]
@@ -4182,6 +4444,47 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                linked_accounts:
+                  anyOf:
+                    - items:
+                        properties:
+                          url:
+                            type: "string"
+                          platform:
+                            anyOf:
+                              - type: "string"
+                              - type: "null"
+                          display_name:
+                            anyOf:
+                              - type: "string"
+                              - type: "null"
+                        additionalProperties: false
+                        type: "object"
+                        required:
+                          - "url"
+                      type: "array"
+                    - type: "null"
+                video_type:
+                  anyOf:
+                    - items:
+                        type: "string"
+                        enum:
+                          - "talking_head"
+                          - "faceless"
+                          - "animation"
+                          - "clips"
+                          - "montages"
+                          - "other"
+                      type: "array"
+                    - type: "null"
+              additionalProperties: false
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -4195,6 +4498,8 @@ paths:
   /agents/{agent_id}/core/linked-accounts:
     post:
       operationId: postAgentsByAgentIdCoreLinkedAccounts
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — add agent account"
       tags: [Agent Chat]
@@ -4204,19 +4509,57 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                url:
+                  type: "string"
+                  maxLength: 2000
+                  minLength: 1
+                display_name:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+              additionalProperties: false
+              type: "object"
+              required:
+                - "url"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: "integer"
+                  url:
+                    type: "string"
+                  platform:
+                    type: "string"
+                  display_name:
+                    anyOf:
+                      - type: "string"
+                      - type: "null"
+                type: "object"
+                required:
+                  - "id"
+                  - "url"
+                  - "platform"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_account"
-      x-schema-status: missing
   /agents/{agent_id}/core/linked-accounts/{linked_account_id}:
     delete:
       operationId: deleteAgentsByAgentIdCoreLinkedAccountsByLinkedAccountId
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — remove linked account"
       tags: [Agent Chat]
@@ -4244,6 +4587,8 @@ paths:
   /agents/{agent_id}/core/reference-images:
     post:
       operationId: postAgentsByAgentIdCoreReferenceImages
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — add agent look"
       tags: [Agent Chat]
@@ -4253,18 +4598,81 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                content_resource_ids:
+                  anyOf:
+                    - items:
+                        type: "integer"
+                      type: "array"
+                    - type: "null"
+                images:
+                  anyOf:
+                    - items:
+                        properties:
+                          content_resource_id:
+                            type: "integer"
+                          url:
+                            anyOf:
+                              - type: "string"
+                              - type: "null"
+                          thumbnail_url:
+                            anyOf:
+                              - type: "string"
+                              - type: "null"
+                          added_at:
+                            anyOf:
+                              - type: "string"
+                                maxLength: 100
+                              - type: "null"
+                        additionalProperties: false
+                        type: "object"
+                        required:
+                          - "content_resource_id"
+                      type: "array"
+                    - type: "null"
+              additionalProperties: false
+              type: "object"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  properties:
+                    content_resource_id:
+                      type: "integer"
+                    url:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                    thumbnail_url:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                    added_at:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                  type: "object"
+                  required:
+                    - "content_resource_id"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_look"
-      x-schema-status: missing
     delete:
       operationId: deleteAgentsByAgentIdCoreReferenceImages
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Create, update, or remove assistants and their profiles — add agent look"
       tags: [Agent Chat]
@@ -4274,19 +4682,59 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                ids:
+                  items:
+                    type: "integer"
+                  type: "array"
+                  maxItems: 50
+                  minItems: 1
+              additionalProperties: false
+              type: "object"
+              required:
+                - "ids"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  properties:
+                    content_resource_id:
+                      type: "integer"
+                    url:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                    thumbnail_url:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                    added_at:
+                      anyOf:
+                        - type: "string"
+                        - type: "null"
+                  type: "object"
+                  required:
+                    - "content_resource_id"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_agent_action
       x-mcp-branch: "add_agent_look"
-      x-schema-status: missing
   /agents/{agent_id}/monitoring/effective:
     get:
       operationId: getAgentsByAgentIdMonitoringEffective
+      servers:
+        - url: https://agent-core.gen.pro/v1
       x-phase: ideas
       summary: "Discover — monitoring"
       tags: [Agent Chat]
@@ -4309,6 +4757,8 @@ paths:
   /agents/{agent_id}/recurring-jobs/{job_id}/duplicate:
     post:
       operationId: postAgentsByAgentIdRecurringJobsByJobIdDuplicate
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage recurring jobs and monitoring tasks — duplicate recurring job"
       tags: [Agent Chat]
@@ -4323,19 +4773,48 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                vidsheet_url:
+                  type: "string"
+                  maxLength: 2000
+                  minLength: 1
+                name:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 200
+                      minLength: 1
+                    - type: "null"
+                activate:
+                  type: "boolean"
+                  default: true
+              additionalProperties: false
+              type: "object"
+              required:
+                - "vidsheet_url"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_task_action
       x-mcp-branch: "duplicate_recurring_job"
-      x-schema-status: missing
   /agents/{agent_id}/recurring-jobs/{job_id}/test-run:
     post:
       operationId: postAgentsByAgentIdRecurringJobsByJobIdTestRun
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage recurring jobs and monitoring tasks — run recurring job now"
       tags: [Agent Chat]
@@ -4353,6 +4832,11 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -4363,6 +4847,8 @@ paths:
   /agents/{agent_id}/smas:
     get:
       operationId: getAgentsByAgentIdSmas
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — list"
       tags: [Agent Chat]
@@ -4384,6 +4870,8 @@ paths:
       x-schema-status: missing
     post:
       operationId: postAgentsByAgentIdSmas
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — create sma"
       tags: [Agent Chat]
@@ -4406,6 +4894,8 @@ paths:
   /agents/{agent_id}/smas/{sma_id}:
     get:
       operationId: getAgentsByAgentIdSmasBySmaId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — detail"
       tags: [Agent Chat]
@@ -4432,6 +4922,8 @@ paths:
       x-schema-status: missing
     patch:
       operationId: patchAgentsByAgentIdSmasBySmaId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — update sma"
       tags: [Agent Chat]
@@ -4458,6 +4950,8 @@ paths:
       x-schema-status: missing
     delete:
       operationId: deleteAgentsByAgentIdSmasBySmaId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — delete sma"
       tags: [Agent Chat]
@@ -4485,6 +4979,8 @@ paths:
   /agents/{agent_id}/smas/{sma_id}/copy:
     post:
       operationId: postAgentsByAgentIdSmasBySmaIdCopy
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — copy sma"
       tags: [Agent Chat]
@@ -4512,6 +5008,8 @@ paths:
   /agents/{agent_id}/smas/{sma_id}/refresh:
     post:
       operationId: postAgentsByAgentIdSmasBySmaIdRefresh
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — refresh sma"
       tags: [Agent Chat]
@@ -4539,6 +5037,8 @@ paths:
   /agents/{agent_id}/smas/{sma_id}/stats:
     get:
       operationId: getAgentsByAgentIdSmasBySmaIdStats
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — stats"
       tags: [Agent Chat]
@@ -4566,6 +5066,8 @@ paths:
   /agents/{agent_id}/smas/{sma_id}/stop:
     post:
       operationId: postAgentsByAgentIdSmasBySmaIdStop
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage monitoring watchlists and their sources — stop sma"
       tags: [Agent Chat]
@@ -4593,9 +5095,88 @@ paths:
   /analyze/clip_moments:
     post:
       operationId: postAnalyzeClipMoments
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Analyze social trends, comments, hooks, and creators — clip moments"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  maxLength: 128
+                  minLength: 1
+                sources:
+                  items:
+                    type: "string"
+                  type: "array"
+                  maxItems: 10
+                  minItems: 1
+                clip_count:
+                  type: "integer"
+                  maximum: 10.0
+                  minimum: 1.0
+                  default: 1
+                min_duration_s:
+                  anyOf:
+                    - type: "number"
+                      exclusiveMinimum: 0.0
+                    - type: "null"
+                max_duration_s:
+                  anyOf:
+                    - type: "number"
+                      exclusiveMinimum: 0.0
+                    - type: "null"
+                mode:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "viral_moments"
+                        - "summarize"
+                    - type: "null"
+                presentation:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "source_clip"
+                        - "floating_head"
+                        - "split_screen"
+                    - type: "null"
+                output_aspect_ratio:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "9:16"
+                        - "16:9"
+                        - "1:1"
+                    - type: "null"
+                smart_reframe:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                playback_speed:
+                  anyOf:
+                    - type: "number"
+                      exclusiveMinimum: 0.0
+                    - type: "null"
+                target_final_max_duration_s:
+                  anyOf:
+                    - type: "number"
+                      exclusiveMinimum: 0.0
+                    - type: "null"
+                enrich:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+              additionalProperties: false
+              type: "object"
+              required:
+                - "agent_id"
+                - "sources"
       responses:
         '200':
           description: Success.
@@ -4607,6 +5188,8 @@ paths:
   /analyze/jobs/{job_id}:
     get:
       operationId: getAnalyzeJobsByJobId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Analyze social trends, comments, hooks, and creators — comment mining"
       tags: [Agent Chat]
@@ -4619,55 +5202,304 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  job_id:
+                    type: "string"
+                  status:
+                    type: "string"
+                  kind:
+                    type:
+                      - "string"
+                      - "null"
+                  agent_id:
+                    type:
+                      - "string"
+                      - "null"
+                  error:
+                    type: "string"
+                  result:
+                    type: "object"
+                    additionalProperties: true
+                required:
+                  - "job_id"
+                  - "status"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
-      x-schema-status: missing
   /analyze/research:
     post:
       operationId: postAnalyzeResearch
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Analyze social trends, comments, hooks, and creators — comment mining"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  minLength: 1
+                query:
+                  type: "string"
+                  minLength: 1
+                mode:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "news"
+                        - "social"
+                        - "web"
+                        - "all"
+                    - type: "null"
+                platforms:
+                  anyOf:
+                    - items:
+                        type: "string"
+                        enum:
+                          - "x"
+                          - "news"
+                          - "web"
+                      type: "array"
+                    - type: "null"
+                days:
+                  anyOf:
+                    - type: "integer"
+                      maximum: 365.0
+                      minimum: 1.0
+                    - type: "null"
+                limit:
+                  anyOf:
+                    - type: "integer"
+                      maximum: 1000.0
+                      minimum: 1.0
+                    - type: "null"
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+              type: "object"
+              required:
+                - "agent_id"
+                - "query"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  job_id:
+                    type: "string"
+                  status:
+                    type: "string"
+                  kind:
+                    type: "string"
+                required:
+                  - "job_id"
+                  - "status"
+                  - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
-      x-schema-status: missing
   /analyze/synthesis:
     post:
       operationId: postAnalyzeSynthesis
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Analyze social trends, comments, hooks, and creators — comment mining"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  maxLength: 128
+                  minLength: 1
+                kind:
+                  type: "string"
+                  enum:
+                    - "comments"
+                    - "video"
+                platform:
+                  type: "string"
+                  enum:
+                    - "tiktok"
+                    - "instagram"
+                    - "youtube"
+                  default: "tiktok"
+                query:
+                  type: "string"
+                  maxLength: 2000
+                  default: ""
+                target:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 2048
+                    - type: "null"
+                video_url:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 2048
+                    - type: "null"
+                limit:
+                  type: "integer"
+                  maximum: 200.0
+                  minimum: 1.0
+                  default: 50
+                days:
+                  type: "integer"
+                  maximum: 365.0
+                  minimum: 1.0
+                  default: 30
+                include_video_analysis:
+                  type: "boolean"
+                  default: false
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+              additionalProperties: false
+              type: "object"
+              required:
+                - "agent_id"
+                - "kind"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  job_id:
+                    type: "string"
+                  status:
+                    type: "string"
+                  kind:
+                    type: "string"
+                required:
+                  - "job_id"
+                  - "status"
+                  - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
-      x-schema-status: missing
   /analyze/trends:
     post:
       operationId: postAnalyzeTrends
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Analyze social trends, comments, hooks, and creators — comment mining"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  minLength: 1
+                branch:
+                  type: "string"
+                  enum:
+                    - "trends"
+                    - "hooks"
+                    - "creators"
+                  default: "trends"
+                query:
+                  type: "string"
+                  default: ""
+                mode:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "hashtag"
+                        - "keyword"
+                        - "niche"
+                        - "handle"
+                    - type: "null"
+                target:
+                  anyOf:
+                    - type: "string"
+                    - items:
+                      type: "array"
+                    - type: "null"
+                creator:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                platform:
+                  anyOf:
+                    - type: "string"
+                      enum:
+                        - "tiktok"
+                        - "instagram"
+                        - "youtube"
+                        - "kick"
+                        - "all"
+                    - type: "null"
+                filters:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                relevance_query:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                raw:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+              type: "object"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  job_id:
+                    type: "string"
+                  status:
+                    type: "string"
+                  kind:
+                    type: "string"
+                required:
+                  - "job_id"
+                  - "status"
+                  - "kind"
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "comment_mining"
-      x-schema-status: missing
   /audio_matching_jobs:
     post:
       operationId: postAudioMatchingJobs
@@ -5775,23 +6607,226 @@ paths:
   /ideas/directions:
     get:
       operationId: getIdeasDirections
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — directions"
       tags: [Agent Chat]
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.directions"
-      x-schema-status: missing
   /ideas/generate:
     post:
       operationId: postIdeasGenerate
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — generate ideas"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  minLength: 1
+                brief:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                count:
+                  anyOf:
+                    - type: "integer"
+                      maximum: 50.0
+                      minimum: 1.0
+                    - type: "null"
+                video_type:
+                  anyOf:
+                    - type: "string"
+                    - type: "integer"
+                    - type: "null"
+                requirements:
+                  anyOf:
+                    - items:
+                        type: "string"
+                      type: "array"
+                      maxItems: 20
+                    - type: "null"
+                sheet_rows:
+                  items:
+                    properties:
+                      row_id: {}
+                      cells:
+                        items:
+                          properties:
+                            column_title:
+                              type: "string"
+                              default: ""
+                            value:
+                          type: "object"
+                        type: "array"
+                    type: "object"
+                  type: "array"
+                  maxItems: 1000
+                source_content_resource_id:
+                  anyOf:
+                    - type: "integer"
+                    - type: "null"
+                attachments:
+                  items:
+                    properties:
+                      signed_id:
+                        type: "string"
+                        default: ""
+                      filename:
+                        type: "string"
+                        default: "attachment"
+                      content_type:
+                        type: "string"
+                        default: ""
+                      byte_size:
+                        anyOf:
+                          - type: "integer"
+                          - type: "null"
+                      url:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      thumbnail_url:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      content_resource_id:
+                        anyOf:
+                          - type: "integer"
+                            minimum: 1.0
+                          - type: "null"
+                      origin_type:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      enrichment:
+                        anyOf:
+                          - additionalProperties: True
+                            type: "object"
+                          - type: "null"
+                      ref:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      kind:
+                        anyOf:
+                          - type: "string"
+                            enum:
+                              - "image"
+                              - "video"
+                              - "audio"
+                              - "document"
+                          - type: "null"
+                      role:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      note:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                      use:
+                        anyOf:
+                          - type: "string"
+                          - type: "null"
+                    type: "object"
+                  type: "array"
+                  maxItems: 10
+                prompt:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                content_idea:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                style:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                content:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                reference_video:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                format:
+                  anyOf:
+                    - additionalProperties: True
+                      type: "object"
+                    - type: "null"
+                cast:
+                  anyOf:
+                    - items:
+                        additionalProperties: true
+                        type: "object"
+                      type: "array"
+                    - type: "null"
+                conversation_id:
+                  anyOf:
+                    - type: "string"
+                      format: "uuid"
+                    - type: "null"
+                conversation_context:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                target_duration_seconds:
+                  anyOf:
+                    - type: "integer"
+                      maximum: 180.0
+                      minimum: 3.0
+                    - type: "null"
+                from_ideas:
+                  items:
+                    type: "string"
+                    format: "uuid"
+                  type: "array"
+                  maxItems: 50
+                feedback:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                proposal_id:
+                  anyOf:
+                    - type: "string"
+                      format: "uuid"
+                    - type: "null"
+                confirm:
+                  anyOf:
+                    - type: "boolean"
+                    - type: "null"
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 200
+                    - type: "null"
+              type: "object"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
@@ -5803,6 +6838,8 @@ paths:
   /ideas/jobs/{job_id}:
     get:
       operationId: getIdeasJobsByJobId
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Discover — idea job"
       tags: [Agent Chat]
@@ -5815,46 +6852,173 @@ paths:
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  job_id:
+                    type: "string"
+                  status:
+                    type: "string"
+                  run_id:
+                    type: "string"
+                  error:
+                    type: "string"
+                  ideas:
+                    type: "array"
+                    items:
+                      type: "object"
+                      additionalProperties: true
+                  idea_id:
+                    type: "string"
+                  sheet_rows_used:
+                    type: "integer"
+                  sheet_rows_truncated:
+                    type: "boolean"
+                required:
+                  - "job_id"
+                  - "status"
+                  - "run_id"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_discover
       x-mcp-branch: "content.idea_job"
-      x-schema-status: missing
   /ideas/preferences:
     post:
       operationId: postIdeasPreferences
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — set content preference"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  maxLength: 200
+                  minLength: 1
+                conversation_id:
+                  anyOf:
+                    - type: "string"
+                      format: "uuid"
+                    - type: "null"
+                scope:
+                  type: "string"
+                  enum:
+                    - "long_term"
+                    - "session"
+                text:
+                  type: "string"
+                  maxLength: 8000
+                  minLength: 1
+              additionalProperties: false
+              type: "object"
+              required:
+                - "agent_id"
+                - "scope"
+                - "text"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "set_content_preference"
-      x-schema-status: missing
     delete:
       operationId: deleteIdeasPreferences
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — remove content preference"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  maxLength: 200
+                  minLength: 1
+                conversation_id:
+                  anyOf:
+                    - type: "string"
+                      format: "uuid"
+                    - type: "null"
+                scope:
+                  type: "string"
+                  enum:
+                    - "long_term"
+                    - "session"
+                text:
+                  type: "string"
+                  maxLength: 8000
+                  minLength: 1
+              additionalProperties: false
+              type: "object"
+              required:
+                - "agent_id"
+                - "scope"
+                - "text"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "remove_content_preference"
-      x-schema-status: missing
   /ideas/recreate:
     post:
       operationId: postIdeasRecreate
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — recreate video"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  minLength: 1
+                content_resource_id:
+                  anyOf:
+                    - type: "integer"
+                      minimum: 1.0
+                    - type: "null"
+                video_url:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 200
+                    - type: "null"
+              type: "object"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
@@ -5866,9 +7030,50 @@ paths:
   /ideas/reimagine:
     post:
       operationId: postIdeasReimagine
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — reimagine video"
       tags: [Agent Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                agent_id:
+                  type: "string"
+                  minLength: 1
+                content_resource_id:
+                  anyOf:
+                    - type: "integer"
+                      minimum: 1.0
+                    - type: "null"
+                video_url:
+                  anyOf:
+                    - type: "string"
+                    - type: "null"
+                idempotency_key:
+                  anyOf:
+                    - type: "string"
+                      maxLength: 200
+                    - type: "null"
+                idea_id:
+                  anyOf:
+                    - type: "string"
+                      format: "uuid"
+                    - type: "null"
+                count:
+                  type: "integer"
+                  maximum: 5.0
+                  minimum: 1.0
+                  default: 3
+                direction:
+                  type: "string"
+                  default: ""
+              type: "object"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
@@ -5880,6 +7085,8 @@ paths:
   /ideas/{idea_id}/create-video:
     post:
       operationId: postIdeasByIdeaIdCreateVideo
+      servers:
+        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — create video from idea"
       tags: [Agent Chat]
@@ -6045,6 +7252,8 @@ paths:
   /platform/disconnect/{platform}:
     put:
       operationId: putPlatformDisconnectByPlatform
+      servers:
+        - url: https://python.gen.pro
       x-phase: export
       summary: "Schedule, publish, or remove posts — disconnect social"
       tags: [Publishing]
@@ -6054,44 +7263,219 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                agent_id:
+                  type: "string"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                required:
+                  - "message"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       x-mcp-tool: gen_publish_action
       x-mcp-branch: "disconnect_social"
-      x-schema-status: missing
   /platform/get_authorization_url:
     post:
       operationId: postPlatformGetAuthorizationUrl
+      servers:
+        - url: https://python.gen.pro
       x-phase: export
       summary: "Discover — connect url"
       tags: [Publishing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                agent_id:
+                  type: "string"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  url:
+                    type:
+                      - "string"
+                      - "null"
+                required:
+                  - "url"
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_discover
       x-mcp-branch: "publish.connect_url"
-      x-schema-status: missing
   /platform/get_oauth_account:
     post:
       operationId: postPlatformGetOauthAccount
+      servers:
+        - url: https://python.gen.pro
       x-phase: export
       summary: "Analyze social trends, comments, hooks, and creators — web asset scrape"
       tags: [Publishing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                agent_id:
+                  type: "string"
+              required:
+                - "agent_id"
       responses:
         '200':
           description: Success.
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  ig_token:
+                    type:
+                      - "string"
+                      - "null"
+                  ig_id:
+                    type:
+                      - "string"
+                      - "null"
+                  ig_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  ig_username:
+                    type:
+                      - "string"
+                      - "null"
+                  facebook_token:
+                    type:
+                      - "string"
+                      - "null"
+                  facebook_page_id:
+                    type:
+                      - "string"
+                      - "null"
+                  facebook_username:
+                    type:
+                      - "string"
+                      - "null"
+                  tiktok_token:
+                    type:
+                      - "string"
+                      - "null"
+                  tiktok_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  tiktok_refresh_token:
+                    type:
+                      - "string"
+                      - "null"
+                  tiktok_refresh_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  tiktok_username:
+                    type:
+                      - "string"
+                      - "null"
+                  x_token:
+                    type:
+                      - "string"
+                      - "null"
+                  x_refresh_token:
+                    type:
+                      - "string"
+                      - "null"
+                  x_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  x_username:
+                    type:
+                      - "string"
+                      - "null"
+                  user_id:
+                    type:
+                      - "integer"
+                      - "null"
+                  youtube_token:
+                    type:
+                      - "string"
+                      - "null"
+                  youtube_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  youtube_refresh_token:
+                    type:
+                      - "string"
+                      - "null"
+                  youtube_refresh_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  youtube_username:
+                    type:
+                      - "string"
+                      - "null"
+                  linkedin_token:
+                    type:
+                      - "string"
+                      - "null"
+                  linkedin_expire_at:
+                    type:
+                      - "string"
+                      - "null"
+                    format: "date-time"
+                  linkedin_id:
+                    type:
+                      - "string"
+                      - "null"
+                  linkedin_username:
+                    type:
+                      - "string"
+                      - "null"
+                  created_at:
+                    type: "string"
+                    format: "date-time"
+                required:
+                  - "created_at"
         '401':
           $ref: '#/components/responses/Unauthorized'
       x-mcp-tool: gen_analyze
       x-mcp-branch: "web_asset_scrape"
-      x-schema-status: missing
   /projects/{id}/set_project_share:
     put:
       operationId: putProjectsByIdSetProjectShare

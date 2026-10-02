@@ -17,10 +17,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parent.parent
 SCRIPT = REPO / "scripts" / "sync_mcp_surface.py"
-OPENAPI = REPO / "public" / "openapi.yaml"
-SURFACE = REPO / "scripts" / "mcp-surface.json"
+# `GEN_OPENAPI` and `GEN_MCP_SURFACE` let a reviewer point the server checks at
+# scratch copies, which is how the wrong-host sabotage case is exercised without
+# touching the committed files.
+OPENAPI = Path(os.environ.get("GEN_OPENAPI") or (REPO / "public" / "openapi.yaml"))
+SURFACE = Path(os.environ.get("GEN_MCP_SURFACE") or (REPO / "scripts" / "mcp-surface.json"))
 # `GEN_OPERATION_SCHEMAS` lets a test (or a reviewer) point the schema checks at
 # a scratch copy, which is how the fake-key sabotage case is exercised without
 # touching the committed file. It defaults to the committed one.
@@ -28,6 +33,18 @@ SCHEMAS = Path(os.environ.get("GEN_OPERATION_SCHEMAS") or (REPO / "scripts" / "o
 BASELINE = REPO / "scripts" / "openapi-missing-baseline.json"
 
 METHODS = ("get", "post", "put", "patch", "delete")
+
+# `operation-schemas.json` names the repository each shape was read from, so one
+# file can cite gen-backend-v2, gen-agentic, agent-core and gen-backend-python at
+# once. Each repository is checked against its own checkout, and a checkout that
+# is not configured is skipped rather than failed: the docs suite must still run
+# from a docs-only clone.
+REPO_ENV = {
+    "gen-backend-v2": "GEN_BACKEND_PATH",
+    "gen-agentic": "GEN_AGENTIC_PATH",
+    "agent-core": "AGENT_CORE_PATH",
+    "gen-backend-python": "GEN_BACKEND_PYTHON_PATH",
+}
 
 
 def load_module():
@@ -62,6 +79,55 @@ def parse_paths(text):
 
 def surface_operations():
     return [(entry["method"], entry["path"]) for entry in json.loads(SURFACE.read_text())["operations"]]
+
+
+def top_level_servers(text):
+    """The document default hosts, read from the spec's own `servers:` block."""
+    lines = text.split("\n")
+    start = next(i for i, line in enumerate(lines) if line == "servers:")
+    urls = []
+    for line in lines[start + 1:]:
+        if line and not line.startswith(" "):
+            break
+        match = re.match(r"^  - url:\s*(\S+)\s*$", line)
+        if match:
+            urls.append(match.group(1))
+    assert urls, "the spec declares no top-level servers"
+    return urls
+
+
+def operation_servers(text):
+    """`{(METHOD, path): [servers]}` — the operation-level override, else the default."""
+    default = top_level_servers(text)[0]
+    lines = text.split("\n")
+    start = lines.index("paths:")
+    end = next(i for i, line in enumerate(lines) if line.startswith("components:"))
+    override = {}
+    path = method = None
+    collecting = False
+    for line in lines[start + 1:end]:
+        match = re.match(r"^  (/\S.*):\s*$", line)
+        if match:
+            path, method, collecting = match.group(1), None, False
+            continue
+        match = re.match(r"^    (get|post|put|patch|delete):\s*$", line)
+        if match and path is not None:
+            method = match.group(1)
+            override[(method.upper(), path)] = []
+            collecting = False
+            continue
+        if method is None:
+            continue
+        if re.match(r"^      servers:\s*$", line):
+            collecting = True
+            continue
+        if collecting:
+            match = re.match(r"^        - url:\s*(\S+)\s*$", line)
+            if match:
+                override[(method.upper(), path)].append(match.group(1))
+            elif line.strip():
+                collecting = False
+    return {key: (value or [default]) for key, value in override.items()}
 
 
 def test_check_passes():
@@ -121,10 +187,14 @@ def test_operation_schemas_key_the_real_surface():
 
 
 def test_operation_schemas_cite_backend_sources():
-    """Every entry names the backend code it was derived from, and a backend checkout confirms it.
+    """Every entry names the backend code it was derived from, and a checkout confirms it.
 
-    The file-existence check runs only when GEN_BACKEND_PATH points at a checkout of
-    the backend repository, so this suite still runs from a docs-only clone.
+    Each `source` is `<repo>:<path>` — `<repo>:<path>#<symbol>` when the shape
+    came from one method, class or resource. The file-existence check runs per
+    repository and only when that repository's env var points at a checkout, so
+    this suite still runs from a docs-only clone. The check reads the repository's
+    `origin/main` blob, never the working tree: a local branch can be behind, and a
+    source that only exists in a stale checkout would make a passing test a lie.
     """
     schemas = json.loads(SCHEMAS.read_text())
     empty = sorted(key for key, entry in schemas.items() if not entry.get("source"))
@@ -134,16 +204,103 @@ def test_operation_schemas_cite_backend_sources():
     )
     assert incomplete == [], f"operation-schemas.json entries with neither requestBody nor response: {incomplete}"
 
-    backend = os.environ.get("GEN_BACKEND_PATH")
-    if not backend:
-        return
-    missing = []
+    unnamed = []
     for key, entry in schemas.items():
         for reference in entry["source"]:
-            relative = reference.split("#", 1)[0]
-            if not (Path(backend) / relative).exists():
-                missing.append(f"{key}: {reference}")
-    assert missing == [], f"operation-schemas.json sources not found in GEN_BACKEND_PATH: {missing}"
+            repo, _, rest = reference.partition(":")
+            if repo not in REPO_ENV or not rest:
+                unnamed.append(f"{key}: {reference}")
+    assert unnamed == [], f"operation-schemas.json sources without a `<repo>:<path>` name: {unnamed}"
+
+    missing = []
+    for repo, env in REPO_ENV.items():
+        checkout = os.environ.get(env)
+        if not checkout:
+            continue
+        for key, entry in schemas.items():
+            for reference in entry["source"]:
+                source_repo, _, location = reference.partition(":")
+                if source_repo != repo:
+                    continue
+                relative = location.split("#", 1)[0]
+                if not backend_file_exists(checkout, relative):
+                    missing.append(f"{key}: {reference}")
+    assert missing == [], f"operation-schemas.json sources not found on origin/main: {missing}"
+
+
+def backend_file_exists(checkout, relative):
+    """`origin/main:<path>` exists in the checkout? Falls back to `HEAD` when the ref is absent."""
+    for revision in ("origin/main", "HEAD"):
+        ref = subprocess.run(
+            ["git", "-C", checkout, "rev-parse", "--verify", "--quiet", revision],
+            capture_output=True,
+            text=True,
+        )
+        if ref.returncode != 0:
+            continue
+        blob = subprocess.run(
+            ["git", "-C", checkout, "cat-file", "-e", f"{revision}:{relative}"],
+            capture_output=True,
+            text=True,
+        )
+        return blob.returncode == 0
+    return False
+
+
+def test_every_operation_server_equals_its_surface_entry():
+    """The host an operation documents is the host its MCP branch calls.
+
+    `mcp-surface.json` carries the derived `server`; the spec must render exactly
+    that, as an operation-level `servers:` override for anything but the document
+    default. A mismatch sends a caller to a backend that does not serve the route.
+    """
+    surface = {f"{entry['method']} {entry['path']}": entry.get("server") for entry in json.loads(SURFACE.read_text())["operations"]}
+    rendered = operation_servers(OPENAPI.read_text())
+    mismatches = []
+    for (method, path), servers in rendered.items():
+        expected = surface.get(f"{method} {path}")
+        if len(servers) != 1 or servers[0] != expected:
+            mismatches.append(f"{method} {path}: documented {servers}, surface {expected}")
+    assert mismatches == [], mismatches
+
+
+def test_top_level_servers_cover_every_operation_server():
+    """Every host an operation uses is declared at the top of the spec."""
+    text = OPENAPI.read_text()
+    declared = set(top_level_servers(text))
+    used = {server for servers in operation_servers(text).values() for server in servers}
+    assert used <= declared, f"operation servers missing from `servers:`: {sorted(used - declared)}"
+
+
+def test_every_surface_operation_names_a_server():
+    module = load_module()
+    entries = json.loads(SURFACE.read_text())["operations"]
+    unknown = sorted(
+        f"{entry['method']} {entry['path']}"
+        for entry in entries
+        if entry.get("server") not in module.TOP_LEVEL_SERVERS
+    )
+    assert unknown == [], f"surface operations without a known server: {unknown}"
+
+
+def test_derived_servers_match_the_mcp_source():
+    """With a gen-mcp-server checkout, re-derive every host from the MCP source.
+
+    This catches the case the self-consistency check cannot: the committed
+    `server` and the rendered doc agreeing with each other while both are wrong.
+    """
+    mcp = os.environ.get("GEN_MCP_PATH")
+    if not mcp:
+        pytest.skip("GEN_MCP_PATH is not set; the MCP source is not available")
+    module = load_module()
+    entries = json.loads(SURFACE.read_text())["operations"]
+    derived = module.derive_servers(entries, mcp)
+    mismatches = []
+    for entry in entries:
+        key = f"{entry['method']} {entry['path']}"
+        if derived[key][0] != entry.get("server"):
+            mismatches.append(f"{key}: surface {entry.get('server')}, MCP source {derived[key][0]}")
+    assert mismatches == [], mismatches
 
 
 def test_set_default_user_job_body_is_nested():

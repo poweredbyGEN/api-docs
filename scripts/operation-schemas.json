@@ -17,7 +17,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/credit_balances_controller.rb#show"
+      "gen-backend-v2:app/controllers/v1/credit_balances_controller.rb#show"
     ]
   },
   "GET /credit_plans": {
@@ -38,8 +38,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/credit_plans_controller.rb#index",
-      "app/resources/credit_plan_resource.rb"
+      "gen-backend-v2:app/controllers/v1/credit_plans_controller.rb#index",
+      "gen-backend-v2:app/resources/credit_plan_resource.rb"
     ]
   },
   "GET /credit_transactions": {
@@ -63,8 +63,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/credit_transactions_controller.rb#index",
-      "app/resources/credit_transaction_resource.rb"
+      "gen-backend-v2:app/controllers/v1/credit_transactions_controller.rb#index",
+      "gen-backend-v2:app/resources/credit_transaction_resource.rb"
     ]
   },
   "POST /payment": {
@@ -113,7 +113,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/payments_controller.rb#create"
+      "gen-backend-v2:app/controllers/v1/payments_controller.rb#create"
     ]
   },
   "POST /seat_checkout": {
@@ -137,7 +137,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/seat_checkouts_controller.rb#create"
+      "gen-backend-v2:app/controllers/v1/seat_checkouts_controller.rb#create"
     ]
   },
   "POST /subscription_upgrade": {
@@ -173,8 +173,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/subscription_upgrades_controller.rb#create",
-      "app/resources/credit_plan_resource.rb"
+      "gen-backend-v2:app/controllers/v1/subscription_upgrades_controller.rb#create",
+      "gen-backend-v2:app/resources/credit_plan_resource.rb"
     ]
   },
   "POST /x402_credit_purchase/settle": {
@@ -229,8 +229,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/x402_credit_purchases_controller.rb#settle",
-      "app/resources/credit_purchase_resource.rb"
+      "gen-backend-v2:app/controllers/v1/x402_credit_purchases_controller.rb#settle",
+      "gen-backend-v2:app/resources/credit_purchase_resource.rb"
     ]
   },
   "GET /user_jobs": {
@@ -291,8 +291,8 @@
       "description": "`head :ok`-style list; `UserJobResource` per job."
     },
     "source": [
-      "app/controllers/v1/user_jobs_controller.rb#index",
-      "app/resources/user_job_resource.rb"
+      "gen-backend-v2:app/controllers/v1/user_jobs_controller.rb#index",
+      "gen-backend-v2:app/resources/user_job_resource.rb"
     ]
   },
   "POST /user_jobs/estimate": {
@@ -331,7 +331,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_jobs_controller.rb#estimate"
+      "gen-backend-v2:app/controllers/v1/user_jobs_controller.rb#estimate"
     ]
   },
   "GET /organizations/{organization_id}/user_organizations": {
@@ -348,7 +348,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_organizations_controller.rb#index"
+      "gen-backend-v2:app/controllers/v1/user_organizations_controller.rb#index"
     ]
   },
   "PUT /projects/{id}/set_project_share": {
@@ -381,8 +381,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/projects_controller.rb#set_project_share",
-      "app/resources/project_share_resource.rb"
+      "gen-backend-v2:app/controllers/v1/projects_controller.rb#set_project_share",
+      "gen-backend-v2:app/resources/project_share_resource.rb"
     ]
   },
   "PUT /agents/{agent_id}": {
@@ -466,8 +466,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/agents_controller.rb#update",
-      "app/resources/agent_resource.rb"
+      "gen-backend-v2:app/controllers/v1/agents_controller.rb#update",
+      "gen-backend-v2:app/resources/agent_resource.rb"
     ]
   },
   "GET /avatars": {
@@ -500,8 +500,8 @@
       "description": "`Avatars::Presenter#summary` per avatar; `source` selects my/library/all."
     },
     "source": [
-      "app/controllers/v1/avatars_controller.rb#index",
-      "app/presenters/avatars/presenter.rb#summary"
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#index",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#summary"
     ]
   },
   "POST /avatars": {
@@ -616,9 +616,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatars_controller.rb#create",
-      "app/presenters/avatars/presenter.rb#detail",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#create",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#detail",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "GET /avatars/{id}": {
@@ -712,8 +712,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatars_controller.rb#show",
-      "app/presenters/avatars/presenter.rb#detail"
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#show",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#detail"
     ]
   },
   "PATCH /avatars/{id}": {
@@ -825,9 +825,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatars_controller.rb#update",
-      "app/presenters/avatars/presenter.rb#detail",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#update",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#detail",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /avatars/{id}/copy": {
@@ -931,9 +931,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatars_controller.rb#copy",
-      "app/presenters/avatars/presenter.rb#detail",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#copy",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb#detail",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /avatars/{avatar_id}/looks": {
@@ -968,8 +968,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatar_looks_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/avatar_looks_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /avatars/{avatar_id}/talking_loops": {
@@ -1011,9 +1011,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatar_talking_loops_controller.rb#create",
-      "app/presenters/avatars/presenter.rb",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/avatar_talking_loops_controller.rb#create",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "GET /avatars/{avatar_id}/talking_loops/{id}": {
@@ -1038,8 +1038,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/avatar_talking_loops_controller.rb#show",
-      "app/presenters/avatars/presenter.rb"
+      "gen-backend-v2:app/controllers/v1/avatar_talking_loops_controller.rb#show",
+      "gen-backend-v2:app/presenters/avatars/presenter.rb"
     ]
   },
   "GET /hume_ai_sample/status": {
@@ -1064,8 +1064,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/hume_ai_samples_controller.rb#status",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/hume_ai_samples_controller.rb#status",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /hume_ai_sample": {
@@ -1114,10 +1114,10 @@
       }
     },
     "source": [
-      "app/controllers/v1/hume_ai_samples_controller.rb#create",
-      "app/controllers/v1/hume_ai_samples_controller.rb#submit_via_fal_ai",
-      "app/controllers/v1/hume_ai_samples_controller.rb#generate_via_hume_ai",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/hume_ai_samples_controller.rb#create",
+      "gen-backend-v2:app/controllers/v1/hume_ai_samples_controller.rb#submit_via_fal_ai",
+      "gen-backend-v2:app/controllers/v1/hume_ai_samples_controller.rb#generate_via_hume_ai",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /generate_voice_sample": {
@@ -1144,8 +1144,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/generate_voice_samples_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/generate_voice_samples_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /generate_voice_description": {
@@ -1176,8 +1176,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/generate_voice_descriptions_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/generate_voice_descriptions_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "GET /voice_resources": {
@@ -1198,8 +1198,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/voice_resources_controller.rb#index",
-      "app/resources/voice_resource_resource.rb"
+      "gen-backend-v2:app/controllers/v1/voice_resources_controller.rb#index",
+      "gen-backend-v2:app/resources/voice_resource_resource.rb"
     ]
   },
   "GET /voice_resources/{voice_id}": {
@@ -1217,8 +1217,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/voice_resources_controller.rb#show",
-      "app/resources/voice_resource_resource.rb"
+      "gen-backend-v2:app/controllers/v1/voice_resources_controller.rb#show",
+      "gen-backend-v2:app/resources/voice_resource_resource.rb"
     ]
   },
   "GET /user_voice_resources": {
@@ -1251,9 +1251,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_voice_resources_controller.rb#index",
-      "app/resources/user_voice_resource_resource.rb",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/user_voice_resources_controller.rb#index",
+      "gen-backend-v2:app/resources/user_voice_resource_resource.rb",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "GET /user_voice_resources/{voice_id}": {
@@ -1283,8 +1283,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_voice_resources_controller.rb#show",
-      "app/resources/user_voice_resource_resource.rb"
+      "gen-backend-v2:app/controllers/v1/user_voice_resources_controller.rb#show",
+      "gen-backend-v2:app/resources/user_voice_resource_resource.rb"
     ]
   },
   "POST /user_voice_resources": {
@@ -1347,9 +1347,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_voice_resources_controller.rb#create",
-      "app/resources/user_voice_resource_resource.rb",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/user_voice_resources_controller.rb#create",
+      "gen-backend-v2:app/resources/user_voice_resource_resource.rb",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /eleven_labs_job": {
@@ -1382,8 +1382,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/eleven_labs_jobs_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/eleven_labs_jobs_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /content_resources/from_url": {
@@ -1445,9 +1445,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/content_resources_controller.rb#from_url",
-      "app/resources/content_resource_resource.rb",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/content_resources_controller.rb#from_url",
+      "gen-backend-v2:app/resources/content_resource_resource.rb",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /audio_matching_jobs": {
@@ -1481,8 +1481,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/audio_matching_jobs_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/audio_matching_jobs_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /video_recreate_job": {
@@ -1522,8 +1522,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/video_recreate_jobs_controller.rb#create",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/video_recreate_jobs_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "GET /recommended_sounds": {
@@ -1586,8 +1586,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/recommended_sounds_controller.rb#index",
-      "app/resources/data_warehouse/recommended_sound_resource.rb"
+      "gen-backend-v2:app/controllers/v1/recommended_sounds_controller.rb#index",
+      "gen-backend-v2:app/resources/data_warehouse/recommended_sound_resource.rb"
     ]
   },
   "GET /sound_libraries": {
@@ -1607,7 +1607,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/sound_libraries_controller.rb#index"
+      "gen-backend-v2:app/controllers/v1/sound_libraries_controller.rb#index"
     ]
   },
   "GET /aura/proxy-locations/countries": {
@@ -1628,7 +1628,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/aura_proxy_locations_controller.rb#countries"
+      "gen-backend-v2:app/controllers/v1/aura_proxy_locations_controller.rb#countries"
     ]
   },
   "GET /aura/proxy-locations/cities": {
@@ -1651,7 +1651,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/aura_proxy_locations_controller.rb#cities"
+      "gen-backend-v2:app/controllers/v1/aura_proxy_locations_controller.rb#cities"
     ]
   },
   "POST /vidsheet/{sheet_id}/columns/{column_id}/duplicate": {
@@ -1670,8 +1670,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/spreadsheet_columns_controller.rb#duplicate",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/spreadsheet_columns_controller.rb#duplicate",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate": {
@@ -1688,9 +1688,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/video_layers_controller.rb#duplicate",
-      "app/controllers/v1/video_layers_controller.rb#duplicate_additional_attributes",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/video_layers_controller.rb#duplicate",
+      "gen-backend-v2:app/controllers/v1/video_layers_controller.rb#duplicate_additional_attributes",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "PATCH /vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job": {
@@ -1744,9 +1744,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/spreadsheet_cells_controller.rb#set_default_user_job",
-      "app/controllers/v1/spreadsheet_cells_controller.rb#spreadsheet_cell_default_user_job_params",
-      "app/resources/spreadsheet_cell_resource.rb"
+      "gen-backend-v2:app/controllers/v1/spreadsheet_cells_controller.rb#set_default_user_job",
+      "gen-backend-v2:app/controllers/v1/spreadsheet_cells_controller.rb#spreadsheet_cell_default_user_job_params",
+      "gen-backend-v2:app/resources/spreadsheet_cell_resource.rb"
     ],
     "requestBody": {
       "type": "object",
@@ -1793,8 +1793,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/vidsheet_generations_controller.rb#index",
-      "app/controllers/v1/vidsheet_generations_controller.rb#generation_entry"
+      "gen-backend-v2:app/controllers/v1/vidsheet_generations_controller.rb#index",
+      "gen-backend-v2:app/controllers/v1/vidsheet_generations_controller.rb#generation_entry"
     ]
   },
   "GET /vidsheet/{sheet_id}/cells/{cell_id}/available_variables": {
@@ -1840,8 +1840,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/available_variables_controller.rb#show",
-      "app/services/spreadsheets/available_variables.rb#process"
+      "gen-backend-v2:app/controllers/v1/available_variables_controller.rb#show",
+      "gen-backend-v2:app/services/spreadsheets/available_variables.rb#process"
     ]
   },
   "GET /vidsheet/{sheet_id}/operations": {
@@ -1878,8 +1878,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/vidsheet_operations_controller.rb#index",
-      "app/services/vidsheets/change_set_summary.rb"
+      "gen-backend-v2:app/controllers/v1/vidsheet_operations_controller.rb#index",
+      "gen-backend-v2:app/services/vidsheets/change_set_summary.rb"
     ]
   },
   "GET /vidsheet/{sheet_id}/operations/last": {
@@ -1913,8 +1913,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/vidsheet_operations_controller.rb#last",
-      "app/services/vidsheets/change_set_summary.rb"
+      "gen-backend-v2:app/controllers/v1/vidsheet_operations_controller.rb#last",
+      "gen-backend-v2:app/services/vidsheets/change_set_summary.rb"
     ]
   },
   "POST /vidsheet/{sheet_id}/validate_video_layout": {
@@ -1935,9 +1935,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/spreadsheets_controller.rb#validate_video_layout",
-      "app/services/spreadsheets/vidsheet_route_contract.rb#payload",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/spreadsheets_controller.rb#validate_video_layout",
+      "gen-backend-v2:app/services/spreadsheets/vidsheet_route_contract.rb#payload",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ],
     "requestBody": {
       "type": "object",
@@ -2023,9 +2023,9 @@
       }
     },
     "source": [
-      "app/controllers/v1/spreadsheet_rows_controller.rb#duplicate",
-      "app/resources/spreadsheet_row_resource.rb",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/spreadsheet_rows_controller.rb#duplicate",
+      "gen-backend-v2:app/resources/spreadsheet_row_resource.rb",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ],
     "requestBody": {
       "type": "object",
@@ -2061,7 +2061,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/agent_avatars_controller.rb#create"
+      "gen-backend-v2:app/controllers/v1/agent_avatars_controller.rb#create"
     ]
   },
   "PATCH /content_resources/{id}": {
@@ -2086,7 +2086,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/content_resources_controller.rb#update"
+      "gen-backend-v2:app/controllers/v1/content_resources_controller.rb#update"
     ]
   },
   "POST /organizations/{organization_id}/user_organizations": {
@@ -2106,7 +2106,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_organizations_controller.rb#create"
+      "gen-backend-v2:app/controllers/v1/user_organizations_controller.rb#create"
     ]
   },
   "POST /user_shared_agents": {
@@ -2128,7 +2128,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_shared_agents_controller.rb#create"
+      "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#create"
     ]
   },
   "PUT /user_shared_agents/{id}": {
@@ -2149,7 +2149,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_shared_agents_controller.rb#update"
+      "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#update"
     ]
   },
   "PATCH /vidsheet/{sheet_id}/columns/update_positions": {
@@ -2167,7 +2167,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/spreadsheet_columns_controller.rb#update_positions"
+      "gen-backend-v2:app/controllers/v1/spreadsheet_columns_controller.rb#update_positions"
     ]
   },
   "PUT /vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions": {
@@ -2185,7 +2185,7 @@
       }
     },
     "source": [
-      "app/controllers/v1/video_layers_controller.rb#update_positions"
+      "gen-backend-v2:app/controllers/v1/video_layers_controller.rb#update_positions"
     ]
   },
   "GET /user_shared_agents/{id}": {
@@ -2211,8 +2211,8 @@
       }
     },
     "source": [
-      "app/controllers/v1/user_shared_agents_controller.rb#show",
-      "app/presenters/user_shared_agent/presenter.rb#as_json"
+      "gen-backend-v2:app/controllers/v1/user_shared_agents_controller.rb#show",
+      "gen-backend-v2:app/presenters/user_shared_agent/presenter.rb#as_json"
     ]
   },
   "POST /generations/{generation_id}/stop": {
@@ -2230,8 +2230,8 @@
       ]
     },
     "source": [
-      "app/controllers/v1/generations_controller.rb#stop",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/generations_controller.rb#stop",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
     ]
   },
   "POST /generations/{generation_id}/continue": {
@@ -2250,8 +2250,2317 @@
       ]
     },
     "source": [
-      "app/controllers/v1/generations_controller.rb#continue_generation",
-      "app/controllers/application_controller.rb#require_agent!"
+      "gen-backend-v2:app/controllers/v1/generations_controller.rb#continue_generation",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "PATCH /agents/{agent_id}/recurring-jobs": {
+    "requestBody": {
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "job_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20000,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vidsheet_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schedule": {
+          "anyOf": [
+            {
+              "properties": {
+                "cadence": {
+                  "type": "string",
+                  "enum": [
+                    "minutely",
+                    "hourly",
+                    "daily",
+                    "weekly",
+                    "monthly"
+                  ]
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "time_of_day": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{2}:\\d{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "days_of_week": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "day_of_month": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "interval_value": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "freshness_window_minutes": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "maximum": 1440.0,
+                      "minimum": 1.0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "type": "object",
+              "required": [
+                "cadence",
+                "timezone"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delivery": {
+          "anyOf": [
+            {
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "chat_only",
+                    "email"
+                  ],
+                  "default": "email"
+                },
+                "email": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recipients": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "preferences": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RecurringJobDeliveryPreferences"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "active",
+                "paused"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "auto_publish": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actions": {
+          "anyOf": [
+            {
+              "items": {
+                "properties": {
+                  "position": {
+                    "type": "integer",
+                    "minimum": 1.0,
+                    "title": "Position"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "update_element",
+                      "update_track"
+                    ],
+                    "title": "Kind",
+                    "default": "update_element"
+                  },
+                  "target": {
+                    "$ref": "#/components/schemas/AutomationActionTarget"
+                  },
+                  "update_with": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "title": "Update With",
+                    "default": ""
+                  },
+                  "model": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Model"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "position",
+                  "target"
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actions_parallel": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "auto_generate_video": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_run_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_strategy": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "duplicate_last_row",
+                "add_new_row"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#update_recurring_job_by_name",
+      "gen-agentic:src/gen/recurring_jobs_models.py#RecurringJobUpdate"
+    ]
+  },
+  "POST /agents/{agent_id}/recurring-jobs/defaults": {
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#ensure_default_recurring_jobs"
+    ]
+  },
+  "POST /agents/{agent_id}/recurring-jobs/{job_id}/duplicate": {
+    "requestBody": {
+      "properties": {
+        "vidsheet_url": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activate": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "vidsheet_url"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#duplicate_recurring_job",
+      "gen-agentic:src/gen/recurring_jobs_models.py#RecurringJobDuplicate"
+    ]
+  },
+  "POST /agents/{agent_id}/recurring-jobs/{job_id}/pause": {
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#pause_recurring_job"
+    ]
+  },
+  "POST /agents/{agent_id}/recurring-jobs/{job_id}/resume": {
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#resume_recurring_job"
+    ]
+  },
+  "POST /agents/{agent_id}/recurring-jobs/{job_id}/test-run": {
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/recurring_jobs_api.py#test_run_recurring_job"
+    ]
+  },
+  "POST /analyze/clip_moments": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1
+        },
+        "sources": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "clip_count": {
+          "type": "integer",
+          "maximum": 10.0,
+          "minimum": 1.0,
+          "default": 1
+        },
+        "min_duration_s": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_duration_s": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "viral_moments",
+                "summarize"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "presentation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "source_clip",
+                "floating_head",
+                "split_screen"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_aspect_ratio": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "9:16",
+                "16:9",
+                "1:1"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "smart_reframe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "playback_speed": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_final_max_duration_s": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enrich": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "agent_id",
+        "sources"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#analyze_clip_moments",
+      "gen-agentic:src/gen/gen_analyze/contracts.py#ClipMomentsRequest"
+    ]
+  },
+  "POST /analyze/research": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "news",
+                "social",
+                "web",
+                "all"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "platforms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string",
+                "enum": [
+                  "x",
+                  "news",
+                  "web"
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 365.0,
+              "minimum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 1000.0,
+              "minimum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "agent_id",
+        "query"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#analyze_research_job",
+      "gen-agentic:src/gen/gen_analyze/contracts.py#AnalyzeResearchRequest",
+      "gen-agentic:src/gen/server.py#_analyze_job_receipt"
+    ],
+    "response": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status",
+        "kind"
+      ]
+    }
+  },
+  "POST /analyze/synthesis": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "comments",
+            "video"
+          ]
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "tiktok",
+            "instagram",
+            "youtube"
+          ],
+          "default": "tiktok"
+        },
+        "query": {
+          "type": "string",
+          "maxLength": 2000,
+          "default": ""
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "maximum": 200.0,
+          "minimum": 1.0,
+          "default": 50
+        },
+        "days": {
+          "type": "integer",
+          "maximum": 365.0,
+          "minimum": 1.0,
+          "default": 30
+        },
+        "include_video_analysis": {
+          "type": "boolean",
+          "default": false
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "agent_id",
+        "kind"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#analyze_synthesis_job",
+      "gen-agentic:src/gen/gen_analyze/contracts.py#AnalyzeSynthesisRequest",
+      "gen-agentic:src/gen/server.py#_analyze_job_receipt"
+    ],
+    "response": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status",
+        "kind"
+      ]
+    }
+  },
+  "POST /analyze/trends": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "branch": {
+          "type": "string",
+          "enum": [
+            "trends",
+            "hooks",
+            "creators"
+          ],
+          "default": "trends"
+        },
+        "query": {
+          "type": "string",
+          "default": ""
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "hashtag",
+                "keyword",
+                "niche",
+                "handle"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "creator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "platform": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "tiktok",
+                "instagram",
+                "youtube",
+                "kick",
+                "all"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "filters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relevance_query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#analyze_trends_job",
+      "gen-agentic:src/gen/gen_analyze/contracts.py#AnalyzeTrendsRequest",
+      "gen-agentic:src/gen/server.py#_analyze_job_receipt"
+    ],
+    "response": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status",
+        "kind"
+      ]
+    }
+  },
+  "GET /ideas/directions": {
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/ideas/memory_api.py#directions"
+    ]
+  },
+  "POST /ideas/generate": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brief": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 50.0,
+              "minimum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "maxItems": 20
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sheet_rows": {
+          "items": {
+            "properties": {
+              "row_id": {},
+              "cells": {
+                "items": {
+                  "properties": {
+                    "column_title": {
+                      "type": "string",
+                      "title": "Column Title",
+                      "default": ""
+                    },
+                    "value": {
+                      "title": "Value"
+                    }
+                  },
+                  "type": "object",
+                  "title": "ContentIdeasSheetCell"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array",
+          "maxItems": 1000
+        },
+        "source_content_resource_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attachments": {
+          "items": {
+            "properties": {
+              "signed_id": {
+                "type": "string",
+                "default": ""
+              },
+              "filename": {
+                "type": "string",
+                "default": "attachment"
+              },
+              "content_type": {
+                "type": "string",
+                "default": ""
+              },
+              "byte_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "thumbnail_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content_resource_id": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1.0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "origin_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "enrichment": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio",
+                      "document"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "role": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "use": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "type": "array",
+          "maxItems": 10
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_idea": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "style": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reference_video": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cast": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conversation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conversation_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_duration_seconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 180.0,
+              "minimum": 3.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "from_ideas": {
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": "array",
+          "maxItems": 50
+        },
+        "feedback": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confirm": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#generate_ideas",
+      "gen-agentic:src/gen/ideas/contracts.py#IdeaGenerateRequest"
+    ]
+  },
+  "POST /ideas/preferences": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1
+        },
+        "conversation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "long_term",
+            "session"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 8000,
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "agent_id",
+        "scope",
+        "text"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/ideas/engine.py#add_preference",
+      "gen-agentic:src/gen/ideas/memory_api.py#PreferenceRequest"
+    ]
+  },
+  "DELETE /ideas/preferences": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1
+        },
+        "conversation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "long_term",
+            "session"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 8000,
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "agent_id",
+        "scope",
+        "text"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source": [
+      "gen-agentic:src/gen/ideas/memory_api.py#delete_preference",
+      "gen-agentic:src/gen/ideas/memory_api.py#PreferenceRequest"
+    ]
+  },
+  "POST /ideas/recreate": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_resource_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#recreate_video_idea",
+      "gen-agentic:src/gen/ideas/contracts.py#RecreateVideoRequest"
+    ]
+  },
+  "POST /ideas/reimagine": {
+    "requestBody": {
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_resource_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idea_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "maximum": 5.0,
+          "minimum": 1.0,
+          "default": 3
+        },
+        "direction": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "type": "object",
+      "required": [
+        "agent_id"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#reimagine_video_ideas",
+      "gen-agentic:src/gen/ideas/contracts.py#SourceVideoIdeasRequest"
+    ]
+  },
+  "POST /agents/{agent_id}/core/complete-profile": {
+    "requestBody": {
+      "properties": {
+        "linked_accounts": {
+          "anyOf": [
+            {
+              "items": {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "title": "Url"
+                  },
+                  "platform": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Platform"
+                  },
+                  "display_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Display Name"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "url"
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video_type": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string",
+                "enum": [
+                  "talking_head",
+                  "faceless",
+                  "animation",
+                  "clips",
+                  "montages",
+                  "other"
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "source": [
+      "agent-core:app/routers/agent_core.py#complete_agent_profile",
+      "agent-core:app/schemas/agent_core.py#CompleteProfileRequest"
+    ]
+  },
+  "POST /agents/{agent_id}/core/linked-accounts": {
+    "requestBody": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "url"
+      ]
+    },
+    "response": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "id",
+        "url",
+        "platform"
+      ]
+    },
+    "source": [
+      "agent-core:app/routers/agent_core.py#add_linked_account"
+    ]
+  },
+  "POST /agents/{agent_id}/core/reference-images": {
+    "requestBody": {
+      "properties": {
+        "content_resource_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "images": {
+          "anyOf": [
+            {
+              "items": {
+                "properties": {
+                  "content_resource_id": {
+                    "type": "integer",
+                    "title": "Content Resource Id"
+                  },
+                  "url": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Url"
+                  },
+                  "thumbnail_url": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Thumbnail Url"
+                  },
+                  "added_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Added At"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "content_resource_id"
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "response": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "content_resource_id": {
+            "type": "integer"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "added_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_resource_id"
+        ]
+      }
+    },
+    "source": [
+      "agent-core:app/routers/agent_core.py#add_reference_images",
+      "agent-core:app/schemas/agent_core.py#AddReferenceImagesRequest",
+      "agent-core:app/schemas/agent_core.py#ReferenceImageItem"
+    ]
+  },
+  "DELETE /agents/{agent_id}/core/reference-images": {
+    "requestBody": {
+      "properties": {
+        "ids": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "maxItems": 50,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "ids"
+      ]
+    },
+    "response": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "content_resource_id": {
+            "type": "integer"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "added_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_resource_id"
+        ]
+      }
+    },
+    "source": [
+      "agent-core:app/routers/agent_core.py#remove_reference_images",
+      "agent-core:app/schemas/agent_core.py#RemoveReferenceImagesRequest",
+      "agent-core:app/schemas/agent_core.py#ReferenceImageItem"
+    ]
+  },
+  "PUT /platform/disconnect/{platform}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ]
+    },
+    "source": [
+      "gen-backend-python:endpoints/platform_api.py#disconnect_account",
+      "gen-backend-python:dtos/platform/agent_request_dto.py#AgentRequest"
+    ],
+    "requestBody": {
+      "type": "object",
+      "properties": {
+        "agent_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    }
+  },
+  "POST /platform/get_authorization_url": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "source": [
+      "gen-backend-python:endpoints/platform_api.py#get_authorization_url",
+      "gen-backend-python:dtos/platform/agent_request_dto.py#AgentRequest"
+    ],
+    "requestBody": {
+      "type": "object",
+      "properties": {
+        "agent_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    }
+  },
+  "POST /platform/get_oauth_account": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "ig_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ig_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ig_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "ig_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facebook_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facebook_page_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facebook_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tiktok_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tiktok_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "tiktok_refresh_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tiktok_refresh_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "tiktok_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x_refresh_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "x_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "user_id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "youtube_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "youtube_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "youtube_refresh_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "youtube_refresh_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "youtube_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linkedin_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linkedin_expire_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "linkedin_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linkedin_username": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "created_at"
+      ]
+    },
+    "source": [
+      "gen-backend-python:endpoints/platform_api.py#get_oauth_account",
+      "gen-backend-python:endpoints/base_models.py#OauthUserModel",
+      "gen-backend-python:dtos/platform/agent_request_dto.py#AgentRequest"
+    ],
+    "requestBody": {
+      "type": "object",
+      "properties": {
+        "agent_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent_id"
+      ]
+    }
+  },
+  "DELETE /schedule/post/{post_id}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ]
+    },
+    "source": [
+      "gen-backend-python:endpoints/schedule_api.py#delete_post"
+    ]
+  },
+  "DELETE /schedule/post/{post_id}/published": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "integer"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "platform": {
+                "type": "string"
+              },
+              "outcome": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "platform",
+              "outcome"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "post_id",
+        "results"
+      ]
+    },
+    "source": [
+      "gen-backend-python:endpoints/schedule_api.py#delete_published_post_from_platforms",
+      "gen-backend-python:services/published_post_delete.py#_result_for"
+    ]
+  },
+  "GET /analyze/jobs/{job_id}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agent_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "job_id",
+        "status"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#get_analyze_job"
+    ]
+  },
+  "GET /ideas/jobs/{job_id}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "ideas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "idea_id": {
+          "type": "string"
+        },
+        "sheet_rows_used": {
+          "type": "integer"
+        },
+        "sheet_rows_truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "job_id",
+        "status",
+        "run_id"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#get_idea_generation_job"
+    ]
+  },
+  "PUT /agent/ideas/{id}/status/{status}": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "idea_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "idea_id",
+        "status"
+      ]
+    },
+    "source": [
+      "gen-agentic:src/gen/server.py#set_idea_status"
+    ]
+  },
+  "DELETE /agents/{agent_id}/core": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "agent_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "agent_id"
+      ]
+    },
+    "source": [
+      "agent-core:app/routers/agent_core.py#delete_core"
     ]
   }
 }
