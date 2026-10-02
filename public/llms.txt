@@ -10,6 +10,49 @@ Canonical API/MCP workflow: https://api.gen.pro/guides/vidsheet-actions/
 Use `gen_discover` for current action, card, model, and layer-setting schemas, then `gen_vidsheet_action` for typed mutations. `update` saves without generation; `generate` requires an explicit card, exact owner, and stable idempotency key. Hosted MCP: Claude and ChatGPT connectors add `https://mcp.gen.pro` by URL and sign in with OAuth (no header); clients that send headers use `Authorization: Bearer <your-PAT>`.
 
 Per-target Vidsheet mutation examples below describe legacy direct-HTTP routes. Migrate editing integrations to the canonical guide; do not reconstruct save/create-job/attach sequences from those older examples. Hosted MCP final-video rendering is unavailable; use the Vidsheet editor for final rendering. Read-only and non-Vidsheet endpoint references remain applicable.
+<!-- gen:backend-vidsheet-actions:start -->
+
+`POST /v1/vidsheet/actions` takes one envelope: `actions[]` of 1–200 typed actions.
+
+| `action` | `target.kind` | Required besides `action` and `target` |
+|---|---|---|
+| `create` | `vidsheet` | — |
+| `create` | `column` | `values` |
+| `create` | `row` | — |
+| `create` | `layer` | — |
+| `create` | `variable` | `values` |
+| `update` | `vidsheet` | `values` |
+| `update` | `column` | `values` |
+| `update` | `row` | `values` |
+| `update` | `cell` | `values` |
+| `update` | `layer` | `values` |
+| `update` | `creation_card` | `values` |
+| `update` | `variable` | `values` |
+| `generate` | `cell` | `card` |
+| `generate` | `layer` | `card` |
+| `generate` | `creation_card` | `card` |
+| `generate` | `column` | — |
+| `duplicate` | `vidsheet` | — |
+| `duplicate` | `column` | — |
+| `duplicate` | `row` | — |
+| `duplicate` | `layer` | — |
+| `delete` | `vidsheet` | — |
+| `delete` | `column` | — |
+| `delete` | `row` | — |
+| `delete` | `layer` | — |
+| `delete` | `variable` | — |
+| `reorder` | `column` | `ids` |
+| `reorder` | `row` | `ids` |
+| `reorder` | `layer` | `ids` |
+| `undo` | `vidsheet` | — |
+| `redo` | `vidsheet` | — |
+| `export` | `vidsheet` | — |
+
+Read the current envelope with `GET /v1/vidsheet/action_schema` (MCP: `gen_discover` domain=`vidsheet` view=`actions`).
+`Idempotency-Key`: Required for generate; optional for edits. Scoped to acting user and agent for 24 hours. Identical requests replay the stored response; changed requests conflict.
+Existing-job lifecycle: `POST /v1/generations/{id}/lifecycle` (MCP: `gen_vidsheet_action` ops `stop_generation` and `continue_generation`).
+
+<!-- gen:backend-vidsheet-actions:end -->
 
 Base URLs:
 - `https://api.gen.pro/v1` — agent setup, vidsheets, generations, renders, publishing, content monitoring
@@ -605,6 +648,64 @@ If none match, build custom with `POST /v1/vidsheet` and add columns / layers by
 ## Creation Card Types (all 10)
 
 Every cell generation declares a `generation_type` and `data` object. Models are canonical names — the MCP server maps them to the platform's internal model identifiers automatically.
+<!-- gen:backend-creation-card-matrix:start -->
+
+**Creation-card capability matrix (generated from the API).**
+
+`GET /v1/creation_card_matrix` is the capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.
+
+| Card | Model | Label | Ratio | Duration (s) | Output resolution |
+|---|---|---|---|---|---|
+| `image-from-text` | `gemini_2` | Nano Banana 2 | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `gemini_2_lite` | Nano Banana 2 Lite | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `gemini_pro` | Nano Banana Pro | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `gpt-image-2` | GPT Image 2 | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `gpt-image-2.5-flare` | GPT Image 2.5 Flare | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `gpt-image-2.5-sunburst` | GPT Image 2.5 Sunburst | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `grok` | Grok | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | — | — |
+| `image-from-text` | `midjourney` | Midjourney 8.2 | `1:1`, `9:16`, `16:9` | — | — |
+| `image-from-text` | `seedream-4.0` | Seedream 4.0 | `1:1`, `9:16`, `16:9`, `4:3`, `3:4` | — | — |
+| `image-from-text` | `seedream-4.5` | Seedream 4.5 | `1:1`, `9:16`, `16:9` | — | — |
+| `video-from-text` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-text` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
+| `video-from-text` | `kling-v3` | Kling 3.0 | `1:1`, `9:16`, `16:9` | 3–15 | — |
+| `video-from-text` | `seedance-2.0` | Seedance 2.0 | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-text` | `seedance-2.0-fast` | Seedance 2.0 Fast - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p` |
+| `video-from-text` | `seedance-2.0-less-restriction` | Seedance 2.0 - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-text` | `seedance-2.5` | Seedance 2.5 | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-text` | `seedance-2.5-less-restriction` | Seedance 2.5 - less restricted | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-text` | `veo-3.1` | Veo 3.1 | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-text` | `veo-3.1-fast` | Veo 3.1 Fast | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-text` | `veo-3.1-lite` | Veo 3.1 Lite | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-image` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-image` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
+| `video-from-image` | `kling-v2-6` | Kling 2.6 | — | 5, 10 | — |
+| `video-from-image` | `kling-v3` | Kling 3.0 | — | 3–15 | — |
+| `video-from-image` | `minimax-h3-max` | MiniMax H3 Max | `1:1`, `9:16`, `16:9` | 5–15 | `480p`, `768p`, `1080p` |
+| `video-from-image` | `seedance-2.0` | Seedance 2.0 | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-image` | `seedance-2.0-fast` | Seedance 2.0 Fast - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p` |
+| `video-from-image` | `seedance-2.0-less-restriction` | Seedance 2.0 - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-image` | `seedance-2.5` | Seedance 2.5 | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-image` | `seedance-2.5-less-restriction` | Seedance 2.5 - less restricted | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-image` | `veo-3.1` | Veo 3.1 | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-image` | `veo-3.1-fast` | Veo 3.1 Fast | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-image` | `veo-3.1-lite` | Veo 3.1 Lite | `9:16`, `16:9` | 4, 6, 8 | — |
+| `video-from-ingredients` | `gemini-omni-flash-preview` | Gemini Omni Flash | `9:16`, `16:9` | — | — |
+| `video-from-ingredients` | `grok` | Grok Imagine | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` | 1–15 | — |
+| `video-from-ingredients` | `kling-v3` | Kling 3.0 | `1:1`, `9:16`, `16:9` | 3–15 | — |
+| `video-from-ingredients` | `seedance-2.0` | Seedance 2.0 | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-ingredients` | `seedance-2.0-fast` | Seedance 2.0 Fast - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p` |
+| `video-from-ingredients` | `seedance-2.0-less-restriction` | Seedance 2.0 - less restricted | `1:1`, `9:16`, `16:9` | 4–15 | `480p`, `720p`, `1080p` |
+| `video-from-ingredients` | `seedance-2.5` | Seedance 2.5 | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-ingredients` | `seedance-2.5-less-restriction` | Seedance 2.5 - less restricted | `16:9`, `9:16`, `4:3`, `3:4` | 4–30 | `480p`, `720p`, `1080p` |
+| `video-from-ingredients` | `veo-3.1` | Veo 3.1 | `9:16`, `16:9` | 8 | — |
+| `song` | `suno-v4.5plus-beta` | Suno v4.5+ | — | — | — |
+| `song` | `suno-v5-beta` | Suno v5 | — | — | — |
+| `song` | `suno-v5.5-beta` | Suno v5.5 | — | — | — |
+
+Song length caps (seconds): `suno-v5-beta` 240; `suno-v4.5plus-beta` 480; `suno-v5.5-beta` 360.
+
+<!-- gen:backend-creation-card-matrix:end -->
 
 ### text
 ```json
@@ -863,6 +964,31 @@ that result as accepted work.
 **Agent setup:** read settings with `gen_discover` agent views; write with `gen_agent_action` (`set_profile`, `set_name`, `set_location`, `set_primary_voice`, `set_primary_photo`, `add_reference_images`, `add_linked_account`, `create_agent`, `update_agent`, `delete_agent`, `create_agent_avatar`, `create_look`, sharing actions). These branches replace the retired per-endpoint agent tools.
 
 **Job control:** poll a generation with the `gen_discover` generation view; `gen_vidsheet_action` op `stop_generation` (record a stop and request a refund; verify the actual outcome) and op `continue_generation` (continue an owned stopped job using credits; supply generation_id, agent_id, and a stable nonblank 1–255-character idempotency_key, preserving spaces; retry the same inputs/key after timeout or generation_busy; returns the same generation_id pending, not a new card-generated job). `continue_generation` takes no card body; poll the same job with `gen_discover` to establish completion; a run_id is read with the `gen_discover` run view.
+<!-- gen:backend-mcp-tools:start -->
+
+The hosted server serves 15 tools (`gen_discover` plus one `gen_<noun>_action` per domain, and the `gen_ask`, `gen_analyze`, `gen_avatars` and `gen_generate` tools):
+
+| Tool | Purpose |
+|---|---|
+| `gen_agent_action` | Manage assistants and their profiles. |
+| `gen_analyze` | Analyze real social data and research the web: collect is the typed collection seam — one synchronous DW /collect call per request, answered as model-visible evidence + a per-target coverage summary… |
+| `gen_ask` | Ask GEN anything in plain words: a question, or a build goal for the composer. |
+| `gen_asset_action` | Manage the agent's asset library: analyze any asset_id or file url with kind video/image/audio (quoted, confirmed DW enrichment; documents are refused until DW supports them; cached repeats are… |
+| `gen_avatars` | Avatars: one person each, with looks (images of the person) and talking loops (silent talking videos of the person, generated from a look or uploaded). |
+| `gen_billing_action` | Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase). |
+| `gen_content_action` | Manage an agent's content: its content resource files — create one from an uploaded file (create_content_resource), rename one (update_content_resource), or permanently delete one… |
+| `gen_discover` | Discover |
+| `gen_generate` | Create media with GEN: generate an image (create_image), a video clip (create_video), an original song (create_song), a DJ-style song mix (create_song_mix), or transcribe audio or video into text… |
+| `gen_platform_action` | Workspace and access admin for an agent: create, rename, or delete an organization (create_organization, update_organization, delete_organization), upgrade its workspace plan (upgrade_workspace)… |
+| `gen_publish_action` | Step 5 (Export & Publish): Ship posts to social platforms — schedule, publish, update, or remove posts. |
+| `gen_task_action` | Run the task control plane: create, update, pause, resume, delete, duplicate, and run-now recurring jobs ('daily tasks' — a schedule plus a saved prompt), manage content-monitoring jobs, and approve… |
+| `gen_vidsheet_action` | Step 4 (Edit & Generate): the Vidsheet write tool for the editable video workspace. |
+| `gen_voice_action` | Build a custom voice for an agent: clone one from an audio sample (clone_voice), design one from a scripted prompt flow (generate_voice_script, generate_voice_description, generate_voice_samples… |
+| `gen_watchlist_action` | Run one or more watchlist operations in a single call: create, update, pause, resume or delete a watchlist, add or remove a monitoring source, or ask a question about a watchlist (query_watchlist… |
+
+Retired `gen_*` names stay callable as hidden compatibility aliases (for example `gen_media_action` → `gen_generate`); the full map is https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
+
+<!-- gen:backend-mcp-tools:end -->
 
 Full install guide: https://api.gen.pro/guides/mcp/
 

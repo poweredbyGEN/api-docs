@@ -1,0 +1,81 @@
+{
+  "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
+  "revision": "36b26b4",
+  "tools": [
+    {
+      "name": "gen_agent_action",
+      "title": "Create, update, or remove assistants and their profiles",
+      "summary": "Manage assistants and their profiles."
+    },
+    {
+      "name": "gen_analyze",
+      "title": "Analyze social trends, comments, hooks, and creators",
+      "summary": "Analyze real social data and research the web: collect is the typed collection seam — one synchronous DW /collect call per request, answered as model-visible evidence + a per-target coverage summary…"
+    },
+    {
+      "name": "gen_ask",
+      "title": "Ask GEN anything, or chat about a build goal",
+      "summary": "Ask GEN anything in plain words: a question, or a build goal for the composer."
+    },
+    {
+      "name": "gen_asset_action",
+      "title": "Analyze, upload, import, and delete assets",
+      "summary": "Manage the agent's asset library: analyze any asset_id or file url with kind video/image/audio (quoted, confirmed DW enrichment; documents are refused until DW supports them; cached repeats are…"
+    },
+    {
+      "name": "gen_avatars",
+      "title": "Manage avatars, looks, and talking loops",
+      "summary": "Avatars: one person each, with looks (images of the person) and talking loops (silent talking videos of the person, generated from a look or uploaded)."
+    },
+    {
+      "name": "gen_billing_action",
+      "title": "Buy credits and manage credit purchases",
+      "summary": "Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase)."
+    },
+    {
+      "name": "gen_content_action",
+      "title": "Manage content resources and content ideas",
+      "summary": "Manage an agent's content: its content resource files — create one from an uploaded file (create_content_resource), rename one (update_content_resource), or permanently delete one…"
+    },
+    {
+      "name": "gen_discover",
+      "title": "Discover",
+      "summary": "Discover"
+    },
+    {
+      "name": "gen_generate",
+      "title": "Create images, videos, songs, and transcripts",
+      "summary": "Create media with GEN: generate an image (create_image), a video clip (create_video), an original song (create_song), a DJ-style song mix (create_song_mix), or transcribe audio or video into text…"
+    },
+    {
+      "name": "gen_platform_action",
+      "title": "Manage workspaces, API keys, preferences, and backups",
+      "summary": "Workspace and access admin for an agent: create, rename, or delete an organization (create_organization, update_organization, delete_organization), upgrade its workspace plan (upgrade_workspace)…"
+    },
+    {
+      "name": "gen_publish_action",
+      "title": "Schedule, publish, or remove posts",
+      "summary": "Step 5 (Export & Publish): Ship posts to social platforms — schedule, publish, update, or remove posts."
+    },
+    {
+      "name": "gen_task_action",
+      "title": "Manage recurring jobs and monitoring tasks",
+      "summary": "Run the task control plane: create, update, pause, resume, delete, duplicate, and run-now recurring jobs ('daily tasks' — a schedule plus a saved prompt), manage content-monitoring jobs, and approve…"
+    },
+    {
+      "name": "gen_vidsheet_action",
+      "title": "Vidsheet action",
+      "summary": "Step 4 (Edit & Generate): the Vidsheet write tool for the editable video workspace."
+    },
+    {
+      "name": "gen_voice_action",
+      "title": "Clone, design, preview, and delete voices",
+      "summary": "Build a custom voice for an agent: clone one from an audio sample (clone_voice), design one from a scripted prompt flow (generate_voice_script, generate_voice_description, generate_voice_samples…"
+    },
+    {
+      "name": "gen_watchlist_action",
+      "title": "Manage monitoring watchlists and their sources",
+      "summary": "Run one or more watchlist operations in a single call: create, update, pause, resume or delete a watchlist, add or remove a monitoring source, or ask a question about a watchlist (query_watchlist…"
+    }
+  ]
+}

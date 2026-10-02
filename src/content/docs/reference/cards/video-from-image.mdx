@@ -54,6 +54,13 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | Grok | `video_from_image` | `"grok"` | 1–15 |
 
 `kling-v1-6` and `kling-v2-1` are retired for new generation. Saved layers that name them still read back.
+<!-- gen:backend-model-enums:start -->
+
+Model ids the API accepts, read from the Rails job enums:
+
+- `video_from_image`: `veo-3`, `veo-3-fast`, `veo-3.1`, `veo-3.1-fast`, `veo-3.1-lite`, `gemini-omni-flash-preview`, `kling-v3`, `kling-v2-6`, `seedance-2.0`, `seedance-2.0-less-restriction`, `seedance-2.0-fast`, `seedance-2.5`, `seedance-2.5-less-restriction`
+
+<!-- gen:backend-model-enums:end -->
 
 ---
 

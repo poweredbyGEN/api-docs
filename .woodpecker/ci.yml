@@ -6,13 +6,20 @@
 # squash merge can match no filter and then produce no pipeline at all.
 #
 # model-enums (npm test): every documented generation type and model is one
-#   Rails accepts, derived from the vendored scripts/user-job-enums.json, plus
-#   the MDX table check.
+#   Rails accepts, derived from the vendored scripts/backend/user-job-enums.json,
+#   plus the MDX table check.
 # enums-freshness (GEN-6697): that vendored copy is byte-identical to
 #   gen-backend-v2 main on git.gen.pro, read with the org secret
 #   gen_gitea_read_token (a Gitea read token; gen_backend_v2_read_token is a
 #   GitHub PAT, which Gitea answers with 401). A missing secret or fetch
 #   failure is red, never a skip.
+# backend-drift: every generated region of the public docs (the OpenAPI copies,
+#   llms.txt, llms-full.txt and the card reference pages) is exactly what
+#   scripts/sync-from-backend.mjs renders from the vendored gen-backend-v2 and
+#   gen-mcp-server artifacts, so a backend change cannot land without the docs
+#   moving with it. Offline and stdlib-only: it reads scripts/backend/, which is
+#   refreshed by the same script with --backend. Hand-written prose outside a
+#   gen:<name> marker pair is not compared, so it stays free to edit by hand.
 # publish-platforms (GEN-6715, GEN-7755): every platform the live publishing
 #   rules endpoint serves has a row in the publishing page and llms-full.txt and
 #   a value in the publish platform enum of both OpenAPI copies, and no doc
@@ -42,6 +49,11 @@ steps:
         from_secret: gen_gitea_read_token
     commands:
       - node scripts/check-enums-freshness.mjs
+
+  backend-drift:
+    image: node:20-slim
+    commands:
+      - node scripts/sync-from-backend.mjs --check
 
   publish-platforms:
     image: python:3.12-slim

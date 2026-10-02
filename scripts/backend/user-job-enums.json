@@ -79,54 +79,20 @@
         "text",
         "text_var",
         "sample_voice_url",
+        "sample_voice_duration",
         "remove_silence",
         "voice_model_provider"
       ]
     },
-    "create_avatar": {
-      "required": [
-        "train_avatar_node_id",
-        "prompt"
-      ],
-      "one_of_required": [],
-      "properties": [
-        "train_avatar_node_id",
-        "prompt",
-        "prompt_var",
-        "skin_noise_scale",
-        "skin_blend_opacity",
-        "is_detailed_skin"
-      ]
-    },
-    "create_avatar_switch_dress": {
-      "required": [
-        "train_avatar_node_id",
-        "content_resource_id",
-        "first_prompt",
-        "second_prompt"
-      ],
-      "one_of_required": [],
-      "properties": [
-        "train_avatar_node_id",
-        "content_resource_id",
-        "first_prompt",
-        "first_prompt_var",
-        "second_prompt",
-        "second_prompt_var",
-        "skin_detail_intensity",
-        "dress_resolution"
-      ]
-    },
     "create_talking_avatar_and_lip_sync": {
-      "required": [
-        "infinite_voice_lip_sync_data"
-      ],
+      "required": [],
       "one_of_required": [],
       "properties": [
         "talking_avatar_data",
         "talking_avatar_combine_data",
         "infinite_voice_lip_sync_data",
-        "previous_user_job_id"
+        "previous_user_job_id",
+        "avatar_data"
       ]
     },
     "design_voice": {
@@ -178,7 +144,8 @@
         "size",
         "aspect_ratio",
         "number_of_images",
-        "images"
+        "images",
+        "avatar_data"
       ],
       "model": {
         "type": "string",
@@ -305,17 +272,9 @@
       }
     },
     "generate_pika_video": {
-      "required": [
-        "prompt",
-        "images"
-      ],
+      "required": [],
       "one_of_required": [],
-      "properties": [
-        "prompt",
-        "prompt_var",
-        "images",
-        "native_audio"
-      ]
+      "properties": []
     },
     "grok_image_generation": {
       "required": [
@@ -328,7 +287,8 @@
         "negative_prompt",
         "negative_prompt_var",
         "aspect_ratio",
-        "model"
+        "model",
+        "avatar_data"
       ],
       "model": {
         "type": "string",
@@ -518,24 +478,15 @@
       "properties": [
         "prompt",
         "prompt_var",
-        "aspect_ratio"
+        "aspect_ratio",
+        "avatar_data"
       ]
     },
     "minimax_h3_max_video_generation": {
       "required": [
         "prompt"
       ],
-      "one_of_required": [
-        [
-          "image"
-        ],
-        [
-          "images"
-        ],
-        [
-          "image_tail"
-        ]
-      ],
+      "one_of_required": [],
       "properties": [
         "prompt",
         "prompt_var",
@@ -596,7 +547,8 @@
         "format",
         "number_of_images",
         "images",
-        "content_resource_ids"
+        "content_resource_ids",
+        "avatar_data"
       ],
       "model": {
         "type": "string",
@@ -692,7 +644,9 @@
       "model": {
         "type": "string",
         "enum": [
-          "seedance-2.0"
+          "seedance-2.0",
+          "seedance-2.0-less-restriction",
+          "seedance-2.0-fast"
         ],
         "default": "seedance-2.0"
       },
@@ -730,7 +684,8 @@
       "model": {
         "type": "string",
         "enum": [
-          "seedance-2.5"
+          "seedance-2.5",
+          "seedance-2.5-less-restriction"
         ],
         "default": "seedance-2.5"
       },
@@ -740,51 +695,14 @@
           "string"
         ],
         "minimum": 4,
-        "maximum": 15,
+        "maximum": 30,
         "default": 5
       }
     },
     "seedance_video_generation": {
       "required": [],
-      "one_of_required": [
-        [
-          "model"
-        ],
-        [
-          "model"
-        ]
-      ],
-      "properties": [
-        "image",
-        "image_tail",
-        "images",
-        "prompt",
-        "prompt_var",
-        "aspect_ratio",
-        "duration",
-        "resolution",
-        "camera_fixed",
-        "model",
-        "native_audio",
-        "voice_replace_data"
-      ],
-      "model": {
-        "type": "string",
-        "enum": [
-          "seedance-lite",
-          "seedance-pro",
-          "seedance-1.0-lite",
-          "seedance-1.0-pro",
-          "seedance-1.5-pro"
-        ],
-        "default": "seedance-1.5-pro"
-      },
-      "duration": {
-        "type": "integer",
-        "minimum": 3,
-        "maximum": 12,
-        "default": 5
-      }
+      "one_of_required": [],
+      "properties": []
     },
     "seedream_image_generation": {
       "required": [
@@ -797,7 +715,8 @@
         "model",
         "aspect_ratio",
         "images",
-        "content_resource_ids"
+        "content_resource_ids",
+        "avatar_data"
       ],
       "model": {
         "type": "string",
@@ -881,7 +800,8 @@
         "image_tail",
         "video",
         "prompts",
-        "durations"
+        "durations",
+        "aspect_ratio"
       ]
     },
     "talking_avatar_combine": {

@@ -1,6 +1,6 @@
 // Every documented generation type and model must be one Rails accepts, derived
-// from scripts/user-job-enums.json (a byte copy of gen-backend-v2's generated
-// docs/generated/user-job-enums.json, held identical to main by
+// from scripts/backend/user-job-enums.json (a byte copy of gen-backend-v2's
+// generated docs/generated/user-job-enums.json, held identical to main by
 // check-enums-freshness.mjs; its keys are the job types the Rails validator
 // accepts). Fails when a surface documents a generation_type Rails rejects,
 // lists a model value Rails rejects, omits one it accepts, or omits a field
@@ -8,7 +8,7 @@
 
 import { readFileSync } from "node:fs";
 
-const jobs = JSON.parse(readFileSync(new URL("./user-job-enums.json", import.meta.url))).user_jobs;
+const jobs = JSON.parse(readFileSync(new URL("./backend/user-job-enums.json", import.meta.url))).user_jobs;
 if (!jobs || Object.keys(jobs).length === 0) throw new Error("user-job-enums.json carries no user_jobs");
 
 const CANONICAL = {

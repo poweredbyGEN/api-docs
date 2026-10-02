@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// GEN-6697: scripts/user-job-enums.json feeds check-model-enums.mjs, so the
-// documented model enums are only as true as this copy. Fails unless it is
+// GEN-6697: scripts/backend/user-job-enums.json feeds check-model-enums.mjs, so
+// the documented model enums are only as true as this copy. Fails unless it is
 // byte-identical to the Rails-generated docs/generated/user-job-enums.json at
 // gen-backend-v2 <ref> (argv[2], default main) on git.gen.pro, the forge that
 // controls merges (GEN-6691). GitHub is a one-way mirror that lags or freezes,
@@ -12,7 +12,7 @@
 // skip path. The token is a Gitea read token (Woodpecker org secret
 // gen_gitea_read_token), not a GitHub PAT.
 // Re-vendor from a fresh gen-backend-v2 checkout:
-//   git -C ~/projects/gen-backend-v2 show origin/main:docs/generated/user-job-enums.json > scripts/user-job-enums.json
+//   node scripts/sync-from-backend.mjs --backend ../gen-backend-v2
 import { readFileSync } from "node:fs";
 
 const ref = process.argv[2] ?? "main";
@@ -43,9 +43,9 @@ const remote = await get(`raw/docs/generated/user-job-enums.json?ref=${sha}`);
 const jobs = parse(remote, `gen-backend-v2@${sha}: user-job-enums.json`).user_jobs;
 if (!jobs || Object.keys(jobs).length < 40) fail(`gen-backend-v2@${sha}: only ${Object.keys(jobs ?? {}).length} job types (< 40); refusing to trust it`);
 
-const local = readFileSync(new URL("./user-job-enums.json", import.meta.url));
-if (!local.equals(remote)) fail(`scripts/user-job-enums.json differs from gen-backend-v2@${sha} (${ref}) (local ${local.length} bytes, remote ${remote.length} bytes); re-vendor from a fresh checkout and commit`);
-console.log(`PASS: scripts/user-job-enums.json is byte-identical to gen-backend-v2@${sha} (${ref}) docs/generated/user-job-enums.json`);
+const local = readFileSync(new URL("./backend/user-job-enums.json", import.meta.url));
+if (!local.equals(remote)) fail(`scripts/backend/user-job-enums.json differs from gen-backend-v2@${sha} (${ref}) (local ${local.length} bytes, remote ${remote.length} bytes); re-vendor with scripts/sync-from-backend.mjs and commit`);
+console.log(`PASS: scripts/backend/user-job-enums.json is byte-identical to gen-backend-v2@${sha} (${ref}) docs/generated/user-job-enums.json`);
 
 function fail(msg) {
   console.error(`FAIL: ${msg}`);
