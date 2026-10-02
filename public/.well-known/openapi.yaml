@@ -12013,7 +12013,7 @@ components:
         - midjourney
         - seedream-4.0
         - seedream-4.5
-        - gemini-omni-flash-preview
+        - gemini-omni-1.1-flash
         - kling-v3
         - seedance-2.0
         - seedance-2.0-fast
