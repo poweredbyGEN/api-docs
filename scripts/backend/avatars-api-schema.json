@@ -1,5 +1,392 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "create": {
+    "additionalProperties": false,
+    "description": "POST /v1/avatars (create): the detail plus the look, talking loop and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the avatar's primary_voice.",
+    "properties": {
+      "avatar_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "avatar_look_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "avatar_look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "avatar_looks": {
+        "items": {
+          "additionalProperties": false,
+          "description": "An avatar look with the ready talking loops made from it.",
+          "properties": {
+            "avatar_look_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "avatar_talking_loops": {
+              "items": {
+                "additionalProperties": false,
+                "description": "A ready (silent) talking loop and its latest voiced preview.",
+                "properties": {
+                  "aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "avatar_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "avatar_look_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "avatar_talking_loop_id": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "duration": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "generated",
+                      "uploaded"
+                    ]
+                  },
+                  "latest_generated_video_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "made_from_talking_avatar_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ready"
+                    ]
+                  },
+                  "thumbnail_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "avatar_talking_loop_id",
+                  "name",
+                  "kind",
+                  "status",
+                  "url",
+                  "thumbnail_url",
+                  "duration",
+                  "avatar_id",
+                  "avatar_look_id",
+                  "made_from_talking_avatar_id",
+                  "latest_generated_video_url",
+                  "aspect_ratio"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "from_agent_core": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "original",
+                "uploaded",
+                "generated"
+              ]
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "avatar_look_id",
+            "name",
+            "origin",
+            "from_agent_core",
+            "url",
+            "thumbnail_url",
+            "avatar_talking_loops"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "avatar_talking_loop_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "avatar_talking_loop_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "cover_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "generating_avatar_talking_loops": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A talking loop still being generated, before its row exists.",
+          "properties": {
+            "avatar_look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "processing"
+              ]
+            },
+            "user_job_id": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "user_job_id",
+            "avatar_look_id",
+            "status"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "is_agent_avatar": {
+        "type": "boolean"
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "preview_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "primary_voice": {
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "source": {
+        "enum": [
+          "my",
+          "library"
+        ]
+      },
+      "updated_at": {
+        "type": "string"
+      },
+      "uploaded_avatar_talking_loops": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A ready (silent) talking loop and its latest voiced preview.",
+          "properties": {
+            "aspect_ratio": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "avatar_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "avatar_look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "avatar_talking_loop_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "generated",
+                "uploaded"
+              ]
+            },
+            "latest_generated_video_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "made_from_talking_avatar_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ready"
+              ]
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "avatar_talking_loop_id",
+            "name",
+            "kind",
+            "status",
+            "url",
+            "thumbnail_url",
+            "duration",
+            "avatar_id",
+            "avatar_look_id",
+            "made_from_talking_avatar_id",
+            "latest_generated_video_url",
+            "aspect_ratio"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "user_job_ids": {
+        "items": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "voice_clone_message": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "voice_clone_status": {
+        "enum": [
+          "pending",
+          "skipped",
+          "not_requested",
+          "not_applicable"
+        ]
+      },
+      "voice_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "avatar_id",
+      "name",
+      "source",
+      "is_agent_avatar",
+      "cover_url",
+      "preview_url",
+      "latest_generated_video_url",
+      "avatar_look_count",
+      "avatar_talking_loop_count",
+      "primary_voice",
+      "updated_at",
+      "avatar_looks",
+      "uploaded_avatar_talking_loops",
+      "generating_avatar_talking_loops",
+      "avatar_look_id",
+      "avatar_talking_loop_id",
+      "voice_id",
+      "user_job_ids",
+      "voice_clone_status",
+      "voice_clone_message"
+    ],
+    "type": "object"
+  },
   "description": "JSON Schema contract for Avatars::Presenter output (GET /v1/avatars, GET /v1/avatars/:id). Generated from app/presenters/avatars/presenter.rb — do not edit by hand; run bin/rails vidsheet_schema:generate.",
   "detail": {
     "additionalProperties": false,
@@ -115,6 +502,9 @@
               },
               "type": "array"
             },
+            "from_agent_core": {
+              "type": "boolean"
+            },
             "name": {
               "type": [
                 "string",
@@ -145,6 +535,7 @@
             "avatar_look_id",
             "name",
             "origin",
+            "from_agent_core",
             "url",
             "thumbnail_url",
             "avatar_talking_loops"
@@ -193,6 +584,9 @@
           "type": "object"
         },
         "type": "array"
+      },
+      "is_agent_avatar": {
+        "type": "boolean"
       },
       "latest_generated_video_url": {
         "type": [
@@ -322,6 +716,7 @@
       "avatar_id",
       "name",
       "source",
+      "is_agent_avatar",
       "cover_url",
       "preview_url",
       "latest_generated_video_url",
@@ -464,6 +859,9 @@
         },
         "type": "array"
       },
+      "from_agent_core": {
+        "type": "boolean"
+      },
       "name": {
         "type": [
           "string",
@@ -494,6 +892,7 @@
       "avatar_look_id",
       "name",
       "origin",
+      "from_agent_core",
       "url",
       "thumbnail_url",
       "avatar_talking_loops"
@@ -521,6 +920,9 @@
           "string",
           "null"
         ]
+      },
+      "is_agent_avatar": {
+        "type": "boolean"
       },
       "latest_generated_video_url": {
         "type": [
@@ -557,6 +959,7 @@
       "avatar_id",
       "name",
       "source",
+      "is_agent_avatar",
       "cover_url",
       "preview_url",
       "latest_generated_video_url",

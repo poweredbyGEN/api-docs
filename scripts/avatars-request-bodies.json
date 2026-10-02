@@ -2,10 +2,9 @@
   "POST /avatars": {
     "requestBody": {
       "type": "object",
-      "description": "JSON request body.",
+      "description": "JSON request body. An image becomes the avatar's original look. A video of a person becomes an uploaded talking loop, its first frame becomes the first look (the cover), and, unless clone_voice is false, its audio is cloned into a new voice that becomes the avatar's primary voice. Cloning a voice uses credits and needs a paid plan; uploading and extracting the frame do not. Send an Idempotency-Key header to retry safely. Refusals: 422 video_has_no_audio, video_too_short_for_voice_clone (the clone needs at least 30 seconds of speech) and video_audio_unreadable (each with param content_resource_id) when clone_voice is true; without clone_voice those videos are created without a voice and voice_clone_message says why.",
       "required": [
         "agent_id",
-        "name",
         "content_resource_id"
       ],
       "properties": {
@@ -14,10 +13,27 @@
           "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
         },
         "name": {
-          "description": "Avatar name."
+          "type": "string",
+          "description": "Avatar name. Optional: defaults to the file name, else \"New avatar\"."
         },
         "content_resource_id": {
-          "description": "An uploaded image (becomes the original look) or video (becomes the first talking loop)."
+          "description": "An uploaded image (becomes the original look) or video of a person (becomes a talking loop, its first frame the first look, and its audio a cloned voice unless clone_voice is false)."
+        },
+        "clone_voice": {
+          "type": "boolean",
+          "description": "Videos only (ignored for images). Default true: clone the person's voice from the video's audio into the avatar's primary voice; this uses credits. false skips it. true refuses a video without audio or shorter than 30 seconds instead of creating it without a voice."
+        },
+        "voice_gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female"
+          ],
+          "description": "The cloned voice's gender label. Default female."
+        },
+        "voice_language": {
+          "type": "string",
+          "description": "The cloned voice's language. Default english."
         }
       }
     },
