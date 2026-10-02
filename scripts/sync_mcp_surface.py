@@ -73,6 +73,8 @@ SCHEMAS_FILE = os.path.join(ROOT, "scripts", "operation-schemas.json")
 SEED_FILE = os.path.join(ROOT, "scripts", "openapi-operations.json")
 BASELINE_FILE = os.path.join(ROOT, "scripts", "openapi-missing-baseline.json")
 CONTRACT_FILE = os.path.join(ROOT, "scripts", "backend", "public-contract.json")
+AVATARS_SCHEMA_FILE = os.path.join(ROOT, "scripts", "backend", "avatars-api-schema.json")
+AVATAR_REQUEST_BODIES_FILE = os.path.join(ROOT, "scripts", "avatars-request-bodies.json")
 OVERRIDES_FILE = os.path.join(ROOT, "scripts", "mcp-path-params.json")
 OPENAPI_FILES = ["public/openapi.yaml", "public/.well-known/openapi.yaml"]
 LLMS_FILES = ["public/llms.txt", "public/llms-full.txt"]
@@ -891,6 +893,56 @@ def merge_operation_schema(lines, schema_entry):
     return out
 
 
+# ---- avatar response schemas --------------------------------------------------
+#
+# The backend's docs/generated/avatars-api-schema.json pins the five
+# Avatars::Presenter output shapes (summary, detail, look, talking_loop,
+# generating_job). Each /avatars operation's success body is one of them: the
+# index list is an array of `summary`, show/create/update/copy return `detail`,
+# the look routes return `look` and the talking-loop routes return
+# `talking_loop`. The request bodies stay hand-written in
+# scripts/avatars-request-bodies.json because the backend generates only the
+# presenter output, not the strong-parameter lists of those routes.
+AVATAR_RESPONSES = {
+    "GET /avatars": ("summary", "list"),
+    "GET /avatars/{id}": ("detail", "object"),
+    "POST /avatars": ("detail", "object"),
+    "PATCH /avatars/{id}": ("detail", "object"),
+    "POST /avatars/{id}/copy": ("detail", "object"),
+    "POST /avatars/{avatar_id}/looks": ("look", "object"),
+    "GET /avatars/{avatar_id}/looks/{id}": ("look", "object"),
+    "POST /avatars/{avatar_id}/talking_loops": ("talking_loop", "object"),
+    "GET /avatars/{avatar_id}/talking_loops/{id}": ("talking_loop", "object"),
+    "POST /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops": ("talking_loop", "object"),
+}
+
+
+def avatar_schema_entries(avatars, request_bodies):
+    """Synthetic `scripts/operation-schemas.json` entries for the /avatars routes.
+
+    The response schemas come from the vendored avatars-api-schema.json; the
+    request bodies and the DELETE noContent marker come from the hand-written
+    scripts/avatars-request-bodies.json. Keyed `METHOD /path` so they flow
+    through `merge_operation_schema` exactly like the other operations.
+    """
+    entries = {}
+    for key, (name, kind) in AVATAR_RESPONSES.items():
+        schema = avatars.get(name)
+        if schema is None:
+            raise SystemExit(
+                f"{os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)}: missing {name!r} schema; "
+                "re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2>"
+            )
+        entry = {"response": {"type": "array", "items": schema} if kind == "list" else schema}
+        request = request_bodies.get(key)
+        if request and request.get("requestBody") is not None:
+            entry["requestBody"] = request["requestBody"]
+        entries[key] = entry
+    if request_bodies.get("DELETE /avatars/{id}", {}).get("noContent"):
+        entries["DELETE /avatars/{id}"] = {"noContent": True}
+    return entries
+
+
 def server_override_lines(entry):
     """The operation-level `servers:` block for a non-default backend.
 
@@ -1324,6 +1376,18 @@ def main(argv):
         for key in unknown:
             print(f"  {key}")
         return 1
+    # The /avatars response schemas come from the vendored avatars-api-schema.json,
+    # not from scripts/operation-schemas.json. Fail loudly when the vendored file
+    # is missing so a regression never silently drops those response schemas.
+    if not os.path.exists(AVATARS_SCHEMA_FILE):
+        print(
+            f"FAIL: {os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)} is missing; "
+            "run scripts/sync-from-backend.mjs --backend <gen-backend-v2> to vendor it"
+        )
+        return 1
+    avatars = read_json(AVATARS_SCHEMA_FILE)
+    request_bodies = read_json(AVATAR_REQUEST_BODIES_FILE) if os.path.exists(AVATAR_REQUEST_BODIES_FILE) else {}
+    schemas.update(avatar_schema_entries(avatars, request_bodies))
     outputs, meta = render_all(surface, seed, contract, schemas)
     failures, missing = assert_invariants(surface, meta)
     if failures:

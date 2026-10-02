@@ -20,6 +20,7 @@
 //   docs/generated/user-job-enums.json               the model enum each job type accepts
 //   docs/generated/vidsheet-action-schema.json       the Vidsheet action envelope
 //   docs/generated/vidsheet-operations-schema.json   the Vidsheet operation endpoints
+//   docs/generated/avatars-api-schema.json           the /avatars response schemas
 // The MCP tool surface is gen-mcp-server's served registry, vendored to
 // scripts/backend/mcp-tools.json from
 // src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv on origin/main.
@@ -56,6 +57,7 @@ const UPSTREAM = {
   userJobs: "docs/generated/user-job-enums.json",
   actionSchema: "docs/generated/vidsheet-action-schema.json",
   operationsSchema: "docs/generated/vidsheet-operations-schema.json",
+  avatars: "docs/generated/avatars-api-schema.json",
 };
 
 // The documented generation types and the Rails job types each one routes to.
@@ -633,6 +635,11 @@ function vidsheetOperations(operationsSchema) {
 
 function vendor(backendDir) {
   mkdirSync(VENDOR_DIR, { recursive: true });
+  // The /avatars response schemas are the newest vendored artifact. Validate it
+  // first so a missing or malformed upstream file fails the sync immediately,
+  // instead of silently keeping stale hand-written response schemas in the
+  // public spec.
+  readSourceJson(backendDir, UPSTREAM.avatars);
   const contract = {
     catalog: buildCatalog(backendDir),
     user_jobs: readSourceJson(backendDir, UPSTREAM.userJobs).user_jobs ?? {},
@@ -645,6 +652,7 @@ function vendor(backendDir) {
   writeFileSync(PUBLIC_CONTRACT, `${JSON.stringify(contract, null, 2)}\n`);
   // check-enums-freshness.mjs compares this byte copy with the backend.
   copyFileSync(path.join(backendDir, UPSTREAM.userJobs), path.join(VENDOR_DIR, "user-job-enums.json"));
+  copyFileSync(path.join(backendDir, UPSTREAM.avatars), path.join(VENDOR_DIR, "avatars-api-schema.json"));
   const sha = path.join(backendDir, "SHA");
   if (existsSync(sha)) {
     copyFileSync(sha, path.join(VENDOR_DIR, "SHA"));

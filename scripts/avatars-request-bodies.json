@@ -1,0 +1,147 @@
+{
+  "POST /avatars": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "name",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "name": {
+          "description": "Avatar name."
+        },
+        "content_resource_id": {
+          "description": "An uploaded image (becomes the original look) or video (becomes the first talking loop)."
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "PATCH /avatars/{id}": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "name": {},
+        "primary_voice": {
+          "type": "object",
+          "properties": {
+            "source": {},
+            "voice_id": {}
+          }
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#update",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{id}/copy": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#copy",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{avatar_id}/looks": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "content_resource_id": {
+          "description": "An uploaded image."
+        },
+        "name": {}
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatar_looks_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{avatar_id}/talking_loops": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "agent_id",
+        "content_resource_id"
+      ],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "description": "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+        },
+        "content_resource_id": {
+          "description": "An uploaded video."
+        },
+        "name": {
+          "description": "Defaults to the avatar's name when omitted."
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatar_talking_loops_controller.rb#create",
+      "gen-backend-v2:app/controllers/application_controller.rb#require_agent!"
+    ]
+  },
+  "POST /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops": {
+    "requestBody": {
+      "type": "object",
+      "description": "JSON request body.",
+      "required": [
+        "content_resource_id"
+      ],
+      "properties": {
+        "content_resource_id": {
+          "type": "string",
+          "description": "Content resource of the uploaded video that becomes the talking loop (`owned_content_resource!(..., kind: \"video\")`)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Talking loop name; defaults to the avatar's name."
+        }
+      }
+    },
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatar_talking_loops_controller.rb#create"
+    ]
+  },
+  "DELETE /avatars/{id}": {
+    "noContent": true,
+    "source": [
+      "gen-backend-v2:app/controllers/v1/avatars_controller.rb#destroy"
+    ]
+  }
+}
