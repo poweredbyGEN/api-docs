@@ -1,0 +1,21 @@
+{
+  "/agents/{}/core/linked-accounts/{}": ["agent_id", "linked_account_id"],
+  "/agents/{}/monitoring/effective": ["agent_id"],
+  "/agents/{}/recurring-jobs": ["agent_id"],
+  "/agents/{}/smas/{}": ["agent_id", "sma_id"],
+  "/avatars/{}": ["id"],
+  "/avatars/{}/copy": ["id"],
+  "/avatars/{}/looks": ["avatar_id"],
+  "/avatars/{}/looks/{}": ["avatar_id", "id"],
+  "/avatars/{}/looks/{}/talking_loops": ["avatar_id", "avatar_look_id"],
+  "/avatars/{}/talking_loops": ["avatar_id"],
+  "/avatars/{}/talking_loops/{}": ["avatar_id", "id"],
+  "/organizations/{}/user_organizations/{}": ["organization_id", "id"],
+  "/projects/{}/set_project_share": ["id"],
+  "/user_shared_agents/{}": ["id"],
+  "/vidsheet/{}/cells/{}/available_variables": ["sheet_id", "cell_id"],
+  "/vidsheet/{}/generations": ["id"],
+  "/vidsheet/{}/operations": ["sheet_id"],
+  "/vidsheet/{}/operations/last": ["sheet_id"],
+  "/vidsheet/{}/validate_video_layout": ["sheet_id"]
+}

@@ -7234,6 +7234,605 @@
     "idempotency_description": "Required for generate; optional for edits. Scoped to acting user and agent for 24 hours. Identical requests replay the stored response; changed requests conflict.",
     "min_items": 1,
     "max_items": 200,
+    "request_projection": {
+      "type": "object",
+      "required": [
+        "agent_id",
+        "actions"
+      ],
+      "properties": {
+        "agent_id": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          ],
+          "description": "The agent that owns the video workspace."
+        },
+        "change_set_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "An optional stable edit-group identifier for undo and retry."
+        },
+        "actions": {
+          "type": "array",
+          "description": "One action, or a compatible batch: updates, generations (at most 50), variable creates, one video-scene edit group, or a reconcile of creates, updates and deletes on one Vidsheet. A reconcile applies deletes, then creates, then updates; a create may carry a ref that later updates address.",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "response_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "title": "Video editing action response",
+      "description": "Every success, pending, confirmation, payment, and error envelope returned by the Rails video-action endpoint.",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "description": "Results in the same order as the submitted actions.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "The zero-based action index."
+                  },
+                  "result": {
+                    "type": "object",
+                    "description": "The persisted edit resource, generation job, delete preview result, or undo summary.",
+                    "properties": {
+                      "user_job_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "A persisted Rails resource identifier."
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "The current edit or asynchronous job status."
+                      },
+                      "container_type": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "The Rails owner type for a generated take."
+                      },
+                      "container_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "The cell or layer that owns the generated take."
+                      },
+                      "card_type": {
+                        "type": "string",
+                        "description": "The generation card that created the job."
+                      },
+                      "reference_mapping": {
+                        "type": "object",
+                        "description": "Provider attachment order grouped by creation-card field; prompt mentions use these stable labels.",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "position": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "label": {
+                                "type": "string",
+                                "pattern": "^(Image|Video|Audio) [1-9][0-9]*$"
+                              },
+                              "media_type": {
+                                "enum": [
+                                  "image",
+                                  "video",
+                                  "audio"
+                                ]
+                              },
+                              "source": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "enum": [
+                                      "content_resource",
+                                      "local_variable",
+                                      "global_variable",
+                                      "video_layer",
+                                      "final_video",
+                                      "audio_library"
+                                    ]
+                                  },
+                                  "id": {
+                                    "oneOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      {
+                                        "type": "string",
+                                        "minLength": 1
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "id"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "position",
+                              "label",
+                              "media_type",
+                              "source"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "project_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "A persisted Rails resource identifier."
+                      },
+                      "filename": {
+                        "type": "string",
+                        "description": "The safe CSV download filename."
+                      },
+                      "content_type": {
+                        "const": "text/csv",
+                        "description": "The exported file media type."
+                      },
+                      "csv": {
+                        "type": "string",
+                        "description": "RFC 4180-compatible Vidsheet grid content."
+                      },
+                      "csv_chars": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "The complete CSV character count."
+                      },
+                      "row_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "The number of rows included in the CSV."
+                      },
+                      "column_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "The number of Vidsheet columns included in the CSV."
+                      },
+                      "uuid": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "uuid",
+                        "description": "The stable UUID of a created or duplicated Vidsheet; non-null in create and duplicate receipts."
+                      },
+                      "agent_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "The agent that owns the created or duplicated Vidsheet."
+                      },
+                      "spreadsheet_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "The persisted numeric Vidsheet identifier."
+                      },
+                      "vidsheet_project_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The UUID used by the canonical editable Vidsheet route."
+                      },
+                      "vidsheet_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "The canonical editable video-workspace URL."
+                      },
+                      "deleted": {
+                        "type": "boolean",
+                        "description": "Whether the requested resource was deleted."
+                      },
+                      "column_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "A persisted Rails resource identifier."
+                      },
+                      "total_estimated_credits": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "The summed pre-dispatch credit estimate for a column generate."
+                      },
+                      "rows": {
+                        "type": "array",
+                        "description": "The per-row dispatch ledger of a column generate.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "row_id": {
+                              "oneOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_-]+$",
+                                  "minLength": 1,
+                                  "maxLength": 128
+                                }
+                              ],
+                              "description": "A persisted Rails resource identifier."
+                            },
+                            "cell_id": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "minimum": 1,
+                              "description": "The row's cell in the generated column; null when the row has no cell in it."
+                            },
+                            "status": {
+                              "enum": [
+                                "dispatched",
+                                "would_dispatch",
+                                "failed",
+                                "skipped"
+                              ],
+                              "description": "Whether this row dispatched a job, would dispatch it on a preview, was refused, or held no card to run."
+                            },
+                            "user_job_id": {
+                              "oneOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_-]+$",
+                                  "minLength": 1,
+                                  "maxLength": 128
+                                }
+                              ],
+                              "description": "A persisted Rails resource identifier."
+                            },
+                            "error": {
+                              "type": "string",
+                              "description": "Why this row did not dispatch."
+                            }
+                          },
+                          "required": [
+                            "row_id",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "index",
+                  "result"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "change_set_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid",
+              "description": "The undoable edit group, when the actions changed stored video data."
+            },
+            "refs": {
+              "type": "object",
+              "description": "The persisted id of every record a create named with a ref.",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                ]
+              }
+            },
+            "contract_version": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "The exact Rails video-action contract revision."
+            }
+          },
+          "required": [
+            "results",
+            "change_set_id",
+            "contract_version"
+          ],
+          "additionalProperties": false,
+          "description": "A successful video-editing action response."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "queued",
+                "generating"
+              ],
+              "description": "The prerequisite or source is not ready yet."
+            },
+            "error_code": {
+              "enum": [
+                "source_not_ready",
+                "generation_pending"
+              ],
+              "description": "The machine-readable pending reason."
+            },
+            "retryable": {
+              "const": true,
+              "description": "Retry the identical request and idempotency key."
+            },
+            "retry_after_seconds": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum retry delay."
+            },
+            "message": {
+              "type": "string",
+              "description": "Human-readable pending detail."
+            }
+          },
+          "required": [
+            "status",
+            "error_code",
+            "retryable",
+            "message"
+          ],
+          "additionalProperties": false,
+          "description": "An accepted generation that needs an identical retry."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string",
+              "description": "Human-readable confirmation instructions."
+            },
+            "error_code": {
+              "const": "confirmation_required",
+              "description": "The destructive action needs explicit confirmation."
+            },
+            "operation": {
+              "type": "string",
+              "description": "The destructive operation being confirmed."
+            },
+            "would_destroy": {
+              "type": "object",
+              "description": "The authoritative Rails preview bound to the token."
+            },
+            "confirm_token": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A short-lived, single-use confirmation token."
+            },
+            "expires_in": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Token lifetime in seconds."
+            },
+            "token_rejected": {
+              "type": "string",
+              "description": "Why a supplied token did not authorize this preview."
+            }
+          },
+          "required": [
+            "error",
+            "error_code",
+            "operation",
+            "would_destroy",
+            "confirm_token",
+            "expires_in"
+          ],
+          "additionalProperties": false,
+          "description": "A destructive-action confirmation response."
+        },
+        {
+          "type": "object",
+          "description": "A validation, conflict, credit, or payment response from the Rails action boundary.",
+          "required": [
+            "error_code"
+          ],
+          "properties": {
+            "error": {
+              "type": "string",
+              "description": "Human-readable failure detail."
+            },
+            "error_code": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The stable machine-readable failure code."
+            },
+            "errors": {
+              "type": "array",
+              "description": "Field-level action validation failures.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": [
+                      "string",
+                      "array"
+                    ],
+                    "description": "The invalid request path."
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "The field failure code."
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "The field failure detail."
+                  },
+                  "schema": {
+                    "type": "string",
+                    "description": "The generated schema revision that rejected the request."
+                  },
+                  "fragment": {
+                    "type": "string",
+                    "description": "The JSON Pointer to the rejected request value."
+                  },
+                  "failed_attribute": {
+                    "type": "string",
+                    "description": "The JSON Schema keyword that rejected the value."
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "retryable": {
+              "type": "boolean",
+              "description": "Whether retrying can succeed without changing the action."
+            },
+            "new_change_set_required": {
+              "type": "boolean",
+              "description": "Whether the caller must begin a new edit group."
+            },
+            "funding_error_kind": {
+              "type": "string",
+              "description": "The credit or payment failure category."
+            },
+            "x402_credit_purchase": {
+              "type": "object",
+              "description": "A typed x402 quote or credit-plan requirement.",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "credit_plan_required",
+                    "payment_required"
+                  ]
+                },
+                "checkout_session_id": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  ],
+                  "description": "A persisted Rails resource identifier."
+                },
+                "amount_usd": {
+                  "type": "string"
+                },
+                "credits": {
+                  "type": "string"
+                },
+                "payment_methods": {
+                  "type": "array"
+                },
+                "retry": {
+                  "type": "object"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    },
     "rows": [
       {
         "action": "create",
@@ -7443,5 +8042,4257 @@
         "operationId": "vidsheet_operation.undo"
       }
     ]
+  },
+  "vidsheet_operations": {
+    "POST /v1/vidsheet/from_idea": {
+      "operationId": "spreadsheet.from_idea"
+    },
+    "GET /v1/vidsheet/global_variables_template": {
+      "operationId": "spreadsheet.global_variables_template"
+    },
+    "DELETE /v1/vidsheet/{id}": {
+      "operationId": "project.destroy",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{id}": {
+      "operationId": "spreadsheet.show",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{id}": {
+      "operationId": "project.update",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "project",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "project": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "is_default": {
+                          "type": "boolean"
+                        },
+                        "snapshot": {
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "vidsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "is_default": {
+                      "type": "boolean"
+                    },
+                    "snapshot": {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "child_project_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "last_accessed_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "parent_project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "python_sma_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "python_watchlist_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "slug": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_locked_snapshot": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_source": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_status": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_version": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "status": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "template_position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "uuid": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "vidsheet_mutation_revision": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "vidsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{id}": {
+      "operationId": "project.update",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "project",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "project": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "is_default": {
+                          "type": "boolean"
+                        },
+                        "snapshot": {
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "vidsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "is_default": {
+                      "type": "boolean"
+                    },
+                    "snapshot": {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "child_project_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "last_accessed_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "parent_project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "python_sma_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "python_watchlist_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "slug": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_locked_snapshot": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_source": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_status": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "sma_version": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "status": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "template_position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "uuid": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "vidsheet_mutation_revision": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "vidsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{id}/ask": {
+      "operationId": "vidsheet_ask.create",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "x-no-db-column": true
+                },
+                "conversation_id": {
+                  "x-no-db-column": true
+                },
+                "attachments": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "signed_id": {
+                          "x-no-db-column": true
+                        },
+                        "filename": {
+                          "x-no-db-column": true
+                        },
+                        "content_type": {
+                          "x-no-db-column": true
+                        },
+                        "byte_size": {
+                          "x-no-db-column": true
+                        },
+                        "url": {
+                          "x-no-db-column": true
+                        },
+                        "thumbnail_url": {
+                          "x-no-db-column": true
+                        },
+                        "content_resource_id": {
+                          "x-no-db-column": true
+                        },
+                        "origin_type": {
+                          "x-no-db-column": true
+                        },
+                        "enrichment": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-unbounded": true
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "signed_id": {
+                            "x-no-db-column": true
+                          },
+                          "filename": {
+                            "x-no-db-column": true
+                          },
+                          "content_type": {
+                            "x-no-db-column": true
+                          },
+                          "byte_size": {
+                            "x-no-db-column": true
+                          },
+                          "url": {
+                            "x-no-db-column": true
+                          },
+                          "thumbnail_url": {
+                            "x-no-db-column": true
+                          },
+                          "content_resource_id": {
+                            "x-no-db-column": true
+                          },
+                          "origin_type": {
+                            "x-no-db-column": true
+                          },
+                          "enrichment": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-unbounded": true
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "x-unbounded": true
+                },
+                "context": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "row_id": {
+                          "x-no-db-column": true
+                        },
+                        "cell_id": {
+                          "x-no-db-column": true
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "row_id": {
+                            "x-no-db-column": true
+                          },
+                          "cell_id": {
+                            "x-no-db-column": true
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                },
+                "vidsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{id}/clone": {
+      "operationId": "spreadsheet.clone",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{id}/global_variables": {
+      "operationId": "spreadsheet.global_variables",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{id}/import_global_variables": {
+      "operationId": "spreadsheet.import_global_variables",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{id}/validate_video_layout": {
+      "operationId": "spreadsheet.validate_video_layout",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/cells/mass_update": {
+      "operationId": "spreadsheet_cell.mass_update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "spreadsheet_cells": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        },
+                        "default_user_job_attributes": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "x-unbounded": true
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "video_layers_attributes": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "position": {
+                                  "type": "integer",
+                                  "x-ordering-axis": true
+                                },
+                                "additional_attributes": {
+                                  "type": "object",
+                                  "additionalProperties": true,
+                                  "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                  "x-max-serialized-bytes": 2097152,
+                                  "x-max-nesting-depth": 16,
+                                  "propertyNames": {
+                                    "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                  }
+                                },
+                                "default_user_job_attributes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "data": {
+                                      "type": "object",
+                                      "additionalProperties": true,
+                                      "x-unbounded": true
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "name": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "position": {
+                                    "type": "integer",
+                                    "x-ordering-axis": true
+                                  },
+                                  "additional_attributes": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                    "x-max-serialized-bytes": 2097152,
+                                    "x-max-nesting-depth": 16,
+                                    "propertyNames": {
+                                      "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                    }
+                                  },
+                                  "default_user_job_attributes": {
+                                    "type": "object",
+                                    "properties": {
+                                      "data": {
+                                        "type": "object",
+                                        "additionalProperties": true,
+                                        "x-unbounded": true
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            }
+                          },
+                          "default_user_job_attributes": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-unbounded": true
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "video_layers_attributes": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "name": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "position": {
+                                    "type": "integer",
+                                    "x-ordering-axis": true
+                                  },
+                                  "additional_attributes": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                    "x-max-serialized-bytes": 2097152,
+                                    "x-max-nesting-depth": 16,
+                                    "propertyNames": {
+                                      "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                    }
+                                  },
+                                  "default_user_job_attributes": {
+                                    "type": "object",
+                                    "properties": {
+                                      "data": {
+                                        "type": "object",
+                                        "additionalProperties": true,
+                                        "x-unbounded": true
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "name": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "position": {
+                                      "type": "integer",
+                                      "x-ordering-axis": true
+                                    },
+                                    "additional_attributes": {
+                                      "type": "object",
+                                      "additionalProperties": true,
+                                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                      "x-max-serialized-bytes": 2097152,
+                                      "x-max-nesting-depth": 16,
+                                      "propertyNames": {
+                                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                      }
+                                    },
+                                    "default_user_job_attributes": {
+                                      "type": "object",
+                                      "properties": {
+                                        "data": {
+                                          "type": "object",
+                                          "additionalProperties": true,
+                                          "x-unbounded": true
+                                        }
+                                      },
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "include_creation_card": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_cell": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                },
+                "with_execution_cost": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/cells/{id}": {
+      "operationId": "spreadsheet_cell.show",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/cells/{id}": {
+      "operationId": "spreadsheet_cell.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_cell",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_cell": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "default_user_job_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        },
+                        "default_user_job_attributes": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "x-unbounded": true
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "video_layers_attributes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "position": {
+                                "type": "integer",
+                                "x-ordering-axis": true
+                              },
+                              "additional_attributes": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                "x-max-serialized-bytes": 2097152,
+                                "x-max-nesting-depth": 16,
+                                "propertyNames": {
+                                  "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                }
+                              },
+                              "default_user_job_attributes": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "x-unbounded": true
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_cells": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "default_user_job_id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      }
+                    },
+                    "default_user_job_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-unbounded": true
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "video_layers_attributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "position": {
+                            "type": "integer",
+                            "x-ordering-axis": true
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            }
+                          },
+                          "default_user_job_attributes": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-unbounded": true
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "cell_role": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "default_user_job_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "execution_cost": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "spreadsheet_column_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "spreadsheet_row_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_history": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_cells": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/cells/{id}": {
+      "operationId": "spreadsheet_cell.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_cell",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_cell": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "default_user_job_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        },
+                        "default_user_job_attributes": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "x-unbounded": true
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "video_layers_attributes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "position": {
+                                "type": "integer",
+                                "x-ordering-axis": true
+                              },
+                              "additional_attributes": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                "x-max-serialized-bytes": 2097152,
+                                "x-max-nesting-depth": 16,
+                                "propertyNames": {
+                                  "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                }
+                              },
+                              "default_user_job_attributes": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "x-unbounded": true
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_cells": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "default_user_job_id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      }
+                    },
+                    "default_user_job_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-unbounded": true
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "video_layers_attributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "position": {
+                            "type": "integer",
+                            "x-ordering-axis": true
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            }
+                          },
+                          "default_user_job_attributes": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-unbounded": true
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "cell_role": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "default_user_job_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "execution_cost": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "spreadsheet_column_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "spreadsheet_row_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_history": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_cells": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/cells/{id}/available_variables": {
+      "operationId": "available_variable.show",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/cells/{id}/set_default_user_job": {
+      "operationId": "spreadsheet_cell.set_default_user_job",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "default_user_job": {
+                  "type": "object",
+                  "properties": {
+                    "user_job_id": {
+                      "x-no-db-column": true
+                    },
+                    "is_user_job": {
+                      "x-no-db-column": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers": {
+      "operationId": "video_layer.create",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "video_layer",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "video_layer": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "position": {
+                          "type": "integer",
+                          "x-ordering-axis": true
+                        },
+                        "type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "sound",
+                            "text",
+                            "clip",
+                            null
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "position"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "x-direct-read": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "position": {
+                      "type": "integer",
+                      "x-ordering-axis": true
+                    },
+                    "type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "sound",
+                        "text",
+                        "clip",
+                        null
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      }
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "default_user_job_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "default_user_job_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_history": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true,
+                  "required": [
+                    "position"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/update_positions": {
+      "operationId": "video_layer.update_positions",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "DELETE /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/{id}": {
+      "operationId": "video_layer.destroy",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/{id}": {
+      "operationId": "video_layer.show",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/{id}": {
+      "operationId": "video_layer.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "video_layer",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "video_layer": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "sound",
+                            "text",
+                            "clip",
+                            null
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        },
+                        "default_user_job_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "default_user_job_type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "additional_attributes": {
+                      "x-direct-read": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "sound",
+                        "text",
+                        "clip",
+                        null
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      }
+                    },
+                    "default_user_job_id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "default_user_job_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_history": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/{id}": {
+      "operationId": "video_layer.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "video_layer",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "video_layer": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "sound",
+                            "text",
+                            "clip",
+                            null
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        },
+                        "default_user_job_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "default_user_job_type": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "additional_attributes": {
+                      "x-direct-read": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "sound",
+                        "text",
+                        "clip",
+                        null
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      }
+                    },
+                    "default_user_job_id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "default_user_job_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "owner_type": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_history": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "user_job_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/cells/{spreadsheet_cell_id}/layers/{id}/duplicate": {
+      "operationId": "video_layer.duplicate",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "spreadsheet_cell_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "additional_attributes": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                  "x-max-serialized-bytes": 2097152,
+                  "x-max-nesting-depth": 16,
+                  "propertyNames": {
+                    "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                  }
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "name": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/columns": {
+      "operationId": "spreadsheet_column.index",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/columns": {
+      "operationId": "spreadsheet_column.create",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Replays the original created resource for 24 hours within the same project and endpoint.",
+          "schema": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_column",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_column": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "x-unique": true,
+                          "x-unique-scope": [
+                            "project_id"
+                          ]
+                        },
+                        "temp_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "image",
+                            "video",
+                            "audio",
+                            "media",
+                            "stats"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "position": {
+                          "type": "integer",
+                          "x-ordering-axis": true
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "cloned_from_spreadsheet_column_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        },
+                        "spreadsheet_cells_attributes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "spreadsheet_row_id": {
+                                "type": "integer"
+                              },
+                              "value": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "additional_attributes": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                "x-max-serialized-bytes": 2097152,
+                                "x-max-nesting-depth": 16,
+                                "propertyNames": {
+                                  "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                }
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "x-unique": true,
+                      "x-unique-scope": [
+                        "project_id"
+                      ]
+                    },
+                    "temp_title": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "image",
+                        "video",
+                        "audio",
+                        "media",
+                        "stats"
+                      ]
+                    },
+                    "description": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "position": {
+                      "type": "integer",
+                      "x-ordering-axis": true
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "cloned_from_spreadsheet_column_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "spreadsheet_cells_attributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "spreadsheet_row_id": {
+                            "type": "integer"
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "column_role": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-direct-read": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/columns/mass_update": {
+      "operationId": "spreadsheet_column.mass_update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "spreadsheet_columns": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string",
+                          "x-unique": true,
+                          "x-unique-scope": [
+                            "project_id"
+                          ]
+                        },
+                        "temp_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "image",
+                            "video",
+                            "audio",
+                            "media",
+                            "stats"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "position": {
+                          "type": "integer",
+                          "x-ordering-axis": true
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "cloned_from_spreadsheet_column_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": "string",
+                            "x-unique": true,
+                            "x-unique-scope": [
+                              "project_id"
+                            ]
+                          },
+                          "temp_title": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "image",
+                              "video",
+                              "audio",
+                              "media",
+                              "stats"
+                            ]
+                          },
+                          "description": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "position": {
+                            "type": "integer",
+                            "x-ordering-axis": true
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            },
+                            "x-allowed-new-keys": [
+                              "cloned_from_spreadsheet_column_id",
+                              "airtable_record_id",
+                              "just_cloned"
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/columns/update_positions": {
+      "operationId": "spreadsheet_column.update_positions",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "DELETE /v1/vidsheet/{vidsheet_id}/columns/{id}": {
+      "operationId": "spreadsheet_column.destroy",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/columns/{id}": {
+      "operationId": "spreadsheet_column.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_column",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_column": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "x-unique": true,
+                          "x-unique-scope": [
+                            "project_id"
+                          ]
+                        },
+                        "temp_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "image",
+                            "video",
+                            "audio",
+                            "media",
+                            "stats"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "cloned_from_spreadsheet_column_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "x-unique": true,
+                      "x-unique-scope": [
+                        "project_id"
+                      ]
+                    },
+                    "temp_title": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "image",
+                        "video",
+                        "audio",
+                        "media",
+                        "stats"
+                      ]
+                    },
+                    "description": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "cloned_from_spreadsheet_column_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "column_role": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/columns/{id}": {
+      "operationId": "spreadsheet_column.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_column",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_column": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "x-unique": true,
+                          "x-unique-scope": [
+                            "project_id"
+                          ]
+                        },
+                        "temp_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "image",
+                            "video",
+                            "audio",
+                            "media",
+                            "stats"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "cloned_from_spreadsheet_column_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "x-unique": true,
+                      "x-unique-scope": [
+                        "project_id"
+                      ]
+                    },
+                    "temp_title": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "image",
+                        "video",
+                        "audio",
+                        "media",
+                        "stats"
+                      ]
+                    },
+                    "description": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "cloned_from_spreadsheet_column_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "column_role": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_columns": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/columns/{id}/duplicate": {
+      "operationId": "spreadsheet_column.duplicate",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/global_variables": {
+      "operationId": "global_variable.create",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "x-no-db-column": true
+                },
+                "value": {
+                  "x-no-db-column": true
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "DELETE /v1/vidsheet/{vidsheet_id}/global_variables/{id}": {
+      "operationId": "global_variable.destroy",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/global_variables/{id}": {
+      "operationId": "global_variable.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "x-no-db-column": true
+                },
+                "value": {
+                  "x-no-db-column": true
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/global_variables/{id}": {
+      "operationId": "global_variable.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "x-no-db-column": true
+                },
+                "value": {
+                  "x-no-db-column": true
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/operations": {
+      "operationId": "vidsheet_operation.index",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/operations/last": {
+      "operationId": "vidsheet_operation.last",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/operations/redo": {
+      "operationId": "vidsheet_operation.redo",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/operations/undo": {
+      "operationId": "vidsheet_operation.undo",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/rows": {
+      "operationId": "spreadsheet_row.index",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/rows": {
+      "operationId": "spreadsheet_row.create",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Replays the original created resource for 24 hours within the same project and endpoint.",
+          "schema": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_row",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_row": {
+                      "type": "object",
+                      "properties": {
+                        "position": {
+                          "type": "integer",
+                          "x-ordering-axis": true
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "rowHeight",
+                            "cloned_from_spreadsheet_row_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        },
+                        "spreadsheet_cells_attributes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "spreadsheet_column_id": {
+                                "type": "integer"
+                              },
+                              "value": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "additional_attributes": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                                "x-max-serialized-bytes": 2097152,
+                                "x-max-nesting-depth": 16,
+                                "propertyNames": {
+                                  "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                                }
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "integer",
+                      "x-ordering-axis": true
+                    },
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "rowHeight",
+                        "cloned_from_spreadsheet_row_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "spreadsheet_cells_attributes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "spreadsheet_column_id": {
+                            "type": "integer"
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            }
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-direct-read": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/rows/delta": {
+      "operationId": "spreadsheet_row.delta",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/rows/duplicate_last": {
+      "operationId": "spreadsheet_row.duplicate_last",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Replays the original created resource for 24 hours within the same project and endpoint.",
+          "schema": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      ]
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/rows/mass_update": {
+      "operationId": "spreadsheet_row.mass_update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "spreadsheet_rows": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "position": {
+                          "type": "integer",
+                          "x-ordering-axis": true
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "rowHeight",
+                            "cloned_from_spreadsheet_row_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "position": {
+                            "type": "integer",
+                            "x-ordering-axis": true
+                          },
+                          "additional_attributes": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                            "x-max-serialized-bytes": 2097152,
+                            "x-max-nesting-depth": 16,
+                            "propertyNames": {
+                              "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                            },
+                            "x-allowed-new-keys": [
+                              "rowHeight",
+                              "cloned_from_spreadsheet_row_id",
+                              "airtable_record_id",
+                              "just_cloned"
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  ]
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "include_user_jobs": {
+                  "x-direct-read": true
+                },
+                "include_video_layers": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                },
+                "with_execution_cost": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/rows/seed_test_data": {
+      "operationId": "spreadsheet_row.seed_test_data",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/rows/update_positions": {
+      "operationId": "spreadsheet_row.update_positions",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "DELETE /v1/vidsheet/{vidsheet_id}/rows/{id}": {
+      "operationId": "spreadsheet_row.destroy",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{vidsheet_id}/rows/{id}": {
+      "operationId": "spreadsheet_row.show",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "PATCH /v1/vidsheet/{vidsheet_id}/rows/{id}": {
+      "operationId": "spreadsheet_row.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_row",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_row": {
+                      "type": "object",
+                      "properties": {
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "rowHeight",
+                            "cloned_from_spreadsheet_row_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        },
+                        "spreadsheet_cells_attributes": {
+                          "type": "object",
+                          "properties": {
+                            "spreadsheet_column_id": {
+                              "type": "integer"
+                            },
+                            "value": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "additional_attributes": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                              "x-max-serialized-bytes": 2097152,
+                              "x-max-nesting-depth": 16,
+                              "propertyNames": {
+                                "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                              }
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "rowHeight",
+                        "cloned_from_spreadsheet_row_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "spreadsheet_cells_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "spreadsheet_column_id": {
+                          "type": "integer"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PUT /v1/vidsheet/{vidsheet_id}/rows/{id}": {
+      "operationId": "spreadsheet_row.update",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "x-params-wrapper": "spreadsheet_row",
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "spreadsheet_row": {
+                      "type": "object",
+                      "properties": {
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          },
+                          "x-allowed-new-keys": [
+                            "rowHeight",
+                            "cloned_from_spreadsheet_row_id",
+                            "airtable_record_id",
+                            "just_cloned"
+                          ]
+                        },
+                        "spreadsheet_cells_attributes": {
+                          "type": "object",
+                          "properties": {
+                            "spreadsheet_column_id": {
+                              "type": "integer"
+                            },
+                            "value": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "additional_attributes": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                              "x-max-serialized-bytes": 2097152,
+                              "x-max-nesting-depth": 16,
+                              "propertyNames": {
+                                "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                              }
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "additional_attributes": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                      "x-max-serialized-bytes": 2097152,
+                      "x-max-nesting-depth": 16,
+                      "propertyNames": {
+                        "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                      },
+                      "x-allowed-new-keys": [
+                        "rowHeight",
+                        "cloned_from_spreadsheet_row_id",
+                        "airtable_record_id",
+                        "just_cloned"
+                      ]
+                    },
+                    "spreadsheet_cells_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "spreadsheet_column_id": {
+                          "type": "integer"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "additional_attributes": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "x-bounded-by": "VidsheetAdditionalAttributesGate",
+                          "x-max-serialized-bytes": 2097152,
+                          "x-max-nesting-depth": 16,
+                          "propertyNames": {
+                            "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "created_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "position": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "project_id": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "updated_at": {
+                      "x-params-wrapper-discarded": true
+                    },
+                    "agent_id": {
+                      "x-direct-read": true
+                    },
+                    "impersonation_token": {
+                      "x-direct-read": true
+                    },
+                    "include_user_jobs": {
+                      "x-direct-read": true
+                    },
+                    "include_video_layers": {
+                      "x-direct-read": true
+                    },
+                    "organization_id": {
+                      "x-direct-read": true
+                    },
+                    "project_share_token": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_id": {
+                      "x-direct-read": true
+                    },
+                    "spreadsheet_rows": {
+                      "x-direct-read": true
+                    },
+                    "with_execution_cost": {
+                      "x-direct-read": true
+                    }
+                  },
+                  "additionalProperties": false,
+                  "x-params-wrapper-fallback": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "POST /v1/vidsheet/{vidsheet_id}/rows/{id}/duplicate": {
+      "operationId": "spreadsheet_row.duplicate",
+      "parameters": [
+        {
+          "name": "vidsheet_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Replays the original created resource for 24 hours within the same project and endpoint.",
+          "schema": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      ]
+    }
   }
 }

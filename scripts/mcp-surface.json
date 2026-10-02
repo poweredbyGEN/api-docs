@@ -1,0 +1,3501 @@
+{
+  "source": "api-mcp-coverage.json (MCP tool \u2192 backend route)",
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/agent/conversations",
+      "operationId": "listConversations",
+      "tag": "Agent Chat",
+      "summary": "List conversations",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.conversations",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.conversations"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agent/conversations/{id}",
+      "operationId": "getConversation",
+      "tag": "Agent Chat",
+      "summary": "Get a conversation",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.conversation",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.conversation"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agent/conversations/{id}/session-preferences",
+      "operationId": "getSessionPreferences",
+      "tag": "Agent Chat",
+      "summary": "Get session preferences",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.preferences",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.preferences"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agent/conversations/{id}/session-preferences",
+      "operationId": "updateSessionPreferences",
+      "tag": "Agent Chat",
+      "summary": "Update session preferences",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "update_session_preferences",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "update_session_preferences"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agent/ideas",
+      "operationId": "listIdeas",
+      "tag": "Agent Chat",
+      "summary": "List content ideas",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "content.ideas",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "content.ideas"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agent/ideas/{idea_id}",
+      "operationId": "getAgentIdeasByIdeaId",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 idea",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "content.idea",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "content.idea"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/agent/ideas/{id}/status/{status}",
+      "operationId": "setIdeaStatus",
+      "tag": "Agent Chat",
+      "summary": "Set idea status explicitly",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "set_idea_status",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "set_idea_status"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agent/run",
+      "operationId": "startAgentRun",
+      "tag": "Agent Chat",
+      "summary": "Start an agent run",
+      "mcp_tool": "gen_ask",
+      "mcp_branch": "ask",
+      "mcp_owners": [
+        {
+          "tool": "gen_ask",
+          "branch": "ask"
+        },
+        {
+          "tool": "gen_ask",
+          "branch": "chat"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "query_watchlist"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agent/runs/{run_id}",
+      "operationId": "getAgentRun",
+      "tag": "Agent Chat",
+      "summary": "Get agent run status",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "task.run_status",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "task.run_status"
+        },
+        {
+          "tool": "gen_ask",
+          "branch": "ask"
+        },
+        {
+          "tool": "gen_ask",
+          "branch": "chat"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agent/runs/{run_id}/approve",
+      "operationId": "approveAgentAction",
+      "tag": "Agent Chat",
+      "summary": "Approve or reject a pending agent action",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "decide_agent_run",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "decide_agent_run"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents",
+      "operationId": "listAgents",
+      "tag": "Discovery",
+      "summary": "List agents",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.capabilities",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.capabilities"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.list"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents",
+      "operationId": "createAgent",
+      "tag": "Agents",
+      "summary": "Create an agent",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "create_agent",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_agent"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}",
+      "operationId": "getAgent",
+      "tag": "Agents",
+      "summary": "Get an agent",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.detail",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.detail"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.profile"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/agents/{agent_id}",
+      "operationId": "putAgentsByAgentId",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 set name",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "set_name",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_name"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}",
+      "operationId": "updateAgent",
+      "tag": "Agents",
+      "summary": "Update an agent",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "connect_agent_elevenlabs",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "connect_agent_elevenlabs"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "update_agent"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}",
+      "operationId": "deleteAgent",
+      "tag": "Agents",
+      "summary": "Delete an agent",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "delete_agent",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "delete_agent"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/avatars",
+      "operationId": "listAgentAvatars",
+      "tag": "Agents",
+      "summary": "List agent avatars",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.avatars",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.avatars"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/avatars",
+      "operationId": "createAgentAvatar",
+      "tag": "Agents",
+      "summary": "Upload agent avatar",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "create_agent_avatar",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_agent_avatar"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/avatars/{id}",
+      "operationId": "deleteAgentAvatar",
+      "tag": "Agents",
+      "summary": "Delete avatar(s)",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "delete_agent_avatar",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "delete_agent_avatar"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/core",
+      "operationId": "getAgentCore",
+      "tag": "Agent Core",
+      "summary": "Get the full agent setup",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.core",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.core"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.profile"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.settings"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_inspiration"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_look"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_reference_images"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "collect"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "complete_profile"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_agent_profile"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}/core",
+      "operationId": "patchAgentCore",
+      "tag": "Agent Core",
+      "summary": "Update any combination of setup fields",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "update_agent_core",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "update_agent_core"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_inspiration"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_agent_primary_photo"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_location"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_primary_photo"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_primary_voice"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_profile"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/core",
+      "operationId": "deleteAgentsByAgentIdCore",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 reset agent profile",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "reset_agent_profile",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "reset_agent_profile"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/core/complete-profile",
+      "operationId": "postAgentsByAgentIdCoreCompleteProfile",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 complete profile",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "complete_profile",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "complete_profile"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_agent_profile"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/core/linked-accounts",
+      "operationId": "postAgentsByAgentIdCoreLinkedAccounts",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 add agent account",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "add_agent_account",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_account"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_linked_account"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/core/linked-accounts/{linked_account_id}",
+      "operationId": "deleteAgentsByAgentIdCoreLinkedAccountsByLinkedAccountId",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 remove linked account",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "remove_linked_account",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "remove_linked_account"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/core/reference-images",
+      "operationId": "postAgentsByAgentIdCoreReferenceImages",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 add agent look",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "add_agent_look",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_look"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_look"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_reference_images"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_reference_images"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/core/reference-images",
+      "operationId": "deleteAgentsByAgentIdCoreReferenceImages",
+      "tag": "Agent Chat",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 add agent look",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "add_agent_look",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_agent_look"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "add_reference_images"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "remove_reference_images"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/monitoring/effective",
+      "operationId": "getAgentsByAgentIdMonitoringEffective",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 monitoring",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.monitoring",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.monitoring"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/proof-of-genesis/backups",
+      "operationId": "listProofOfGenesisBackups",
+      "tag": "Proof of Genesis",
+      "summary": "List Proof of Genesis backups for an agent",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.backups",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.backups"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/proof-of-genesis/backups",
+      "operationId": "createProofOfGenesisBackup",
+      "tag": "Proof of Genesis",
+      "summary": "Back up an asset to Walrus",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "create_proof_of_genesis_backup",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "create_proof_of_genesis_backup"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/proof-of-genesis/backups/{backup_id}",
+      "operationId": "removeProofOfGenesisBackup",
+      "tag": "Proof of Genesis",
+      "summary": "Remove a Proof of Genesis backup from the default asset view",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "remove_proof_of_genesis_backup",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "remove_proof_of_genesis_backup"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/recurring-jobs",
+      "operationId": "listRecurringJobs",
+      "tag": "Recurring Jobs",
+      "summary": "List recurring jobs (daily tasks) for an agent",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "task.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "task.list"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs",
+      "operationId": "createRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Create a recurring agent job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "create_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "create_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}/recurring-jobs",
+      "operationId": "patchAgentsByAgentIdRecurringJobs",
+      "tag": "Agent Chat",
+      "summary": "Manage recurring jobs and monitoring tasks \u2014 update recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "update_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "update_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/recurring-jobs",
+      "operationId": "deleteAgentsByAgentIdRecurringJobs",
+      "tag": "Agent Chat",
+      "summary": "Manage recurring jobs and monitoring tasks \u2014 delete recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "delete_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "delete_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs/defaults",
+      "operationId": "ensureDefaultRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Idempotently ensure the default daily content-ideas job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "ensure_default_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "ensure_default_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}",
+      "operationId": "getRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Get one recurring job",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "task.job",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "task.job"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}",
+      "operationId": "updateRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Update a recurring job's mutable fields",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "update_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "update_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}",
+      "operationId": "deleteRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Soft-delete a recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "delete_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "delete_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}/duplicate",
+      "operationId": "postAgentsByAgentIdRecurringJobsByJobIdDuplicate",
+      "tag": "Agent Chat",
+      "summary": "Manage recurring jobs and monitoring tasks \u2014 duplicate recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "duplicate_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "duplicate_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}/pause",
+      "operationId": "pauseRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Pause a recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "pause_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "pause_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}/resume",
+      "operationId": "resumeRecurringJob",
+      "tag": "Recurring Jobs",
+      "summary": "Resume a paused recurring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "resume_recurring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "resume_recurring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/recurring-jobs/{job_id}/test-run",
+      "operationId": "postAgentsByAgentIdRecurringJobsByJobIdTestRun",
+      "tag": "Agent Chat",
+      "summary": "Manage recurring jobs and monitoring tasks \u2014 run recurring job now",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "run_recurring_job_now",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "run_recurring_job_now"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/smas",
+      "operationId": "getAgentsByAgentIdSmas",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 list",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "sma.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "sma.list"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/smas",
+      "operationId": "postAgentsByAgentIdSmas",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 create sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "create_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "create_sma"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/smas/{sma_id}",
+      "operationId": "getAgentsByAgentIdSmasBySmaId",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 detail",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "sma.detail",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "sma.detail"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}/smas/{sma_id}",
+      "operationId": "patchAgentsByAgentIdSmasBySmaId",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 update sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "update_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "update_sma"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/smas/{sma_id}",
+      "operationId": "deleteAgentsByAgentIdSmasBySmaId",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 delete sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "delete_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "delete_sma"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/smas/{sma_id}/copy",
+      "operationId": "postAgentsByAgentIdSmasBySmaIdCopy",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 copy sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "copy_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "copy_sma"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/smas/{sma_id}/refresh",
+      "operationId": "postAgentsByAgentIdSmasBySmaIdRefresh",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 refresh sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "refresh_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "refresh_sma"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/smas/{sma_id}/stats",
+      "operationId": "getAgentsByAgentIdSmasBySmaIdStats",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 stats",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "sma.stats",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "sma.stats"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/smas/{sma_id}/stop",
+      "operationId": "postAgentsByAgentIdSmasBySmaIdStop",
+      "tag": "Agent Chat",
+      "summary": "Manage monitoring watchlists and their sources \u2014 stop sma",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "stop_sma",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "stop_sma"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/watchlists",
+      "operationId": "listWatchlists",
+      "tag": "Watchlists",
+      "summary": "List active watchlists for an agent",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "watchlist.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "watchlist.list"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "add_watchlist_source"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "delete_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "pause_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "query_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "remove_watchlist_source"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "resume_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "update_watchlist"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "web_asset_scrape"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/watchlists",
+      "operationId": "createWatchlist",
+      "tag": "Watchlists",
+      "summary": "Create a watchlist (idempotent on name)",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "create_watchlist",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "create_watchlist"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}",
+      "operationId": "getWatchlist",
+      "tag": "Watchlists",
+      "summary": "Get a single watchlist with sources",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "watchlist.detail",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "watchlist.detail"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}",
+      "operationId": "updateWatchlist",
+      "tag": "Watchlists",
+      "summary": "Update a watchlist (also used for pause/resume)",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "pause_watchlist",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "pause_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "resume_watchlist"
+        },
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "update_watchlist"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}",
+      "operationId": "deleteWatchlist",
+      "tag": "Watchlists",
+      "summary": "Soft-delete a watchlist",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "delete_watchlist",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "delete_watchlist"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}/sources",
+      "operationId": "addWatchlistSource",
+      "tag": "Watchlists",
+      "summary": "Add or restore a source on a watchlist",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "add_watchlist_source",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "add_watchlist_source"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}/sources",
+      "operationId": "removeWatchlistSourceByKey",
+      "tag": "Watchlists",
+      "summary": "Remove a source by (platform, target_type, target_value)",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "remove_watchlist_source",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "remove_watchlist_source"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}",
+      "operationId": "removeWatchlistSource",
+      "tag": "Watchlists",
+      "summary": "Remove a source by id",
+      "mcp_tool": "gen_watchlist_action",
+      "mcp_branch": "remove_watchlist_source",
+      "mcp_owners": [
+        {
+          "tool": "gen_watchlist_action",
+          "branch": "remove_watchlist_source"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/analyze/clip_moments",
+      "operationId": "postAnalyzeClipMoments",
+      "tag": "Agent Chat",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 clip moments",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "clip_moments",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "clip_moments"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/analyze/jobs/{job_id}",
+      "operationId": "getAnalyzeJobsByJobId",
+      "tag": "Agent Chat",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 comment mining",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "comment_mining",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "comment_mining"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "creators"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "hooks"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research_web"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "trends"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "video_analysis"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "analyze.job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/analyze/research",
+      "operationId": "postAnalyzeResearch",
+      "tag": "Agent Chat",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 comment mining",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "comment_mining",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "comment_mining"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "creators"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "hooks"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research_web"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "trends"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "video_analysis"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/analyze/synthesis",
+      "operationId": "postAnalyzeSynthesis",
+      "tag": "Agent Chat",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 comment mining",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "comment_mining",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "comment_mining"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "creators"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "hooks"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research_web"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "trends"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "video_analysis"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/analyze/trends",
+      "operationId": "postAnalyzeTrends",
+      "tag": "Agent Chat",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 comment mining",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "comment_mining",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "comment_mining"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "creators"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "hooks"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "research_web"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "trends"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "video_analysis"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/asset_libraries",
+      "operationId": "listAssetLibraries",
+      "tag": "Asset Libraries",
+      "summary": "Browse asset library",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "asset.libraries",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "asset.libraries"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/audio/mixes",
+      "operationId": "createSongMix",
+      "tag": "Song Mixes",
+      "summary": "Create a song-mix job",
+      "mcp_tool": "gen_generate",
+      "mcp_branch": "create_song_mix",
+      "mcp_owners": [
+        {
+          "tool": "gen_generate",
+          "branch": "create_song_mix"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/audio_matching_jobs",
+      "operationId": "postAudioMatchingJobs",
+      "tag": "Song Mixes",
+      "summary": "Vidsheet action \u2014 <flat ops>",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "<flat ops>",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/aura/proxy-locations/cities",
+      "operationId": "getAuraProxyLocationsCities",
+      "tag": "Agent Profile",
+      "summary": "Discover \u2014 cities",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "location.cities",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "location.cities"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/aura/proxy-locations/countries",
+      "operationId": "getAuraProxyLocationsCountries",
+      "tag": "Agent Profile",
+      "summary": "Discover \u2014 countries",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "location.countries",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "location.countries"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/avatars",
+      "operationId": "getAvatars",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 list",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "list",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "list"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/avatars",
+      "operationId": "postAvatars",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 create",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "create",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "create"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/avatars/{avatar_id}/looks",
+      "operationId": "postAvatarsByAvatarIdLooks",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 upload avatar look",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "upload_avatar_look",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "upload_avatar_look"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops",
+      "operationId": "postAvatarsByAvatarIdLooksByAvatarLookIdTalkingLoops",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 create avatar talking loop",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "create_avatar_talking_loop",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "create_avatar_talking_loop"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/avatars/{avatar_id}/looks/{id}",
+      "operationId": "getAvatarsByAvatarIdLooksById",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 get (look)",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "get (look)",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "get (look)"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/avatars/{avatar_id}/talking_loops",
+      "operationId": "postAvatarsByAvatarIdTalkingLoops",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 upload avatar talking loop",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "upload_avatar_talking_loop",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "upload_avatar_talking_loop"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/avatars/{avatar_id}/talking_loops/{id}",
+      "operationId": "getAvatarsByAvatarIdTalkingLoopsById",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 get avatar talking loop",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "get_avatar_talking_loop",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "get_avatar_talking_loop"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/avatars/{id}",
+      "operationId": "getAvatarsById",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 get",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "get | get_avatar_talking_loop",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "get | get_avatar_talking_loop"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/avatars/{id}",
+      "operationId": "patchAvatarsById",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 rename",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "rename | set_primary_voice",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "rename | set_primary_voice"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/avatars/{id}",
+      "operationId": "deleteAvatarsById",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 delete avatar",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "delete_avatar | delete_avatar_look | delete_avatar_talking_loop",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "delete_avatar | delete_avatar_look | delete_avatar_talking_loop"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/avatars/{id}/copy",
+      "operationId": "postAvatarsByIdCopy",
+      "tag": "Avatars",
+      "summary": "Manage avatars, looks, and talking loops \u2014 copy to mine",
+      "mcp_tool": "gen_avatars",
+      "mcp_branch": "copy_to_mine",
+      "mcp_owners": [
+        {
+          "tool": "gen_avatars",
+          "branch": "copy_to_mine"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/content_resources",
+      "operationId": "listContentResources",
+      "tag": "Content Resources",
+      "summary": "List content resources",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "asset.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "asset.list"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "content.list"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/content_resources",
+      "operationId": "createContentResource",
+      "tag": "Content Resources",
+      "summary": "Upload a content resource",
+      "mcp_tool": "gen_asset_action",
+      "mcp_branch": "complete_asset_upload",
+      "mcp_owners": [
+        {
+          "tool": "gen_asset_action",
+          "branch": "complete_asset_upload"
+        },
+        {
+          "tool": "gen_content_action",
+          "branch": "create_content_resource"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/content_resources/from_url",
+      "operationId": "postContentResourcesFromUrl",
+      "tag": "Content Resources",
+      "summary": "Analyze, upload, import, and delete assets \u2014 import asset from url",
+      "mcp_tool": "gen_asset_action",
+      "mcp_branch": "import_asset_from_url",
+      "mcp_owners": [
+        {
+          "tool": "gen_asset_action",
+          "branch": "import_asset_from_url"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "transcribe"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/content_resources/{id}",
+      "operationId": "getContentResource",
+      "tag": "Content Resources",
+      "summary": "Get a content resource",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "asset.detail",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "asset.detail"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "content.resource"
+        },
+        {
+          "tool": "gen_asset_action",
+          "branch": "analyze"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/content_resources/{id}",
+      "operationId": "updateContentResource",
+      "tag": "Content Resources",
+      "summary": "Rename a content resource",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "update_content_resource",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "update_content_resource"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/content_resources/{id}",
+      "operationId": "deleteContentResource",
+      "tag": "Content Resources",
+      "summary": "Delete a content resource",
+      "mcp_tool": "gen_asset_action",
+      "mcp_branch": "delete_asset",
+      "mcp_owners": [
+        {
+          "tool": "gen_asset_action",
+          "branch": "delete_asset"
+        },
+        {
+          "tool": "gen_content_action",
+          "branch": "delete_content_resource"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/credit_balance",
+      "operationId": "getCreditBalance",
+      "tag": "Billing",
+      "summary": "Discover \u2014 capabilities",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "agent.capabilities",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "agent.capabilities"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "billing.balance"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "billing.generation_access"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "billing.usage"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/credit_plans",
+      "operationId": "getCreditPlans",
+      "tag": "Billing",
+      "summary": "Discover \u2014 plans",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "billing.plans",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "billing.plans"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/credit_transactions",
+      "operationId": "getCreditTransactions",
+      "tag": "Billing",
+      "summary": "Discover \u2014 usage",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "billing.usage",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "billing.usage"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/direct_upload",
+      "operationId": "createDirectUpload",
+      "tag": "Direct Upload",
+      "summary": "Get pre-signed upload URL",
+      "mcp_tool": "gen_asset_action",
+      "mcp_branch": "create_direct_upload",
+      "mcp_owners": [
+        {
+          "tool": "gen_asset_action",
+          "branch": "create_direct_upload"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/eleven_labs_job",
+      "operationId": "postElevenLabsJob",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 preview voice",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "preview_voice",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "preview_voice"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/generate_voice_description",
+      "operationId": "postGenerateVoiceDescription",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 generate voice description",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "generate_voice_description",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "generate_voice_description"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/generate_voice_sample",
+      "operationId": "postGenerateVoiceSample",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 generate voice script",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "generate_voice_script",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "generate_voice_script"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/generations/{generation_id}",
+      "operationId": "getGeneration",
+      "tag": "Generations",
+      "summary": "Get generation status",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.generation",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.generation"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_look"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/generations/{generation_id}/continue",
+      "operationId": "continueGeneration",
+      "tag": "Generations",
+      "summary": "Continue a stopped generation",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "<flat ops>",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/generations/{generation_id}/stop",
+      "operationId": "stopGeneration",
+      "tag": "Generations",
+      "summary": "Stop a generation",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "<flat ops>",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/hume_ai_sample",
+      "operationId": "postHumeAiSample",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 generate voice samples",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "generate_voice_samples",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "generate_voice_samples"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/hume_ai_sample/status",
+      "operationId": "getHumeAiSampleStatus",
+      "tag": "Agent Voice",
+      "summary": "Discover \u2014 sample status",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "voice.sample_status",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "voice.sample_status"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/ideas/directions",
+      "operationId": "getIdeasDirections",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 directions",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "content.directions",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "content.directions"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/generate",
+      "operationId": "postIdeasGenerate",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 generate ideas",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "generate_ideas",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "generate_ideas"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/ideas/jobs/{job_id}",
+      "operationId": "getIdeasJobsByJobId",
+      "tag": "Agent Chat",
+      "summary": "Discover \u2014 idea job",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "content.idea_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "content.idea_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/preferences",
+      "operationId": "postIdeasPreferences",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 set content preference",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "set_content_preference",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "set_content_preference"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/ideas/preferences",
+      "operationId": "deleteIdeasPreferences",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 remove content preference",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "remove_content_preference",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "remove_content_preference"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/recreate",
+      "operationId": "postIdeasRecreate",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 recreate video",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "recreate_video",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "recreate_video"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/reimagine",
+      "operationId": "postIdeasReimagine",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 reimagine video",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "reimagine_video",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "reimagine_video"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/{idea_id}/create-video",
+      "operationId": "postIdeasByIdeaIdCreateVideo",
+      "tag": "Agent Chat",
+      "summary": "Manage content resources and content ideas \u2014 create video from idea",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "create_video_from_idea",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "create_video_from_idea"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/ideas/{idea_id}/expand",
+      "operationId": "expandIdea",
+      "tag": "Agent Chat",
+      "summary": "Expand an idea into a project manifest",
+      "mcp_tool": "gen_content_action",
+      "mcp_branch": "expand_idea",
+      "mcp_owners": [
+        {
+          "tool": "gen_content_action",
+          "branch": "expand_idea"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/me",
+      "operationId": "getMe",
+      "tag": "Discovery",
+      "summary": "Get current user",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.me",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.me"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "revoke_agent_share"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_agent_share_role"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_project_share"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "share_agent"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "transfer_agent_ownership"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "invite_member"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "leave_workspace"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "remove_member"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "set_member_role"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "start_seat_checkout"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "transfer_workspace_ownership"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/organizations",
+      "operationId": "listOrganizations",
+      "tag": "Organizations",
+      "summary": "List organizations",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.organizations",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.organizations"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/organizations",
+      "operationId": "createOrganization",
+      "tag": "Organizations",
+      "summary": "Create an organization",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "create_organization",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "create_organization"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/organizations/{organization_id}",
+      "operationId": "getOrganization",
+      "tag": "Organizations",
+      "summary": "Get an organization",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.organization",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.organization"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/organizations/{organization_id}",
+      "operationId": "updateOrganization",
+      "tag": "Organizations",
+      "summary": "Update an organization",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "update_organization",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "update_organization"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/organizations/{organization_id}",
+      "operationId": "deleteOrganization",
+      "tag": "Organizations",
+      "summary": "Delete an organization",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "delete_organization",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "delete_organization"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/organizations/{organization_id}/user_organizations",
+      "operationId": "getOrganizationsByOrganizationIdUserOrganizations",
+      "tag": "Organizations",
+      "summary": "Discover \u2014 members",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.members",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.members"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "invite_member"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "leave_workspace"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "remove_member"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "set_member_role"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "start_seat_checkout"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "transfer_workspace_ownership"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/organizations/{organization_id}/user_organizations",
+      "operationId": "postOrganizationsByOrganizationIdUserOrganizations",
+      "tag": "Organizations",
+      "summary": "Manage workspaces, API keys, preferences, and backups \u2014 invite member",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "invite_member",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "invite_member"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "set_member_role"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "transfer_workspace_ownership"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/organizations/{organization_id}/user_organizations/{id}",
+      "operationId": "deleteOrganizationsByOrganizationIdUserOrganizationsById",
+      "tag": "Organizations",
+      "summary": "Manage workspaces, API keys, preferences, and backups \u2014 leave workspace",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "leave_workspace",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "leave_workspace"
+        },
+        {
+          "tool": "gen_platform_action",
+          "branch": "remove_member"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/payment",
+      "operationId": "postPayment",
+      "tag": "Billing",
+      "summary": "Buy credits and manage credit purchases \u2014 buy credits",
+      "mcp_tool": "gen_billing_action",
+      "mcp_branch": "buy_credits",
+      "mcp_owners": [
+        {
+          "tool": "gen_billing_action",
+          "branch": "buy_credits"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/persisted_tokens",
+      "operationId": "listApiKeys",
+      "tag": "API Keys",
+      "summary": "List API keys",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.api_keys",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.api_keys"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/persisted_tokens",
+      "operationId": "createApiKey",
+      "tag": "API Keys",
+      "summary": "Create API key",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "create_api_key",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "create_api_key"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/persisted_tokens/revoke_all",
+      "operationId": "revokeAllApiKeys",
+      "tag": "API Keys",
+      "summary": "Revoke all API keys",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "revoke_all_api_keys",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "revoke_all_api_keys"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/persisted_tokens/{id}",
+      "operationId": "updateApiKey",
+      "tag": "API Keys",
+      "summary": "Rename API key",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "update_api_key",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "update_api_key"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/persisted_tokens/{id}/revoke",
+      "operationId": "revokeApiKey",
+      "tag": "API Keys",
+      "summary": "Revoke API key",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "revoke_api_key",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "revoke_api_key"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/platform/disconnect/{platform}",
+      "operationId": "putPlatformDisconnectByPlatform",
+      "tag": "Publishing",
+      "summary": "Schedule, publish, or remove posts \u2014 disconnect social",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "disconnect_social",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "disconnect_social"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/platform/get_authorization_url",
+      "operationId": "postPlatformGetAuthorizationUrl",
+      "tag": "Publishing",
+      "summary": "Discover \u2014 connect url",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "publish.connect_url",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "publish.connect_url"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/platform/get_oauth_account",
+      "operationId": "postPlatformGetOauthAccount",
+      "tag": "Publishing",
+      "summary": "Analyze social trends, comments, hooks, and creators \u2014 web asset scrape",
+      "mcp_tool": "gen_analyze",
+      "mcp_branch": "web_asset_scrape",
+      "mcp_owners": [
+        {
+          "tool": "gen_analyze",
+          "branch": "web_asset_scrape"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.capabilities"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "publish.connections"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/projects/{id}/set_project_share",
+      "operationId": "putProjectsByIdSetProjectShare",
+      "tag": "Organizations",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 set project share",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "set_project_share",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_project_share"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/recommended_sounds",
+      "operationId": "getRecommendedSounds",
+      "tag": "Song Mixes",
+      "summary": "Discover \u2014 recommended sounds",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "media.recommended_sounds",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "media.recommended_sounds"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/schedule/post/{post_id}",
+      "operationId": "getScheduledPost",
+      "tag": "Publishing",
+      "summary": "Post outcome per platform (did it publish? where is it?)",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "publish.post_status",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "publish.post_status"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/schedule/post/{post_id}",
+      "operationId": "updateScheduledPost",
+      "tag": "Publishing",
+      "summary": "Update a scheduled post before it goes out",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "update_scheduled_post",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "update_scheduled_post"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/schedule/post/{post_id}",
+      "operationId": "deleteScheduledPost",
+      "tag": "Publishing",
+      "summary": "Delete a scheduled post",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "delete_scheduled_post",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "delete_scheduled_post"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/schedule/post/{post_id}/published",
+      "operationId": "updatePublishedPost",
+      "tag": "Publishing",
+      "summary": "Edit the metadata of a post that is already live",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "update_published_post",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "update_published_post"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/schedule/post/{post_id}/published",
+      "operationId": "deleteSchedulePostByPostIdPublished",
+      "tag": "Publishing",
+      "summary": "Schedule, publish, or remove posts \u2014 delete published post",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "delete_published_post",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "delete_published_post"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/schedule/posts",
+      "operationId": "listScheduledPosts",
+      "tag": "Publishing",
+      "summary": "List scheduled posts (content calendar)",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "publish.scheduled",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "publish.scheduled"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/schedule/with-post",
+      "operationId": "createScheduledPost",
+      "tag": "Publishing",
+      "summary": "Publish now or schedule a post (all platforms)",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "schedule_post_<platform>",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "schedule_post_<platform>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/seat_checkout",
+      "operationId": "postSeatCheckout",
+      "tag": "Billing",
+      "summary": "Manage workspaces, API keys, preferences, and backups \u2014 start seat checkout",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "start_seat_checkout",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "start_seat_checkout"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/sound_libraries",
+      "operationId": "getSoundLibraries",
+      "tag": "Song Mixes",
+      "summary": "Discover \u2014 sound library",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "media.sound_library",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "media.sound_library"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/subscription_upgrade",
+      "operationId": "postSubscriptionUpgrade",
+      "tag": "Billing",
+      "summary": "Manage workspaces, API keys, preferences, and backups \u2014 upgrade workspace",
+      "mcp_tool": "gen_platform_action",
+      "mcp_branch": "upgrade_workspace",
+      "mcp_owners": [
+        {
+          "tool": "gen_platform_action",
+          "branch": "upgrade_workspace"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/templates/projects",
+      "operationId": "listTemplates",
+      "tag": "Templates",
+      "summary": "List templates",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.templates",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.templates"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/templates/projects/{slug}",
+      "operationId": "getTemplate",
+      "tag": "Templates",
+      "summary": "Get a template",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.template",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.template"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/templates/spreadsheets/{slug}/clone",
+      "operationId": "cloneTemplate",
+      "tag": "Templates",
+      "summary": "Clone a template",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "clone_template",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "clone_template"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/transcriptions",
+      "operationId": "createTranscription",
+      "tag": "Generations",
+      "summary": "Transcribe audio or video",
+      "mcp_tool": "gen_generate",
+      "mcp_branch": "transcribe",
+      "mcp_owners": [
+        {
+          "tool": "gen_generate",
+          "branch": "transcribe"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/user_jobs",
+      "operationId": "getUserJobs",
+      "tag": "Generations",
+      "summary": "Schedule, publish, or remove posts \u2014 publish content",
+      "mcp_tool": "gen_publish_action",
+      "mcp_branch": "publish_content",
+      "mcp_owners": [
+        {
+          "tool": "gen_publish_action",
+          "branch": "publish_content"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/user_jobs",
+      "operationId": "createUserJob",
+      "tag": "Content Monitoring",
+      "summary": "Create user job (monitoring or publishing)",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "create_monitoring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "create_monitoring_job"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_look"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_image"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_song"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_video"
+        },
+        {
+          "tool": "gen_publish_action",
+          "branch": "publish_content"
+        },
+        {
+          "tool": "gen_voice_action",
+          "branch": "preview_voice"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/user_jobs/estimate",
+      "operationId": "postUserJobsEstimate",
+      "tag": "Generations",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 create look",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "create_look",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "create_look"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.generation_estimate"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_image"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_song"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "create_video"
+        },
+        {
+          "tool": "gen_generate",
+          "branch": "transcribe"
+        },
+        {
+          "tool": "gen_voice_action",
+          "branch": "design_voice"
+        },
+        {
+          "tool": "gen_voice_action",
+          "branch": "preview_voice"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/user_jobs/{id}",
+      "operationId": "getUserJob",
+      "tag": "Content Monitoring",
+      "summary": "Get user job status",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.audio_matches",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.audio_matches"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "voice.preview_status"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/user_jobs/{id}",
+      "operationId": "updateMonitoringJob",
+      "tag": "Content Monitoring",
+      "summary": "Update monitoring job",
+      "mcp_tool": "gen_task_action",
+      "mcp_branch": "update_monitoring_job",
+      "mcp_owners": [
+        {
+          "tool": "gen_task_action",
+          "branch": "update_monitoring_job"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/user_shared_agents",
+      "operationId": "postUserSharedAgents",
+      "tag": "Agents",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 share agent",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "share_agent",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "share_agent"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/user_shared_agents/{id}",
+      "operationId": "getUserSharedAgentsById",
+      "tag": "Agents",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 revoke agent share",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "revoke_agent_share",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "revoke_agent_share"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_agent_share_role"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "share_agent"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "agent.shares"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/user_shared_agents/{id}",
+      "operationId": "putUserSharedAgentsById",
+      "tag": "Agents",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 set agent share role",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "set_agent_share_role",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "set_agent_share_role"
+        },
+        {
+          "tool": "gen_agent_action",
+          "branch": "transfer_agent_ownership"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/user_shared_agents/{id}",
+      "operationId": "deleteUserSharedAgentsById",
+      "tag": "Agents",
+      "summary": "Create, update, or remove assistants and their profiles \u2014 revoke agent share",
+      "mcp_tool": "gen_agent_action",
+      "mcp_branch": "revoke_agent_share",
+      "mcp_owners": [
+        {
+          "tool": "gen_agent_action",
+          "branch": "revoke_agent_share"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/user_voice_resources",
+      "operationId": "getUserVoiceResources",
+      "tag": "Agent Voice",
+      "summary": "Discover \u2014 list",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "voice.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "voice.list"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "voice.list"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "voice.mine"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/user_voice_resources",
+      "operationId": "postUserVoiceResources",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 clone voice",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "clone_voice",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "clone_voice"
+        },
+        {
+          "tool": "gen_voice_action",
+          "branch": "design_voice"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/user_voice_resources/{voice_id}",
+      "operationId": "getUserVoiceResourcesByVoiceId",
+      "tag": "Agent Voice",
+      "summary": "Discover \u2014 resource",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "voice.resource",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "voice.resource"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/user_voice_resources/{voice_id}",
+      "operationId": "deleteUserVoiceResourcesByVoiceId",
+      "tag": "Agent Voice",
+      "summary": "Clone, design, preview, and delete voices \u2014 delete voice",
+      "mcp_tool": "gen_voice_action",
+      "mcp_branch": "delete_voice",
+      "mcp_owners": [
+        {
+          "tool": "gen_voice_action",
+          "branch": "delete_voice"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/video_recreate_job",
+      "operationId": "postVideoRecreateJob",
+      "tag": "Discovery",
+      "summary": "Vidsheet action \u2014 <flat ops>",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "<flat ops>",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet",
+      "operationId": "createSheet",
+      "tag": "Sheets",
+      "summary": "Create a sheet",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "create_sheet | create_engine",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "create_sheet | create_engine"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/actions",
+      "operationId": "postVidsheetActions",
+      "tag": "Sheets",
+      "summary": "Vidsheet action \u2014 <flat ops>",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "<flat ops>",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{id}/generations",
+      "operationId": "getVidsheetByIdGenerations",
+      "tag": "Sheets",
+      "summary": "Discover \u2014 running generations",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.running_generations",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.running_generations"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}",
+      "operationId": "getSheet",
+      "tag": "Sheets",
+      "summary": "Get a sheet",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.sheet",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.sheet"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.engine"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.available_variables"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.cell"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.columns"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.last_operation"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layer"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layers"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layout_validation"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.operations"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.row"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.rows"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.running_generations"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.variables"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.video"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "media.last_operation"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "media.operations"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layer_analysis"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "layer_analysis"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}",
+      "operationId": "getCell",
+      "tag": "Cells",
+      "summary": "Get a cell",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.cell",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.cell"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layers"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layer_analysis"
+        },
+        {
+          "tool": "gen_analyze",
+          "branch": "layer_analysis"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}",
+      "operationId": "updateCell",
+      "tag": "Cells",
+      "summary": "Update a cell",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "set_cell | actions[] update/cell",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "set_cell | actions[] update/cell"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/available_variables",
+      "operationId": "getVidsheetBySheetIdCellsByCellIdAvailableVariables",
+      "tag": "Cells",
+      "summary": "Discover \u2014 available variables",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.available_variables",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.available_variables"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/generate",
+      "operationId": "generateCellContent",
+      "tag": "Generations",
+      "summary": "Generate content for a cell",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "generate (cell)",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "generate (cell)"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers",
+      "operationId": "createLayer",
+      "tag": "Layers",
+      "summary": "Create a layer",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "add_layer | actions[] create/layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "add_layer | actions[] create/layer"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions",
+      "operationId": "updateLayerPositions",
+      "tag": "Layers",
+      "summary": "Reorder layers",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] reorder/layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] reorder/layer"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}",
+      "operationId": "getLayer",
+      "tag": "Layers",
+      "summary": "Get a layer",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layer"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}",
+      "operationId": "updateLayer",
+      "tag": "Layers",
+      "summary": "Update a layer",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "update_layer | actions[] update/layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "update_layer | actions[] update/layer"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}",
+      "operationId": "deleteLayer",
+      "tag": "Layers",
+      "summary": "Delete a layer",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] delete/layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] delete/layer"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate",
+      "operationId": "duplicateLayer",
+      "tag": "Layers",
+      "summary": "Duplicate a layer",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] duplicate/layer",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] duplicate/layer"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate",
+      "operationId": "generateLayerContent",
+      "tag": "Generations",
+      "summary": "Generate content for a layer",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "generate (layer)",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "generate (layer)"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/render",
+      "operationId": "renderVideo",
+      "tag": "Generations",
+      "summary": "Render final video",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "generate (cell, creation_card_type=final-video)",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "generate (cell, creation_card_type=final-video)"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job",
+      "operationId": "setDefaultUserJob",
+      "tag": "Cells",
+      "summary": "Set default generation for a cell",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] update/cell (values.take)",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] update/cell (values.take)"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/clone",
+      "operationId": "cloneSheet",
+      "tag": "Sheets",
+      "summary": "Clone a sheet",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "duplicate_sheet",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "duplicate_sheet"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/columns",
+      "operationId": "listColumns",
+      "tag": "Columns",
+      "summary": "List columns",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.columns",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.columns"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/columns",
+      "operationId": "createColumn",
+      "tag": "Columns",
+      "summary": "Create a column",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "add_column | actions[] create/column",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "add_column | actions[] create/column"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/vidsheet/{sheet_id}/columns/update_positions",
+      "operationId": "updateColumnPositions",
+      "tag": "Columns",
+      "summary": "Reorder columns",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] reorder/column",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] reorder/column"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/columns/{column_id}/duplicate",
+      "operationId": "duplicateColumn",
+      "tag": "Columns",
+      "summary": "Duplicate a column",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] duplicate/column",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] duplicate/column"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/global_variables",
+      "operationId": "getGlobalVariables",
+      "tag": "Variables",
+      "summary": "Get global variables",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.variables",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.variables"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/operations",
+      "operationId": "getVidsheetBySheetIdOperations",
+      "tag": "Sheets",
+      "summary": "Discover \u2014 operations",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "media.operations",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "media.operations"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.operations"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/operations/last",
+      "operationId": "getVidsheetBySheetIdOperationsLast",
+      "tag": "Sheets",
+      "summary": "Discover \u2014 last operation",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "media.last_operation",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "media.last_operation"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.last_operation"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/rows",
+      "operationId": "listRows",
+      "tag": "Rows",
+      "summary": "List rows",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.rows",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.rows"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layer"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layers"
+        },
+        {
+          "tool": "gen_publish_action",
+          "branch": "publish_content"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/rows",
+      "operationId": "createRow",
+      "tag": "Rows",
+      "summary": "Create a row",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] create/row",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] create/row"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/vidsheet/{sheet_id}/rows/update_positions",
+      "operationId": "updateRowPositions",
+      "tag": "Rows",
+      "summary": "Reorder rows",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] reorder/row",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] reorder/row"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/vidsheet/{sheet_id}/rows/{row_id}",
+      "operationId": "getRow",
+      "tag": "Rows",
+      "summary": "Get a row",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.row",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.row"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layers"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.video"
+        },
+        {
+          "tool": "gen_publish_action",
+          "branch": "publish_content"
+        },
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "<flat ops>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/rows/{row_id}/duplicate",
+      "operationId": "duplicateRow",
+      "tag": "Rows",
+      "summary": "Duplicate a row",
+      "mcp_tool": "gen_vidsheet_action",
+      "mcp_branch": "actions[] duplicate/row",
+      "mcp_owners": [
+        {
+          "tool": "gen_vidsheet_action",
+          "branch": "actions[] duplicate/row"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/vidsheet/{sheet_id}/validate_video_layout",
+      "operationId": "postVidsheetBySheetIdValidateVideoLayout",
+      "tag": "Sheets",
+      "summary": "Discover \u2014 layout validation",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "vidsheet.layout_validation",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "vidsheet.layout_validation"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/voice_resources",
+      "operationId": "getVoiceResources",
+      "tag": "Agent Voice",
+      "summary": "Discover \u2014 list",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "voice.list",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "voice.list"
+        },
+        {
+          "tool": "gen_discover",
+          "branch": "voice.list"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/voice_resources/{voice_id}",
+      "operationId": "getVoiceResourcesByVoiceId",
+      "tag": "Agent Voice",
+      "summary": "Discover \u2014 resource",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "voice.resource",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "voice.resource"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/workspaces",
+      "operationId": "listWorkspaces",
+      "tag": "Discovery",
+      "summary": "List workspaces",
+      "mcp_tool": "gen_discover",
+      "mcp_branch": "platform.workspaces",
+      "mcp_owners": [
+        {
+          "tool": "gen_discover",
+          "branch": "platform.workspaces"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/x402_credit_purchase",
+      "operationId": "createX402CreditPurchase",
+      "tag": "Organizations",
+      "summary": "Create an x402 credit-purchase quote",
+      "mcp_tool": "gen_billing_action",
+      "mcp_branch": "create_x402_credit_purchase",
+      "mcp_owners": [
+        {
+          "tool": "gen_billing_action",
+          "branch": "create_x402_credit_purchase"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/x402_credit_purchase/settle",
+      "operationId": "postX402CreditPurchaseSettle",
+      "tag": "Organizations",
+      "summary": "Buy credits and manage credit purchases \u2014 settle x402 credit purchase",
+      "mcp_tool": "gen_billing_action",
+      "mcp_branch": "settle_x402_credit_purchase",
+      "mcp_owners": [
+        {
+          "tool": "gen_billing_action",
+          "branch": "settle_x402_credit_purchase"
+        }
+      ]
+    }
+  ]
+}

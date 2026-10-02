@@ -32,6 +32,9 @@ jobs:
       - name: Check documented model enums against Rails
         run: npm test
 
+      - name: Check the OpenAPI MCP surface
+        run: python3 scripts/sync_mcp_surface.py --check
+
       - name: Build
         run: npx astro build
 

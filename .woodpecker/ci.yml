@@ -67,6 +67,17 @@ steps:
     image: python:3.12-slim
     commands:
       - python3 scripts/check_publish_platforms.py
+  # mcp-surface: public/openapi.yaml documents exactly the backend routes an MCP
+  #   tool calls. The surface, the paths region of both OpenAPI copies and the
+  #   llms endpoint lists are regenerated from scripts/mcp-surface.json and the
+  #   vendored contracts; the step is red on any drift, on a write without a
+  #   request body, on an operation without a 2xx response schema, or on a
+  #   growth of x-schema-status: missing past scripts/openapi-missing-baseline.json.
+  #   Stdlib-only Python, no install.
+  mcp-surface:
+    image: python:3.12-slim
+    commands:
+      - python3 scripts/sync_mcp_surface.py --check
   mcp-tools:
     image: node:20-slim
     commands:

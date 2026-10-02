@@ -64,6 +64,287 @@ Credits: paid generation/research/voice/render work spends workspace credits. Bu
 
 ---
 
+## Endpoint index
+
+Every backend route the hosted MCP can call. `public/openapi.yaml` documents exactly this surface; `llms-full.txt` adds the MCP tool and branch for each entry.
+
+<!-- gen:mcp-surface-endpoints:start -->
+
+**API Keys**
+
+- `GET /v1/persisted_tokens`
+- `POST /v1/persisted_tokens`
+- `DELETE /v1/persisted_tokens/revoke_all`
+- `PATCH /v1/persisted_tokens/{id}`
+- `DELETE /v1/persisted_tokens/{id}/revoke`
+
+**Agent Chat**
+
+- `GET /v1/agent/conversations`
+- `GET /v1/agent/conversations/{id}`
+- `GET /v1/agent/conversations/{id}/session-preferences`
+- `PATCH /v1/agent/conversations/{id}/session-preferences`
+- `GET /v1/agent/ideas`
+- `GET /v1/agent/ideas/{idea_id}`
+- `PUT /v1/agent/ideas/{id}/status/{status}`
+- `POST /v1/agent/run`
+- `GET /v1/agent/runs/{run_id}`
+- `POST /v1/agent/runs/{run_id}/approve`
+- `PUT /v1/agents/{agent_id}`
+- `DELETE /v1/agents/{agent_id}/core`
+- `POST /v1/agents/{agent_id}/core/complete-profile`
+- `POST /v1/agents/{agent_id}/core/linked-accounts`
+- `DELETE /v1/agents/{agent_id}/core/linked-accounts/{linked_account_id}`
+- `POST /v1/agents/{agent_id}/core/reference-images`
+- `DELETE /v1/agents/{agent_id}/core/reference-images`
+- `GET /v1/agents/{agent_id}/monitoring/effective`
+- `PATCH /v1/agents/{agent_id}/recurring-jobs`
+- `DELETE /v1/agents/{agent_id}/recurring-jobs`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/duplicate`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/test-run`
+- `GET /v1/agents/{agent_id}/smas`
+- `POST /v1/agents/{agent_id}/smas`
+- `GET /v1/agents/{agent_id}/smas/{sma_id}`
+- `PATCH /v1/agents/{agent_id}/smas/{sma_id}`
+- `DELETE /v1/agents/{agent_id}/smas/{sma_id}`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/copy`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/refresh`
+- `GET /v1/agents/{agent_id}/smas/{sma_id}/stats`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/stop`
+- `POST /v1/analyze/clip_moments`
+- `GET /v1/analyze/jobs/{job_id}`
+- `POST /v1/analyze/research`
+- `POST /v1/analyze/synthesis`
+- `POST /v1/analyze/trends`
+- `GET /v1/ideas/directions`
+- `POST /v1/ideas/generate`
+- `GET /v1/ideas/jobs/{job_id}`
+- `POST /v1/ideas/preferences`
+- `DELETE /v1/ideas/preferences`
+- `POST /v1/ideas/recreate`
+- `POST /v1/ideas/reimagine`
+- `POST /v1/ideas/{idea_id}/create-video`
+- `POST /v1/ideas/{idea_id}/expand`
+
+**Agent Core**
+
+- `GET /v1/agents/{agent_id}/core`
+- `PATCH /v1/agents/{agent_id}/core`
+
+**Agent Profile**
+
+- `GET /v1/aura/proxy-locations/cities`
+- `GET /v1/aura/proxy-locations/countries`
+
+**Agent Voice**
+
+- `POST /v1/eleven_labs_job`
+- `POST /v1/generate_voice_description`
+- `POST /v1/generate_voice_sample`
+- `POST /v1/hume_ai_sample`
+- `GET /v1/hume_ai_sample/status`
+- `GET /v1/user_voice_resources`
+- `POST /v1/user_voice_resources`
+- `GET /v1/user_voice_resources/{voice_id}`
+- `DELETE /v1/user_voice_resources/{voice_id}`
+- `GET /v1/voice_resources`
+- `GET /v1/voice_resources/{voice_id}`
+
+**Agents**
+
+- `POST /v1/agents`
+- `GET /v1/agents/{agent_id}`
+- `PATCH /v1/agents/{agent_id}`
+- `DELETE /v1/agents/{agent_id}`
+- `GET /v1/agents/{agent_id}/avatars`
+- `POST /v1/agents/{agent_id}/avatars`
+- `DELETE /v1/agents/{agent_id}/avatars/{id}`
+- `POST /v1/user_shared_agents`
+- `GET /v1/user_shared_agents/{id}`
+- `PUT /v1/user_shared_agents/{id}`
+- `DELETE /v1/user_shared_agents/{id}`
+
+**Asset Libraries**
+
+- `GET /v1/asset_libraries`
+
+**Avatars**
+
+- `GET /v1/avatars`
+- `POST /v1/avatars`
+- `POST /v1/avatars/{avatar_id}/looks`
+- `POST /v1/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops`
+- `GET /v1/avatars/{avatar_id}/looks/{id}`
+- `POST /v1/avatars/{avatar_id}/talking_loops`
+- `GET /v1/avatars/{avatar_id}/talking_loops/{id}`
+- `GET /v1/avatars/{id}`
+- `PATCH /v1/avatars/{id}`
+- `DELETE /v1/avatars/{id}`
+- `POST /v1/avatars/{id}/copy`
+
+**Billing**
+
+- `GET /v1/credit_balance`
+- `GET /v1/credit_plans`
+- `GET /v1/credit_transactions`
+- `POST /v1/payment`
+- `POST /v1/seat_checkout`
+- `POST /v1/subscription_upgrade`
+
+**Cells**
+
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}`
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}/available_variables`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job`
+
+**Columns**
+
+- `GET /v1/vidsheet/{sheet_id}/columns`
+- `POST /v1/vidsheet/{sheet_id}/columns`
+- `PATCH /v1/vidsheet/{sheet_id}/columns/update_positions`
+- `POST /v1/vidsheet/{sheet_id}/columns/{column_id}/duplicate`
+
+**Content Monitoring**
+
+- `POST /v1/user_jobs`
+- `GET /v1/user_jobs/{id}`
+- `PUT /v1/user_jobs/{id}`
+
+**Content Resources**
+
+- `GET /v1/content_resources`
+- `POST /v1/content_resources`
+- `POST /v1/content_resources/from_url`
+- `GET /v1/content_resources/{id}`
+- `PATCH /v1/content_resources/{id}`
+- `DELETE /v1/content_resources/{id}`
+
+**Direct Upload**
+
+- `POST /v1/direct_upload`
+
+**Discovery**
+
+- `GET /v1/agents`
+- `GET /v1/me`
+- `POST /v1/video_recreate_job`
+- `GET /v1/workspaces`
+
+**Generations**
+
+- `GET /v1/generations/{generation_id}`
+- `POST /v1/generations/{generation_id}/continue`
+- `POST /v1/generations/{generation_id}/stop`
+- `POST /v1/transcriptions`
+- `GET /v1/user_jobs`
+- `POST /v1/user_jobs/estimate`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/generate`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/render`
+
+**Layers**
+
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers`
+- `PUT /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions`
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}`
+- `DELETE /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate`
+
+**Organizations**
+
+- `GET /v1/organizations`
+- `POST /v1/organizations`
+- `GET /v1/organizations/{organization_id}`
+- `PATCH /v1/organizations/{organization_id}`
+- `DELETE /v1/organizations/{organization_id}`
+- `GET /v1/organizations/{organization_id}/user_organizations`
+- `POST /v1/organizations/{organization_id}/user_organizations`
+- `DELETE /v1/organizations/{organization_id}/user_organizations/{id}`
+- `PUT /v1/projects/{id}/set_project_share`
+- `POST /v1/x402_credit_purchase`
+- `POST /v1/x402_credit_purchase/settle`
+
+**Proof of Genesis**
+
+- `GET /v1/agents/{agent_id}/proof-of-genesis/backups`
+- `POST /v1/agents/{agent_id}/proof-of-genesis/backups`
+- `DELETE /v1/agents/{agent_id}/proof-of-genesis/backups/{backup_id}`
+
+**Publishing**
+
+- `PUT /v1/platform/disconnect/{platform}`
+- `POST /v1/platform/get_authorization_url`
+- `POST /v1/platform/get_oauth_account`
+- `GET /v1/schedule/post/{post_id}`
+- `PATCH /v1/schedule/post/{post_id}`
+- `DELETE /v1/schedule/post/{post_id}`
+- `PATCH /v1/schedule/post/{post_id}/published`
+- `DELETE /v1/schedule/post/{post_id}/published`
+- `GET /v1/schedule/posts`
+- `POST /v1/schedule/with-post`
+
+**Recurring Jobs**
+
+- `GET /v1/agents/{agent_id}/recurring-jobs`
+- `POST /v1/agents/{agent_id}/recurring-jobs`
+- `POST /v1/agents/{agent_id}/recurring-jobs/defaults`
+- `GET /v1/agents/{agent_id}/recurring-jobs/{job_id}`
+- `PATCH /v1/agents/{agent_id}/recurring-jobs/{job_id}`
+- `DELETE /v1/agents/{agent_id}/recurring-jobs/{job_id}`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/pause`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/resume`
+
+**Rows**
+
+- `GET /v1/vidsheet/{sheet_id}/rows`
+- `POST /v1/vidsheet/{sheet_id}/rows`
+- `PUT /v1/vidsheet/{sheet_id}/rows/update_positions`
+- `GET /v1/vidsheet/{sheet_id}/rows/{row_id}`
+- `POST /v1/vidsheet/{sheet_id}/rows/{row_id}/duplicate`
+
+**Sheets**
+
+- `POST /v1/vidsheet`
+- `POST /v1/vidsheet/actions`
+- `GET /v1/vidsheet/{id}/generations`
+- `GET /v1/vidsheet/{sheet_id}`
+- `POST /v1/vidsheet/{sheet_id}/clone`
+- `GET /v1/vidsheet/{sheet_id}/operations`
+- `GET /v1/vidsheet/{sheet_id}/operations/last`
+- `POST /v1/vidsheet/{sheet_id}/validate_video_layout`
+
+**Song Mixes**
+
+- `POST /v1/audio/mixes`
+- `POST /v1/audio_matching_jobs`
+- `GET /v1/recommended_sounds`
+- `GET /v1/sound_libraries`
+
+**Templates**
+
+- `GET /v1/templates/projects`
+- `GET /v1/templates/projects/{slug}`
+- `POST /v1/templates/spreadsheets/{slug}/clone`
+
+**Variables**
+
+- `GET /v1/vidsheet/{sheet_id}/global_variables`
+
+**Watchlists**
+
+- `GET /v1/agents/{agent_id}/watchlists`
+- `POST /v1/agents/{agent_id}/watchlists`
+- `GET /v1/agents/{agent_id}/watchlists/{watchlist_id}`
+- `PATCH /v1/agents/{agent_id}/watchlists/{watchlist_id}`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}`
+- `POST /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}`
+
+<!-- gen:mcp-surface-endpoints:end -->
+
 ## The 5-step journey
 
 ```
@@ -652,7 +933,7 @@ Every cell generation declares a `generation_type` and `data` object. Models are
 
 **Creation-card capability matrix (generated from the API).**
 
-`GET /v1/creation_card_matrix` is the capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.
+The creation-card capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.
 
 | Card | Model | Label | Ratio | Duration (s) | Output resolution |
 |---|---|---|---|---|---|

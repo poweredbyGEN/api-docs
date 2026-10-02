@@ -64,6 +64,287 @@ Vidsheet operation history (undo and redo):
 
 <!-- gen:backend-vidsheet-actions:end -->
 
+## Endpoint index (generated)
+
+Every backend route the hosted MCP can call, with the MCP tool and branch that calls it. `public/openapi.yaml` documents exactly this surface.
+
+<!-- gen:mcp-surface-endpoints:start -->
+
+**API Keys**
+
+- `GET /v1/persisted_tokens` — MCP `gen_discover` / `platform.api_keys`
+- `POST /v1/persisted_tokens` — MCP `gen_platform_action` / `create_api_key`
+- `DELETE /v1/persisted_tokens/revoke_all` — MCP `gen_platform_action` / `revoke_all_api_keys`
+- `PATCH /v1/persisted_tokens/{id}` — MCP `gen_platform_action` / `update_api_key`
+- `DELETE /v1/persisted_tokens/{id}/revoke` — MCP `gen_platform_action` / `revoke_api_key`
+
+**Agent Chat**
+
+- `GET /v1/agent/conversations` — MCP `gen_discover` / `platform.conversations`
+- `GET /v1/agent/conversations/{id}` — MCP `gen_discover` / `platform.conversation`
+- `GET /v1/agent/conversations/{id}/session-preferences` — MCP `gen_discover` / `platform.preferences`
+- `PATCH /v1/agent/conversations/{id}/session-preferences` — MCP `gen_platform_action` / `update_session_preferences`
+- `GET /v1/agent/ideas` — MCP `gen_discover` / `content.ideas`
+- `GET /v1/agent/ideas/{idea_id}` — MCP `gen_discover` / `content.idea`
+- `PUT /v1/agent/ideas/{id}/status/{status}` — MCP `gen_content_action` / `set_idea_status`
+- `POST /v1/agent/run` — MCP `gen_ask` / `ask`
+- `GET /v1/agent/runs/{run_id}` — MCP `gen_discover` / `task.run_status`
+- `POST /v1/agent/runs/{run_id}/approve` — MCP `gen_task_action` / `decide_agent_run`
+- `PUT /v1/agents/{agent_id}` — MCP `gen_agent_action` / `set_name`
+- `DELETE /v1/agents/{agent_id}/core` — MCP `gen_agent_action` / `reset_agent_profile`
+- `POST /v1/agents/{agent_id}/core/complete-profile` — MCP `gen_agent_action` / `complete_profile`
+- `POST /v1/agents/{agent_id}/core/linked-accounts` — MCP `gen_agent_action` / `add_agent_account`
+- `DELETE /v1/agents/{agent_id}/core/linked-accounts/{linked_account_id}` — MCP `gen_agent_action` / `remove_linked_account`
+- `POST /v1/agents/{agent_id}/core/reference-images` — MCP `gen_agent_action` / `add_agent_look`
+- `DELETE /v1/agents/{agent_id}/core/reference-images` — MCP `gen_agent_action` / `add_agent_look`
+- `GET /v1/agents/{agent_id}/monitoring/effective` — MCP `gen_discover` / `agent.monitoring`
+- `PATCH /v1/agents/{agent_id}/recurring-jobs` — MCP `gen_task_action` / `update_recurring_job`
+- `DELETE /v1/agents/{agent_id}/recurring-jobs` — MCP `gen_task_action` / `delete_recurring_job`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/duplicate` — MCP `gen_task_action` / `duplicate_recurring_job`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/test-run` — MCP `gen_task_action` / `run_recurring_job_now`
+- `GET /v1/agents/{agent_id}/smas` — MCP `gen_discover` / `sma.list`
+- `POST /v1/agents/{agent_id}/smas` — MCP `gen_watchlist_action` / `create_sma`
+- `GET /v1/agents/{agent_id}/smas/{sma_id}` — MCP `gen_discover` / `sma.detail`
+- `PATCH /v1/agents/{agent_id}/smas/{sma_id}` — MCP `gen_watchlist_action` / `update_sma`
+- `DELETE /v1/agents/{agent_id}/smas/{sma_id}` — MCP `gen_watchlist_action` / `delete_sma`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/copy` — MCP `gen_watchlist_action` / `copy_sma`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/refresh` — MCP `gen_watchlist_action` / `refresh_sma`
+- `GET /v1/agents/{agent_id}/smas/{sma_id}/stats` — MCP `gen_discover` / `sma.stats`
+- `POST /v1/agents/{agent_id}/smas/{sma_id}/stop` — MCP `gen_watchlist_action` / `stop_sma`
+- `POST /v1/analyze/clip_moments` — MCP `gen_analyze` / `clip_moments`
+- `GET /v1/analyze/jobs/{job_id}` — MCP `gen_analyze` / `comment_mining`
+- `POST /v1/analyze/research` — MCP `gen_analyze` / `comment_mining`
+- `POST /v1/analyze/synthesis` — MCP `gen_analyze` / `comment_mining`
+- `POST /v1/analyze/trends` — MCP `gen_analyze` / `comment_mining`
+- `GET /v1/ideas/directions` — MCP `gen_discover` / `content.directions`
+- `POST /v1/ideas/generate` — MCP `gen_content_action` / `generate_ideas`
+- `GET /v1/ideas/jobs/{job_id}` — MCP `gen_discover` / `content.idea_job`
+- `POST /v1/ideas/preferences` — MCP `gen_content_action` / `set_content_preference`
+- `DELETE /v1/ideas/preferences` — MCP `gen_content_action` / `remove_content_preference`
+- `POST /v1/ideas/recreate` — MCP `gen_content_action` / `recreate_video`
+- `POST /v1/ideas/reimagine` — MCP `gen_content_action` / `reimagine_video`
+- `POST /v1/ideas/{idea_id}/create-video` — MCP `gen_content_action` / `create_video_from_idea`
+- `POST /v1/ideas/{idea_id}/expand` — MCP `gen_content_action` / `expand_idea`
+
+**Agent Core**
+
+- `GET /v1/agents/{agent_id}/core` — MCP `gen_discover` / `agent.core`
+- `PATCH /v1/agents/{agent_id}/core` — MCP `gen_agent_action` / `update_agent_core`
+
+**Agent Profile**
+
+- `GET /v1/aura/proxy-locations/cities` — MCP `gen_discover` / `location.cities`
+- `GET /v1/aura/proxy-locations/countries` — MCP `gen_discover` / `location.countries`
+
+**Agent Voice**
+
+- `POST /v1/eleven_labs_job` — MCP `gen_voice_action` / `preview_voice`
+- `POST /v1/generate_voice_description` — MCP `gen_voice_action` / `generate_voice_description`
+- `POST /v1/generate_voice_sample` — MCP `gen_voice_action` / `generate_voice_script`
+- `POST /v1/hume_ai_sample` — MCP `gen_voice_action` / `generate_voice_samples`
+- `GET /v1/hume_ai_sample/status` — MCP `gen_discover` / `voice.sample_status`
+- `GET /v1/user_voice_resources` — MCP `gen_discover` / `voice.list`
+- `POST /v1/user_voice_resources` — MCP `gen_voice_action` / `clone_voice`
+- `GET /v1/user_voice_resources/{voice_id}` — MCP `gen_discover` / `voice.resource`
+- `DELETE /v1/user_voice_resources/{voice_id}` — MCP `gen_voice_action` / `delete_voice`
+- `GET /v1/voice_resources` — MCP `gen_discover` / `voice.list`
+- `GET /v1/voice_resources/{voice_id}` — MCP `gen_discover` / `voice.resource`
+
+**Agents**
+
+- `POST /v1/agents` — MCP `gen_agent_action` / `create_agent`
+- `GET /v1/agents/{agent_id}` — MCP `gen_discover` / `agent.detail`
+- `PATCH /v1/agents/{agent_id}` — MCP `gen_agent_action` / `connect_agent_elevenlabs`
+- `DELETE /v1/agents/{agent_id}` — MCP `gen_agent_action` / `delete_agent`
+- `GET /v1/agents/{agent_id}/avatars` — MCP `gen_discover` / `agent.avatars`
+- `POST /v1/agents/{agent_id}/avatars` — MCP `gen_agent_action` / `create_agent_avatar`
+- `DELETE /v1/agents/{agent_id}/avatars/{id}` — MCP `gen_agent_action` / `delete_agent_avatar`
+- `POST /v1/user_shared_agents` — MCP `gen_agent_action` / `share_agent`
+- `GET /v1/user_shared_agents/{id}` — MCP `gen_agent_action` / `revoke_agent_share`
+- `PUT /v1/user_shared_agents/{id}` — MCP `gen_agent_action` / `set_agent_share_role`
+- `DELETE /v1/user_shared_agents/{id}` — MCP `gen_agent_action` / `revoke_agent_share`
+
+**Asset Libraries**
+
+- `GET /v1/asset_libraries` — MCP `gen_discover` / `asset.libraries`
+
+**Avatars**
+
+- `GET /v1/avatars` — MCP `gen_avatars` / `list`
+- `POST /v1/avatars` — MCP `gen_avatars` / `create`
+- `POST /v1/avatars/{avatar_id}/looks` — MCP `gen_avatars` / `upload_avatar_look`
+- `POST /v1/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops` — MCP `gen_avatars` / `create_avatar_talking_loop`
+- `GET /v1/avatars/{avatar_id}/looks/{id}` — MCP `gen_avatars` / `get (look)`
+- `POST /v1/avatars/{avatar_id}/talking_loops` — MCP `gen_avatars` / `upload_avatar_talking_loop`
+- `GET /v1/avatars/{avatar_id}/talking_loops/{id}` — MCP `gen_avatars` / `get_avatar_talking_loop`
+- `GET /v1/avatars/{id}` — MCP `gen_avatars` / `get | get_avatar_talking_loop`
+- `PATCH /v1/avatars/{id}` — MCP `gen_avatars` / `rename | set_primary_voice`
+- `DELETE /v1/avatars/{id}` — MCP `gen_avatars` / `delete_avatar | delete_avatar_look | delete_avatar_talking_loop`
+- `POST /v1/avatars/{id}/copy` — MCP `gen_avatars` / `copy_to_mine`
+
+**Billing**
+
+- `GET /v1/credit_balance` — MCP `gen_discover` / `agent.capabilities`
+- `GET /v1/credit_plans` — MCP `gen_discover` / `billing.plans`
+- `GET /v1/credit_transactions` — MCP `gen_discover` / `billing.usage`
+- `POST /v1/payment` — MCP `gen_billing_action` / `buy_credits`
+- `POST /v1/seat_checkout` — MCP `gen_platform_action` / `start_seat_checkout`
+- `POST /v1/subscription_upgrade` — MCP `gen_platform_action` / `upgrade_workspace`
+
+**Cells**
+
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}` — MCP `gen_discover` / `vidsheet.cell`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}` — MCP `gen_vidsheet_action` / `set_cell | actions[] update/cell`
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}/available_variables` — MCP `gen_discover` / `vidsheet.available_variables`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}/set_default_user_job` — MCP `gen_vidsheet_action` / `actions[] update/cell (values.take)`
+
+**Columns**
+
+- `GET /v1/vidsheet/{sheet_id}/columns` — MCP `gen_discover` / `vidsheet.columns`
+- `POST /v1/vidsheet/{sheet_id}/columns` — MCP `gen_vidsheet_action` / `add_column | actions[] create/column`
+- `PATCH /v1/vidsheet/{sheet_id}/columns/update_positions` — MCP `gen_vidsheet_action` / `actions[] reorder/column`
+- `POST /v1/vidsheet/{sheet_id}/columns/{column_id}/duplicate` — MCP `gen_vidsheet_action` / `actions[] duplicate/column`
+
+**Content Monitoring**
+
+- `POST /v1/user_jobs` — MCP `gen_task_action` / `create_monitoring_job`
+- `GET /v1/user_jobs/{id}` — MCP `gen_discover` / `vidsheet.audio_matches`
+- `PUT /v1/user_jobs/{id}` — MCP `gen_task_action` / `update_monitoring_job`
+
+**Content Resources**
+
+- `GET /v1/content_resources` — MCP `gen_discover` / `asset.list`
+- `POST /v1/content_resources` — MCP `gen_asset_action` / `complete_asset_upload`
+- `POST /v1/content_resources/from_url` — MCP `gen_asset_action` / `import_asset_from_url`
+- `GET /v1/content_resources/{id}` — MCP `gen_discover` / `asset.detail`
+- `PATCH /v1/content_resources/{id}` — MCP `gen_content_action` / `update_content_resource`
+- `DELETE /v1/content_resources/{id}` — MCP `gen_asset_action` / `delete_asset`
+
+**Direct Upload**
+
+- `POST /v1/direct_upload` — MCP `gen_asset_action` / `create_direct_upload`
+
+**Discovery**
+
+- `GET /v1/agents` — MCP `gen_discover` / `agent.capabilities`
+- `GET /v1/me` — MCP `gen_discover` / `platform.me`
+- `POST /v1/video_recreate_job` — MCP `gen_vidsheet_action` / `<flat ops>`
+- `GET /v1/workspaces` — MCP `gen_discover` / `platform.workspaces`
+
+**Generations**
+
+- `GET /v1/generations/{generation_id}` — MCP `gen_discover` / `vidsheet.generation`
+- `POST /v1/generations/{generation_id}/continue` — MCP `gen_vidsheet_action` / `<flat ops>`
+- `POST /v1/generations/{generation_id}/stop` — MCP `gen_vidsheet_action` / `<flat ops>`
+- `POST /v1/transcriptions` — MCP `gen_generate` / `transcribe`
+- `GET /v1/user_jobs` — MCP `gen_publish_action` / `publish_content`
+- `POST /v1/user_jobs/estimate` — MCP `gen_agent_action` / `create_look`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/generate` — MCP `gen_vidsheet_action` / `generate (cell)`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/generate` — MCP `gen_vidsheet_action` / `generate (layer)`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/render` — MCP `gen_vidsheet_action` / `generate (cell, creation_card_type=final-video)`
+
+**Layers**
+
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers` — MCP `gen_vidsheet_action` / `add_layer | actions[] create/layer`
+- `PUT /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/update_positions` — MCP `gen_vidsheet_action` / `actions[] reorder/layer`
+- `GET /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}` — MCP `gen_discover` / `vidsheet.layer`
+- `PATCH /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}` — MCP `gen_vidsheet_action` / `update_layer | actions[] update/layer`
+- `DELETE /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}` — MCP `gen_vidsheet_action` / `actions[] delete/layer`
+- `POST /v1/vidsheet/{sheet_id}/cells/{cell_id}/layers/{layer_id}/duplicate` — MCP `gen_vidsheet_action` / `actions[] duplicate/layer`
+
+**Organizations**
+
+- `GET /v1/organizations` — MCP `gen_discover` / `platform.organizations`
+- `POST /v1/organizations` — MCP `gen_platform_action` / `create_organization`
+- `GET /v1/organizations/{organization_id}` — MCP `gen_discover` / `platform.organization`
+- `PATCH /v1/organizations/{organization_id}` — MCP `gen_platform_action` / `update_organization`
+- `DELETE /v1/organizations/{organization_id}` — MCP `gen_platform_action` / `delete_organization`
+- `GET /v1/organizations/{organization_id}/user_organizations` — MCP `gen_discover` / `platform.members`
+- `POST /v1/organizations/{organization_id}/user_organizations` — MCP `gen_platform_action` / `invite_member`
+- `DELETE /v1/organizations/{organization_id}/user_organizations/{id}` — MCP `gen_platform_action` / `leave_workspace`
+- `PUT /v1/projects/{id}/set_project_share` — MCP `gen_agent_action` / `set_project_share`
+- `POST /v1/x402_credit_purchase` — MCP `gen_billing_action` / `create_x402_credit_purchase`
+- `POST /v1/x402_credit_purchase/settle` — MCP `gen_billing_action` / `settle_x402_credit_purchase`
+
+**Proof of Genesis**
+
+- `GET /v1/agents/{agent_id}/proof-of-genesis/backups` — MCP `gen_discover` / `platform.backups`
+- `POST /v1/agents/{agent_id}/proof-of-genesis/backups` — MCP `gen_platform_action` / `create_proof_of_genesis_backup`
+- `DELETE /v1/agents/{agent_id}/proof-of-genesis/backups/{backup_id}` — MCP `gen_platform_action` / `remove_proof_of_genesis_backup`
+
+**Publishing**
+
+- `PUT /v1/platform/disconnect/{platform}` — MCP `gen_publish_action` / `disconnect_social`
+- `POST /v1/platform/get_authorization_url` — MCP `gen_discover` / `publish.connect_url`
+- `POST /v1/platform/get_oauth_account` — MCP `gen_analyze` / `web_asset_scrape`
+- `GET /v1/schedule/post/{post_id}` — MCP `gen_discover` / `publish.post_status`
+- `PATCH /v1/schedule/post/{post_id}` — MCP `gen_publish_action` / `update_scheduled_post`
+- `DELETE /v1/schedule/post/{post_id}` — MCP `gen_publish_action` / `delete_scheduled_post`
+- `PATCH /v1/schedule/post/{post_id}/published` — MCP `gen_publish_action` / `update_published_post`
+- `DELETE /v1/schedule/post/{post_id}/published` — MCP `gen_publish_action` / `delete_published_post`
+- `GET /v1/schedule/posts` — MCP `gen_discover` / `publish.scheduled`
+- `POST /v1/schedule/with-post` — MCP `gen_publish_action` / `schedule_post_<platform>`
+
+**Recurring Jobs**
+
+- `GET /v1/agents/{agent_id}/recurring-jobs` — MCP `gen_discover` / `task.list`
+- `POST /v1/agents/{agent_id}/recurring-jobs` — MCP `gen_task_action` / `create_recurring_job`
+- `POST /v1/agents/{agent_id}/recurring-jobs/defaults` — MCP `gen_task_action` / `ensure_default_recurring_job`
+- `GET /v1/agents/{agent_id}/recurring-jobs/{job_id}` — MCP `gen_discover` / `task.job`
+- `PATCH /v1/agents/{agent_id}/recurring-jobs/{job_id}` — MCP `gen_task_action` / `update_recurring_job`
+- `DELETE /v1/agents/{agent_id}/recurring-jobs/{job_id}` — MCP `gen_task_action` / `delete_recurring_job`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/pause` — MCP `gen_task_action` / `pause_recurring_job`
+- `POST /v1/agents/{agent_id}/recurring-jobs/{job_id}/resume` — MCP `gen_task_action` / `resume_recurring_job`
+
+**Rows**
+
+- `GET /v1/vidsheet/{sheet_id}/rows` — MCP `gen_discover` / `vidsheet.rows`
+- `POST /v1/vidsheet/{sheet_id}/rows` — MCP `gen_vidsheet_action` / `actions[] create/row`
+- `PUT /v1/vidsheet/{sheet_id}/rows/update_positions` — MCP `gen_vidsheet_action` / `actions[] reorder/row`
+- `GET /v1/vidsheet/{sheet_id}/rows/{row_id}` — MCP `gen_discover` / `vidsheet.row`
+- `POST /v1/vidsheet/{sheet_id}/rows/{row_id}/duplicate` — MCP `gen_vidsheet_action` / `actions[] duplicate/row`
+
+**Sheets**
+
+- `POST /v1/vidsheet` — MCP `gen_vidsheet_action` / `create_sheet | create_engine`
+- `POST /v1/vidsheet/actions` — MCP `gen_vidsheet_action` / `<flat ops>`
+- `GET /v1/vidsheet/{id}/generations` — MCP `gen_discover` / `vidsheet.running_generations`
+- `GET /v1/vidsheet/{sheet_id}` — MCP `gen_discover` / `vidsheet.sheet`
+- `POST /v1/vidsheet/{sheet_id}/clone` — MCP `gen_vidsheet_action` / `duplicate_sheet`
+- `GET /v1/vidsheet/{sheet_id}/operations` — MCP `gen_discover` / `media.operations`
+- `GET /v1/vidsheet/{sheet_id}/operations/last` — MCP `gen_discover` / `media.last_operation`
+- `POST /v1/vidsheet/{sheet_id}/validate_video_layout` — MCP `gen_discover` / `vidsheet.layout_validation`
+
+**Song Mixes**
+
+- `POST /v1/audio/mixes` — MCP `gen_generate` / `create_song_mix`
+- `POST /v1/audio_matching_jobs` — MCP `gen_vidsheet_action` / `<flat ops>`
+- `GET /v1/recommended_sounds` — MCP `gen_discover` / `media.recommended_sounds`
+- `GET /v1/sound_libraries` — MCP `gen_discover` / `media.sound_library`
+
+**Templates**
+
+- `GET /v1/templates/projects` — MCP `gen_discover` / `vidsheet.templates`
+- `GET /v1/templates/projects/{slug}` — MCP `gen_discover` / `vidsheet.template`
+- `POST /v1/templates/spreadsheets/{slug}/clone` — MCP `gen_vidsheet_action` / `clone_template`
+
+**Variables**
+
+- `GET /v1/vidsheet/{sheet_id}/global_variables` — MCP `gen_discover` / `vidsheet.variables`
+
+**Watchlists**
+
+- `GET /v1/agents/{agent_id}/watchlists` — MCP `gen_discover` / `watchlist.list`
+- `POST /v1/agents/{agent_id}/watchlists` — MCP `gen_watchlist_action` / `create_watchlist`
+- `GET /v1/agents/{agent_id}/watchlists/{watchlist_id}` — MCP `gen_discover` / `watchlist.detail`
+- `PATCH /v1/agents/{agent_id}/watchlists/{watchlist_id}` — MCP `gen_watchlist_action` / `pause_watchlist`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}` — MCP `gen_watchlist_action` / `delete_watchlist`
+- `POST /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources` — MCP `gen_watchlist_action` / `add_watchlist_source`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources` — MCP `gen_watchlist_action` / `remove_watchlist_source`
+- `DELETE /v1/agents/{agent_id}/watchlists/{watchlist_id}/sources/{source_id}` — MCP `gen_watchlist_action` / `remove_watchlist_source`
+
+<!-- gen:mcp-surface-endpoints:end -->
+
 ## Base URLs and Auth
 
 - `https://api.gen.pro/v1` — agent setup, vidsheets, generations, renders, content monitoring, publishing
@@ -680,7 +961,7 @@ Status flow: `pending → processing → completed | failed | stopped`.
 
 ## Creation-card capability matrix (generated from the API)
 
-`GET /v1/creation_card_matrix` is the capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.
+The creation-card capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.
 
 | Card | Model | Label | Ratio | Duration (s) | Output resolution |
 |---|---|---|---|---|---|

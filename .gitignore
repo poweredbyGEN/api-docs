@@ -2,6 +2,7 @@ node_modules
 dist
 .firecrawl
 .astro
+__pycache__/
 
 
 # Local-only tooling (not shipped)
