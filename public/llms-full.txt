@@ -1863,7 +1863,7 @@ next cadence tick.
 - MCP Server: hosted remote endpoint `https://mcp.gen.pro` with `Authorization: Bearer <pat>` (`/mcp` also accepts older configurations). The downloadable package is retired. Use live `tools/list` for available tools and `gen://api-reference` for guidance.
 <!-- gen:backend-mcp-tools:start -->
 
-The hosted server serves 15 tools (`gen_discover` plus one `gen_<noun>_action` per domain, and the `gen_ask`, `gen_analyze`, `gen_avatars` and `gen_generate` tools):
+The hosted server serves 16 tools (`gen_discover` plus one `gen_<noun>_action` per domain, and the `gen_ask`, `gen_analyze`, `gen_avatars` and `gen_generate` tools):
 
 | Tool | Purpose |
 |---|---|
@@ -1871,7 +1871,7 @@ The hosted server serves 15 tools (`gen_discover` plus one `gen_<noun>_action` p
 | `gen_analyze` | Analyze real social data and research the web: collect is the typed collection seam — one synchronous DW /collect call per request, answered as model-visible evidence + a per-target coverage summary… |
 | `gen_ask` | Ask GEN anything in plain words: a question, or a build goal for the composer. |
 | `gen_asset_action` | Manage the agent's asset library: analyze any asset_id or file url with kind video/image/audio (quoted, confirmed DW enrichment; documents are refused until DW supports them; cached repeats are… |
-| `gen_avatars` | Avatars: one person each, with looks (images of the person) and talking loops (silent talking videos of the person, generated from a look or uploaded). |
+| `gen_avatars` | Avatars: one person each, with looks (images of the person) and talking loops (talking videos of the person with their voice, generated from a look or uploaded). |
 | `gen_billing_action` | Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase). |
 | `gen_content_action` | Manage an agent's content: its content resource files — create one from an uploaded file (create_content_resource), rename one (update_content_resource), or permanently delete one… |
 | `gen_discover` | Discover |
@@ -1879,6 +1879,7 @@ The hosted server serves 15 tools (`gen_discover` plus one `gen_<noun>_action` p
 | `gen_platform_action` | Workspace and access admin for an agent: create, rename, or delete an organization (create_organization, update_organization, delete_organization), upgrade its workspace plan (upgrade_workspace)… |
 | `gen_publish_action` | Step 5 (Export & Publish): Ship posts to social platforms — schedule, publish, update, or remove posts. |
 | `gen_task_action` | Run the task control plane: create, update, pause, resume, delete, duplicate, and run-now recurring jobs ('daily tasks' — a schedule plus a saved prompt), manage content-monitoring jobs, and approve… |
+| `gen_upload_asset` | Upload a file into an agent's owned asset library without sending the bytes through the MCP call. |
 | `gen_vidsheet_action` | Step 4 (Edit & Generate): the Vidsheet write tool for the editable video workspace. |
 | `gen_voice_action` | Build a custom voice for an agent: clone one from an audio sample (clone_voice), design one from a scripted prompt flow (generate_voice_script, generate_voice_description, generate_voice_samples… |
 | `gen_watchlist_action` | Run one or more watchlist operations in a single call: create, update, pause, resume or delete a watchlist, add or remove a monitoring source, or ask a question about a watchlist (query_watchlist… |

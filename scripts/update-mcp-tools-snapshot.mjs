@@ -144,7 +144,9 @@ function replacementFor(name, aliases, views) {
 
 function servedFromServerSource(serverSource) {
   const names = new Set();
-  for (const match of serverSource.matchAll(/@mcp\.tool\(([\s\S]*?)\)\s*\n(?:async )?def ([a-z0-9_]+)/g)) {
+  // A tool registers through @mcp.tool or the @_served_tool wrapper (gen_discover,
+  // gen_avatars), so both decorators count.
+  for (const match of serverSource.matchAll(/@(?:mcp\.tool|_served_tool)\(([\s\S]*?)\)\s*\n(?:async )?def ([a-z0-9_]+)/g)) {
     const explicit = match[1].match(/name="(gen_[a-z0-9_]+)"/);
     names.add(explicit ? explicit[1] : match[2]);
   }

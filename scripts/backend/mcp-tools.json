@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "bbe7c62",
+  "revision": "44c0e48",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -25,7 +25,7 @@
     {
       "name": "gen_avatars",
       "title": "Manage avatars, looks, and talking loops",
-      "summary": "Avatars: one person each, with looks (images of the person) and talking loops (silent talking videos of the person, generated from a look or uploaded)."
+      "summary": "Avatars: one person each, with looks (images of the person) and talking loops (talking videos of the person with their voice, generated from a look or uploaded)."
     },
     {
       "name": "gen_billing_action",
@@ -61,6 +61,11 @@
       "name": "gen_task_action",
       "title": "Manage recurring jobs and monitoring tasks",
       "summary": "Run the task control plane: create, update, pause, resume, delete, duplicate, and run-now recurring jobs ('daily tasks' — a schedule plus a saved prompt), manage content-monitoring jobs, and approve…"
+    },
+    {
+      "name": "gen_upload_asset",
+      "title": "Upload a file into an asset library",
+      "summary": "Upload a file into an agent's owned asset library without sending the bytes through the MCP call."
     },
     {
       "name": "gen_vidsheet_action",

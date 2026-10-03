@@ -1,6 +1,6 @@
 {
-  "source": "live: https://mcp.gen.pro tools/list",
-  "generated_at": "2026-09-29T07:51:59.855Z",
+  "source": "offline: gen-mcp-server origin/main@44c0e48 src/gen_mcp_server/server.py @mcp.tool registry + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
+  "generated_at": "2026-10-03T03:07:15.195Z",
   "served": [
     "gen_agent_action",
     "gen_analyze",
@@ -14,6 +14,7 @@
     "gen_platform_action",
     "gen_publish_action",
     "gen_task_action",
+    "gen_upload_asset",
     "gen_vidsheet_action",
     "gen_voice_action",
     "gen_watchlist_action"
