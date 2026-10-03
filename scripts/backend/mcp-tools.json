@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "44c0e48",
+  "revision": "847e364",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -41,6 +41,11 @@
       "name": "gen_discover",
       "title": "Discover",
       "summary": "Discover"
+    },
+    {
+      "name": "gen_feedback",
+      "title": "Send feedback about GEN",
+      "summary": "Send feedback about GEN (a bug, an idea, praise) from the user to the GEN team."
     },
     {
       "name": "gen_generate",
