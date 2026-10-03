@@ -12,6 +12,8 @@ gen-backend-v2 owns the API contracts. These files are generated from it, never 
 Agent discovery is canonical at `https://gen.pro/llms.txt`. api.gen.pro does not publish its own
 `llms.txt`; the retired `/llms.txt` and `/llms-full.txt` paths 301 to the canonical file at the
 `gen-api-docs-router` Cloudflare Worker, and api.gen.pro keeps `openapi.yaml` for developers.
+That Worker's tracked source, reviewed settings, acceptance tests and deploy order live in
+`operations/`; `apply-api-worker.py` uploads it.
 
 `scripts/sync-from-backend.mjs` writes them (the OpenAPI `paths:` body comes from
 `scripts/sync_mcp_surface.py`). Text outside the `gen:<name>:start` / `gen:<name>:end` markers

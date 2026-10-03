@@ -1,0 +1,13 @@
+{
+  "annotations": {
+    "workers/triggered_by": "upload"
+  },
+  "bindings": [],
+  "compatibility_date": "2026-06-17",
+  "compatibility_flags": [],
+  "logpush": false,
+  "placement": {},
+  "tags": [],
+  "tail_consumers": [],
+  "usage_model": "standard"
+}
