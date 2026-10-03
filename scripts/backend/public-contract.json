@@ -7332,6 +7332,11 @@
           "format": "uuid",
           "description": "An optional stable edit-group identifier for undo and retry."
         },
+        "auto_regenerate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the batch runs the automatic dependent-regeneration walk after its writes. False performs the writes and dispatches no dependent jobs; omitted keeps the current behaviour."
+        },
         "actions": {
           "type": "array",
           "description": "One action, or a compatible batch: updates, generations (at most 50), variable creates, one video-scene edit group, or a reconcile of creates, updates and deletes on one Vidsheet. A reconcile applies deletes, then creates, then updates; a create may carry a ref that later updates address.",
@@ -7693,6 +7698,77 @@
                   }
                 ]
               }
+            },
+            "auto_regeneration": {
+              "description": "One entry per dependent the batch examined, the string \"skipped\" when the caller sent auto_regenerate false, and absent when no dependent was examined.",
+              "oneOf": [
+                {
+                  "const": "skipped"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dependent_cell_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "A persisted Rails resource identifier."
+                      },
+                      "source_cell_id": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]+$",
+                            "minLength": 1,
+                            "maxLength": 128
+                          }
+                        ],
+                        "description": "A persisted Rails resource identifier."
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "The regeneration outcome for this dependent."
+                      },
+                      "user_job_id": {
+                        "type": [
+                          "integer",
+                          "string",
+                          "null"
+                        ],
+                        "description": "The dispatched or replayed job, when one exists."
+                      },
+                      "error": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Why this dependent was not regenerated."
+                      }
+                    },
+                    "required": [
+                      "dependent_cell_id",
+                      "source_cell_id",
+                      "status"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              ]
             },
             "contract_version": {
               "type": "string",
