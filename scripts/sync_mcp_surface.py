@@ -917,11 +917,13 @@ def merge_operation_schema(lines, schema_entry):
     is the richer contract and is never overwritten. Every property in either
     field is traceable to the backend files its `source` list names.
 
-    An entry may declare where its success body lives with `responseStatus`:
-    the default is the operation's 2xx, but a protocol whose success is a
-    non-2xx status (x402's 402 quote) names that status explicitly. `noContent`
-    and `noRequestBody` carry no schema at all — they assert the backend returns
-    no body (or takes none), so nothing is rendered for them.
+    An entry may name its success status with `responseStatus`. Alongside a
+    `response` it selects which status carries that body (x402's 402 quote is a
+    success at a non-2xx status); alongside `noContent` it retitles the seeded
+    placeholder 2xx to the status the backend actually answers, because
+    `head :no_content` answers 204, not the 200 the placeholder claims.
+    `noContent` and `noRequestBody` carry no schema at all — they assert the
+    backend returns no body (or takes none), so nothing is rendered for them.
     """
     if not schema_entry:
         return list(lines)
@@ -982,6 +984,11 @@ def merge_operation_schema(lines, schema_entry):
                 "              schema:",
                 *yaml_block(response, 16),
             ]
+    elif schema_entry.get("responseStatus") is not None:
+        status = str(schema_entry["responseStatus"])
+        success_at = next((i for i, line in enumerate(out) if re.match(r"^        '2\d\d':\s*$", line)), None)
+        if success_at is not None:
+            out[success_at] = f"        '{status}':"
     return out
 
 
@@ -1015,7 +1022,9 @@ def avatar_schema_entries(avatars):
 
     Everything comes from the vendored avatars-api-schema.json: the response
     schemas, and from its `requests` the request body (POST/PATCH) or query
-    parameters (GET/DELETE) of every route. A DELETE answers 204 with no body.
+    parameters (GET/DELETE) of every route. A DELETE answers 204 with no body
+    (`head :no_content`), so it declares both `noContent` and the
+    `responseStatus` that retitles the seeded 200 to 204.
     Keyed `METHOD /path` so they flow through `merge_operation_schema` exactly
     like the other operations.
     """
@@ -1043,6 +1052,7 @@ def avatar_schema_entries(avatars):
             entry["parameters"] = query_parameters(request["schema"])
         if method == "DELETE":
             entry["noContent"] = True
+            entry["responseStatus"] = 204
     return entries
 
 

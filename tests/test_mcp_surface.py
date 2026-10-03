@@ -178,6 +178,41 @@ def test_every_operation_has_a_2xx_schema_or_is_marked_missing():
     assert failures == []
 
 
+def test_avatar_deletes_declare_204_and_render_it():
+    """A vendored avatar DELETE declares the 204 its controller answers, and the render says 204.
+
+    `V1::AvatarsController#destroy` ends in `head :no_content`, so the vendored
+    avatars schema marks the route `noContent`. Without an explicit
+    `responseStatus` the generated operation kept the seeded placeholder 200 and
+    advertised a success the backend never returns. The operation is rendered
+    here from the generators, so dropping the declaration fails this test even
+    while the committed YAML still says 204.
+    """
+    module = load_module()
+    avatars = json.loads((REPO / "scripts" / "backend" / "avatars-api-schema.json").read_text())
+    entries = module.avatar_schema_entries(avatars)
+    surface = {f"{method} {path}" for method, path in surface_operations()}
+    avatar_deletes = {key: entry for key, entry in entries.items() if key.startswith("DELETE ") and key in surface}
+    assert avatar_deletes, "the vendored avatars schema carries no DELETE on the MCP surface"
+    for key, entry in avatar_deletes.items():
+        assert entry.get("noContent") is True, f"{key}: a DELETE answers with no body"
+        assert entry.get("responseStatus") == 204, f"{key}: a DELETE answers 204, got {entry.get('responseStatus')!r}"
+
+    schemas = json.loads(SCHEMAS.read_text())
+    schemas.update({key: entry for key, entry in entries.items() if key in surface})
+    seed = json.loads((REPO / "scripts" / "openapi-operations.json").read_text())
+    contract = json.loads((REPO / "scripts" / "backend" / "public-contract.json").read_text())
+    body, _ = module.render_paths(json.loads(SURFACE.read_text())["operations"], seed, contract, schemas)
+    rendered = parse_paths(module.render_paths_file(OPENAPI.read_text(), body))
+    committed = parse_paths(OPENAPI.read_text())
+    for key in avatar_deletes:
+        method, path = key.split(" ", 1)
+        for label, operations in (("rendered", rendered), ("committed", committed)):
+            text = "\n".join(operations[(method, path)])
+            assert re.search(r"^        '204':\s*$", text, re.M), f"{key}: {label} without a 204"
+            assert not re.search(r"^        '200':\s*$", text, re.M), f"{key}: {label} a 200 the backend never returns"
+
+
 def test_missing_count_does_not_grow():
     documented = parse_paths(OPENAPI.read_text())
     missing = sum(1 for block in documented.values() if "x-schema-status: missing" in "\n".join(block))

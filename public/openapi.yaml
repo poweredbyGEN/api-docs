@@ -7224,7 +7224,7 @@ paths:
         schema:
           type: "string"
       responses:
-        '200':
+        '204':
           description: Success.
         '401':
           $ref: '#/components/responses/Unauthorized'

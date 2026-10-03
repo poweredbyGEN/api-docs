@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 // intent: agent discovery has exactly one canonical document, https://gen.pro/llms.txt.
-// api.gen.pro used to serve its own llms.txt and llms-full.txt; those duplicates were retired and
-// the old paths 301 to the canonical file at the gen-api-docs-router worker. This check fails when
-// a duplicate is regenerated, when a page links the site-local path instead of the canonical URL
-// (which would make the redirect target point back at api.gen.pro), or when the developer OpenAPI
-// asset stops being published. Run: npm test
+// Invariant: no duplicate is regenerated, no page links a site-local /llms.txt (a link that
+// would make the canonical file point back at the redirected host), and the developer OpenAPI
+// assets stay published. Run: npm test
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -57,12 +55,8 @@ for (const dirname of SCAN_DIRS) {
   }
   for (const abs of walk(base)) {
     if (!TEXT_EXT.has(path.extname(abs))) continue;
-    let text;
-    try {
-      text = readFileSync(abs, "utf8");
-    } catch {
-      continue; // binary asset with a text-looking extension
-    }
+    // A text extension that cannot be read is a broken input, not a skip.
+    const text = readFileSync(abs, "utf8");
     const rel = path.relative(ROOT, abs).split(path.sep).join("/");
     text.split("\n").forEach((line, index) => {
       if (line.includes(CANONICAL)) canonicalLinks += 1;
