@@ -306,13 +306,13 @@
       "path": "/agents/{agent_id}/avatars",
       "operationId": "listAgentAvatars",
       "tag": "Agents",
-      "summary": "List agent avatars",
+      "summary": "List agent profile photos",
       "mcp_tool": "gen_discover",
-      "mcp_branch": "agent.avatars",
+      "mcp_branch": "agent.profile_photos",
       "mcp_owners": [
         {
           "tool": "gen_discover",
-          "branch": "agent.avatars"
+          "branch": "agent.profile_photos"
         }
       ],
       "server": "https://api.gen.pro/v1",
@@ -1340,23 +1340,6 @@
       ],
       "server": "https://api.gen.pro/v1",
       "server_source": "src/gen_mcp_server/server.py:12372 (api_call)"
-    },
-    {
-      "method": "POST",
-      "path": "/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops",
-      "operationId": "postAvatarsByAvatarIdLooksByAvatarLookIdTalkingLoops",
-      "tag": "Avatars",
-      "summary": "Manage avatars, looks, and talking loops \u2014 create avatar talking loop",
-      "mcp_tool": "gen_avatars",
-      "mcp_branch": "create_avatar_talking_loop",
-      "mcp_owners": [
-        {
-          "tool": "gen_avatars",
-          "branch": "create_avatar_talking_loop"
-        }
-      ],
-      "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:1370 (internal_agent_access_call)"
     },
     {
       "method": "GET",

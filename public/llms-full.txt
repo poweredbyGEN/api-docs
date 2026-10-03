@@ -147,7 +147,7 @@ Every backend route the hosted MCP can call, with the MCP tool and branch that c
 - `GET /v1/agents/{agent_id}` — MCP `gen_discover` / `agent.detail`
 - `PATCH /v1/agents/{agent_id}` — MCP `gen_agent_action` / `connect_agent_elevenlabs`
 - `DELETE /v1/agents/{agent_id}` — MCP `gen_agent_action` / `delete_agent`
-- `GET /v1/agents/{agent_id}/avatars` — MCP `gen_discover` / `agent.avatars`
+- `GET /v1/agents/{agent_id}/avatars` — MCP `gen_discover` / `agent.profile_photos`
 - `POST /v1/agents/{agent_id}/avatars` — MCP `gen_agent_action` / `create_agent_avatar`
 - `DELETE /v1/agents/{agent_id}/avatars/{id}` — MCP `gen_agent_action` / `delete_agent_avatar`
 - `POST /v1/user_shared_agents` — MCP `gen_agent_action` / `share_agent`
@@ -164,7 +164,6 @@ Every backend route the hosted MCP can call, with the MCP tool and branch that c
 - `GET /v1/avatars` — MCP `gen_avatars` / `list`
 - `POST /v1/avatars` — MCP `gen_avatars` / `create`
 - `POST /v1/avatars/{avatar_id}/looks` — MCP `gen_avatars` / `upload_avatar_look`
-- `POST /v1/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops` — MCP `gen_avatars` / `create_avatar_talking_loop`
 - `GET /v1/avatars/{avatar_id}/looks/{id}` — MCP `gen_avatars` / `get (look)`
 - `POST /v1/avatars/{avatar_id}/talking_loops` — MCP `gen_avatars` / `upload_avatar_talking_loop`
 - `GET /v1/avatars/{avatar_id}/talking_loops/{id}` — MCP `gen_avatars` / `get_avatar_talking_loop`

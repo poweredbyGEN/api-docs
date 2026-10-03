@@ -164,7 +164,6 @@ Every backend route the hosted MCP can call. `public/openapi.yaml` documents exa
 - `GET /v1/avatars`
 - `POST /v1/avatars`
 - `POST /v1/avatars/{avatar_id}/looks`
-- `POST /v1/avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops`
 - `GET /v1/avatars/{avatar_id}/looks/{id}`
 - `POST /v1/avatars/{avatar_id}/talking_loops`
 - `GET /v1/avatars/{avatar_id}/talking_loops/{id}`

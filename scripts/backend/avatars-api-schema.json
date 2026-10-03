@@ -30,7 +30,7 @@
             "avatar_talking_loops": {
               "items": {
                 "additionalProperties": false,
-                "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+                "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
                 "properties": {
                   "aspect_ratio": {
                     "type": [
@@ -245,7 +245,7 @@
       "uploaded_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+          "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -387,7 +387,7 @@
     ],
     "type": "object"
   },
-  "description": "JSON Schema contract for Avatars::Presenter output (GET /v1/avatars, GET /v1/avatars/:id). Generated from app/presenters/avatars/presenter.rb — do not edit by hand; run bin/rails vidsheet_schema:generate.",
+  "description": "JSON Schema contract for Avatars::Presenter output (GET /v1/avatars, GET /v1/avatars/:id) and, under requests, the request params of every /v1/avatars route (AvatarRequestParams). Generated from app/presenters/avatars/presenter.rb and app/controllers/concerns/avatar_request_params.rb — do not edit by hand; run bin/rails vidsheet_schema:generate.",
   "detail": {
     "additionalProperties": false,
     "description": "GET /v1/avatars/:id (show): the summary plus looks and talking loops.",
@@ -412,7 +412,7 @@
             "avatar_talking_loops": {
               "items": {
                 "additionalProperties": false,
-                "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+                "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
                 "properties": {
                   "aspect_ratio": {
                     "type": [
@@ -621,7 +621,7 @@
       "uploaded_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+          "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -769,7 +769,7 @@
       "avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
-          "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+          "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
           "properties": {
             "aspect_ratio": {
               "type": [
@@ -899,6 +899,362 @@
     ],
     "type": "object"
   },
+  "requests": {
+    "DELETE /v1/avatars/{avatar_id}/looks/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "DELETE /v1/avatars/{avatar_id}/talking_loops/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "DELETE /v1/avatars/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/avatars": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "has_looks": {
+            "default": false,
+            "description": "true lists only avatars with at least one look.",
+            "type": "boolean"
+          },
+          "search": {
+            "description": "Only avatars whose name contains this text (case-insensitive).",
+            "type": "string"
+          },
+          "source": {
+            "default": "my",
+            "description": "my lists the agent's own avatars, library the shared avatar library, all both (own first).",
+            "enum": [
+              "my",
+              "library",
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/avatars/{avatar_id}/talking_loops/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/avatars/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/avatars/{avatar_id}/looks/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "The new name. Omitting it or sending null clears the name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/avatars/{avatar_id}/talking_loops/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "The new name. Omitting it or sending null clears the name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/avatars/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Renames the avatar. Renaming the agent's own avatar also renames the agent.",
+            "type": "string"
+          },
+          "primary_voice": {
+            "description": "Sets the avatar's primary voice, the voice its talking loops speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it.",
+            "properties": {
+              "billing_source": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "ownership": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/avatars": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "clone_voice": {
+            "default": true,
+            "description": "Videos only. Clones the person's voice from the video into the avatar's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
+            "type": "boolean"
+          },
+          "content_resource_id": {
+            "description": "An uploaded image or video of a person. An image becomes the avatar's original look. A video becomes its first talking loop, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Avatar name. Defaults to the file name, else \"New avatar\".",
+            "type": "string"
+          },
+          "voice_gender": {
+            "default": "female",
+            "description": "Gender of the cloned voice.",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "type": "string"
+          },
+          "voice_language": {
+            "default": "english",
+            "description": "Language the person speaks in the video, as a lowercase English name (for example english or spanish).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/avatars/{avatar_id}/looks": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "content_resource_id": {
+            "description": "An uploaded image of the person.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Look name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/avatars/{avatar_id}/talking_loops": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          },
+          "clone_voice": {
+            "default": false,
+            "description": "Also clones the person's voice from the video; it becomes the avatar's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
+            "type": "boolean"
+          },
+          "content_resource_id": {
+            "description": "An uploaded video of the person speaking.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Talking loop name. Defaults to the avatar's name.",
+            "type": "string"
+          },
+          "voice_gender": {
+            "default": "female",
+            "description": "Gender of the cloned voice.",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "type": "string"
+          },
+          "voice_language": {
+            "default": "english",
+            "description": "Language the person speaks in the video, as a lowercase English name (for example english or spanish).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/avatars/{id}/copy": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose avatars these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    }
+  },
   "summary": {
     "additionalProperties": false,
     "description": "One row of GET /v1/avatars (the index list).",
@@ -972,7 +1328,7 @@
   },
   "talking_loop": {
     "additionalProperties": false,
-    "description": "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video.",
+    "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
     "properties": {
       "aspect_ratio": {
         "type": [

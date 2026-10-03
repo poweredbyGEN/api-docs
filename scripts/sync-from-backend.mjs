@@ -20,7 +20,7 @@
 //   docs/generated/user-job-enums.json               the model enum each job type accepts
 //   docs/generated/vidsheet-action-schema.json       the Vidsheet action envelope
 //   docs/generated/vidsheet-operations-schema.json   the Vidsheet operation endpoints
-//   docs/generated/avatars-api-schema.json           the /avatars response schemas
+//   docs/generated/avatars-api-schema.json           the /avatars response and request schemas
 // The MCP tool surface is gen-mcp-server's served registry, vendored to
 // scripts/backend/mcp-tools.json from
 // src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv on origin/main.
@@ -650,7 +650,12 @@ function vendor(backendDir) {
   // first so a missing or malformed upstream file fails the sync immediately,
   // instead of silently keeping stale hand-written response schemas in the
   // public spec.
-  readSourceJson(backendDir, UPSTREAM.avatars);
+  // Its `requests` (every /v1/avatars route's request params, generated from
+  // what the controllers permit) is what scripts/sync_mcp_surface.py renders as
+  // those routes' request bodies and query parameters.
+  if (!readSourceJson(backendDir, UPSTREAM.avatars).requests) {
+    throw new Error(`${UPSTREAM.avatars} has no "requests"; regenerate it in gen-backend-v2 (bin/rails vidsheet_schema:generate)`);
+  }
   const contract = {
     catalog: buildCatalog(backendDir),
     user_jobs: readSourceJson(backendDir, UPSTREAM.userJobs).user_jobs ?? {},

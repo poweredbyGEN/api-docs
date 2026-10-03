@@ -78,7 +78,6 @@ SEED_FILE = os.path.join(ROOT, "scripts", "openapi-operations.json")
 BASELINE_FILE = os.path.join(ROOT, "scripts", "openapi-missing-baseline.json")
 CONTRACT_FILE = os.path.join(ROOT, "scripts", "backend", "public-contract.json")
 AVATARS_SCHEMA_FILE = os.path.join(ROOT, "scripts", "backend", "avatars-api-schema.json")
-AVATAR_REQUEST_BODIES_FILE = os.path.join(ROOT, "scripts", "avatars-request-bodies.json")
 OVERRIDES_FILE = os.path.join(ROOT, "scripts", "mcp-path-params.json")
 OPENAPI_FILES = ["public/openapi.yaml", "public/.well-known/openapi.yaml"]
 LLMS_FILES = ["public/llms.txt", "public/llms-full.txt"]
@@ -931,6 +930,15 @@ def merge_operation_schema(lines, schema_entry):
     if not schema_entry:
         return list(lines)
     out = list(lines)
+    query = schema_entry.get("parameters")
+    if query:
+        existing = next((i for i, line in enumerate(out) if line.startswith("      parameters:")), None)
+        if existing is None:
+            at = next(i for i, line in enumerate(out) if re.match(r"^      (requestBody|responses):", line))
+            out[at:at] = ["      parameters:"]
+            existing = at
+        end = next((j for j in range(existing + 1, len(out)) if re.match(r"^      \S", out[j]) and not out[j].startswith("      -")), len(out))
+        out[end:end] = yaml_block(query, 6)
     schema = schema_entry.get("requestBody")
     if schema is not None:
         existing = next((i for i, line in enumerate(out) if line.startswith("      requestBody:")), None)
@@ -985,13 +993,14 @@ def merge_operation_schema(lines, schema_entry):
 #
 # The backend's docs/generated/avatars-api-schema.json pins the
 # Avatars::Presenter output shapes (summary, detail, look, talking_loop,
-# generating_job) and the create answer. Each /avatars operation's success body
+# generating_job) and the create answers. Each /avatars operation's success body
 # is one of them: the index list is an array of `summary`, create returns
 # `create` (the detail plus what it made), show/update/copy return `detail`,
-# the look routes return `look` and the talking-loop routes return
-# `talking_loop`. The request bodies stay hand-written in
-# scripts/avatars-request-bodies.json because the backend generates only the
-# presenter output, not the strong-parameter lists of those routes.
+# the look routes return `look`, a talking-loop upload returns
+# `talking_loop_create` and the other talking-loop routes `talking_loop`.
+# The same file's `requests` carries every /v1/avatars route's request params,
+# generated from the params the controllers permit: a body for POST/PATCH and
+# query parameters for GET/DELETE.
 AVATAR_RESPONSES = {
     "GET /avatars": ("summary", "list"),
     "GET /avatars/{id}": ("detail", "object"),
@@ -1000,19 +1009,19 @@ AVATAR_RESPONSES = {
     "POST /avatars/{id}/copy": ("detail", "object"),
     "POST /avatars/{avatar_id}/looks": ("look", "object"),
     "GET /avatars/{avatar_id}/looks/{id}": ("look", "object"),
-    "POST /avatars/{avatar_id}/talking_loops": ("talking_loop", "object"),
+    "POST /avatars/{avatar_id}/talking_loops": ("talking_loop_create", "object"),
     "GET /avatars/{avatar_id}/talking_loops/{id}": ("talking_loop", "object"),
-    "POST /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops": ("talking_loop", "object"),
 }
 
 
-def avatar_schema_entries(avatars, request_bodies):
+def avatar_schema_entries(avatars):
     """Synthetic `scripts/operation-schemas.json` entries for the /avatars routes.
 
-    The response schemas come from the vendored avatars-api-schema.json; the
-    request bodies and the DELETE noContent marker come from the hand-written
-    scripts/avatars-request-bodies.json. Keyed `METHOD /path` so they flow
-    through `merge_operation_schema` exactly like the other operations.
+    Everything comes from the vendored avatars-api-schema.json: the response
+    schemas, and from its `requests` the request body (POST/PATCH) or query
+    parameters (GET/DELETE) of every route. A DELETE answers 204 with no body.
+    Keyed `METHOD /path` so they flow through `merge_operation_schema` exactly
+    like the other operations.
     """
     entries = {}
     for key, (name, kind) in AVATAR_RESPONSES.items():
@@ -1022,14 +1031,38 @@ def avatar_schema_entries(avatars, request_bodies):
                 f"{os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)}: missing {name!r} schema; "
                 "re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2>"
             )
-        entry = {"response": {"type": "array", "items": schema} if kind == "list" else schema}
-        request = request_bodies.get(key)
-        if request and request.get("requestBody") is not None:
-            entry["requestBody"] = request["requestBody"]
-        entries[key] = entry
-    if request_bodies.get("DELETE /avatars/{id}", {}).get("noContent"):
-        entries["DELETE /avatars/{id}"] = {"noContent": True}
+        entries[key] = {"response": {"type": "array", "items": schema} if kind == "list" else schema}
+    requests = avatars.get("requests")
+    if not requests:
+        raise SystemExit(
+            f"{os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)}: missing 'requests'; "
+            "re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2>"
+        )
+    for route, request in requests.items():
+        method, _, path = route.partition(" ")
+        entry = entries.setdefault(f"{method} {path.removeprefix('/v1')}", {})
+        if request["in"] == "body":
+            entry["requestBody"] = request["schema"]
+        else:
+            entry["parameters"] = query_parameters(request["schema"])
+        if method == "DELETE":
+            entry["noContent"] = True
     return entries
+
+
+def query_parameters(schema):
+    """OpenAPI `in: query` parameters for a generated request schema."""
+    required = set(schema.get("required", []))
+    params = []
+    for name, prop in schema["properties"].items():
+        param = {"name": name, "in": "query"}
+        if name in required:
+            param["required"] = True
+        if "description" in prop:
+            param["description"] = prop["description"]
+        param["schema"] = {key: value for key, value in prop.items() if key != "description"}
+        params.append(param)
+    return params
 
 
 def server_override_lines(entry):
@@ -1586,8 +1619,7 @@ def main(argv):
         )
         return 1
     avatars = read_json(AVATARS_SCHEMA_FILE)
-    request_bodies = read_json(AVATAR_REQUEST_BODIES_FILE) if os.path.exists(AVATAR_REQUEST_BODIES_FILE) else {}
-    schemas.update(avatar_schema_entries(avatars, request_bodies))
+    schemas.update({key: entry for key, entry in avatar_schema_entries(avatars).items() if key in known})
     outputs, meta = render_all(surface, seed, contract, schemas)
     failures, missing = assert_invariants(surface, meta)
     if failures:

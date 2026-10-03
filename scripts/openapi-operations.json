@@ -343,7 +343,7 @@
           "    get:",
           "      operationId: listAgentAvatars",
           "      x-phase: setup",
-          "      summary: List agent avatars",
+          "      summary: List agent profile photos",
           "      description: Returns all avatars for the agent. Cursor-based pagination (20 per page). Primary avatar listed first.",
           "      tags: [Agents]",
           "      parameters:",

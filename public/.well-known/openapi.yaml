@@ -561,9 +561,9 @@ paths:
     get:
       operationId: listAgentAvatars
       x-mcp-tool: gen_discover
-      x-mcp-branch: "agent.avatars"
+      x-mcp-branch: "agent.profile_photos"
       x-phase: setup
-      summary: List agent avatars
+      summary: List agent profile photos
       description: Returns all avatars for the agent. Cursor-based pagination (20 per page). Primary avatar listed first.
       tags: [Agents]
       parameters:
@@ -5670,6 +5670,34 @@ paths:
       x-phase: setup
       summary: "Manage avatars, looks, and talking loops — list"
       tags: [Avatars]
+      parameters:
+      - name: "agent_id"
+        in: "query"
+        required: True
+        description: "The agent whose avatars these are."
+        schema:
+          type: "integer"
+      - name: "has_looks"
+        in: "query"
+        description: "true lists only avatars with at least one look."
+        schema:
+          default: false
+          type: "boolean"
+      - name: "search"
+        in: "query"
+        description: "Only avatars whose name contains this text (case-insensitive)."
+        schema:
+          type: "string"
+      - name: "source"
+        in: "query"
+        description: "my lists the agent's own avatars, library the shared avatar library, all both (own first)."
+        schema:
+          default: "my"
+          enum:
+            - "my"
+            - "library"
+            - "all"
+          type: "string"
       responses:
         '200':
           description: Success.
@@ -5745,32 +5773,35 @@ paths:
         content:
           application/json:
             schema:
-              type: "object"
-              description: "JSON request body. An image becomes the avatar's original look. A video of a person becomes an uploaded talking loop, its first frame becomes the first look (the cover), and, unless clone_voice is false, its audio is cloned into a new voice that becomes the avatar's primary voice. Cloning a voice uses credits and needs a paid plan; uploading and extracting the frame do not. Send an Idempotency-Key header to retry safely. Refusals: 422 video_has_no_audio, video_too_short_for_voice_clone (the clone needs at least 30 seconds of speech) and video_audio_unreadable (each with param content_resource_id) when clone_voice is true; without clone_voice those videos are created without a voice and voice_clone_message says why."
-              required:
-                - "agent_id"
-                - "content_resource_id"
               properties:
                 agent_id:
-                  type: "string"
-                  description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
-                name:
-                  type: "string"
-                  description: "Avatar name. Optional: defaults to the file name, else \"New avatar\"."
-                content_resource_id:
-                  description: "An uploaded image (becomes the original look) or video of a person (becomes a talking loop, its first frame the first look, and its audio a cloned voice unless clone_voice is false)."
+                  description: "The agent whose avatars these are."
+                  type: "integer"
                 clone_voice:
+                  default: true
+                  description: "Videos only. Clones the person's voice from the video into the avatar's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
                   type: "boolean"
-                  description: "Videos only (ignored for images). Default true: clone the person's voice from the video's audio into the avatar's primary voice; this uses credits. false skips it. true refuses a video without audio or shorter than 30 seconds instead of creating it without a voice."
-                voice_gender:
+                content_resource_id:
+                  description: "An uploaded image or video of a person. An image becomes the avatar's original look. A video becomes its first talking loop, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely."
+                  type: "integer"
+                name:
+                  description: "Avatar name. Defaults to the file name, else \"New avatar\"."
                   type: "string"
+                voice_gender:
+                  default: "female"
+                  description: "Gender of the cloned voice."
                   enum:
                     - "male"
                     - "female"
-                  description: "The cloned voice's gender label. Default female."
-                voice_language:
                   type: "string"
-                  description: "The cloned voice's language. Default english."
+                voice_language:
+                  default: "english"
+                  description: "Language the person speaks in the video, as a lowercase English name (for example english or spanish)."
+                  type: "string"
+              required:
+                - "agent_id"
+                - "content_resource_id"
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -5801,7 +5832,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -5951,7 +5982,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6078,18 +6109,20 @@ paths:
         content:
           application/json:
             schema:
-              type: "object"
-              description: "JSON request body."
+              properties:
+                agent_id:
+                  description: "The agent whose avatars these are."
+                  type: "integer"
+                content_resource_id:
+                  description: "An uploaded image of the person."
+                  type: "integer"
+                name:
+                  description: "Look name."
+                  type: "string"
               required:
                 - "agent_id"
                 - "content_resource_id"
-              properties:
-                agent_id:
-                  type: "string"
-                  description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
-                content_resource_id:
-                  description: "An uploaded image."
-                name: {}
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -6105,7 +6138,7 @@ paths:
                   avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6204,116 +6237,6 @@ paths:
           $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_avatars
       x-mcp-branch: "upload_avatar_look"
-  /avatars/{avatar_id}/looks/{avatar_look_id}/talking_loops:
-    post:
-      operationId: postAvatarsByAvatarIdLooksByAvatarLookIdTalkingLoops
-      x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — create avatar talking loop"
-      tags: [Avatars]
-      parameters:
-      - name: avatar_id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: avatar_look_id
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: "object"
-              description: "JSON request body."
-              required:
-                - "content_resource_id"
-              properties:
-                content_resource_id:
-                  type: "string"
-                  description: "Content resource of the uploaded video that becomes the talking loop (`owned_content_resource!(..., kind: \"video\")`)."
-                name:
-                  type: "string"
-                  description: "Talking loop name; defaults to the avatar's name."
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
-                properties:
-                  aspect_ratio:
-                    type:
-                      - "string"
-                      - "null"
-                  avatar_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  avatar_look_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  avatar_talking_loop_id:
-                    minimum: 1
-                    type: "integer"
-                  duration:
-                    type:
-                      - "integer"
-                      - "null"
-                  kind:
-                    enum:
-                      - "generated"
-                      - "uploaded"
-                  latest_generated_video_url:
-                    type:
-                      - "string"
-                      - "null"
-                  made_from_talking_avatar_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  name:
-                    type:
-                      - "string"
-                      - "null"
-                  status:
-                    enum:
-                      - "ready"
-                  thumbnail_url:
-                    type:
-                      - "string"
-                      - "null"
-                  url:
-                    type:
-                      - "string"
-                      - "null"
-                required:
-                  - "avatar_talking_loop_id"
-                  - "name"
-                  - "kind"
-                  - "status"
-                  - "url"
-                  - "thumbnail_url"
-                  - "duration"
-                  - "avatar_id"
-                  - "avatar_look_id"
-                  - "made_from_talking_avatar_id"
-                  - "latest_generated_video_url"
-                  - "aspect_ratio"
-                type: "object"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "create_avatar_talking_loop"
   /avatars/{avatar_id}/looks/{id}:
     get:
       operationId: getAvatarsByAvatarIdLooksById
@@ -6346,7 +6269,7 @@ paths:
                   avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6462,19 +6385,35 @@ paths:
         content:
           application/json:
             schema:
-              type: "object"
-              description: "JSON request body."
+              properties:
+                agent_id:
+                  description: "The agent whose avatars these are."
+                  type: "integer"
+                clone_voice:
+                  default: false
+                  description: "Also clones the person's voice from the video; it becomes the avatar's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
+                  type: "boolean"
+                content_resource_id:
+                  description: "An uploaded video of the person speaking."
+                  type: "integer"
+                name:
+                  description: "Talking loop name. Defaults to the avatar's name."
+                  type: "string"
+                voice_gender:
+                  default: "female"
+                  description: "Gender of the cloned voice."
+                  enum:
+                    - "male"
+                    - "female"
+                  type: "string"
+                voice_language:
+                  default: "english"
+                  description: "Language the person speaks in the video, as a lowercase English name (for example english or spanish)."
+                  type: "string"
               required:
                 - "agent_id"
                 - "content_resource_id"
-              properties:
-                agent_id:
-                  type: "string"
-                  description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
-                content_resource_id:
-                  description: "An uploaded video."
-                name:
-                  description: "Defaults to the avatar's name when omitted."
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -6482,7 +6421,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                description: "POST /v1/avatars/:avatar_id/talking_loops (create): the uploaded talking loop plus its voice-clone job. With clone_voice true the video's voice is cloned and becomes the avatar's primary_voice once the job finishes; off by default."
                 properties:
                   aspect_ratio:
                     type:
@@ -6530,6 +6469,21 @@ paths:
                     type:
                       - "string"
                       - "null"
+                  user_job_ids:
+                    items:
+                      minimum: 1
+                      type: "integer"
+                    type: "array"
+                  voice_clone_message:
+                    type:
+                      - "string"
+                      - "null"
+                  voice_clone_status:
+                    enum:
+                      - "pending"
+                      - "skipped"
+                      - "not_requested"
+                      - "not_applicable"
                 required:
                   - "avatar_talking_loop_id"
                   - "name"
@@ -6543,6 +6497,9 @@ paths:
                   - "made_from_talking_avatar_id"
                   - "latest_generated_video_url"
                   - "aspect_ratio"
+                  - "user_job_ids"
+                  - "voice_clone_status"
+                  - "voice_clone_message"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -6569,6 +6526,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: "agent_id"
+        in: "query"
+        required: True
+        description: "The agent whose avatars these are."
+        schema:
+          type: "integer"
       responses:
         '200':
           description: Success.
@@ -6576,7 +6539,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                 properties:
                   aspect_ratio:
                     type:
@@ -6658,6 +6621,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: "agent_id"
+        in: "query"
+        required: True
+        description: "The agent whose avatars these are."
+        schema:
+          type: "integer"
       responses:
         '200':
           description: Success.
@@ -6684,7 +6653,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -6830,7 +6799,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -6933,18 +6902,46 @@ paths:
         content:
           application/json:
             schema:
-              type: "object"
-              description: "JSON request body."
               properties:
                 agent_id:
+                  description: "The agent whose avatars these are."
+                  type: "integer"
+                name:
+                  description: "Renames the avatar. Renaming the agent's own avatar also renames the agent."
                   type: "string"
-                  description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
-                name: {}
                 primary_voice:
-                  type: "object"
+                  description: "Sets the avatar's primary voice, the voice its talking loops speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it."
                   properties:
-                    source: {}
-                    voice_id: {}
+                    billing_source:
+                      type:
+                        - "string"
+                        - "integer"
+                    id:
+                      type:
+                        - "string"
+                        - "integer"
+                    name:
+                      type:
+                        - "string"
+                        - "integer"
+                    ownership:
+                      type:
+                        - "string"
+                        - "integer"
+                    provider:
+                      type:
+                        - "string"
+                        - "integer"
+                    voice_id:
+                      type:
+                        - "string"
+                        - "integer"
+                  type:
+                    - "object"
+                    - "null"
+              required:
+                - "agent_id"
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -6971,7 +6968,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -7117,7 +7114,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
@@ -7215,6 +7212,17 @@ paths:
         required: true
         schema:
           type: string
+      - name: "agent_id"
+        in: "query"
+        required: True
+        description: "The agent whose avatars these are."
+        schema:
+          type: "integer"
+      - name: "confirm_token"
+        in: "query"
+        description: "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete."
+        schema:
+          type: "string"
       responses:
         '200':
           description: Success.
@@ -7243,12 +7251,13 @@ paths:
         content:
           application/json:
             schema:
-              type: "object"
-              description: "JSON request body."
               properties:
                 agent_id:
-                  type: "string"
-                  description: "Agent context; the controller reads params[:agent_id] (`require_agent!`)."
+                  description: "The agent whose avatars these are."
+                  type: "integer"
+              required:
+                - "agent_id"
+              type: "object"
       responses:
         '200':
           description: Success.
@@ -7275,7 +7284,7 @@ paths:
                         avatar_talking_loops:
                           items:
                             additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                             properties:
                               aspect_ratio:
                                 type:
@@ -7421,7 +7430,7 @@ paths:
                   uploaded_avatar_talking_loops:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice (GEN-8234), latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:

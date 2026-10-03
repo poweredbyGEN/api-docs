@@ -1,6 +1,7 @@
 // GEN-8145: acceptance tests for the /avatars response schemas now sourced
 // from scripts/backend/avatars-api-schema.json instead of hand-written entries
-// in scripts/operation-schemas.json. node --test, stdlib only; the OpenAPI
+// in scripts/operation-schemas.json (and, GEN-8255, the request bodies from its
+// generated requests). node --test, stdlib only; the OpenAPI
 // copies are parsed with PyYAML (no YAML parser ships in the Node stdlib).
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -102,4 +103,35 @@ test("D5: sync fails clearly when the backend lacks docs/generated/avatars-api-s
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// GEN-8255: the /avatars request bodies and query parameters come from the
+// vendored avatars-api-schema.json `requests`, generated from the params the
+// backend controllers permit; there is no hand-written request list.
+function vendoredRequests() {
+  return JSON.parse(readFileSync(AVATARS_SCHEMA, "utf8")).requests;
+}
+
+function bodySchema(operation) {
+  return operation.requestBody.content["application/json"].schema;
+}
+
+test("D6: avatar upload request bodies deep-equal the vendored requests, clone_voice params included", () => {
+  const doc = parseOpenApi();
+  const requests = vendoredRequests();
+  const loopBody = bodySchema(doc.paths["/avatars/{avatar_id}/talking_loops"].post);
+  const avatarBody = bodySchema(doc.paths["/avatars"].post);
+  assert.deepEqual(loopBody, requests["POST /v1/avatars/{avatar_id}/talking_loops"].schema);
+  assert.deepEqual(avatarBody, requests["POST /v1/avatars"].schema);
+  for (const name of ["clone_voice", "voice_gender", "voice_language"]) {
+    assert.ok(Object.hasOwn(loopBody.properties, name), `talking_loops POST lacks ${name}`);
+  }
+  assert.ok(Object.hasOwn(avatarBody.properties, "clone_voice"), "POST /avatars lacks clone_voice");
+});
+
+test("D7: GET /avatars query parameters are the vendored requests and no hand-written request file exists", () => {
+  const doc = parseOpenApi();
+  const query = (doc.paths["/avatars"].get.parameters ?? []).filter((param) => param.in === "query").map((param) => param.name);
+  assert.deepEqual(query.sort(), Object.keys(vendoredRequests()["GET /v1/avatars"].schema.properties).sort());
+  assert.throws(() => accessSync(path.join(ROOT, "scripts", "avatars-request-bodies.json")));
 });
