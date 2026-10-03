@@ -1060,6 +1060,120 @@
     ],
     "type": "object"
   },
+  "talking_loop_create": {
+    "additionalProperties": false,
+    "description": "POST /v1/avatars/:avatar_id/talking_loops (create): the uploaded talking loop plus its voice-clone job. With clone_voice true the video's voice is cloned and becomes the avatar's primary_voice once the job finishes; off by default.",
+    "properties": {
+      "aspect_ratio": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "avatar_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "avatar_look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "avatar_talking_loop_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "kind": {
+        "enum": [
+          "generated",
+          "uploaded"
+        ]
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "made_from_talking_avatar_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "enum": [
+          "ready"
+        ]
+      },
+      "thumbnail_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "user_job_ids": {
+        "items": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "voice_clone_message": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "voice_clone_status": {
+        "enum": [
+          "pending",
+          "skipped",
+          "not_requested",
+          "not_applicable"
+        ]
+      }
+    },
+    "required": [
+      "avatar_talking_loop_id",
+      "name",
+      "kind",
+      "status",
+      "url",
+      "thumbnail_url",
+      "duration",
+      "avatar_id",
+      "avatar_look_id",
+      "made_from_talking_avatar_id",
+      "latest_generated_video_url",
+      "aspect_ratio",
+      "user_job_ids",
+      "voice_clone_status",
+      "voice_clone_message"
+    ],
+    "type": "object"
+  },
   "title": "Avatars API",
   "x-generated-by": "bin/rails vidsheet_schema:generate"
 }
