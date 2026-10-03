@@ -7,7 +7,6 @@ __pycache__/
 
 # Local-only tooling (not shipped)
 .claude/
-CLAUDE.md
 graphify-out/
 src/graphify-out/
 
