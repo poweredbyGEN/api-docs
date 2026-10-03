@@ -7,8 +7,11 @@ Public docs for the GEN API and hosted MCP. Page style lives in `DOCS_STANDARD.m
 gen-backend-v2 owns the API contracts. These files are generated from it, never hand-edited:
 
 - `public/openapi.yaml` and `public/.well-known/openapi.yaml`
-- `public/llms.txt` and `public/llms-full.txt`
 - the vendored copies in `scripts/backend/*`
+
+Agent discovery is canonical at `https://gen.pro/llms.txt`. api.gen.pro does not publish its own
+`llms.txt`; the retired `/llms.txt` and `/llms-full.txt` paths 301 to the canonical file at the
+`gen-api-docs-router` Cloudflare Worker, and api.gen.pro keeps `openapi.yaml` for developers.
 
 `scripts/sync-from-backend.mjs` writes them (the OpenAPI `paths:` body comes from
 `scripts/sync_mcp_surface.py`). Text outside the `gen:<name>:start` / `gen:<name>:end` markers

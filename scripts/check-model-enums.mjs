@@ -46,8 +46,6 @@ const REJECTED = ["gemini_image", "gemini_pro_image", "veo_3", "sora_2", "kling_
 
 const ALL = [...Object.keys(models), ...Object.keys(ROUTES)];
 const SURFACES = {
-  "public/llms.txt": ALL,
-  "public/llms-full.txt": ALL,
   "src/content/docs/reference/generation-types.mdx": ALL,
   "src/content/docs/reference/cards/speech-from-text.mdx": ["speech_from_text"],
   "src/content/docs/reference/cards/lipsync.mdx": ["lipsync"],

@@ -5,10 +5,9 @@ only half a change unless the docs move with it.
 The platform list the API validates against is served by
 https://python.gen.pro/schedule/platforms (the same endpoint the docs publish as
 `GET /v1/schedule/platforms`). Every value it serves must have a row in the
-platform table of the publishing page and of llms-full.txt, and must appear in
-the publish platform enum of both OpenAPI copies. The check also keeps the
-retired MCP tool names off the two doc surfaces and the stale "Currently TikTok"
-claim out of the site.
+platform table of the publishing page, and must appear in the publish platform
+enum of both OpenAPI copies. The check also keeps the retired MCP tool names off
+the doc surfaces and the stale "Currently TikTok" claim out of the site.
 
 The MCP half of the same rule lives in gen-mcp-server .woodpecker/ci.yml, which
 compares the vendored MCP enum with a fresh read of that endpoint; this is the
@@ -34,10 +33,9 @@ from pathlib import Path
 
 LIVE_PLATFORMS_URL = "https://python.gen.pro/schedule/platforms"
 
-# The doc surfaces that must carry one table row per served platform.
+# The doc surface that must carry one table row per served platform.
 PLATFORM_TABLE_FILES = (
     "src/content/docs/reference/publishing.mdx",
-    "public/llms-full.txt",
 )
 # Both published copies of the spec; they are edited by different tooling, so
 # each is checked on its own.

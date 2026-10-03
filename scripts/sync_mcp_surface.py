@@ -3,13 +3,11 @@
 
 MCP is GEN's public contract, so `public/openapi.yaml` documents exactly the
 backend routes an MCP tool calls: nothing more, nothing less. This script owns
-four generated regions:
+these generated regions in both OpenAPI copies:
 
   public/openapi.yaml          the whole `paths:` body, between the
   public/.well-known/openapi.yaml
                                `gen:mcp-surface-paths` markers
-  public/llms.txt              the endpoint list, between the
-  public/llms-full.txt         `gen:mcp-surface-endpoints` markers
   public/openapi.yaml          the shared per-backend error envelopes, between
   public/.well-known/openapi.yaml
                                the `gen:error-envelope-schemas` and
@@ -80,7 +78,6 @@ CONTRACT_FILE = os.path.join(ROOT, "scripts", "backend", "public-contract.json")
 AVATARS_SCHEMA_FILE = os.path.join(ROOT, "scripts", "backend", "avatars-api-schema.json")
 OVERRIDES_FILE = os.path.join(ROOT, "scripts", "mcp-path-params.json")
 OPENAPI_FILES = ["public/openapi.yaml", "public/.well-known/openapi.yaml"]
-LLMS_FILES = ["public/llms.txt", "public/llms-full.txt"]
 METHODS = ("get", "post", "put", "patch", "delete", "head", "options")
 WRITE_METHODS = ("POST", "PUT", "PATCH")
 # Statuses that carry no response body by definition, so a documented success at
@@ -89,7 +86,6 @@ NO_CONTENT_STATUSES = (204, 205)
 
 PATHS_START = "gen:mcp-surface-paths:start"
 PATHS_END = "gen:mcp-surface-paths:end"
-ENDPOINTS_TAG = "mcp-surface-endpoints"
 
 # ---- servers ------------------------------------------------------------------
 #
@@ -1365,27 +1361,6 @@ def render_paths(surface, seed, contract, schemas=None):
     return body, meta
 
 
-def render_endpoints(surface, verbose):
-    tools = {}
-    for entry in surface:
-        tools.setdefault(entry["tag"], []).append(entry)
-    lines = []
-    for tag in sorted(tools):
-        lines.append(f"**{tag}**")
-        lines.append("")
-        for entry in sorted(tools[tag], key=lambda item: (item["path"], METHOD_ORDER.index(item["method"]))):
-            if verbose:
-                lines.append(
-                    f"- `{entry['method']} /v1{entry['path']}` — MCP `{entry['mcp_tool']}` / `{entry['mcp_branch']}`"
-                )
-            else:
-                lines.append(f"- `{entry['method']} /v1{entry['path']}`")
-        lines.append("")
-    while lines and lines[-1] == "":
-        lines.pop()
-    return lines
-
-
 # ---- file plumbing ------------------------------------------------------------
 
 
@@ -1417,19 +1392,6 @@ def render_paths_file(text, body):
         "  # gen:mcp-surface-paths:end",
     ]
     return "\n".join([*head, *block, *tail])
-
-
-def render_endpoints_file(text, body):
-    start = next((i for i, line in enumerate(text.split("\n")) if f"gen:{ENDPOINTS_TAG}:start" in line), -1)
-    lines = text.split("\n")
-    if start < 0:
-        raise ValueError(f"marker gen:{ENDPOINTS_TAG}:start not found")
-    end = next(i for i, line in enumerate(lines) if i > start and f"gen:{ENDPOINTS_TAG}:end" in line)
-    return "\n".join(
-        lines[: start + 1]
-        + ["", *body, ""]
-        + lines[end:]
-    )
 
 
 def render_marker_region(text, start_marker, end_marker, body, anchor):
@@ -1511,9 +1473,6 @@ def render_all(surface, seed, contract, schemas=None):
     outputs = {}
     for relative in OPENAPI_FILES:
         outputs[relative] = render_error_components(render_paths_file(read_file(os.path.join(ROOT, relative)), body))
-    for relative in LLMS_FILES:
-        verbose = relative.endswith("llms-full.txt")
-        outputs[relative] = render_endpoints_file(read_file(os.path.join(ROOT, relative)), render_endpoints(surface, verbose))
     return outputs, meta
 
 

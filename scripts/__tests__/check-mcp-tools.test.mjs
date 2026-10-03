@@ -96,7 +96,7 @@ test("case 4: a stale tool count fails, the current count passes", () => {
   assert.equal(current.status, 0, current.stderr);
 });
 
-test("case 5: the real llms.txt, llms-full.txt and guides/mcp.mdx match the snapshot", () => {
+test("case 5: the real MCP-facing pages match the snapshot", () => {
   const result = spawnSync(process.execPath, [CHECKER], { cwd: ROOT, encoding: "utf8" });
   assert.notEqual(result.status, null, `checker did not run: ${result.error?.message ?? result.stderr}`);
   assert.equal(result.status, 0, result.stderr);

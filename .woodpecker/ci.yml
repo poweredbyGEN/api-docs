@@ -8,22 +8,25 @@
 # model-enums (npm test): every documented generation type and model is one
 #   Rails accepts, derived from the vendored scripts/backend/user-job-enums.json,
 #   plus the MDX table check.
+# llms-canonical (npm test): agent discovery stays canonical at
+#   https://gen.pro/llms.txt — no api.gen.pro duplicate and no site-local link,
+#   because the old paths 301 to the canonical file at the edge worker.
 # enums-freshness (GEN-6697): that vendored copy is byte-identical to
 #   gen-backend-v2 main on git.gen.pro, read with the org secret
 #   gen_gitea_read_token (a Gitea read token; gen_backend_v2_read_token is a
 #   GitHub PAT, which Gitea answers with 401). A missing secret or fetch
 #   failure is red, never a skip.
-# backend-drift: every generated region of the public docs (the OpenAPI copies,
-#   llms.txt, llms-full.txt and the card reference pages) is exactly what
+# backend-drift: every generated region of the public docs (the OpenAPI copies
+#   and the card reference pages) is exactly what
 #   scripts/sync-from-backend.mjs renders from the vendored gen-backend-v2 and
 #   gen-mcp-server artifacts, so a backend change cannot land without the docs
 #   moving with it. Offline and stdlib-only: it reads scripts/backend/, which is
 #   refreshed by the same script with --backend. Hand-written prose outside a
 #   gen:<name> marker pair is not compared, so it stays free to edit by hand.
 # publish-platforms (GEN-6715, GEN-7755): every platform the live publishing
-#   rules endpoint serves has a row in the publishing page and llms-full.txt and
-#   a value in the publish platform enum of both OpenAPI copies, and no doc
-#   surface still names a retired publish tool. Stdlib-only Python, no install;
+#   rules endpoint serves has a row in the publishing page and a value in the
+#   publish platform enum of both OpenAPI copies, and no doc surface still names
+#   a retired publish tool. Stdlib-only Python, no install;
 #   a fetch failure is red, never a skip. The MCP half of the same rule is in
 #   gen-mcp-server .woodpecker/ci.yml.
 # mcp-tools (GEN-6919): every gen_* name in the MCP-facing docs is served by
@@ -68,12 +71,11 @@ steps:
     commands:
       - python3 scripts/check_publish_platforms.py
   # mcp-surface: public/openapi.yaml documents exactly the backend routes an MCP
-  #   tool calls. The surface, the paths region of both OpenAPI copies and the
-  #   llms endpoint lists are regenerated from scripts/mcp-surface.json and the
-  #   vendored contracts; the step is red on any drift, on a write without a
-  #   request body, on an operation without a 2xx response schema, or on a
-  #   growth of x-schema-status: missing past scripts/openapi-missing-baseline.json.
-  #   Stdlib-only Python, no install.
+  #   tool calls. The surface, the paths region of both OpenAPI copies are
+  #   regenerated from scripts/mcp-surface.json and the vendored contracts; the
+  #   step is red on any drift, on a write without a request body, on an operation
+  #   without a 2xx response schema, or on a growth of x-schema-status: missing
+  #   past scripts/openapi-missing-baseline.json. Stdlib-only Python, no install.
   mcp-surface:
     image: python:3.12-slim
     commands:

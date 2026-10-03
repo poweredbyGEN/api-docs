@@ -13,9 +13,9 @@
 //   5. a banned product term (GEN-6897) fails.
 //
 // Usage: node scripts/check-mcp-tools.mjs [--snapshot <file>] [<doc> ...]
-// Default docs: public/llms.txt, public/llms-full.txt and the MCP-facing pages
-// under src/content/docs (guides/mcp.mdx, guides/vidsheet-actions.mdx,
-// guides/content-ideas.mdx, reference/publishing.mdx, reference/watchlists.mdx).
+// Default docs: the MCP-facing pages under src/content/docs (guides/mcp.mdx,
+// guides/vidsheet-actions.mdx, guides/content-ideas.mdx, reference/publishing.mdx,
+// reference/watchlists.mdx).
 // Pass paths to check others; the retired-name migration table
 // (src/content/docs/changelog/2026-09-22-mcp-catalog-collapse.mdx) is
 // deliberately not a default because it exists to list retired names.
@@ -27,8 +27,6 @@ import path from "node:path";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
 const DEFAULT_DOCS = [
-  "public/llms.txt",
-  "public/llms-full.txt",
   "src/content/docs/guides/mcp.mdx",
   "src/content/docs/guides/vidsheet-actions.mdx",
   "src/content/docs/guides/content-ideas.mdx",

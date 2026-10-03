@@ -23,7 +23,6 @@ PUBLISHING_MDX = REPO / "src/content/docs/reference/publishing.mdx"
 SIX_PLATFORMS = ["tiktok", "instagram", "facebook", "youtube", "x", "linkedin"]
 MISSING_PLATFORM_PATHS = (
     "src/content/docs/reference/publishing.mdx",
-    "public/llms-full.txt",
     "public/openapi.yaml",
     "public/.well-known/openapi.yaml",
 )
@@ -76,14 +75,14 @@ def test_seventh_platform_reports_every_missing_place(tmp_path):
 
 def test_retired_tool_name_outside_the_changelog_is_red(tmp_path):
     root = repo_copy(tmp_path / "tree")
-    llms_txt = root / "public/llms.txt"
-    llms_txt.write_text(
-        llms_txt.read_text(encoding="utf-8") + "\nUse `gen_get_social_connect_url` to connect an account.\n",
+    doc = root / "src/content/docs/reference/publishing.mdx"
+    doc.write_text(
+        doc.read_text(encoding="utf-8") + "\nUse `gen_get_social_connect_url` to connect an account.\n",
         encoding="utf-8",
     )
     result = run_check(root, tmp_path, SIX_PLATFORMS)
     assert result.returncode == 1
-    named = [line for line in output_of(result).splitlines() if "public/llms.txt" in line and "gen_get_social_connect_url" in line]
+    named = [line for line in output_of(result).splitlines() if "publishing.mdx" in line and "gen_get_social_connect_url" in line]
     assert named, output_of(result)
 
 

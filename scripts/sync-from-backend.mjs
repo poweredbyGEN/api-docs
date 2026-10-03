@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Regenerates the backend-derived parts of the public docs (public/openapi.yaml,
-// public/.well-known/openapi.yaml, public/llms.txt, public/llms-full.txt and the
-// card reference pages) from the gen-backend-v2 artifacts that define the model,
-// creation-card and Vidsheet contracts. Every generated region is delimited by a
+// public/.well-known/openapi.yaml and the card reference pages) from the
+// gen-backend-v2 artifacts that define the model, creation-card and Vidsheet
+// contracts. Every generated region is delimited by a
 // `gen:<name>:start` / `gen:<name>:end` marker pair, so hand-written prose outside
 // the markers survives a regeneration untouched.
 //
 // The `paths:` body of both OpenAPI copies is owned by scripts/sync_mcp_surface.py:
 // it documents exactly the routes an MCP tool calls. This script renders the
-// `gen:backend-creation-card-schemas` region in components and the markdown
-// regions in llms.txt / llms-full.txt.
+// `gen:backend-creation-card-schemas` region in components and the
+// `gen:backend-model-enums` regions in the card reference pages.
 //
 // Vendor (default): copy the upstream artifacts into scripts/backend/, then
 // regenerate. Sources, all relative to the --backend directory:
@@ -83,12 +83,6 @@ const MODEL_TYPES = {
     "seedance_2_5_video_generation",
   ],
 };
-
-const MIGRATION_GUIDE = "https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/";
-// The worked example in the generated retired-name note. Pinned to the mapping
-// the compatibility shim serves; asserted against the vendored snapshots so a
-// rename upstream fails this script instead of publishing a stale example.
-const RETIRED_EXAMPLE = { from: "gen_media_action", to: "gen_generate" };
 
 function parseArgs(argv) {
   const options = { check: false, backend: null, mcpRepo: DEFAULT_MCP_REPO };
@@ -241,28 +235,9 @@ function sourcePath(dir, rel) {
 const readSource = (dir, rel) => readFileSync(sourcePath(dir, rel), "utf8");
 const readSourceJson = (dir, rel) => JSON.parse(readSource(dir, rel));
 
-function escapeCell(value) {
-  return String(value).replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
-}
-
 function scrub(text) {
   // Public wording: no ticket ids leave this generator.
   return String(text).replace(/\bGEN-\d+\b/g, "").replace(/\s{2,}/g, " ").trim();
-}
-
-function formatNumbers(values) {
-  const nums = values.filter((v) => typeof v === "number").sort((a, b) => a - b);
-  if (!nums.length) return "—";
-  const out = [];
-  let i = 0;
-  while (i < nums.length) {
-    let j = i;
-    while (j + 1 < nums.length && nums[j + 1] === nums[j] + 1) j += 1;
-    if (j - i + 1 >= 4) out.push(`${nums[i]}–${nums[j]}`);
-    else for (let k = i; k <= j; k += 1) out.push(String(nums[k]));
-    i = j + 1;
-  }
-  return out.join(", ");
 }
 
 function jobEnum(userJobs, job, field = "model") {
@@ -459,86 +434,11 @@ function openapiSchemaRegion(catalog) {
   return lines;
 }
 
-function markdownMatrix(catalog, { heading }) {
-  const lines = [];
-  if (heading) lines.push(heading, "");
-  lines.push(
-    "The creation-card capability matrix: the model ids each creation card accepts, and the ratio, duration and outputResolution values the API runs. A generation outside those values is refused.",
-    "",
-    "| Card | Model | Label | Ratio | Duration (s) | Output resolution |",
-    "|---|---|---|---|---|---|",
-  );
-  for (const item of catalog.models) {
-    lines.push(
-      `| \`${escapeCell(item.card)}\` | \`${escapeCell(item.model)}\` | ${escapeCell(item.label)} | ` +
-        `${item.ratio.map((v) => `\`${escapeCell(v)}\``).join(", ") || "—"} | ` +
-        `${formatNumbers(item.duration)} | ` +
-        `${item.outputResolution.map((v) => `\`${escapeCell(v)}\``).join(", ") || "—"} |`,
-    );
-  }
-  const songs = Object.entries(catalog.matrix.song_max_duration_seconds ?? {});
-  if (songs.length) {
-    lines.push(
-      "",
-      "Song length caps (seconds): " + songs.map(([model, seconds]) => `\`${model}\` ${seconds}`).join("; ") + ".",
-    );
-  }
-  return lines;
-}
-
 function markdownModelEnums(userJobs, types) {
   const lines = ["Model ids the API accepts, read from the Rails job enums:", ""];
   for (const type of types) {
     const values = [...new Set((MODEL_TYPES[type] ?? []).flatMap((job) => jobEnum(userJobs, job)))];
     lines.push(`- \`${type}\`: ${values.map((v) => `\`${v}\``).join(", ")}`);
-  }
-  return lines;
-}
-
-function markdownMcpTools(mcpTools) {
-  const tools = mcpTools.tools ?? [];
-  const lines = [
-    `The hosted server serves ${tools.length} tools (\`gen_discover\` plus one \`gen_<noun>_action\` per domain, and the \`gen_ask\`, \`gen_analyze\`, \`gen_avatars\` and \`gen_generate\` tools):`,
-    "",
-    "| Tool | Purpose |",
-    "|---|---|",
-  ];
-  for (const tool of tools) {
-    lines.push(`| \`${escapeCell(tool.name)}\` | ${escapeCell(tool.summary)} |`);
-  }
-  lines.push(
-    "",
-    `Retired \`gen_*\` names stay callable as hidden compatibility aliases (for example \`${RETIRED_EXAMPLE.from}\` → \`${RETIRED_EXAMPLE.to}\`); the full map is ${MIGRATION_GUIDE}`,
-  );
-  return lines;
-}
-
-function markdownVidsheetActions(summary, { operations }) {
-  const lines = [
-    `\`POST ${summary.path}\` takes one envelope: \`actions[]\` of ${summary.min_items}–${summary.max_items ?? "N"} typed actions.`,
-    "",
-    "| `action` | `target.kind` | Required besides `action` and `target` |",
-    "|---|---|---|",
-  ];
-  for (const row of summary.rows) {
-    const extras = row.extras.map((field) => `\`${escapeCell(field)}\``).join(", ") || "—";
-    lines.push(`| \`${escapeCell(row.action)}\` | \`${escapeCell(row.kind)}\` | ${extras} |`);
-  }
-  lines.push(
-    "",
-    `Read the current envelope with \`GET ${summary.discovery_path}\` (MCP: \`gen_discover\` domain=\`vidsheet\` view=\`actions\`).`,
-  );
-  if (summary.idempotency_description) lines.push(`\`Idempotency-Key\`: ${scrub(summary.idempotency_description)}`);
-  if (summary.generation_lifecycle_path) {
-    lines.push(
-      `Existing-job lifecycle: \`POST ${summary.generation_lifecycle_path}\` (MCP: \`gen_vidsheet_action\` ops \`stop_generation\` and \`continue_generation\`).`,
-    );
-  }
-  if (operations && summary.operations.length) {
-    lines.push("", "Vidsheet operation history (undo and redo):", "", "| Method | Path | `operationId` |", "|---|---|---|");
-    for (const row of summary.operations) {
-      lines.push(`| ${row.method} | \`${escapeCell(row.route)}\` | \`${escapeCell(row.operationId)}\` |`);
-    }
   }
   return lines;
 }
@@ -842,35 +742,11 @@ function run() {
   if ((mcpTools.tools ?? []).length < 10) throw new Error("scripts/backend/mcp-tools.json lists too few served tools");
 
   const openapiSchemas = openapiSchemaRegion(catalog);
-  const mcpRegion = ["backend-mcp-tools", markdownMcpTools(mcpTools)];
-  const actionsRegion = ["backend-vidsheet-actions", markdownVidsheetActions(contract.actions, { operations: false })];
   const openapiRegions = [["backend-creation-card-schemas", openapiSchemas]];
 
   const targets = [
     { file: "public/openapi.yaml", regions: openapiRegions },
     { file: "public/.well-known/openapi.yaml", regions: openapiRegions },
-    {
-      file: "public/llms.txt",
-      regions: [
-        [
-          "backend-creation-card-matrix",
-          markdownMatrix(catalog, { heading: "**Creation-card capability matrix (generated from the API).**" }),
-        ],
-        mcpRegion,
-        actionsRegion,
-      ],
-    },
-    {
-      file: "public/llms-full.txt",
-      regions: [
-        [
-          "backend-creation-card-matrix",
-          markdownMatrix(catalog, { heading: "## Creation-card capability matrix (generated from the API)" }),
-        ],
-        mcpRegion,
-        ["backend-vidsheet-actions", markdownVidsheetActions(contract.actions, { operations: true })],
-      ],
-    },
     {
       file: "src/content/docs/reference/generation-types.mdx",
       regions: [["backend-model-enums", markdownModelEnums(userJobs, Object.keys(MODEL_TYPES))]],

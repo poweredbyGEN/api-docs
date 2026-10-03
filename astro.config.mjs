@@ -30,15 +30,11 @@ export default defineConfig({
 				},
 				{
 					tag: 'link',
-					attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'LLM-readable API reference' },
-				},
-				{
-					tag: 'link',
-					attrs: { rel: 'alternate', type: 'text/plain', href: '/llms-full.txt', title: 'LLM-readable full API reference' },
+					attrs: { rel: 'alternate', type: 'text/plain', href: 'https://gen.pro/llms.txt', title: 'Agent discovery (canonical)' },
 				},
 				{
 					tag: 'meta',
-					attrs: { name: 'ai-content-declaration', content: 'This site provides API documentation for AI agents. See /llms.txt for machine-readable reference.' },
+					attrs: { name: 'ai-content-declaration', content: 'API documentation for developers. Agent discovery is canonical at https://gen.pro/llms.txt.' },
 				},
 			],
 			customCss: ['./src/styles/custom.css'],

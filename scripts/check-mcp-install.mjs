@@ -1,7 +1,7 @@
 // GEN-7747 (d)+(e), GEN-7128: the MCP install surface is OAuth-first.
 // Connectors add https://mcp.gen.pro by URL and sign in; the personal access
 // token is the headless/CI path, not the default config. This check fails when
-// guides/mcp.mdx or public/llms.txt line 10 drifts back to PAT-first. Run: npm test
+// guides/mcp.mdx drifts back to PAT-first. Run: npm test
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,7 +10,6 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (rel) => readFileSync(join(root, rel), "utf8");
 
 const MCP_FILE = "src/content/docs/guides/mcp.mdx";
-const LLMS_FILE = "public/llms.txt";
 const INSTALL_END = "## How the MCP fits with the GEN agent";
 const HOSTED_URL = "https://mcp.gen.pro";
 const CLAUDE_ADD = "claude mcp add --transport http gen https://mcp.gen.pro";
@@ -84,19 +83,7 @@ if (changelogAt === -1) {
   fail(4, `${MCP_FILE}:${changelogAt + 1}: the catalog-collapse link is not tied to the retired tool names`);
 }
 
-// 5. llms.txt line 10 covers both auth paths.
-const line10 = read(LLMS_FILE).split("\n")[9] ?? "";
-for (const [re, what] of [
-  [/oauth|sign in/i, "OAuth sign-in"],
-  [/connector/i, "connectors"],
-  [/header/i, "header clients"],
-  [/\bpat\b|personal access token/i, "the PAT"],
-  [/https:\/\/mcp\.gen\.pro/, "the hosted URL"],
-]) {
-  if (!re.test(line10)) fail(5, `${LLMS_FILE}:10: does not name ${what} -> ${line10.slice(0, 120)}`);
-}
-
-// 6. npm test runs this check.
+// 5. npm test runs this check.
 let testScript = null;
 try {
   testScript = JSON.parse(read("package.json")).scripts?.test ?? "";
@@ -104,7 +91,7 @@ try {
   fail(6, `package.json: unreadable (${error.message})`);
 }
 if (testScript !== null && !testScript.includes("check-mcp-install.mjs")) {
-  fail(6, `package.json: "test" does not run scripts/check-mcp-install.mjs -> ${testScript}`);
+  fail(5, `package.json: "test" does not run scripts/check-mcp-install.mjs -> ${testScript}`);
 }
 
 if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
