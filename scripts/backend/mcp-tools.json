@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "da18ecd",
+  "revision": "86fbb34",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -61,6 +61,11 @@
       "name": "gen_publish_action",
       "title": "Schedule, publish, or remove posts",
       "summary": "Step 5 (Export & Publish): Ship posts to social platforms — schedule, publish, update, or remove posts."
+    },
+    {
+      "name": "gen_sign_in_link",
+      "title": "Create a GEN sign-in link",
+      "summary": "Create a one-time GEN sign-in link for the caller's own account so its owner can open GEN in a browser."
     },
     {
       "name": "gen_task_action",
