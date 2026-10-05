@@ -68,6 +68,48 @@ workflow above. Job lifecycle remains separate: the `gen_vidsheet_action` op
 `stop_generation` stops a job, and op `continue_generation` continues an owned
 stopped job using credits and a stable retry key. The retired `gen_stop_generation` and `gen_continue_generation` names are hidden compatibility aliases of `gen_vidsheet_action` until 2026-10-22. See [lifecycle and retry details](/guides/vidsheet-actions/#readback-lifecycle-and-older-integrations).
 
+## Queue, steer and stop
+
+A message sent into a conversation that already has a run in flight is queued behind it rather than rejected. `gen_ask` op `ask` and op `chat` take `mode` — `queue` (the default on a continuation) or `steer` — and `client_message_id`, an idempotency key that makes a retry reuse the queued row instead of adding another. `mode` does nothing on a first message, which starts a run as before.
+
+```json
+{"agent_id":"YOUR_AGENT_ID","actions":[{"action":"ask","question":"what changed in the last run?","conversation_id":"CONVERSATION_ID","mode":"queue","client_message_id":"ask-1"}]}
+```
+
+A queued reply carries no `run_id`. It answers `queued: true` with the message's `pending_id` and its `position`, and `wait` (default true) waits for that message to run. One conversation holds 10 queued messages; the next is refused with `queue_full`.
+
+Steer the live run with new text, or promote a queued message into it:
+
+```json
+{"agent_id":"YOUR_AGENT_ID","actions":[{"action":"steer","conversation_id":"CONVERSATION_ID","message":"use the shorter hook"}]}
+```
+
+```json
+{"agent_id":"YOUR_AGENT_ID","actions":[{"action":"steer","conversation_id":"CONVERSATION_ID","pending_id":"PENDING_ID"}]}
+```
+
+Take a queued message back before it runs:
+
+```json
+{"agent_id":"YOUR_AGENT_ID","actions":[{"action":"cancel_pending","conversation_id":"CONVERSATION_ID","pending_id":"PENDING_ID"}]}
+```
+
+Stop a run. The reply names the run and returns every message it still had queued:
+
+```json
+{"agent_id":"YOUR_AGENT_ID","actions":[{"action":"stop","run_id":"RUN_ID"}]}
+```
+
+Read the queue and the thread with `gen_discover`:
+
+| To read | Arguments |
+|---|---|
+| Conversations, newest first | `{"domain":"platform","view":"conversations","limit":20,"after":"CURSOR"}` |
+| One conversation's messages | `{"domain":"platform","view":"conversation","conversation_id":"CONVERSATION_ID","limit":50,"before":"MESSAGE_ID"}` |
+| The queue behind a live run | `{"domain":"platform","view":"conversation_pending","conversation_id":"CONVERSATION_ID"}` |
+
+`platform.conversations` replies with each row's `has_active_run` and a `next_cursor` that pages with `after`; `platform.conversation` pages older messages with `before`.
+
 ## Sessions and deploys
 
 `initialize` returns an `Mcp-Session-Id` bound to the running deploy (`<sha12>.<nonce>.<sig>`).

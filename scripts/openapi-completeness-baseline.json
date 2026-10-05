@@ -1,9 +1,9 @@
 {
-  "description": 115,
+  "description": 104,
   "request_schema": 7,
-  "request_example": 94,
-  "response_schema": 30,
-  "response_example": 178,
+  "request_example": 93,
+  "response_schema": 14,
+  "response_example": 160,
   "error_responses": 0,
-  "error_codes": 181
+  "error_codes": 180
 }

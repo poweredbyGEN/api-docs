@@ -3978,6 +3978,18 @@
       "gen-agentic:src/gen/server.py#set_idea_status"
     ]
   },
+  "DELETE /agent/conversations/{id}/pending/{pending_id}": {
+    "noContent": true,
+    "source": [
+      "gen-agentic:src/gen/server.py#delete_pending_message"
+    ]
+  },
+  "POST /agent/runs/{run_id}/stop": {
+    "noRequestBody": true,
+    "source": [
+      "gen-agentic:src/gen/server.py#stop_run"
+    ]
+  },
   "DELETE /agents/{agent_id}/core": {
     "response": {
       "type": "object",

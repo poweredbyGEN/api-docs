@@ -19,6 +19,14 @@
 //                     a `code`/`error_code` property with an enum, or whose inline
 //                     example carries a `code`/`error_code`
 //
+// A write whose controller reads no body, and a success the backend answers with
+// no body (`head :no_content`), have nothing to document in that dimension — and
+// no shape can be invented for them without lying about the wire. Those two are
+// declared in scripts/operation-schemas.json (`noRequestBody` / `noContent`),
+// which sync_mcp_surface.py already reads to render the operation. A declaration
+// satisfies the dimension it names; the entry still owes a `source`, so a
+// declaration is a backend fact rather than a way to skip the check.
+//
 // Stdlib-only Node: public/openapi.yaml is YAML and the Node stdlib ships no
 // YAML parser, so this file carries a minimal YAML reader for the subset the
 // spec uses (block mappings, block sequences, single-line flow sequences,
@@ -39,6 +47,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
 const DEFAULT_SPEC = path.join(ROOT, "public", "openapi.yaml");
 const DEFAULT_BASELINE = path.join(ROOT, "scripts", "openapi-completeness-baseline.json");
+const DEFAULT_SCHEMAS = path.join(ROOT, "scripts", "operation-schemas.json");
 
 export const DIMENSIONS = [
   "description",
@@ -445,7 +454,7 @@ function operationHasErrorCodes(spec, op) {
   return false;
 }
 
-export function scoreOperation(spec, method, op) {
+export function scoreOperation(spec, method, op, declaration = {}) {
   const read = isRead(method);
   const score = {
     description: !!op.description && String(op.description).trim().length > 0,
@@ -457,7 +466,7 @@ export function scoreOperation(spec, method, op) {
     error_codes: false,
   };
   const requestBody = op.requestBody;
-  if (read) {
+  if (read || declaration.noRequestBody) {
     score.request_schema = true;
     score.request_example = true;
   } else if (requestBody && typeof requestBody === "object") {
@@ -475,11 +484,17 @@ export function scoreOperation(spec, method, op) {
     }
     if (/^[45]/.test(c)) score.error_responses = true;
   }
+  if (declaration.noContent) {
+    // A success the backend answers with no body has no schema and no example to
+    // copy; the declaration is the whole contract.
+    score.response_schema = true;
+    score.response_example = true;
+  }
   score.error_codes = operationHasErrorCodes(spec, op);
   return score;
 }
 
-export function scoreSpec(spec) {
+export function scoreSpec(spec, declarations = {}) {
   const counts = Object.fromEntries(DIMENSIONS.map((d) => [d, 0]));
   const missing = Object.fromEntries(DIMENSIONS.map((d) => [d, []]));
   for (const [route, methods] of Object.entries(spec.paths || {})) {
@@ -488,7 +503,7 @@ export function scoreSpec(spec) {
       if (!METHODS.has(String(method).toLowerCase())) continue;
       if (!op || typeof op !== "object") continue;
       const key = `${String(method).toUpperCase()} ${route}`;
-      const score = scoreOperation(spec, method, op);
+      const score = scoreOperation(spec, method, op, declarations[key]);
       for (const dim of DIMENSIONS) {
         if (score[dim]) counts[dim] += 1;
         else missing[dim].push(key);
@@ -503,6 +518,17 @@ export function scoreSpec(spec) {
 function readBaseline(path) {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8"));
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+// `{"METHOD /path": {noRequestBody?, noContent?}}` — the bodyless declarations
+// sync_mcp_surface.py renders from. Absent file: no declarations, no exemptions.
+function readDeclarations(file = DEFAULT_SCHEMAS) {
+  try {
+    const parsed = JSON.parse(readFileSync(file, "utf8"));
     return parsed && typeof parsed === "object" ? parsed : {};
   } catch {
     return {};
@@ -580,7 +606,7 @@ function main(argv) {
   }
 
   const spec = parseYaml(readFileSync(options.file, "utf8"));
-  const { counts, missing } = scoreSpec(spec);
+  const { counts, missing } = scoreSpec(spec, readDeclarations());
   const misses = missCounts(missing);
   const baseline = readBaseline(options.baseline);
 
