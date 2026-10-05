@@ -48,7 +48,7 @@ Start an agent run (generate ideas, refine, chat).
 }
 ```
 
-When the conversation already has a run in flight the message is queued behind it and the call answers without a `run_id`:
+When the conversation already has a run in flight the message is queued behind it and the call answers HTTP 202 without a `run_id`:
 
 ```json
 {
