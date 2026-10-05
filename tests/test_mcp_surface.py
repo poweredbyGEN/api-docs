@@ -178,23 +178,23 @@ def test_every_operation_has_a_2xx_schema_or_is_marked_missing():
     assert failures == []
 
 
-def test_avatar_deletes_declare_204_and_render_it():
-    """A vendored avatar DELETE declares the 204 its controller answers, and the render says 204.
+def test_character_deletes_declare_204_and_render_it():
+    """A vendored character DELETE declares the 204 its controller answers, and the render says 204.
 
-    `V1::AvatarsController#destroy` ends in `head :no_content`, so the vendored
-    avatars schema marks the route `noContent`. Without an explicit
-    `responseStatus` the generated operation kept the seeded placeholder 200 and
-    advertised a success the backend never returns. The operation is rendered
-    here from the generators, so dropping the declaration fails this test even
-    while the committed YAML still says 204.
+    `V1::AvatarsController#destroy` (serving /v1/characters) ends in
+    `head :no_content`, so the vendored characters schema marks the route
+    `noContent`. Without an explicit `responseStatus` the generated operation
+    kept the seeded placeholder 200 and advertised a success the backend never
+    returns. The operation is rendered here from the generators, so dropping the
+    declaration fails this test even while the committed YAML still says 204.
     """
     module = load_module()
-    avatars = json.loads((REPO / "scripts" / "backend" / "avatars-api-schema.json").read_text())
-    entries = module.avatar_schema_entries(avatars)
+    characters = json.loads((REPO / "scripts" / "backend" / "characters-api-schema.json").read_text())
+    entries = module.character_schema_entries(characters)
     surface = {f"{method} {path}" for method, path in surface_operations()}
-    avatar_deletes = {key: entry for key, entry in entries.items() if key.startswith("DELETE ") and key in surface}
-    assert avatar_deletes, "the vendored avatars schema carries no DELETE on the MCP surface"
-    for key, entry in avatar_deletes.items():
+    character_deletes = {key: entry for key, entry in entries.items() if key.startswith("DELETE ") and key in surface}
+    assert character_deletes, "the vendored characters schema carries no DELETE on the MCP surface"
+    for key, entry in character_deletes.items():
         assert entry.get("noContent") is True, f"{key}: a DELETE answers with no body"
         assert entry.get("responseStatus") == 204, f"{key}: a DELETE answers 204, got {entry.get('responseStatus')!r}"
 
@@ -205,12 +205,55 @@ def test_avatar_deletes_declare_204_and_render_it():
     body, _ = module.render_paths(json.loads(SURFACE.read_text())["operations"], seed, contract, schemas)
     rendered = parse_paths(module.render_paths_file(OPENAPI.read_text(), body))
     committed = parse_paths(OPENAPI.read_text())
-    for key in avatar_deletes:
+    for key in character_deletes:
         method, path = key.split(" ", 1)
         for label, operations in (("rendered", rendered), ("committed", committed)):
             text = "\n".join(operations[(method, path)])
             assert re.search(r"^        '204':\s*$", text, re.M), f"{key}: {label} without a 204"
             assert not re.search(r"^        '200':\s*$", text, re.M), f"{key}: {label} a 200 the backend never returns"
+
+
+def test_character_routes_replace_the_avatar_routes():
+    """gen_characters is documented under /characters; /avatars is only a named deprecated alias.
+
+    Every /characters response schema the generator declares is a route of the
+    vendored characters schema, the surface carries no /avatars operation and no
+    retired gen_avatars owner, and each /characters operation names the
+    /avatars route that still answers for it.
+    """
+    module = load_module()
+    characters = json.loads((REPO / "scripts" / "backend" / "characters-api-schema.json").read_text())
+    routes = {key.replace(" /v1/", " /", 1) for key in characters["requests"]}
+    assert set(module.CHARACTER_RESPONSES) <= routes, sorted(set(module.CHARACTER_RESPONSES) - routes)
+
+    entries = json.loads(SURFACE.read_text())["operations"]
+    assert not [e for e in entries if e["path"].startswith("/avatars")]
+    assert not [e for e in entries if e["mcp_tool"] == "gen_avatars"]
+    owned = [e for e in entries if e["mcp_tool"] == "gen_characters"]
+    assert owned and all(e["path"].startswith("/characters") for e in owned)
+
+    assert module.deprecated_alias("/characters/{character_id}/talking_characters/{id}") == "/avatars/{avatar_id}/talking_loops/{id}"
+    assert module.deprecated_alias("/agents/{agent_id}/avatars") is None
+    documented = parse_paths(OPENAPI.read_text())
+    for entry in owned:
+        text = "\n".join(documented[(entry["method"], entry["path"])])
+        alias = module.deprecated_alias(entry["path"])
+        assert f"{entry['method']} /v1{alias} is the deprecated name" in text, (entry["method"], entry["path"])
+
+
+def test_gen_characters_branches_resolve_through_the_avatar_handlers():
+    """`_CHARACTER_OPS` maps each gen_characters op onto the gen_avatars handler that runs it."""
+    import ast
+
+    module = load_module()
+    server = ast.parse(
+        "_AVATAR_HANDLERS = {'list': _avatars_list, 'delete_avatar_look': lambda a, p: _avatars_delete(a, p, 'look')}\n"
+        "_CHARACTER_OPS = {'list': 'list', 'delete_look': 'delete_avatar_look', 'ghost': 'no_such_op'}\n"
+    )
+    handlers = module._branch_handlers(server, ast.parse("FAMILIES = []"))
+    assert handlers[("gen_characters", "list")] == ["_avatars_list"]
+    assert handlers[("gen_characters", "delete_look")] == ["_avatars_delete"]
+    assert ("gen_characters", "ghost") not in handlers
 
 
 def test_missing_count_does_not_grow():

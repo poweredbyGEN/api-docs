@@ -43,6 +43,26 @@ All endpoints authenticate with `X-API-Key: <your-PAT>` or `Authorization: Beare
 | PATCH | /v1/agents/:agent_id/avatars/:id | setup |
 | DELETE | /v1/agents/:agent_id/avatars/:id | setup |
 
+## Characters
+
+A character is a person the agent can appear as, with looks and talking characters. `/v1/avatars` is the deprecated name of `/v1/characters` and still works.
+
+| Method | Path | Phase |
+|--------|------|-------|
+| GET | /v1/characters | setup |
+| POST | /v1/characters | setup |
+| GET | /v1/characters/:id | setup |
+| PATCH | /v1/characters/:id | setup |
+| DELETE | /v1/characters/:id | setup |
+| POST | /v1/characters/:id/copy | setup |
+| POST | /v1/characters/:character_id/looks | setup |
+| PATCH | /v1/characters/:character_id/looks/:id | setup |
+| DELETE | /v1/characters/:character_id/looks/:id | setup |
+| POST | /v1/characters/:character_id/talking_characters | setup |
+| GET | /v1/characters/:character_id/talking_characters/:id | setup |
+| PATCH | /v1/characters/:character_id/talking_characters/:id | setup |
+| DELETE | /v1/characters/:character_id/talking_characters/:id | setup |
+
 ## Agent Core (recommended one-PATCH setup)
 
 | Method | Path | Phase |

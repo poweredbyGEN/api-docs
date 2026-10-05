@@ -20,7 +20,8 @@
 //   docs/generated/user-job-enums.json               the model enum each job type accepts
 //   docs/generated/vidsheet-action-schema.json       the Vidsheet action envelope
 //   docs/generated/vidsheet-operations-schema.json   the Vidsheet operation endpoints
-//   docs/generated/avatars-api-schema.json           the /avatars response and request schemas
+//   docs/generated/avatars-api-schema.json           the deprecated /avatars response and request schemas
+//   docs/generated/characters-api-schema.json        the /characters response and request schemas
 // The MCP tool surface is gen-mcp-server's served registry, vendored to
 // scripts/backend/mcp-tools.json from
 // src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv on origin/main.
@@ -58,6 +59,7 @@ const UPSTREAM = {
   actionSchema: "docs/generated/vidsheet-action-schema.json",
   operationsSchema: "docs/generated/vidsheet-operations-schema.json",
   avatars: "docs/generated/avatars-api-schema.json",
+  characters: "docs/generated/characters-api-schema.json",
 };
 
 // The documented generation types and the Rails job types each one routes to.
@@ -553,8 +555,13 @@ function vendor(backendDir) {
   // Its `requests` (every /v1/avatars route's request params, generated from
   // what the controllers permit) is what scripts/sync_mcp_surface.py renders as
   // those routes' request bodies and query parameters.
-  if (!readSourceJson(backendDir, UPSTREAM.avatars).requests) {
-    throw new Error(`${UPSTREAM.avatars} has no "requests"; regenerate it in gen-backend-v2 (bin/rails vidsheet_schema:generate)`);
+  // Avatars are called characters: /v1/characters serves the same contract under
+  // character names, and its schema is what scripts/sync_mcp_surface.py renders
+  // for the /characters routes. Both files are validated the same way.
+  for (const artifact of [UPSTREAM.avatars, UPSTREAM.characters]) {
+    if (!readSourceJson(backendDir, artifact).requests) {
+      throw new Error(`${artifact} has no "requests"; regenerate it in gen-backend-v2 (bin/rails vidsheet_schema:generate)`);
+    }
   }
   const contract = {
     catalog: buildCatalog(backendDir),
@@ -569,6 +576,7 @@ function vendor(backendDir) {
   // check-enums-freshness.mjs compares this byte copy with the backend.
   copyFileSync(path.join(backendDir, UPSTREAM.userJobs), path.join(VENDOR_DIR, "user-job-enums.json"));
   copyFileSync(path.join(backendDir, UPSTREAM.avatars), path.join(VENDOR_DIR, "avatars-api-schema.json"));
+  copyFileSync(path.join(backendDir, UPSTREAM.characters), path.join(VENDOR_DIR, "characters-api-schema.json"));
   const sha = path.join(backendDir, "SHA");
   if (existsSync(sha)) {
     copyFileSync(sha, path.join(VENDOR_DIR, "SHA"));

@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "75da810",
+  "revision": "62747c8",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -23,14 +23,14 @@
       "summary": "Manage the agent's asset library: analyze any asset_id or file url with kind video/image/audio (quoted, confirmed DW enrichment; documents are refused until DW supports them; cached repeats are…"
     },
     {
-      "name": "gen_avatars",
-      "title": "Manage avatars, looks, and talking loops",
-      "summary": "Avatars: one person each, with looks (images of the person) and talking loops (talking videos of the person with their voice, generated from a look or uploaded)."
-    },
-    {
       "name": "gen_billing_action",
       "title": "Buy credits and manage credit purchases",
       "summary": "Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase)."
+    },
+    {
+      "name": "gen_characters",
+      "title": "Manage characters, looks, and talking characters",
+      "summary": "Characters: one person each, with looks (images of the person) and talking characters (talking videos of the person with their voice, generated from a look or uploaded)."
     },
     {
       "name": "gen_content_action",

@@ -1,0 +1,1835 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "create": {
+    "additionalProperties": false,
+    "description": "POST /v1/characters (create): the detail plus the look, talking character and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the character's primary_voice.",
+    "properties": {
+      "character_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "character_public_id": {
+        "description": "Random public id for URLs; every character endpoint accepts it in place of character_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
+      "cover_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "default_talking_character": {
+        "additionalProperties": false,
+        "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "made_from_talking_character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "talking_character_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "talking_character_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "character_id",
+          "look_id",
+          "made_from_talking_character_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "generating_talking_characters": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A talking character still being generated, before its row exists.",
+          "properties": {
+            "look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "processing"
+              ]
+            },
+            "user_job_id": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "user_job_id",
+            "look_id",
+            "status"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "is_agent_character": {
+        "type": "boolean"
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "look_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "looks": {
+        "items": {
+          "additionalProperties": false,
+          "description": "An character look with the ready talking characters made from it.",
+          "properties": {
+            "from_agent_core": {
+              "type": "boolean"
+            },
+            "look_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "original",
+                "uploaded",
+                "generated"
+              ]
+            },
+            "talking_characters": {
+              "items": {
+                "additionalProperties": false,
+                "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+                "properties": {
+                  "aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "character_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "duration": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "generated",
+                      "uploaded"
+                    ]
+                  },
+                  "latest_generated_video_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "look_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "made_from_talking_character_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ready"
+                    ]
+                  },
+                  "talking_character_id": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "thumbnail_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "talking_character_id",
+                  "name",
+                  "kind",
+                  "status",
+                  "url",
+                  "thumbnail_url",
+                  "duration",
+                  "character_id",
+                  "look_id",
+                  "made_from_talking_character_id",
+                  "latest_generated_video_url",
+                  "aspect_ratio"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "look_id",
+            "name",
+            "origin",
+            "from_agent_core",
+            "url",
+            "thumbnail_url",
+            "talking_characters"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "name": {
+        "type": "string"
+      },
+      "preview_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "primary_voice": {
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "source": {
+        "enum": [
+          "my",
+          "library"
+        ]
+      },
+      "talking_character_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "talking_character_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "updated_at": {
+        "type": "string"
+      },
+      "uploaded_talking_characters": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+          "properties": {
+            "aspect_ratio": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "generated",
+                "uploaded"
+              ]
+            },
+            "latest_generated_video_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "made_from_talking_character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ready"
+              ]
+            },
+            "talking_character_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "talking_character_id",
+            "name",
+            "kind",
+            "status",
+            "url",
+            "thumbnail_url",
+            "duration",
+            "character_id",
+            "look_id",
+            "made_from_talking_character_id",
+            "latest_generated_video_url",
+            "aspect_ratio"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "user_job_ids": {
+        "items": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "voice_clone_message": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "voice_clone_status": {
+        "enum": [
+          "pending",
+          "skipped",
+          "not_requested",
+          "not_applicable"
+        ]
+      },
+      "voice_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "character_id",
+      "character_public_id",
+      "name",
+      "source",
+      "is_agent_character",
+      "cover_url",
+      "preview_url",
+      "latest_generated_video_url",
+      "look_count",
+      "talking_character_count",
+      "primary_voice",
+      "default_talking_character",
+      "updated_at",
+      "looks",
+      "uploaded_talking_characters",
+      "generating_talking_characters",
+      "look_id",
+      "talking_character_id",
+      "voice_id",
+      "user_job_ids",
+      "voice_clone_status",
+      "voice_clone_message"
+    ],
+    "type": "object"
+  },
+  "description": "JSON Schema contract for Characters::Presenter output (GET /v1/characters, GET /v1/characters/:id) and, under requests, the request params of every /v1/characters route (CharacterRequestParams). Generated from app/presenters/characters/presenter.rb and app/controllers/concerns/character_request_params.rb — do not edit by hand; run bin/rails vidsheet_schema:generate.",
+  "detail": {
+    "additionalProperties": false,
+    "description": "GET /v1/characters/:id (show): the summary plus looks and talking characters.",
+    "properties": {
+      "character_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "character_public_id": {
+        "description": "Random public id for URLs; every character endpoint accepts it in place of character_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
+      "cover_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "default_talking_character": {
+        "additionalProperties": false,
+        "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "made_from_talking_character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "talking_character_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "talking_character_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "character_id",
+          "look_id",
+          "made_from_talking_character_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "generating_talking_characters": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A talking character still being generated, before its row exists.",
+          "properties": {
+            "look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "processing"
+              ]
+            },
+            "user_job_id": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "user_job_id",
+            "look_id",
+            "status"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "is_agent_character": {
+        "type": "boolean"
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "look_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "looks": {
+        "items": {
+          "additionalProperties": false,
+          "description": "An character look with the ready talking characters made from it.",
+          "properties": {
+            "from_agent_core": {
+              "type": "boolean"
+            },
+            "look_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "original",
+                "uploaded",
+                "generated"
+              ]
+            },
+            "talking_characters": {
+              "items": {
+                "additionalProperties": false,
+                "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+                "properties": {
+                  "aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "character_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "duration": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "generated",
+                      "uploaded"
+                    ]
+                  },
+                  "latest_generated_video_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "look_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "made_from_talking_character_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ready"
+                    ]
+                  },
+                  "talking_character_id": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "thumbnail_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "talking_character_id",
+                  "name",
+                  "kind",
+                  "status",
+                  "url",
+                  "thumbnail_url",
+                  "duration",
+                  "character_id",
+                  "look_id",
+                  "made_from_talking_character_id",
+                  "latest_generated_video_url",
+                  "aspect_ratio"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "look_id",
+            "name",
+            "origin",
+            "from_agent_core",
+            "url",
+            "thumbnail_url",
+            "talking_characters"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "name": {
+        "type": "string"
+      },
+      "preview_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "primary_voice": {
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "source": {
+        "enum": [
+          "my",
+          "library"
+        ]
+      },
+      "talking_character_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "string"
+      },
+      "uploaded_talking_characters": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+          "properties": {
+            "aspect_ratio": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "generated",
+                "uploaded"
+              ]
+            },
+            "latest_generated_video_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "made_from_talking_character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ready"
+              ]
+            },
+            "talking_character_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "talking_character_id",
+            "name",
+            "kind",
+            "status",
+            "url",
+            "thumbnail_url",
+            "duration",
+            "character_id",
+            "look_id",
+            "made_from_talking_character_id",
+            "latest_generated_video_url",
+            "aspect_ratio"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "character_id",
+      "character_public_id",
+      "name",
+      "source",
+      "is_agent_character",
+      "cover_url",
+      "preview_url",
+      "latest_generated_video_url",
+      "look_count",
+      "talking_character_count",
+      "primary_voice",
+      "default_talking_character",
+      "updated_at",
+      "looks",
+      "uploaded_talking_characters",
+      "generating_talking_characters"
+    ],
+    "type": "object"
+  },
+  "generating_job": {
+    "additionalProperties": false,
+    "description": "A talking character still being generated, before its row exists.",
+    "properties": {
+      "look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "processing"
+        ]
+      },
+      "user_job_id": {
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "user_job_id",
+      "look_id",
+      "status"
+    ],
+    "type": "object"
+  },
+  "look": {
+    "additionalProperties": false,
+    "description": "An character look with the ready talking characters made from it.",
+    "properties": {
+      "from_agent_core": {
+        "type": "boolean"
+      },
+      "look_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "origin": {
+        "enum": [
+          "original",
+          "uploaded",
+          "generated"
+        ]
+      },
+      "talking_characters": {
+        "items": {
+          "additionalProperties": false,
+          "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+          "properties": {
+            "aspect_ratio": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "generated",
+                "uploaded"
+              ]
+            },
+            "latest_generated_video_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "look_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "made_from_talking_character_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ready"
+              ]
+            },
+            "talking_character_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "thumbnail_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "talking_character_id",
+            "name",
+            "kind",
+            "status",
+            "url",
+            "thumbnail_url",
+            "duration",
+            "character_id",
+            "look_id",
+            "made_from_talking_character_id",
+            "latest_generated_video_url",
+            "aspect_ratio"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "thumbnail_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "look_id",
+      "name",
+      "origin",
+      "from_agent_core",
+      "url",
+      "thumbnail_url",
+      "talking_characters"
+    ],
+    "type": "object"
+  },
+  "requests": {
+    "DELETE /v1/characters/{character_id}/looks/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "DELETE /v1/characters/{character_id}/talking_characters/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "DELETE /v1/characters/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "confirm_token": {
+            "description": "Confirms a permanent delete. Without it, an API-key request that would delete content is answered 428 with what would be deleted and a confirm_token; send the same request again with that token to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/characters": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "has_looks": {
+            "default": false,
+            "description": "true lists only characters with at least one look.",
+            "type": "boolean"
+          },
+          "search": {
+            "description": "Only characters whose name contains this text (case-insensitive).",
+            "type": "string"
+          },
+          "source": {
+            "default": "my",
+            "description": "my lists the agent's own characters, library the shared character library, all both (own first).",
+            "enum": [
+              "my",
+              "library",
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/characters/{character_id}/talking_characters/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "GET /v1/characters/{id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/characters/{character_id}/looks/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "The new name. Omitting it or sending null clears the name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/characters/{character_id}/talking_characters/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "The new name. Omitting it or sending null clears the name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PATCH /v1/characters/{id}": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Renames the character. Renaming the agent's own character also renames the agent.",
+            "type": "string"
+          },
+          "primary_voice": {
+            "description": "Sets the character's primary voice, the voice its talking characters speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it.",
+            "properties": {
+              "billing_source": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "ownership": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/characters": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "clone_voice": {
+            "default": true,
+            "description": "Videos only. Clones the person's voice from the video into the character's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
+            "type": "boolean"
+          },
+          "content_resource_id": {
+            "description": "An uploaded image or video of a person. An image becomes the character's original look. A video becomes its first talking character, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Character name. Defaults to the file name, else \"New character\".",
+            "type": "string"
+          },
+          "voice_gender": {
+            "default": "female",
+            "description": "Gender of the cloned voice.",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "type": "string"
+          },
+          "voice_language": {
+            "default": "english",
+            "description": "Language the person speaks in the video, as a lowercase English name (for example english or spanish).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/characters/{character_id}/looks": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "content_resource_id": {
+            "description": "An uploaded image of the person.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Look name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/characters/{character_id}/talking_characters": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          },
+          "clone_voice": {
+            "default": false,
+            "description": "Also clones the person's voice from the video; it becomes the character's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
+            "type": "boolean"
+          },
+          "content_resource_id": {
+            "description": "An uploaded video of the person speaking.",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Talking character name. Defaults to the character's name.",
+            "type": "string"
+          },
+          "voice_gender": {
+            "default": "female",
+            "description": "Gender of the cloned voice.",
+            "enum": [
+              "male",
+              "female"
+            ],
+            "type": "string"
+          },
+          "voice_language": {
+            "default": "english",
+            "description": "Language the person speaks in the video, as a lowercase English name (for example english or spanish).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "content_resource_id"
+        ],
+        "type": "object"
+      }
+    },
+    "POST /v1/characters/{id}/copy": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "summary": {
+    "additionalProperties": false,
+    "description": "One row of GET /v1/characters (the index list).",
+    "properties": {
+      "character_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "character_public_id": {
+        "description": "Random public id for URLs; every character endpoint accepts it in place of character_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
+      "cover_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "default_talking_character": {
+        "additionalProperties": false,
+        "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "made_from_talking_character_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "talking_character_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "talking_character_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "character_id",
+          "look_id",
+          "made_from_talking_character_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "is_agent_character": {
+        "type": "boolean"
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "look_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "preview_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "primary_voice": {
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "source": {
+        "enum": [
+          "my",
+          "library"
+        ]
+      },
+      "talking_character_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "character_id",
+      "character_public_id",
+      "name",
+      "source",
+      "is_agent_character",
+      "cover_url",
+      "preview_url",
+      "latest_generated_video_url",
+      "look_count",
+      "talking_character_count",
+      "primary_voice",
+      "default_talking_character",
+      "updated_at"
+    ],
+    "type": "object"
+  },
+  "talking_character": {
+    "additionalProperties": false,
+    "description": "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+    "properties": {
+      "aspect_ratio": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "character_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "kind": {
+        "enum": [
+          "generated",
+          "uploaded"
+        ]
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "made_from_talking_character_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "enum": [
+          "ready"
+        ]
+      },
+      "talking_character_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "thumbnail_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "required": [
+      "talking_character_id",
+      "name",
+      "kind",
+      "status",
+      "url",
+      "thumbnail_url",
+      "duration",
+      "character_id",
+      "look_id",
+      "made_from_talking_character_id",
+      "latest_generated_video_url",
+      "aspect_ratio"
+    ],
+    "type": "object"
+  },
+  "talking_character_create": {
+    "additionalProperties": false,
+    "description": "POST /v1/characters/:character_id/talking_characters (create): the uploaded talking character plus its voice-clone job. With clone_voice true the video's voice is cloned and becomes the character's primary_voice once the job finishes; off by default.",
+    "properties": {
+      "aspect_ratio": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "character_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "duration": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "kind": {
+        "enum": [
+          "generated",
+          "uploaded"
+        ]
+      },
+      "latest_generated_video_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "look_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "made_from_talking_character_id": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "enum": [
+          "ready"
+        ]
+      },
+      "talking_character_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "thumbnail_url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "url": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "user_job_ids": {
+        "items": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "voice_clone_message": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "voice_clone_status": {
+        "enum": [
+          "pending",
+          "skipped",
+          "not_requested",
+          "not_applicable"
+        ]
+      }
+    },
+    "required": [
+      "talking_character_id",
+      "name",
+      "kind",
+      "status",
+      "url",
+      "thumbnail_url",
+      "duration",
+      "character_id",
+      "look_id",
+      "made_from_talking_character_id",
+      "latest_generated_video_url",
+      "aspect_ratio",
+      "user_job_ids",
+      "voice_clone_status",
+      "voice_clone_message"
+    ],
+    "type": "object"
+  },
+  "title": "Characters API",
+  "x-generated-by": "bin/rails vidsheet_schema:generate"
+}

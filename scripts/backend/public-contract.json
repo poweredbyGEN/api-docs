@@ -8570,6 +8570,12 @@
                 "conversation_id": {
                   "x-no-db-column": true
                 },
+                "mode": {
+                  "x-no-db-column": true
+                },
+                "client_message_id": {
+                  "x-no-db-column": true
+                },
                 "attachments": {
                   "anyOf": [
                     {

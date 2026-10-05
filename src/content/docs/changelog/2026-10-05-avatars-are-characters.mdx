@@ -1,0 +1,37 @@
+---
+title: Avatars are now characters
+description: The avatar API and MCP tool are renamed to characters. The old names keep working for now.
+---
+
+**Date:** 2026-10-05. **Applies to:** `https://api.gen.pro/v1` and the hosted GEN MCP at `https://mcp.gen.pro`.
+
+## API
+
+Use `/v1/characters`. Responses use character names: `character_id`, `looks`, `look_id`, `talking_characters`, `talking_character_id`, `clips`.
+
+```bash
+curl "https://api.gen.pro/v1/characters?agent_id=AGENT_ID&source=my"   -H "X-API-Key: YOUR_API_KEY"
+```
+
+| Old | New |
+|---|---|
+| `/v1/avatars` | `/v1/characters` |
+| `/v1/avatars/:avatar_id/looks` | `/v1/characters/:character_id/looks` |
+| `/v1/avatars/:avatar_id/talking_loops` | `/v1/characters/:character_id/talking_characters` |
+| `avatar_not_found` | `character_not_found` |
+| `avatar_look_not_found` | `look_not_found` |
+| `avatar_talking_loop_not_found` | `talking_character_not_found` |
+
+`/v1/avatars` still works with the old field names. It is deprecated; move to `/v1/characters`.
+
+Agent profile photos at `/v1/agents/:agent_id/avatars` are not characters and are unchanged.
+
+## MCP
+
+Use `gen_characters`. Ops: `list`, `get`, `get_talking_character`, `create`, `upload_look`, `upload_talking_character`, `create_talking_character`, `edit_talking_character`, `copy_to_mine`, `rename`, `set_primary_voice`, `delete_character`, `delete_look`, `delete_talking_character`.
+
+```json
+{"name":"gen_characters","arguments":{"agent_id":"AGENT_ID","op":"get","character_id":"CHARACTER_ID"}}
+```
+
+The retired `gen_avatars` name still runs and points to `gen_characters`. It is no longer in `tools/list`.

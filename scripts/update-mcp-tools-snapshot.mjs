@@ -36,7 +36,9 @@ const SERVER_CANDIDATES = ["src/gen_mcp_server/server.py", "gen_mcp_server/serve
 // documents them): https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 const KNOWN_RENAMES = {
   gen_media_action: "gen_generate",
-  gen_list_talking_avatars: "gen_avatars",
+  gen_list_talking_avatars: "gen_characters",
+  // Avatars are called characters: gen_avatars is a hidden compat alias.
+  gen_avatars: "gen_characters",
   gen_vidsheet_discover: "gen_discover",
 };
 
@@ -145,7 +147,7 @@ function replacementFor(name, aliases, views) {
 function servedFromServerSource(serverSource) {
   const names = new Set();
   // A tool registers through @mcp.tool or the @_served_tool wrapper (gen_discover,
-  // gen_avatars), so both decorators count.
+  // gen_characters), so both decorators count.
   for (const match of serverSource.matchAll(/@(?:mcp\.tool|_served_tool)\(([\s\S]*?)\)\s*\n(?:async )?def ([a-z0-9_]+)/g)) {
     const explicit = match[1].match(/name="(gen_[a-z0-9_]+)"/);
     names.add(explicit ? explicit[1] : match[2]);
