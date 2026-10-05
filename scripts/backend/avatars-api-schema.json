@@ -1347,7 +1347,7 @@
             "type": "integer"
           },
           "name": {
-            "description": "Avatar name. Defaults to the file name, else \"New avatar\".",
+            "description": "Avatar name. Defaults to the file name, else \"New character\".",
             "type": "string"
           },
           "voice_gender": {
