@@ -142,14 +142,65 @@ def test_surface_is_exactly_the_openapi_operations():
 
 
 def test_every_write_has_a_body_or_is_marked_missing():
+    """A write documents its body, declares it takes none, or declares the gap.
+
+    A write whose controller reads only path params (`POST /agent/runs/{run_id}/stop`)
+    has no body to copy, so `scripts/operation-schemas.json` declares `noRequestBody`
+    and the generator renders it bodyless. Without the declaration or the marker the
+    operation would advertise a body the backend never accepts.
+    """
+    schemas = json.loads(SCHEMAS.read_text())
     failures = []
     for key, block in parse_paths(OPENAPI.read_text()).items():
         if key[0] not in ("POST", "PUT", "PATCH"):
+            continue
+        if (schemas.get(f"{key[0]} {key[1]}") or {}).get("noRequestBody"):
             continue
         text = "\n".join(block)
         if not re.search(r"^      requestBody:", text, re.M) and "x-schema-status: missing" not in text:
             failures.append(key)
     assert failures == []
+
+
+def test_queue_branches_reach_the_surface_spec_and_guide():
+    """The chat-queue branches are documented from the surface through to the guide.
+
+    A message into a conversation with a run in flight is queued rather than
+    rejected: `gen_ask` gained `steer` / `cancel_pending` / `stop` and
+    `gen_discover` gained the `platform.conversation_pending` view. The surface is
+    the only place the branch names live, and the OpenAPI copies and the MCP guide
+    are the reader-facing halves, so a rename at any one of the three leaves the
+    queue reachable but undocumented.
+    """
+    branches = {(entry["mcp_tool"], entry["mcp_branch"]) for entry in json.loads(SURFACE.read_text())["operations"]}
+    assert ("gen_discover", "platform.conversation_pending") in branches
+    assert {("gen_ask", "steer"), ("gen_ask", "cancel_pending"), ("gen_ask", "stop")} <= branches
+
+    documented = parse_paths(OPENAPI.read_text())
+    assert ("GET", "/agent/conversations/{id}/pending") in documented
+    assert ("POST", "/agent/runs/{run_id}/stop") in documented
+    pending = "\n".join(documented[("GET", "/agent/conversations/{id}/pending")])
+    assert "x-mcp-branch: \"platform.conversation_pending\"" in pending
+
+    guide = (REPO / "src" / "content" / "docs" / "guides" / "mcp.mdx").read_text()
+    missing = [
+        token
+        for token in (
+            "## Queue, steer and stop",
+            '"mode":"queue"',
+            '"action":"steer"',
+            '"action":"cancel_pending"',
+            '"action":"stop"',
+            '"view":"conversation_pending"',
+            '"after":"CURSOR"',
+            '"before":"MESSAGE_ID"',
+            "next_cursor",
+            "has_active_run",
+            "queue_full",
+        )
+        if token not in guide
+    ]
+    assert missing == [], f"the MCP guide does not document: {missing}"
 
 
 def test_every_operation_has_a_2xx_schema_or_is_marked_missing():
