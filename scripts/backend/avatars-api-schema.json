@@ -183,6 +183,99 @@
           "null"
         ]
       },
+      "default_talking_avatar": {
+        "additionalProperties": false,
+        "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_talking_loop_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "made_from_talking_avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "avatar_talking_loop_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "avatar_id",
+          "avatar_look_id",
+          "made_from_talking_avatar_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "generating_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
@@ -380,6 +473,7 @@
       "avatar_look_count",
       "avatar_talking_loop_count",
       "primary_voice",
+      "default_talking_avatar",
       "updated_at",
       "avatar_looks",
       "uploaded_avatar_talking_loops",
@@ -565,6 +659,99 @@
           "null"
         ]
       },
+      "default_talking_avatar": {
+        "additionalProperties": false,
+        "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_talking_loop_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "made_from_talking_avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "avatar_talking_loop_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "avatar_id",
+          "avatar_look_id",
+          "made_from_talking_avatar_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "generating_avatar_talking_loops": {
         "items": {
           "additionalProperties": false,
@@ -735,6 +922,7 @@
       "avatar_look_count",
       "avatar_talking_loop_count",
       "primary_voice",
+      "default_talking_avatar",
       "updated_at",
       "avatar_looks",
       "uploaded_avatar_talking_loops",
@@ -1294,6 +1482,99 @@
           "null"
         ]
       },
+      "default_talking_avatar": {
+        "additionalProperties": false,
+        "description": "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video.",
+        "properties": {
+          "aspect_ratio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_look_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avatar_talking_loop_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "duration": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "generated",
+              "uploaded"
+            ]
+          },
+          "latest_generated_video_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "made_from_talking_avatar_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready"
+            ]
+          },
+          "thumbnail_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "avatar_talking_loop_id",
+          "name",
+          "kind",
+          "status",
+          "url",
+          "thumbnail_url",
+          "duration",
+          "avatar_id",
+          "avatar_look_id",
+          "made_from_talking_avatar_id",
+          "latest_generated_video_url",
+          "aspect_ratio"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "is_agent_avatar": {
         "type": "boolean"
       },
@@ -1340,6 +1621,7 @@
       "avatar_look_count",
       "avatar_talking_loop_count",
       "primary_voice",
+      "default_talking_avatar",
       "updated_at"
     ],
     "type": "object"
