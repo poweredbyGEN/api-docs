@@ -100,8 +100,8 @@ tags:
     description: Browse and clone pre-configured engine templates.
   - name: Agents
     description: Create, read, update, and delete agents and their avatars.
-  - name: Avatars
-    description: A person the agent can appear as, with looks (images) and talking loops (silent talking videos).
+  - name: Characters
+    description: A person the agent can appear as, with looks (images) and talking characters (talking videos). Characters were called avatars; the /v1/avatars routes still work as deprecated aliases.
   - name: Organizations
     description: Manage organizations (workspaces).
   - name: Billing
@@ -5664,33 +5664,34 @@ paths:
           $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_discover
       x-mcp-branch: "location.countries"
-  /avatars:
+  /characters:
     get:
-      operationId: getAvatars
+      operationId: getCharacters
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — list"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — list"
+      description: "GET /v1/avatars is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
       - name: "agent_id"
         in: "query"
         required: True
-        description: "The agent whose avatars these are."
+        description: "The agent whose characters these are."
         schema:
           type: "integer"
       - name: "has_looks"
         in: "query"
-        description: "true lists only avatars with at least one look."
+        description: "true lists only characters with at least one look."
         schema:
           default: false
           type: "boolean"
       - name: "search"
         in: "query"
-        description: "Only avatars whose name contains this text (case-insensitive)."
+        description: "Only characters whose name contains this text (case-insensitive)."
         schema:
           type: "string"
       - name: "source"
         in: "query"
-        description: "my lists the agent's own avatars, library the shared avatar library, all both (own first)."
+        description: "my lists the agent's own characters, library the shared character library, all both (own first)."
         schema:
           default: "my"
           enum:
@@ -5707,44 +5708,31 @@ paths:
                 type: "array"
                 items:
                   additionalProperties: false
-                  description: "One row of GET /v1/avatars (the index list)."
+                  description: "One row of GET /v1/characters (the index list)."
                   properties:
-                    avatar_id:
+                    character_id:
                       minimum: 1
                       type: "integer"
-                    avatar_look_count:
-                      minimum: 0
-                      type: "integer"
-                    avatar_public_id:
-                      description: "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id."
+                    character_public_id:
+                      description: "Random public id for URLs; every character endpoint accepts it in place of character_id."
                       pattern: "^[2-9A-HJ-NP-Z]{8}$"
                       type: "string"
-                    avatar_talking_loop_count:
-                      minimum: 0
-                      type: "integer"
                     cover_url:
                       type:
                         - "string"
                         - "null"
-                    default_talking_avatar:
+                    default_talking_character:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -5757,7 +5745,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -5768,6 +5760,9 @@ paths:
                         status:
                           enum:
                             - "ready"
+                        talking_character_id:
+                          minimum: 1
+                          type: "integer"
                         thumbnail_url:
                           type:
                             - "string"
@@ -5777,27 +5772,30 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type:
                         - "object"
                         - "null"
-                    is_agent_avatar:
+                    is_agent_character:
                       type: "boolean"
                     latest_generated_video_url:
                       type:
                         - "string"
                         - "null"
+                    look_count:
+                      minimum: 0
+                      type: "integer"
                     name:
                       type: "string"
                     preview_url:
@@ -5812,34 +5810,38 @@ paths:
                       enum:
                         - "my"
                         - "library"
+                    talking_character_count:
+                      minimum: 0
+                      type: "integer"
                     updated_at:
                       type: "string"
                   required:
-                    - "avatar_id"
-                    - "avatar_public_id"
+                    - "character_id"
+                    - "character_public_id"
                     - "name"
                     - "source"
-                    - "is_agent_avatar"
+                    - "is_agent_character"
                     - "cover_url"
                     - "preview_url"
                     - "latest_generated_video_url"
-                    - "avatar_look_count"
-                    - "avatar_talking_loop_count"
+                    - "look_count"
+                    - "talking_character_count"
                     - "primary_voice"
-                    - "default_talking_avatar"
+                    - "default_talking_character"
                     - "updated_at"
                   type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
+      x-mcp-tool: gen_characters
       x-mcp-branch: "list"
     post:
-      operationId: postAvatars
+      operationId: postCharacters
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — create"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — create"
+      description: "POST /v1/avatars is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       requestBody:
         required: true
         content:
@@ -5847,17 +5849,17 @@ paths:
             schema:
               properties:
                 agent_id:
-                  description: "The agent whose avatars these are."
+                  description: "The agent whose characters these are."
                   type: "integer"
                 clone_voice:
                   default: true
-                  description: "Videos only. Clones the person's voice from the video into the avatar's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
+                  description: "Videos only. Clones the person's voice from the video into the character's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
                   type: "boolean"
                 content_resource_id:
-                  description: "An uploaded image or video of a person. An image becomes the avatar's original look. A video becomes its first talking loop, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely."
+                  description: "An uploaded image or video of a person. An image becomes the character's original look. A video becomes its first talking character, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely."
                   type: "integer"
                 name:
-                  description: "Avatar name. Defaults to the file name, else \"New avatar\"."
+                  description: "Character name. Defaults to the file name, else \"New character\"."
                   type: "string"
                 voice_gender:
                   default: "female"
@@ -5881,155 +5883,31 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "POST /v1/avatars (create): the detail plus the look, talking loop and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the avatar's primary_voice."
+                description: "POST /v1/characters (create): the detail plus the look, talking character and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the character's primary_voice."
                 properties:
-                  avatar_id:
+                  character_id:
                     minimum: 1
                     type: "integer"
-                  avatar_look_count:
-                    minimum: 0
-                    type: "integer"
-                  avatar_look_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  avatar_looks:
-                    items:
-                      additionalProperties: false
-                      description: "An avatar look with the ready talking loops made from it."
-                      properties:
-                        avatar_look_id:
-                          minimum: 1
-                          type: "integer"
-                        avatar_talking_loops:
-                          items:
-                            additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
-                            properties:
-                              aspect_ratio:
-                                type:
-                                  - "string"
-                                  - "null"
-                              avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_look_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_talking_loop_id:
-                                minimum: 1
-                                type: "integer"
-                              duration:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              kind:
-                                enum:
-                                  - "generated"
-                                  - "uploaded"
-                              latest_generated_video_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              made_from_talking_avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              name:
-                                type:
-                                  - "string"
-                                  - "null"
-                              status:
-                                enum:
-                                  - "ready"
-                              thumbnail_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              url:
-                                type:
-                                  - "string"
-                                  - "null"
-                            required:
-                              - "avatar_talking_loop_id"
-                              - "name"
-                              - "kind"
-                              - "status"
-                              - "url"
-                              - "thumbnail_url"
-                              - "duration"
-                              - "avatar_id"
-                              - "avatar_look_id"
-                              - "made_from_talking_avatar_id"
-                              - "latest_generated_video_url"
-                              - "aspect_ratio"
-                            type: "object"
-                          type: "array"
-                        from_agent_core:
-                          type: "boolean"
-                        name:
-                          type:
-                            - "string"
-                            - "null"
-                        origin:
-                          enum:
-                            - "original"
-                            - "uploaded"
-                            - "generated"
-                        thumbnail_url:
-                          type:
-                            - "string"
-                            - "null"
-                        url:
-                          type:
-                            - "string"
-                            - "null"
-                      required:
-                        - "avatar_look_id"
-                        - "name"
-                        - "origin"
-                        - "from_agent_core"
-                        - "url"
-                        - "thumbnail_url"
-                        - "avatar_talking_loops"
-                      type: "object"
-                    type: "array"
-                  avatar_public_id:
-                    description: "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id."
+                  character_public_id:
+                    description: "Random public id for URLs; every character endpoint accepts it in place of character_id."
                     pattern: "^[2-9A-HJ-NP-Z]{8}$"
                     type: "string"
-                  avatar_talking_loop_count:
-                    minimum: 0
-                    type: "integer"
-                  avatar_talking_loop_id:
-                    type:
-                      - "integer"
-                      - "null"
                   cover_url:
                     type:
                       - "string"
                       - "null"
-                  default_talking_avatar:
+                  default_talking_character:
                     additionalProperties: false
-                    description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                    description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                     properties:
                       aspect_ratio:
                         type:
                           - "string"
                           - "null"
-                      avatar_id:
+                      character_id:
                         type:
                           - "integer"
                           - "null"
-                      avatar_look_id:
-                        type:
-                          - "integer"
-                          - "null"
-                      avatar_talking_loop_id:
-                        minimum: 1
-                        type: "integer"
                       duration:
                         type:
                           - "integer"
@@ -6042,7 +5920,11 @@ paths:
                         type:
                           - "string"
                           - "null"
-                      made_from_talking_avatar_id:
+                      look_id:
+                        type:
+                          - "integer"
+                          - "null"
+                      made_from_talking_character_id:
                         type:
                           - "integer"
                           - "null"
@@ -6053,6 +5935,9 @@ paths:
                       status:
                         enum:
                           - "ready"
+                      talking_character_id:
+                        minimum: 1
+                        type: "integer"
                       thumbnail_url:
                         type:
                           - "string"
@@ -6062,27 +5947,27 @@ paths:
                           - "string"
                           - "null"
                     required:
-                      - "avatar_talking_loop_id"
+                      - "talking_character_id"
                       - "name"
                       - "kind"
                       - "status"
                       - "url"
                       - "thumbnail_url"
                       - "duration"
-                      - "avatar_id"
-                      - "avatar_look_id"
-                      - "made_from_talking_avatar_id"
+                      - "character_id"
+                      - "look_id"
+                      - "made_from_talking_character_id"
                       - "latest_generated_video_url"
                       - "aspect_ratio"
                     type:
                       - "object"
                       - "null"
-                  generating_avatar_talking_loops:
+                  generating_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A talking loop still being generated, before its row exists."
+                      description: "A talking character still being generated, before its row exists."
                       properties:
-                        avatar_look_id:
+                        look_id:
                           type:
                             - "integer"
                             - "null"
@@ -6095,16 +5980,126 @@ paths:
                           type: "integer"
                       required:
                         - "user_job_id"
-                        - "avatar_look_id"
+                        - "look_id"
                         - "status"
                       type: "object"
                     type: "array"
-                  is_agent_avatar:
+                  is_agent_character:
                     type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
                       - "null"
+                  look_count:
+                    minimum: 0
+                    type: "integer"
+                  look_id:
+                    type:
+                      - "integer"
+                      - "null"
+                  looks:
+                    items:
+                      additionalProperties: false
+                      description: "An character look with the ready talking characters made from it."
+                      properties:
+                        from_agent_core:
+                          type: "boolean"
+                        look_id:
+                          minimum: 1
+                          type: "integer"
+                        name:
+                          type:
+                            - "string"
+                            - "null"
+                        origin:
+                          enum:
+                            - "original"
+                            - "uploaded"
+                            - "generated"
+                        talking_characters:
+                          items:
+                            additionalProperties: false
+                            description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                            properties:
+                              aspect_ratio:
+                                type:
+                                  - "string"
+                                  - "null"
+                              character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              duration:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              kind:
+                                enum:
+                                  - "generated"
+                                  - "uploaded"
+                              latest_generated_video_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              look_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              made_from_talking_character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              name:
+                                type:
+                                  - "string"
+                                  - "null"
+                              status:
+                                enum:
+                                  - "ready"
+                              talking_character_id:
+                                minimum: 1
+                                type: "integer"
+                              thumbnail_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              url:
+                                type:
+                                  - "string"
+                                  - "null"
+                            required:
+                              - "talking_character_id"
+                              - "name"
+                              - "kind"
+                              - "status"
+                              - "url"
+                              - "thumbnail_url"
+                              - "duration"
+                              - "character_id"
+                              - "look_id"
+                              - "made_from_talking_character_id"
+                              - "latest_generated_video_url"
+                              - "aspect_ratio"
+                            type: "object"
+                          type: "array"
+                        thumbnail_url:
+                          type:
+                            - "string"
+                            - "null"
+                        url:
+                          type:
+                            - "string"
+                            - "null"
+                      required:
+                        - "look_id"
+                        - "name"
+                        - "origin"
+                        - "from_agent_core"
+                        - "url"
+                        - "thumbnail_url"
+                        - "talking_characters"
+                      type: "object"
+                    type: "array"
                   name:
                     type: "string"
                   preview_url:
@@ -6119,28 +6114,28 @@ paths:
                     enum:
                       - "my"
                       - "library"
+                  talking_character_count:
+                    minimum: 0
+                    type: "integer"
+                  talking_character_id:
+                    type:
+                      - "integer"
+                      - "null"
                   updated_at:
                     type: "string"
-                  uploaded_avatar_talking_loops:
+                  uploaded_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -6153,7 +6148,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -6164,6 +6163,9 @@ paths:
                         status:
                           enum:
                             - "ready"
+                        talking_character_id:
+                          minimum: 1
+                          type: "integer"
                         thumbnail_url:
                           type:
                             - "string"
@@ -6173,16 +6175,16 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type: "object"
@@ -6207,24 +6209,24 @@ paths:
                       - "string"
                       - "null"
                 required:
-                  - "avatar_id"
-                  - "avatar_public_id"
+                  - "character_id"
+                  - "character_public_id"
                   - "name"
                   - "source"
-                  - "is_agent_avatar"
+                  - "is_agent_character"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
-                  - "avatar_look_count"
-                  - "avatar_talking_loop_count"
+                  - "look_count"
+                  - "talking_character_count"
                   - "primary_voice"
-                  - "default_talking_avatar"
+                  - "default_talking_character"
                   - "updated_at"
-                  - "avatar_looks"
-                  - "uploaded_avatar_talking_loops"
-                  - "generating_avatar_talking_loops"
-                  - "avatar_look_id"
-                  - "avatar_talking_loop_id"
+                  - "looks"
+                  - "uploaded_talking_characters"
+                  - "generating_talking_characters"
+                  - "look_id"
+                  - "talking_character_id"
                   - "voice_id"
                   - "user_job_ids"
                   - "voice_clone_status"
@@ -6234,16 +6236,17 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
+      x-mcp-tool: gen_characters
       x-mcp-branch: "create"
-  /avatars/{avatar_id}/looks:
+  /characters/{character_id}/looks:
     post:
-      operationId: postAvatarsByAvatarIdLooks
+      operationId: postCharactersByCharacterIdLooks
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — upload avatar look"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — upload look"
+      description: "POST /v1/avatars/{avatar_id}/looks is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
-      - name: avatar_id
+      - name: character_id
         in: path
         required: true
         schema:
@@ -6255,7 +6258,7 @@ paths:
             schema:
               properties:
                 agent_id:
-                  description: "The agent whose avatars these are."
+                  description: "The agent whose characters these are."
                   type: "integer"
                 content_resource_id:
                   description: "An uploaded image of the person."
@@ -6274,31 +6277,35 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "An avatar look with the ready talking loops made from it."
+                description: "An character look with the ready talking characters made from it."
                 properties:
-                  avatar_look_id:
+                  from_agent_core:
+                    type: "boolean"
+                  look_id:
                     minimum: 1
                     type: "integer"
-                  avatar_talking_loops:
+                  name:
+                    type:
+                      - "string"
+                      - "null"
+                  origin:
+                    enum:
+                      - "original"
+                      - "uploaded"
+                      - "generated"
+                  talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -6311,7 +6318,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -6322,137 +6333,9 @@ paths:
                         status:
                           enum:
                             - "ready"
-                        thumbnail_url:
-                          type:
-                            - "string"
-                            - "null"
-                        url:
-                          type:
-                            - "string"
-                            - "null"
-                      required:
-                        - "avatar_talking_loop_id"
-                        - "name"
-                        - "kind"
-                        - "status"
-                        - "url"
-                        - "thumbnail_url"
-                        - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
-                        - "latest_generated_video_url"
-                        - "aspect_ratio"
-                      type: "object"
-                    type: "array"
-                  from_agent_core:
-                    type: "boolean"
-                  name:
-                    type:
-                      - "string"
-                      - "null"
-                  origin:
-                    enum:
-                      - "original"
-                      - "uploaded"
-                      - "generated"
-                  thumbnail_url:
-                    type:
-                      - "string"
-                      - "null"
-                  url:
-                    type:
-                      - "string"
-                      - "null"
-                required:
-                  - "avatar_look_id"
-                  - "name"
-                  - "origin"
-                  - "from_agent_core"
-                  - "url"
-                  - "thumbnail_url"
-                  - "avatar_talking_loops"
-                type: "object"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "upload_avatar_look"
-  /avatars/{avatar_id}/looks/{id}:
-    get:
-      operationId: getAvatarsByAvatarIdLooksById
-      x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — get (look)"
-      tags: [Avatars]
-      parameters:
-      - name: avatar_id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: "An avatar look with the ready talking loops made from it."
-                properties:
-                  avatar_look_id:
-                    minimum: 1
-                    type: "integer"
-                  avatar_talking_loops:
-                    items:
-                      additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
-                      properties:
-                        aspect_ratio:
-                          type:
-                            - "string"
-                            - "null"
-                        avatar_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
+                        talking_character_id:
                           minimum: 1
                           type: "integer"
-                        duration:
-                          type:
-                            - "integer"
-                            - "null"
-                        kind:
-                          enum:
-                            - "generated"
-                            - "uploaded"
-                        latest_generated_video_url:
-                          type:
-                            - "string"
-                            - "null"
-                        made_from_talking_avatar_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        name:
-                          type:
-                            - "string"
-                            - "null"
-                        status:
-                          enum:
-                            - "ready"
                         thumbnail_url:
                           type:
                             - "string"
@@ -6462,31 +6345,20 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
-                  from_agent_core:
-                    type: "boolean"
-                  name:
-                    type:
-                      - "string"
-                      - "null"
-                  origin:
-                    enum:
-                      - "original"
-                      - "uploaded"
-                      - "generated"
                   thumbnail_url:
                     type:
                       - "string"
@@ -6496,13 +6368,13 @@ paths:
                       - "string"
                       - "null"
                 required:
-                  - "avatar_look_id"
+                  - "look_id"
                   - "name"
                   - "origin"
                   - "from_agent_core"
                   - "url"
                   - "thumbnail_url"
-                  - "avatar_talking_loops"
+                  - "talking_characters"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -6510,16 +6382,17 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "get (look)"
-  /avatars/{avatar_id}/talking_loops:
+      x-mcp-tool: gen_characters
+      x-mcp-branch: "upload_look"
+  /characters/{character_id}/talking_characters:
     post:
-      operationId: postAvatarsByAvatarIdTalkingLoops
+      operationId: postCharactersByCharacterIdTalkingCharacters
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — upload avatar talking loop"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — upload talking character"
+      description: "POST /v1/avatars/{avatar_id}/talking_loops is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
-      - name: avatar_id
+      - name: character_id
         in: path
         required: true
         schema:
@@ -6531,17 +6404,17 @@ paths:
             schema:
               properties:
                 agent_id:
-                  description: "The agent whose avatars these are."
+                  description: "The agent whose characters these are."
                   type: "integer"
                 clone_voice:
                   default: false
-                  description: "Also clones the person's voice from the video; it becomes the avatar's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
+                  description: "Also clones the person's voice from the video; it becomes the character's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
                   type: "boolean"
                 content_resource_id:
                   description: "An uploaded video of the person speaking."
                   type: "integer"
                 name:
-                  description: "Talking loop name. Defaults to the avatar's name."
+                  description: "Talking character name. Defaults to the character's name."
                   type: "string"
                 voice_gender:
                   default: "female"
@@ -6565,23 +6438,16 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "POST /v1/avatars/:avatar_id/talking_loops (create): the uploaded talking loop plus its voice-clone job. With clone_voice true the video's voice is cloned and becomes the avatar's primary_voice once the job finishes; off by default."
+                description: "POST /v1/characters/:character_id/talking_characters (create): the uploaded talking character plus its voice-clone job. With clone_voice true the video's voice is cloned and becomes the character's primary_voice once the job finishes; off by default."
                 properties:
                   aspect_ratio:
                     type:
                       - "string"
                       - "null"
-                  avatar_id:
+                  character_id:
                     type:
                       - "integer"
                       - "null"
-                  avatar_look_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  avatar_talking_loop_id:
-                    minimum: 1
-                    type: "integer"
                   duration:
                     type:
                       - "integer"
@@ -6594,7 +6460,11 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  made_from_talking_avatar_id:
+                  look_id:
+                    type:
+                      - "integer"
+                      - "null"
+                  made_from_talking_character_id:
                     type:
                       - "integer"
                       - "null"
@@ -6605,6 +6475,9 @@ paths:
                   status:
                     enum:
                       - "ready"
+                  talking_character_id:
+                    minimum: 1
+                    type: "integer"
                   thumbnail_url:
                     type:
                       - "string"
@@ -6629,16 +6502,16 @@ paths:
                       - "not_requested"
                       - "not_applicable"
                 required:
-                  - "avatar_talking_loop_id"
+                  - "talking_character_id"
                   - "name"
                   - "kind"
                   - "status"
                   - "url"
                   - "thumbnail_url"
                   - "duration"
-                  - "avatar_id"
-                  - "avatar_look_id"
-                  - "made_from_talking_avatar_id"
+                  - "character_id"
+                  - "look_id"
+                  - "made_from_talking_character_id"
                   - "latest_generated_video_url"
                   - "aspect_ratio"
                   - "user_job_ids"
@@ -6651,16 +6524,17 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "upload_avatar_talking_loop"
-  /avatars/{avatar_id}/talking_loops/{id}:
+      x-mcp-tool: gen_characters
+      x-mcp-branch: "upload_talking_character"
+  /characters/{character_id}/talking_characters/{id}:
     get:
-      operationId: getAvatarsByAvatarIdTalkingLoopsById
+      operationId: getCharactersByCharacterIdTalkingCharactersById
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — get avatar talking loop"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — get talking character"
+      description: "GET /v1/avatars/{avatar_id}/talking_loops/{id} is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
-      - name: avatar_id
+      - name: character_id
         in: path
         required: true
         schema:
@@ -6673,7 +6547,7 @@ paths:
       - name: "agent_id"
         in: "query"
         required: True
-        description: "The agent whose avatars these are."
+        description: "The agent whose characters these are."
         schema:
           type: "integer"
       responses:
@@ -6683,23 +6557,16 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                 properties:
                   aspect_ratio:
                     type:
                       - "string"
                       - "null"
-                  avatar_id:
+                  character_id:
                     type:
                       - "integer"
                       - "null"
-                  avatar_look_id:
-                    type:
-                      - "integer"
-                      - "null"
-                  avatar_talking_loop_id:
-                    minimum: 1
-                    type: "integer"
                   duration:
                     type:
                       - "integer"
@@ -6712,7 +6579,11 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  made_from_talking_avatar_id:
+                  look_id:
+                    type:
+                      - "integer"
+                      - "null"
+                  made_from_talking_character_id:
                     type:
                       - "integer"
                       - "null"
@@ -6723,6 +6594,9 @@ paths:
                   status:
                     enum:
                       - "ready"
+                  talking_character_id:
+                    minimum: 1
+                    type: "integer"
                   thumbnail_url:
                     type:
                       - "string"
@@ -6732,16 +6606,16 @@ paths:
                       - "string"
                       - "null"
                 required:
-                  - "avatar_talking_loop_id"
+                  - "talking_character_id"
                   - "name"
                   - "kind"
                   - "status"
                   - "url"
                   - "thumbnail_url"
                   - "duration"
-                  - "avatar_id"
-                  - "avatar_look_id"
-                  - "made_from_talking_avatar_id"
+                  - "character_id"
+                  - "look_id"
+                  - "made_from_talking_character_id"
                   - "latest_generated_video_url"
                   - "aspect_ratio"
                 type: "object"
@@ -6751,14 +6625,15 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "get_avatar_talking_loop"
-  /avatars/{id}:
+      x-mcp-tool: gen_characters
+      x-mcp-branch: "get_talking_character"
+  /characters/{id}:
     get:
-      operationId: getAvatarsById
+      operationId: getCharactersById
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — get"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — get"
+      description: "GET /v1/avatars/{id} is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
       - name: id
         in: path
@@ -6768,7 +6643,7 @@ paths:
       - name: "agent_id"
         in: "query"
         required: True
-        description: "The agent whose avatars these are."
+        description: "The agent whose characters these are."
         schema:
           type: "integer"
       responses:
@@ -6778,147 +6653,31 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "GET /v1/avatars/:id (show): the summary plus looks and talking loops."
+                description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
-                  avatar_id:
+                  character_id:
                     minimum: 1
                     type: "integer"
-                  avatar_look_count:
-                    minimum: 0
-                    type: "integer"
-                  avatar_looks:
-                    items:
-                      additionalProperties: false
-                      description: "An avatar look with the ready talking loops made from it."
-                      properties:
-                        avatar_look_id:
-                          minimum: 1
-                          type: "integer"
-                        avatar_talking_loops:
-                          items:
-                            additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
-                            properties:
-                              aspect_ratio:
-                                type:
-                                  - "string"
-                                  - "null"
-                              avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_look_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_talking_loop_id:
-                                minimum: 1
-                                type: "integer"
-                              duration:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              kind:
-                                enum:
-                                  - "generated"
-                                  - "uploaded"
-                              latest_generated_video_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              made_from_talking_avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              name:
-                                type:
-                                  - "string"
-                                  - "null"
-                              status:
-                                enum:
-                                  - "ready"
-                              thumbnail_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              url:
-                                type:
-                                  - "string"
-                                  - "null"
-                            required:
-                              - "avatar_talking_loop_id"
-                              - "name"
-                              - "kind"
-                              - "status"
-                              - "url"
-                              - "thumbnail_url"
-                              - "duration"
-                              - "avatar_id"
-                              - "avatar_look_id"
-                              - "made_from_talking_avatar_id"
-                              - "latest_generated_video_url"
-                              - "aspect_ratio"
-                            type: "object"
-                          type: "array"
-                        from_agent_core:
-                          type: "boolean"
-                        name:
-                          type:
-                            - "string"
-                            - "null"
-                        origin:
-                          enum:
-                            - "original"
-                            - "uploaded"
-                            - "generated"
-                        thumbnail_url:
-                          type:
-                            - "string"
-                            - "null"
-                        url:
-                          type:
-                            - "string"
-                            - "null"
-                      required:
-                        - "avatar_look_id"
-                        - "name"
-                        - "origin"
-                        - "from_agent_core"
-                        - "url"
-                        - "thumbnail_url"
-                        - "avatar_talking_loops"
-                      type: "object"
-                    type: "array"
-                  avatar_public_id:
-                    description: "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id."
+                  character_public_id:
+                    description: "Random public id for URLs; every character endpoint accepts it in place of character_id."
                     pattern: "^[2-9A-HJ-NP-Z]{8}$"
                     type: "string"
-                  avatar_talking_loop_count:
-                    minimum: 0
-                    type: "integer"
                   cover_url:
                     type:
                       - "string"
                       - "null"
-                  default_talking_avatar:
+                  default_talking_character:
                     additionalProperties: false
-                    description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                    description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                     properties:
                       aspect_ratio:
                         type:
                           - "string"
                           - "null"
-                      avatar_id:
+                      character_id:
                         type:
                           - "integer"
                           - "null"
-                      avatar_look_id:
-                        type:
-                          - "integer"
-                          - "null"
-                      avatar_talking_loop_id:
-                        minimum: 1
-                        type: "integer"
                       duration:
                         type:
                           - "integer"
@@ -6931,7 +6690,11 @@ paths:
                         type:
                           - "string"
                           - "null"
-                      made_from_talking_avatar_id:
+                      look_id:
+                        type:
+                          - "integer"
+                          - "null"
+                      made_from_talking_character_id:
                         type:
                           - "integer"
                           - "null"
@@ -6942,6 +6705,9 @@ paths:
                       status:
                         enum:
                           - "ready"
+                      talking_character_id:
+                        minimum: 1
+                        type: "integer"
                       thumbnail_url:
                         type:
                           - "string"
@@ -6951,27 +6717,27 @@ paths:
                           - "string"
                           - "null"
                     required:
-                      - "avatar_talking_loop_id"
+                      - "talking_character_id"
                       - "name"
                       - "kind"
                       - "status"
                       - "url"
                       - "thumbnail_url"
                       - "duration"
-                      - "avatar_id"
-                      - "avatar_look_id"
-                      - "made_from_talking_avatar_id"
+                      - "character_id"
+                      - "look_id"
+                      - "made_from_talking_character_id"
                       - "latest_generated_video_url"
                       - "aspect_ratio"
                     type:
                       - "object"
                       - "null"
-                  generating_avatar_talking_loops:
+                  generating_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A talking loop still being generated, before its row exists."
+                      description: "A talking character still being generated, before its row exists."
                       properties:
-                        avatar_look_id:
+                        look_id:
                           type:
                             - "integer"
                             - "null"
@@ -6984,16 +6750,122 @@ paths:
                           type: "integer"
                       required:
                         - "user_job_id"
-                        - "avatar_look_id"
+                        - "look_id"
                         - "status"
                       type: "object"
                     type: "array"
-                  is_agent_avatar:
+                  is_agent_character:
                     type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
                       - "null"
+                  look_count:
+                    minimum: 0
+                    type: "integer"
+                  looks:
+                    items:
+                      additionalProperties: false
+                      description: "An character look with the ready talking characters made from it."
+                      properties:
+                        from_agent_core:
+                          type: "boolean"
+                        look_id:
+                          minimum: 1
+                          type: "integer"
+                        name:
+                          type:
+                            - "string"
+                            - "null"
+                        origin:
+                          enum:
+                            - "original"
+                            - "uploaded"
+                            - "generated"
+                        talking_characters:
+                          items:
+                            additionalProperties: false
+                            description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                            properties:
+                              aspect_ratio:
+                                type:
+                                  - "string"
+                                  - "null"
+                              character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              duration:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              kind:
+                                enum:
+                                  - "generated"
+                                  - "uploaded"
+                              latest_generated_video_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              look_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              made_from_talking_character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              name:
+                                type:
+                                  - "string"
+                                  - "null"
+                              status:
+                                enum:
+                                  - "ready"
+                              talking_character_id:
+                                minimum: 1
+                                type: "integer"
+                              thumbnail_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              url:
+                                type:
+                                  - "string"
+                                  - "null"
+                            required:
+                              - "talking_character_id"
+                              - "name"
+                              - "kind"
+                              - "status"
+                              - "url"
+                              - "thumbnail_url"
+                              - "duration"
+                              - "character_id"
+                              - "look_id"
+                              - "made_from_talking_character_id"
+                              - "latest_generated_video_url"
+                              - "aspect_ratio"
+                            type: "object"
+                          type: "array"
+                        thumbnail_url:
+                          type:
+                            - "string"
+                            - "null"
+                        url:
+                          type:
+                            - "string"
+                            - "null"
+                      required:
+                        - "look_id"
+                        - "name"
+                        - "origin"
+                        - "from_agent_core"
+                        - "url"
+                        - "thumbnail_url"
+                        - "talking_characters"
+                      type: "object"
+                    type: "array"
                   name:
                     type: "string"
                   preview_url:
@@ -7008,28 +6880,24 @@ paths:
                     enum:
                       - "my"
                       - "library"
+                  talking_character_count:
+                    minimum: 0
+                    type: "integer"
                   updated_at:
                     type: "string"
-                  uploaded_avatar_talking_loops:
+                  uploaded_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -7042,7 +6910,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -7053,6 +6925,9 @@ paths:
                         status:
                           enum:
                             - "ready"
+                        talking_character_id:
+                          minimum: 1
+                          type: "integer"
                         thumbnail_url:
                           type:
                             - "string"
@@ -7062,37 +6937,37 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
                 required:
-                  - "avatar_id"
-                  - "avatar_public_id"
+                  - "character_id"
+                  - "character_public_id"
                   - "name"
                   - "source"
-                  - "is_agent_avatar"
+                  - "is_agent_character"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
-                  - "avatar_look_count"
-                  - "avatar_talking_loop_count"
+                  - "look_count"
+                  - "talking_character_count"
                   - "primary_voice"
-                  - "default_talking_avatar"
+                  - "default_talking_character"
                   - "updated_at"
-                  - "avatar_looks"
-                  - "uploaded_avatar_talking_loops"
-                  - "generating_avatar_talking_loops"
+                  - "looks"
+                  - "uploaded_talking_characters"
+                  - "generating_talking_characters"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -7100,13 +6975,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "get | get_avatar_talking_loop"
+      x-mcp-tool: gen_characters
+      x-mcp-branch: "get | get_talking_character"
     patch:
-      operationId: patchAvatarsById
+      operationId: patchCharactersById
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — rename"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — rename"
+      description: "PATCH /v1/avatars/{id} is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
       - name: id
         in: path
@@ -7120,13 +6996,13 @@ paths:
             schema:
               properties:
                 agent_id:
-                  description: "The agent whose avatars these are."
+                  description: "The agent whose characters these are."
                   type: "integer"
                 name:
-                  description: "Renames the avatar. Renaming the agent's own avatar also renames the agent."
+                  description: "Renames the character. Renaming the agent's own character also renames the agent."
                   type: "string"
                 primary_voice:
-                  description: "Sets the avatar's primary voice, the voice its talking loops speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it."
+                  description: "Sets the character's primary voice, the voice its talking characters speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it."
                   properties:
                     billing_source:
                       type:
@@ -7165,147 +7041,31 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "GET /v1/avatars/:id (show): the summary plus looks and talking loops."
+                description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
-                  avatar_id:
+                  character_id:
                     minimum: 1
                     type: "integer"
-                  avatar_look_count:
-                    minimum: 0
-                    type: "integer"
-                  avatar_looks:
-                    items:
-                      additionalProperties: false
-                      description: "An avatar look with the ready talking loops made from it."
-                      properties:
-                        avatar_look_id:
-                          minimum: 1
-                          type: "integer"
-                        avatar_talking_loops:
-                          items:
-                            additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
-                            properties:
-                              aspect_ratio:
-                                type:
-                                  - "string"
-                                  - "null"
-                              avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_look_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_talking_loop_id:
-                                minimum: 1
-                                type: "integer"
-                              duration:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              kind:
-                                enum:
-                                  - "generated"
-                                  - "uploaded"
-                              latest_generated_video_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              made_from_talking_avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              name:
-                                type:
-                                  - "string"
-                                  - "null"
-                              status:
-                                enum:
-                                  - "ready"
-                              thumbnail_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              url:
-                                type:
-                                  - "string"
-                                  - "null"
-                            required:
-                              - "avatar_talking_loop_id"
-                              - "name"
-                              - "kind"
-                              - "status"
-                              - "url"
-                              - "thumbnail_url"
-                              - "duration"
-                              - "avatar_id"
-                              - "avatar_look_id"
-                              - "made_from_talking_avatar_id"
-                              - "latest_generated_video_url"
-                              - "aspect_ratio"
-                            type: "object"
-                          type: "array"
-                        from_agent_core:
-                          type: "boolean"
-                        name:
-                          type:
-                            - "string"
-                            - "null"
-                        origin:
-                          enum:
-                            - "original"
-                            - "uploaded"
-                            - "generated"
-                        thumbnail_url:
-                          type:
-                            - "string"
-                            - "null"
-                        url:
-                          type:
-                            - "string"
-                            - "null"
-                      required:
-                        - "avatar_look_id"
-                        - "name"
-                        - "origin"
-                        - "from_agent_core"
-                        - "url"
-                        - "thumbnail_url"
-                        - "avatar_talking_loops"
-                      type: "object"
-                    type: "array"
-                  avatar_public_id:
-                    description: "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id."
+                  character_public_id:
+                    description: "Random public id for URLs; every character endpoint accepts it in place of character_id."
                     pattern: "^[2-9A-HJ-NP-Z]{8}$"
                     type: "string"
-                  avatar_talking_loop_count:
-                    minimum: 0
-                    type: "integer"
                   cover_url:
                     type:
                       - "string"
                       - "null"
-                  default_talking_avatar:
+                  default_talking_character:
                     additionalProperties: false
-                    description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                    description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                     properties:
                       aspect_ratio:
                         type:
                           - "string"
                           - "null"
-                      avatar_id:
+                      character_id:
                         type:
                           - "integer"
                           - "null"
-                      avatar_look_id:
-                        type:
-                          - "integer"
-                          - "null"
-                      avatar_talking_loop_id:
-                        minimum: 1
-                        type: "integer"
                       duration:
                         type:
                           - "integer"
@@ -7318,7 +7078,11 @@ paths:
                         type:
                           - "string"
                           - "null"
-                      made_from_talking_avatar_id:
+                      look_id:
+                        type:
+                          - "integer"
+                          - "null"
+                      made_from_talking_character_id:
                         type:
                           - "integer"
                           - "null"
@@ -7329,6 +7093,9 @@ paths:
                       status:
                         enum:
                           - "ready"
+                      talking_character_id:
+                        minimum: 1
+                        type: "integer"
                       thumbnail_url:
                         type:
                           - "string"
@@ -7338,27 +7105,27 @@ paths:
                           - "string"
                           - "null"
                     required:
-                      - "avatar_talking_loop_id"
+                      - "talking_character_id"
                       - "name"
                       - "kind"
                       - "status"
                       - "url"
                       - "thumbnail_url"
                       - "duration"
-                      - "avatar_id"
-                      - "avatar_look_id"
-                      - "made_from_talking_avatar_id"
+                      - "character_id"
+                      - "look_id"
+                      - "made_from_talking_character_id"
                       - "latest_generated_video_url"
                       - "aspect_ratio"
                     type:
                       - "object"
                       - "null"
-                  generating_avatar_talking_loops:
+                  generating_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A talking loop still being generated, before its row exists."
+                      description: "A talking character still being generated, before its row exists."
                       properties:
-                        avatar_look_id:
+                        look_id:
                           type:
                             - "integer"
                             - "null"
@@ -7371,16 +7138,122 @@ paths:
                           type: "integer"
                       required:
                         - "user_job_id"
-                        - "avatar_look_id"
+                        - "look_id"
                         - "status"
                       type: "object"
                     type: "array"
-                  is_agent_avatar:
+                  is_agent_character:
                     type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
                       - "null"
+                  look_count:
+                    minimum: 0
+                    type: "integer"
+                  looks:
+                    items:
+                      additionalProperties: false
+                      description: "An character look with the ready talking characters made from it."
+                      properties:
+                        from_agent_core:
+                          type: "boolean"
+                        look_id:
+                          minimum: 1
+                          type: "integer"
+                        name:
+                          type:
+                            - "string"
+                            - "null"
+                        origin:
+                          enum:
+                            - "original"
+                            - "uploaded"
+                            - "generated"
+                        talking_characters:
+                          items:
+                            additionalProperties: false
+                            description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                            properties:
+                              aspect_ratio:
+                                type:
+                                  - "string"
+                                  - "null"
+                              character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              duration:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              kind:
+                                enum:
+                                  - "generated"
+                                  - "uploaded"
+                              latest_generated_video_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              look_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              made_from_talking_character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              name:
+                                type:
+                                  - "string"
+                                  - "null"
+                              status:
+                                enum:
+                                  - "ready"
+                              talking_character_id:
+                                minimum: 1
+                                type: "integer"
+                              thumbnail_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              url:
+                                type:
+                                  - "string"
+                                  - "null"
+                            required:
+                              - "talking_character_id"
+                              - "name"
+                              - "kind"
+                              - "status"
+                              - "url"
+                              - "thumbnail_url"
+                              - "duration"
+                              - "character_id"
+                              - "look_id"
+                              - "made_from_talking_character_id"
+                              - "latest_generated_video_url"
+                              - "aspect_ratio"
+                            type: "object"
+                          type: "array"
+                        thumbnail_url:
+                          type:
+                            - "string"
+                            - "null"
+                        url:
+                          type:
+                            - "string"
+                            - "null"
+                      required:
+                        - "look_id"
+                        - "name"
+                        - "origin"
+                        - "from_agent_core"
+                        - "url"
+                        - "thumbnail_url"
+                        - "talking_characters"
+                      type: "object"
+                    type: "array"
                   name:
                     type: "string"
                   preview_url:
@@ -7395,28 +7268,24 @@ paths:
                     enum:
                       - "my"
                       - "library"
+                  talking_character_count:
+                    minimum: 0
+                    type: "integer"
                   updated_at:
                     type: "string"
-                  uploaded_avatar_talking_loops:
+                  uploaded_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -7429,7 +7298,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -7440,6 +7313,9 @@ paths:
                         status:
                           enum:
                             - "ready"
+                        talking_character_id:
+                          minimum: 1
+                          type: "integer"
                         thumbnail_url:
                           type:
                             - "string"
@@ -7449,37 +7325,37 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
                 required:
-                  - "avatar_id"
-                  - "avatar_public_id"
+                  - "character_id"
+                  - "character_public_id"
                   - "name"
                   - "source"
-                  - "is_agent_avatar"
+                  - "is_agent_character"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
-                  - "avatar_look_count"
-                  - "avatar_talking_loop_count"
+                  - "look_count"
+                  - "talking_character_count"
                   - "primary_voice"
-                  - "default_talking_avatar"
+                  - "default_talking_character"
                   - "updated_at"
-                  - "avatar_looks"
-                  - "uploaded_avatar_talking_loops"
-                  - "generating_avatar_talking_loops"
+                  - "looks"
+                  - "uploaded_talking_characters"
+                  - "generating_talking_characters"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -7487,13 +7363,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
+      x-mcp-tool: gen_characters
       x-mcp-branch: "rename | set_primary_voice"
     delete:
-      operationId: deleteAvatarsById
+      operationId: deleteCharactersById
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — delete avatar"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — delete character"
+      description: "DELETE /v1/avatars/{id} is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
       - name: id
         in: path
@@ -7503,7 +7380,7 @@ paths:
       - name: "agent_id"
         in: "query"
         required: True
-        description: "The agent whose avatars these are."
+        description: "The agent whose characters these are."
         schema:
           type: "integer"
       - name: "confirm_token"
@@ -7520,14 +7397,15 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
-      x-mcp-branch: "delete_avatar | delete_avatar_look | delete_avatar_talking_loop"
-  /avatars/{id}/copy:
+      x-mcp-tool: gen_characters
+      x-mcp-branch: "delete_character | delete_look | delete_talking_character"
+  /characters/{id}/copy:
     post:
-      operationId: postAvatarsByIdCopy
+      operationId: postCharactersByIdCopy
       x-phase: setup
-      summary: "Manage avatars, looks, and talking loops — copy to mine"
-      tags: [Avatars]
+      summary: "Manage characters, looks, and talking characters — copy to mine"
+      description: "POST /v1/avatars/{id}/copy is the deprecated name of this route. It still works and answers with avatar field names; use this /v1/characters route."
+      tags: [Characters]
       parameters:
       - name: id
         in: path
@@ -7541,7 +7419,7 @@ paths:
             schema:
               properties:
                 agent_id:
-                  description: "The agent whose avatars these are."
+                  description: "The agent whose characters these are."
                   type: "integer"
               required:
                 - "agent_id"
@@ -7553,147 +7431,31 @@ paths:
             application/json:
               schema:
                 additionalProperties: false
-                description: "GET /v1/avatars/:id (show): the summary plus looks and talking loops."
+                description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
-                  avatar_id:
+                  character_id:
                     minimum: 1
                     type: "integer"
-                  avatar_look_count:
-                    minimum: 0
-                    type: "integer"
-                  avatar_looks:
-                    items:
-                      additionalProperties: false
-                      description: "An avatar look with the ready talking loops made from it."
-                      properties:
-                        avatar_look_id:
-                          minimum: 1
-                          type: "integer"
-                        avatar_talking_loops:
-                          items:
-                            additionalProperties: false
-                            description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
-                            properties:
-                              aspect_ratio:
-                                type:
-                                  - "string"
-                                  - "null"
-                              avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_look_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              avatar_talking_loop_id:
-                                minimum: 1
-                                type: "integer"
-                              duration:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              kind:
-                                enum:
-                                  - "generated"
-                                  - "uploaded"
-                              latest_generated_video_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              made_from_talking_avatar_id:
-                                type:
-                                  - "integer"
-                                  - "null"
-                              name:
-                                type:
-                                  - "string"
-                                  - "null"
-                              status:
-                                enum:
-                                  - "ready"
-                              thumbnail_url:
-                                type:
-                                  - "string"
-                                  - "null"
-                              url:
-                                type:
-                                  - "string"
-                                  - "null"
-                            required:
-                              - "avatar_talking_loop_id"
-                              - "name"
-                              - "kind"
-                              - "status"
-                              - "url"
-                              - "thumbnail_url"
-                              - "duration"
-                              - "avatar_id"
-                              - "avatar_look_id"
-                              - "made_from_talking_avatar_id"
-                              - "latest_generated_video_url"
-                              - "aspect_ratio"
-                            type: "object"
-                          type: "array"
-                        from_agent_core:
-                          type: "boolean"
-                        name:
-                          type:
-                            - "string"
-                            - "null"
-                        origin:
-                          enum:
-                            - "original"
-                            - "uploaded"
-                            - "generated"
-                        thumbnail_url:
-                          type:
-                            - "string"
-                            - "null"
-                        url:
-                          type:
-                            - "string"
-                            - "null"
-                      required:
-                        - "avatar_look_id"
-                        - "name"
-                        - "origin"
-                        - "from_agent_core"
-                        - "url"
-                        - "thumbnail_url"
-                        - "avatar_talking_loops"
-                      type: "object"
-                    type: "array"
-                  avatar_public_id:
-                    description: "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id."
+                  character_public_id:
+                    description: "Random public id for URLs; every character endpoint accepts it in place of character_id."
                     pattern: "^[2-9A-HJ-NP-Z]{8}$"
                     type: "string"
-                  avatar_talking_loop_count:
-                    minimum: 0
-                    type: "integer"
                   cover_url:
                     type:
                       - "string"
                       - "null"
-                  default_talking_avatar:
+                  default_talking_character:
                     additionalProperties: false
-                    description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                    description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                     properties:
                       aspect_ratio:
                         type:
                           - "string"
                           - "null"
-                      avatar_id:
+                      character_id:
                         type:
                           - "integer"
                           - "null"
-                      avatar_look_id:
-                        type:
-                          - "integer"
-                          - "null"
-                      avatar_talking_loop_id:
-                        minimum: 1
-                        type: "integer"
                       duration:
                         type:
                           - "integer"
@@ -7706,7 +7468,11 @@ paths:
                         type:
                           - "string"
                           - "null"
-                      made_from_talking_avatar_id:
+                      look_id:
+                        type:
+                          - "integer"
+                          - "null"
+                      made_from_talking_character_id:
                         type:
                           - "integer"
                           - "null"
@@ -7717,6 +7483,9 @@ paths:
                       status:
                         enum:
                           - "ready"
+                      talking_character_id:
+                        minimum: 1
+                        type: "integer"
                       thumbnail_url:
                         type:
                           - "string"
@@ -7726,27 +7495,27 @@ paths:
                           - "string"
                           - "null"
                     required:
-                      - "avatar_talking_loop_id"
+                      - "talking_character_id"
                       - "name"
                       - "kind"
                       - "status"
                       - "url"
                       - "thumbnail_url"
                       - "duration"
-                      - "avatar_id"
-                      - "avatar_look_id"
-                      - "made_from_talking_avatar_id"
+                      - "character_id"
+                      - "look_id"
+                      - "made_from_talking_character_id"
                       - "latest_generated_video_url"
                       - "aspect_ratio"
                     type:
                       - "object"
                       - "null"
-                  generating_avatar_talking_loops:
+                  generating_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A talking loop still being generated, before its row exists."
+                      description: "A talking character still being generated, before its row exists."
                       properties:
-                        avatar_look_id:
+                        look_id:
                           type:
                             - "integer"
                             - "null"
@@ -7759,16 +7528,122 @@ paths:
                           type: "integer"
                       required:
                         - "user_job_id"
-                        - "avatar_look_id"
+                        - "look_id"
                         - "status"
                       type: "object"
                     type: "array"
-                  is_agent_avatar:
+                  is_agent_character:
                     type: "boolean"
                   latest_generated_video_url:
                     type:
                       - "string"
                       - "null"
+                  look_count:
+                    minimum: 0
+                    type: "integer"
+                  looks:
+                    items:
+                      additionalProperties: false
+                      description: "An character look with the ready talking characters made from it."
+                      properties:
+                        from_agent_core:
+                          type: "boolean"
+                        look_id:
+                          minimum: 1
+                          type: "integer"
+                        name:
+                          type:
+                            - "string"
+                            - "null"
+                        origin:
+                          enum:
+                            - "original"
+                            - "uploaded"
+                            - "generated"
+                        talking_characters:
+                          items:
+                            additionalProperties: false
+                            description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                            properties:
+                              aspect_ratio:
+                                type:
+                                  - "string"
+                                  - "null"
+                              character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              duration:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              kind:
+                                enum:
+                                  - "generated"
+                                  - "uploaded"
+                              latest_generated_video_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              look_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              made_from_talking_character_id:
+                                type:
+                                  - "integer"
+                                  - "null"
+                              name:
+                                type:
+                                  - "string"
+                                  - "null"
+                              status:
+                                enum:
+                                  - "ready"
+                              talking_character_id:
+                                minimum: 1
+                                type: "integer"
+                              thumbnail_url:
+                                type:
+                                  - "string"
+                                  - "null"
+                              url:
+                                type:
+                                  - "string"
+                                  - "null"
+                            required:
+                              - "talking_character_id"
+                              - "name"
+                              - "kind"
+                              - "status"
+                              - "url"
+                              - "thumbnail_url"
+                              - "duration"
+                              - "character_id"
+                              - "look_id"
+                              - "made_from_talking_character_id"
+                              - "latest_generated_video_url"
+                              - "aspect_ratio"
+                            type: "object"
+                          type: "array"
+                        thumbnail_url:
+                          type:
+                            - "string"
+                            - "null"
+                        url:
+                          type:
+                            - "string"
+                            - "null"
+                      required:
+                        - "look_id"
+                        - "name"
+                        - "origin"
+                        - "from_agent_core"
+                        - "url"
+                        - "thumbnail_url"
+                        - "talking_characters"
+                      type: "object"
+                    type: "array"
                   name:
                     type: "string"
                   preview_url:
@@ -7783,28 +7658,24 @@ paths:
                     enum:
                       - "my"
                       - "library"
+                  talking_character_count:
+                    minimum: 0
+                    type: "integer"
                   updated_at:
                     type: "string"
-                  uploaded_avatar_talking_loops:
+                  uploaded_talking_characters:
                     items:
                       additionalProperties: false
-                      description: "A ready talking loop: url plays it with its voice, latest_generated_video_url is its latest voiced video."
+                      description: "A ready talking character: url plays it with its voice, latest_generated_video_url is its latest voiced video."
                       properties:
                         aspect_ratio:
                           type:
                             - "string"
                             - "null"
-                        avatar_id:
+                        character_id:
                           type:
                             - "integer"
                             - "null"
-                        avatar_look_id:
-                          type:
-                            - "integer"
-                            - "null"
-                        avatar_talking_loop_id:
-                          minimum: 1
-                          type: "integer"
                         duration:
                           type:
                             - "integer"
@@ -7817,7 +7688,11 @@ paths:
                           type:
                             - "string"
                             - "null"
-                        made_from_talking_avatar_id:
+                        look_id:
+                          type:
+                            - "integer"
+                            - "null"
+                        made_from_talking_character_id:
                           type:
                             - "integer"
                             - "null"
@@ -7828,6 +7703,9 @@ paths:
                         status:
                           enum:
                             - "ready"
+                        talking_character_id:
+                          minimum: 1
+                          type: "integer"
                         thumbnail_url:
                           type:
                             - "string"
@@ -7837,37 +7715,37 @@ paths:
                             - "string"
                             - "null"
                       required:
-                        - "avatar_talking_loop_id"
+                        - "talking_character_id"
                         - "name"
                         - "kind"
                         - "status"
                         - "url"
                         - "thumbnail_url"
                         - "duration"
-                        - "avatar_id"
-                        - "avatar_look_id"
-                        - "made_from_talking_avatar_id"
+                        - "character_id"
+                        - "look_id"
+                        - "made_from_talking_character_id"
                         - "latest_generated_video_url"
                         - "aspect_ratio"
                       type: "object"
                     type: "array"
                 required:
-                  - "avatar_id"
-                  - "avatar_public_id"
+                  - "character_id"
+                  - "character_public_id"
                   - "name"
                   - "source"
-                  - "is_agent_avatar"
+                  - "is_agent_character"
                   - "cover_url"
                   - "preview_url"
                   - "latest_generated_video_url"
-                  - "avatar_look_count"
-                  - "avatar_talking_loop_count"
+                  - "look_count"
+                  - "talking_character_count"
                   - "primary_voice"
-                  - "default_talking_avatar"
+                  - "default_talking_character"
                   - "updated_at"
-                  - "avatar_looks"
-                  - "uploaded_avatar_talking_loops"
-                  - "generating_avatar_talking_loops"
+                  - "looks"
+                  - "uploaded_talking_characters"
+                  - "generating_talking_characters"
                 type: "object"
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -7875,7 +7753,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ApiValidationError'
-      x-mcp-tool: gen_avatars
+      x-mcp-tool: gen_characters
       x-mcp-branch: "copy_to_mine"
   /content_resources/from_url:
     post:

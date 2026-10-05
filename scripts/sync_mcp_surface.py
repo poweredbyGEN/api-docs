@@ -75,7 +75,7 @@ SCHEMAS_FILE = os.path.join(ROOT, "scripts", "operation-schemas.json")
 SEED_FILE = os.path.join(ROOT, "scripts", "openapi-operations.json")
 BASELINE_FILE = os.path.join(ROOT, "scripts", "openapi-missing-baseline.json")
 CONTRACT_FILE = os.path.join(ROOT, "scripts", "backend", "public-contract.json")
-AVATARS_SCHEMA_FILE = os.path.join(ROOT, "scripts", "backend", "avatars-api-schema.json")
+CHARACTERS_SCHEMA_FILE = os.path.join(ROOT, "scripts", "backend", "characters-api-schema.json")
 OVERRIDES_FILE = os.path.join(ROOT, "scripts", "mcp-path-params.json")
 OPENAPI_FILES = ["public/openapi.yaml", "public/.well-known/openapi.yaml"]
 METHODS = ("get", "post", "put", "patch", "delete", "head", "options")
@@ -128,6 +128,11 @@ ROUTE_ALIASES = {
     "spreadsheet_rows": "rows",
     "spreadsheet_columns": "columns",
     "video_layers": "layers",
+    # Avatars are called characters: gen_characters still calls Rails
+    # /avatars and /avatars/{}/talking_loops, which serve /characters and
+    # /characters/{}/talking_characters under the old names.
+    "avatars": "characters",
+    "talking_loops": "talking_characters",
 }
 
 # ---- shared error envelopes --------------------------------------------------
@@ -217,7 +222,7 @@ ERROR_RESPONSES_END = "gen:error-envelope-responses:end"
 MCP_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
 
 # A tag decides the journey phase the docs filter on. Every tag used here is
-# declared in the spec's `tags:` list (the two additions, Avatars and Billing,
+# declared in the spec's `tags:` list (the two additions, Characters and Billing,
 # are declared there too).
 TAG_PHASE = {
     "Discovery": "setup",
@@ -227,7 +232,7 @@ TAG_PHASE = {
     "Agent Profile": "setup",
     "Agent Core": "setup",
     "Agent Voice": "setup",
-    "Avatars": "setup",
+    "Characters": "setup",
     "Billing": "setup",
     "Agent Chat": "ideas",
     "Song Mixes": "ideas",
@@ -242,7 +247,7 @@ TAG_PHASE = {
 # Path families whose generated operations use a tag not already carried by a
 # documented route of the same family.
 TAG_RULES = [
-    (re.compile(r"^/avatars"), "Avatars"),
+    (re.compile(r"^/characters"), "Characters"),
     (
         re.compile(r"^/(credit_balance|credit_plans|credit_transactions|payment|subscription_upgrade|seat_checkout)"),
         "Billing",
@@ -462,10 +467,13 @@ def _branch_handlers(server_tree, families_tree):
 
     `families.py` FAMILIES owns every action-family branch, `_DISCOVER_DOMAIN_VIEWS`
     owns the gen_discover domain+view matrix, and `_AVATAR_HANDLERS` owns the
-    gen_avatars ops.
+    gen_avatars ops. gen_characters is gen_avatars under character names:
+    `_CHARACTER_OPS` maps each of its ops to the gen_avatars op whose handler
+    runs it.
     """
     handlers = {}
-    for tree, wanted in ((server_tree, ("_DISCOVER_DOMAIN_VIEWS", "_AVATAR_HANDLERS")),):
+    character_ops = {}
+    for tree, wanted in ((server_tree, ("_DISCOVER_DOMAIN_VIEWS", "_AVATAR_HANDLERS", "_CHARACTER_OPS")),):
         for node in tree.body:
             name = None
             if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
@@ -481,18 +489,28 @@ def _branch_handlers(server_tree, families_tree):
                     for view, handler in zip(views.keys, views.values):
                         if isinstance(view, ast.Constant) and isinstance(handler, ast.Constant):
                             handlers[("gen_discover", f"{domain.value}.{view.value}")] = [handler.value]
+            elif name == "_CHARACTER_OPS":
+                for op, avatar_op in zip(node.value.keys, node.value.values):
+                    if isinstance(op, ast.Constant) and isinstance(avatar_op, ast.Constant):
+                        character_ops[op.value] = avatar_op.value
             else:
                 for op, handler in zip(node.value.keys, node.value.values):
                     if not isinstance(op, ast.Constant):
                         continue
                     if isinstance(handler, ast.Constant):
                         handlers[("gen_avatars", op.value)] = [handler.value]
+                    elif isinstance(handler, ast.Name):
+                        # `"list": _avatars_list` names the handler function itself.
+                        handlers[("gen_avatars", op.value)] = [handler.id]
                     elif isinstance(handler, ast.Lambda):
                         handlers[("gen_avatars", op.value)] = [
                             call.func.id
                             for call in ast.walk(handler)
                             if isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
                         ]
+    for op, avatar_op in character_ops.items():
+        if ("gen_avatars", avatar_op) in handlers:
+            handlers[("gen_characters", op)] = handlers[("gen_avatars", avatar_op)]
     for node in families_tree.body:
         name = None
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
@@ -707,7 +725,7 @@ def derive_servers(entries, mcp_src):
         candidates = []
         if tool == "gen_discover" and "." in branch:
             candidates = handlers.get((tool, branch), [])
-        elif tool == "gen_avatars":
+        elif tool in ("gen_avatars", "gen_characters"):
             for part in branch.split("|"):
                 candidates.extend(handlers.get((tool, part.split(" ")[0].strip()), []))
         else:
@@ -992,35 +1010,49 @@ def merge_operation_schema(lines, schema_entry):
     return out
 
 
-# ---- avatar response schemas --------------------------------------------------
+# ---- character response schemas -----------------------------------------------
 #
-# The backend's docs/generated/avatars-api-schema.json pins the
-# Avatars::Presenter output shapes (summary, detail, look, talking_loop,
-# generating_job) and the create answers. Each /avatars operation's success body
-# is one of them: the index list is an array of `summary`, create returns
-# `create` (the detail plus what it made), show/update/copy return `detail`,
-# the look routes return `look`, a talking-loop upload returns
-# `talking_loop_create` and the other talking-loop routes `talking_loop`.
-# The same file's `requests` carries every /v1/avatars route's request params,
-# generated from the params the controllers permit: a body for POST/PATCH and
-# query parameters for GET/DELETE.
-AVATAR_RESPONSES = {
-    "GET /avatars": ("summary", "list"),
-    "GET /avatars/{id}": ("detail", "object"),
-    "POST /avatars": ("create", "object"),
-    "PATCH /avatars/{id}": ("detail", "object"),
-    "POST /avatars/{id}/copy": ("detail", "object"),
-    "POST /avatars/{avatar_id}/looks": ("look", "object"),
-    "GET /avatars/{avatar_id}/looks/{id}": ("look", "object"),
-    "POST /avatars/{avatar_id}/talking_loops": ("talking_loop_create", "object"),
-    "GET /avatars/{avatar_id}/talking_loops/{id}": ("talking_loop", "object"),
+# Avatars are called characters. The backend's
+# docs/generated/characters-api-schema.json pins the Characters::Presenter
+# output shapes (summary, detail, look, talking_character, generating_job) and
+# the create answers. Each /characters operation's success body is one of them:
+# the index list is an array of `summary`, create returns `create` (the detail
+# plus what it made), show/update/copy return `detail`, a look upload returns
+# `look`, a talking-character upload returns `talking_character_create` and the
+# other talking-character routes `talking_character`.
+# The same file's `requests` carries every /v1/characters route's request
+# params, generated from the params the controllers permit: a body for
+# POST/PATCH and query parameters for GET/DELETE.
+CHARACTER_RESPONSES = {
+    "GET /characters": ("summary", "list"),
+    "GET /characters/{id}": ("detail", "object"),
+    "POST /characters": ("create", "object"),
+    "PATCH /characters/{id}": ("detail", "object"),
+    "POST /characters/{id}/copy": ("detail", "object"),
+    "POST /characters/{character_id}/looks": ("look", "object"),
+    "POST /characters/{character_id}/talking_characters": ("talking_character_create", "object"),
+    "GET /characters/{character_id}/talking_characters/{id}": ("talking_character", "object"),
 }
 
 
-def avatar_schema_entries(avatars):
-    """Synthetic `scripts/operation-schemas.json` entries for the /avatars routes.
+def deprecated_alias(path):
+    """The deprecated /avatars route a /characters route still answers at, else None.
 
-    Everything comes from the vendored avatars-api-schema.json: the response
+    Rails serves both names from the same controllers. The alias is named in
+    the /characters operation's description rather than documented as an
+    operation of its own: the spec documents each route an MCP tool calls once.
+    """
+    if not path.startswith("/characters"):
+        return None
+    return (
+        "/avatars" + path[len("/characters"):]
+    ).replace("{character_id}", "{avatar_id}").replace("/talking_characters", "/talking_loops")
+
+
+def character_schema_entries(characters):
+    """Synthetic `scripts/operation-schemas.json` entries for the /characters routes.
+
+    Everything comes from the vendored characters-api-schema.json: the response
     schemas, and from its `requests` the request body (POST/PATCH) or query
     parameters (GET/DELETE) of every route. A DELETE answers 204 with no body
     (`head :no_content`), so it declares both `noContent` and the
@@ -1029,18 +1061,18 @@ def avatar_schema_entries(avatars):
     like the other operations.
     """
     entries = {}
-    for key, (name, kind) in AVATAR_RESPONSES.items():
-        schema = avatars.get(name)
+    for key, (name, kind) in CHARACTER_RESPONSES.items():
+        schema = characters.get(name)
         if schema is None:
             raise SystemExit(
-                f"{os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)}: missing {name!r} schema; "
+                f"{os.path.relpath(CHARACTERS_SCHEMA_FILE, ROOT)}: missing {name!r} schema; "
                 "re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2>"
             )
         entries[key] = {"response": {"type": "array", "items": schema} if kind == "list" else schema}
-    requests = avatars.get("requests")
+    requests = characters.get("requests")
     if not requests:
         raise SystemExit(
-            f"{os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)}: missing 'requests'; "
+            f"{os.path.relpath(CHARACTERS_SCHEMA_FILE, ROOT)}: missing 'requests'; "
             "re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2>"
         )
     for route, request in requests.items():
@@ -1196,6 +1228,13 @@ def generated_operation(entry, index, contract):
     lines.extend(server_override_lines(entry))
     lines.append(f"      x-phase: {phase_for(entry['tag'])}")
     lines.append(f"      summary: {yaml_scalar(entry['summary'])}")
+    alias = deprecated_alias(entry["path"])
+    if alias:
+        note = (
+            f"{entry['method']} /v1{alias} is the deprecated name of this route. It still "
+            "works and answers with avatar field names; use this /v1/characters route."
+        )
+        lines.append(f"      description: {yaml_scalar(note)}")
     lines.append(f"      tags: [{entry['tag']}]")
     params = [name for name in re.findall(r"\{(\w+)\}", entry["path"])]
     contract_entry = contract_for(index, entry["method"], entry["path"])
@@ -1578,17 +1617,17 @@ def main(argv):
         for key in unknown:
             print(f"  {key}")
         return 1
-    # The /avatars response schemas come from the vendored avatars-api-schema.json,
+    # The /characters schemas come from the vendored characters-api-schema.json,
     # not from scripts/operation-schemas.json. Fail loudly when the vendored file
-    # is missing so a regression never silently drops those response schemas.
-    if not os.path.exists(AVATARS_SCHEMA_FILE):
+    # is missing so a regression never silently drops those schemas.
+    if not os.path.exists(CHARACTERS_SCHEMA_FILE):
         print(
-            f"FAIL: {os.path.relpath(AVATARS_SCHEMA_FILE, ROOT)} is missing; "
+            f"FAIL: {os.path.relpath(CHARACTERS_SCHEMA_FILE, ROOT)} is missing; "
             "run scripts/sync-from-backend.mjs --backend <gen-backend-v2> to vendor it"
         )
         return 1
-    avatars = read_json(AVATARS_SCHEMA_FILE)
-    schemas.update({key: entry for key, entry in avatar_schema_entries(avatars).items() if key in known})
+    characters = read_json(CHARACTERS_SCHEMA_FILE)
+    schemas.update({key: entry for key, entry in character_schema_entries(characters).items() if key in known})
     outputs, meta = render_all(surface, seed, contract, schemas)
     failures, missing = assert_invariants(surface, meta)
     if failures:
