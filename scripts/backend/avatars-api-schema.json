@@ -162,6 +162,11 @@
         },
         "type": "array"
       },
+      "avatar_public_id": {
+        "description": "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
       "avatar_talking_loop_count": {
         "minimum": 0,
         "type": "integer"
@@ -365,6 +370,7 @@
     },
     "required": [
       "avatar_id",
+      "avatar_public_id",
       "name",
       "source",
       "is_agent_avatar",
@@ -544,6 +550,11 @@
         },
         "type": "array"
       },
+      "avatar_public_id": {
+        "description": "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
       "avatar_talking_loop_count": {
         "minimum": 0,
         "type": "integer"
@@ -714,6 +725,7 @@
     },
     "required": [
       "avatar_id",
+      "avatar_public_id",
       "name",
       "source",
       "is_agent_avatar",
@@ -1267,6 +1279,11 @@
         "minimum": 0,
         "type": "integer"
       },
+      "avatar_public_id": {
+        "description": "Random public id for URLs; every avatar endpoint accepts it in place of avatar_id.",
+        "pattern": "^[2-9A-HJ-NP-Z]{8}$",
+        "type": "string"
+      },
       "avatar_talking_loop_count": {
         "minimum": 0,
         "type": "integer"
@@ -1313,6 +1330,7 @@
     },
     "required": [
       "avatar_id",
+      "avatar_public_id",
       "name",
       "source",
       "is_agent_avatar",
