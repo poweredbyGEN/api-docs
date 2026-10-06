@@ -1267,6 +1267,10 @@
           "status": "active",
           "models": {}
         },
+        "lip-sync-trim": {
+          "status": "active",
+          "models": {}
+        },
         "media": {
           "status": "active",
           "models": {}
@@ -1315,6 +1319,7 @@
         "captions",
         "image-from-text",
         "lip-sync",
+        "lip-sync-trim",
         "media",
         "raw-text",
         "song",
@@ -2123,7 +2128,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": 20,
+          "max_reference_audio_seconds": 30,
           "required": [
             "model",
             "prompt"
@@ -2616,7 +2621,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": 20,
+          "max_reference_audio_seconds": 30,
           "required": [
             "model",
             "prompt"
@@ -3067,7 +3072,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": 20,
+          "max_reference_audio_seconds": 30,
           "required": [
             "model",
             "prompt",
@@ -3080,6 +3085,8 @@
             "ratio",
             "voiceReplace",
             "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
             "syncOutputAspectRatio",
             "images",
             "model"
@@ -3088,6 +3095,12 @@
             "prompt": {
               "type": "object",
               "x-gen-maxLengthUtf16": 4000
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -3121,6 +3134,8 @@
             "ratio",
             "voiceReplace",
             "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
             "syncOutputAspectRatio",
             "images",
             "model"
@@ -3129,6 +3144,12 @@
             "prompt": {
               "type": "object",
               "x-gen-maxLengthUtf16": 4000
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -3933,6 +3954,38 @@
             "lipSyncModel",
             "model",
             "autoGenerate"
+          ],
+          "bounds": {
+            "lipSyncModel": {
+              "type": "string",
+              "enum": [
+                "sync.so",
+                "gen"
+              ]
+            }
+          }
+        },
+        {
+          "card": "lip-sync-trim",
+          "model": null,
+          "prompt_max_utf16": 3000,
+          "max_reference_images": null,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "video",
+            "audio"
+          ],
+          "fields": [
+            "video",
+            "audio",
+            "removeSilence",
+            "lipSyncModel",
+            "model",
+            "autoGenerate",
+            "videoTrim",
+            "audioTrim"
           ],
           "bounds": {
             "lipSyncModel": {
@@ -6755,7 +6808,8 @@
         "talking_avatar_video_data",
         "remove_background",
         "remove_silence",
-        "lip_sync_model"
+        "lip_sync_model",
+        "trims"
       ],
       "lip_sync_model": {
         "type": "string",
@@ -7058,6 +7112,8 @@
         "image",
         "image_tail",
         "images",
+        "ingredientTrims",
+        "convertMp3sToVideoForLipSync",
         "metadata"
       ],
       "model": {

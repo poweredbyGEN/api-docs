@@ -377,7 +377,8 @@
         "talking_avatar_video_data",
         "remove_background",
         "remove_silence",
-        "lip_sync_model"
+        "lip_sync_model",
+        "trims"
       ],
       "lip_sync_model": {
         "type": "string",
@@ -680,6 +681,8 @@
         "image",
         "image_tail",
         "images",
+        "ingredientTrims",
+        "convertMp3sToVideoForLipSync",
         "metadata"
       ],
       "model": {
