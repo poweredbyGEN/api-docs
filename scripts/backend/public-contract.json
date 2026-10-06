@@ -8191,6 +8191,46 @@
     ]
   },
   "vidsheet_operations": {
+    "GET /v1/vidsheet/build_quote": {
+      "operationId": "vidsheet_action.build_quote",
+      "requestBody": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "engine_id": {
+                  "x-no-db-column": true
+                },
+                "row_id": {
+                  "x-no-db-column": true
+                },
+                "agent_id": {
+                  "x-direct-read": true
+                },
+                "impersonation_token": {
+                  "x-direct-read": true
+                },
+                "organization_id": {
+                  "x-direct-read": true
+                },
+                "project_share_token": {
+                  "x-direct-read": true
+                },
+                "spreadsheet_id": {
+                  "x-direct-read": true
+                },
+                "vidsheet_id": {
+                  "x-direct-read": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
     "POST /v1/vidsheet/from_idea": {
       "operationId": "spreadsheet.from_idea"
     },
