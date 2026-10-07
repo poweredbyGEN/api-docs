@@ -2797,7 +2797,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server.py:12996 (api_call)"
+      "server_source": "src/gen_mcp_server/server.py:12696 (api_call)"
     },
     {
       "method": "GET",
