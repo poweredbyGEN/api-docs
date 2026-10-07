@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "08d1fd3",
+  "revision": "fa7d0db",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -80,7 +80,7 @@
     {
       "name": "gen_vidsheet_action",
       "title": "Vidsheet action",
-      "summary": "Step 4 (Edit & Generate): the Vidsheet write tool for the editable video workspace."
+      "summary": "Vidsheet: skill://gen/vidsheet-mcp/SKILL.md; host-approved resources/read or prompt vidsheet-mcp."
     },
     {
       "name": "gen_voice_action",
