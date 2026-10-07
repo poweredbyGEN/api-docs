@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "ea0a0cf",
+  "revision": "7725fc4",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -24,7 +24,7 @@
     },
     {
       "name": "gen_billing_action",
-      "title": "Buy credits and manage credit purchases",
+      "title": "Read billing and manage credit purchases",
       "summary": "Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase)."
     },
     {
