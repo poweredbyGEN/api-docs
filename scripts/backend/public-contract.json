@@ -1518,6 +1518,521 @@
           "model": "suno-v5.5-beta"
         }
       ],
+      "jobs": [
+        {
+          "card": "image-from-text",
+          "model": "gemini_2",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_2_lite",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_pro",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gpt-image-2",
+          "user_job_type": "openai_image_generation_2",
+          "fields": {
+            "model": "model",
+            "ratio": "format"
+          },
+          "values": {
+            "ratio": {
+              "1:1": "square",
+              "9:16": "portrait",
+              "16:9": "landscape"
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gpt-image-2.5-flare",
+          "user_job_type": "openai_image_generation_2",
+          "fields": {
+            "model": "model",
+            "ratio": "format"
+          },
+          "values": {
+            "ratio": {
+              "1:1": "square",
+              "9:16": "portrait",
+              "16:9": "landscape"
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gpt-image-2.5-sunburst",
+          "user_job_type": "openai_image_generation_2",
+          "fields": {
+            "model": "model",
+            "ratio": "format"
+          },
+          "values": {
+            "ratio": {
+              "1:1": "square",
+              "9:16": "portrait",
+              "16:9": "landscape"
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "grok",
+          "user_job_type": "grok_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "midjourney",
+          "user_job_type": "midjourney",
+          "fields": {
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "seedream-4.0",
+          "user_job_type": "seedream_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "seedream-4.5",
+          "user_job_type": "seedream_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "song",
+          "model": "suno-v4.5plus-beta",
+          "user_job_type": "song_generation",
+          "fields": {
+            "model": "model",
+            "style": "style",
+            "instrumental": "instrumental",
+            "negativeTags": "negative_tags",
+            "vocalGender": "vocal_gender",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "song",
+          "model": "suno-v5-beta",
+          "user_job_type": "song_generation",
+          "fields": {
+            "model": "model",
+            "style": "style",
+            "instrumental": "instrumental",
+            "negativeTags": "negative_tags",
+            "vocalGender": "vocal_gender",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "song",
+          "model": "suno-v5.5-beta",
+          "user_job_type": "song_generation",
+          "fields": {
+            "model": "model",
+            "style": "style",
+            "instrumental": "instrumental",
+            "negativeTags": "negative_tags",
+            "vocalGender": "vocal_gender",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "text",
+          "model": "gemini",
+          "user_job_type": "text_generation",
+          "fields": {
+            "model": "model",
+            "temperature": "temperature",
+            "max_length": "max_length"
+          }
+        },
+        {
+          "card": "text",
+          "model": "openai",
+          "user_job_type": "text_generation",
+          "fields": {
+            "model": "model",
+            "temperature": "temperature",
+            "max_length": "max_length"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "gemini-omni-1.1-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "grok",
+          "user_job_type": "grok_video_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "kling-v2-6",
+          "user_job_type": "kling_img2video",
+          "fields": {
+            "model": "model",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "kling-v3",
+          "user_job_type": "kling_img2video",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "nativeAudio": "native_audio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "minimax-h3-max",
+          "user_job_type": "minimax_h3_max_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "seedance-2.0",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "seedance-2.0-fast",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "seedance-2.0-less-restriction",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "seedance-2.5",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "seedance-2.5-less-restriction",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "veo-3.1",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "veo-3.1-fast",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-image",
+          "model": "veo-3.1-lite",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "gemini-omni-1.1-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "grok",
+          "user_job_type": "grok_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "kling-v3",
+          "user_job_type": "kling",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "nativeAudio": "native_audio",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "seedance-2.0",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "seedance-2.0-fast",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "seedance-2.0-less-restriction",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "seedance-2.5",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "seedance-2.5-less-restriction",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "veo-3.1",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "gemini-omni-1.1-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "grok",
+          "user_job_type": "grok_video_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio",
+            "duration": "duration"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "kling-v3",
+          "user_job_type": "kling",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "nativeAudio": "native_audio",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "seedance-2.0",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "seedance-2.0-fast",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "seedance-2.0-less-restriction",
+          "user_job_type": "seedance_2_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "seedance-2.5",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "seedance-2.5-less-restriction",
+          "user_job_type": "seedance_2_5_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "veo-3.1",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "veo-3.1-fast",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
+          "card": "video-from-text",
+          "model": "veo-3.1-lite",
+          "user_job_type": "gemini_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio"
+          }
+        }
+      ],
       "song_max_duration_seconds": {
         "suno-v5-beta": 240,
         "suno-v4.5plus-beta": 480,
@@ -4089,6 +4604,110 @@
               "type": "number",
               "minimum": 0.5,
               "maximum": 2
+            }
+          }
+        },
+        {
+          "card": "text",
+          "model": "gemini",
+          "required": [
+            "prompt"
+          ],
+          "fields": [
+            "model",
+            "temperature",
+            "prompt",
+            "prompt_var",
+            "max_length",
+            "images"
+          ],
+          "bounds": {
+            "model": {
+              "type": "string",
+              "enum": [
+                "openai",
+                "gemini"
+              ],
+              "default": "gemini"
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 0.5
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "max_length": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "images": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 10,
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        {
+          "card": "text",
+          "model": "openai",
+          "required": [
+            "prompt"
+          ],
+          "fields": [
+            "model",
+            "temperature",
+            "prompt",
+            "prompt_var",
+            "max_length",
+            "images"
+          ],
+          "bounds": {
+            "model": {
+              "type": "string",
+              "enum": [
+                "openai",
+                "gemini"
+              ],
+              "default": "gemini"
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 0.5
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "max_length": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "images": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 10,
+              "items": {
+                "type": "object"
+              }
             }
           }
         }

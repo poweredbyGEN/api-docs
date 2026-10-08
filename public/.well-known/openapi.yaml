@@ -12729,7 +12729,7 @@ components:
               model:
                 $ref: '#/components/schemas/CreationCardModel'
               prompt_max_utf16:
-                type: integer
+                type: [integer, "null"]
               max_reference_images:
                 type: [integer, "null"]
               max_reference_videos:
