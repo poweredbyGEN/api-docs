@@ -5978,6 +5978,24 @@ paths:
                   additionalProperties: false
                   description: "One row of GET /v1/characters (the index list)."
                   properties:
+                    availability:
+                      additionalProperties: false
+                      properties:
+                        missing:
+                          items:
+                            enum:
+                              - "looks.url"
+                              - "primary_voice.voice_id"
+                          type: "array"
+                        speaking:
+                          type: "boolean"
+                        visual:
+                          type: "boolean"
+                      required:
+                        - "visual"
+                        - "speaking"
+                        - "missing"
+                      type: "object"
                     character_id:
                       minimum: 1
                       type: "integer"
@@ -6095,6 +6113,7 @@ paths:
                     - "look_count"
                     - "talking_character_count"
                     - "primary_voice"
+                    - "availability"
                     - "default_talking_character"
                     - "updated_at"
                   type: "object"
@@ -6153,6 +6172,24 @@ paths:
                 additionalProperties: false
                 description: "POST /v1/characters (create): the detail plus the look, talking character and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the character's primary_voice."
                 properties:
+                  availability:
+                    additionalProperties: false
+                    properties:
+                      missing:
+                        items:
+                          enum:
+                            - "looks.url"
+                            - "primary_voice.voice_id"
+                        type: "array"
+                      speaking:
+                        type: "boolean"
+                      visual:
+                        type: "boolean"
+                    required:
+                      - "visual"
+                      - "speaking"
+                      - "missing"
+                    type: "object"
                   character_id:
                     minimum: 1
                     type: "integer"
@@ -6488,6 +6525,7 @@ paths:
                   - "look_count"
                   - "talking_character_count"
                   - "primary_voice"
+                  - "availability"
                   - "default_talking_character"
                   - "updated_at"
                   - "looks"
@@ -6923,6 +6961,24 @@ paths:
                 additionalProperties: false
                 description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
+                  availability:
+                    additionalProperties: false
+                    properties:
+                      missing:
+                        items:
+                          enum:
+                            - "looks.url"
+                            - "primary_voice.voice_id"
+                        type: "array"
+                      speaking:
+                        type: "boolean"
+                      visual:
+                        type: "boolean"
+                    required:
+                      - "visual"
+                      - "speaking"
+                      - "missing"
+                    type: "object"
                   character_id:
                     minimum: 1
                     type: "integer"
@@ -7231,6 +7287,7 @@ paths:
                   - "look_count"
                   - "talking_character_count"
                   - "primary_voice"
+                  - "availability"
                   - "default_talking_character"
                   - "updated_at"
                   - "looks"
@@ -7311,6 +7368,24 @@ paths:
                 additionalProperties: false
                 description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
+                  availability:
+                    additionalProperties: false
+                    properties:
+                      missing:
+                        items:
+                          enum:
+                            - "looks.url"
+                            - "primary_voice.voice_id"
+                        type: "array"
+                      speaking:
+                        type: "boolean"
+                      visual:
+                        type: "boolean"
+                    required:
+                      - "visual"
+                      - "speaking"
+                      - "missing"
+                    type: "object"
                   character_id:
                     minimum: 1
                     type: "integer"
@@ -7619,6 +7694,7 @@ paths:
                   - "look_count"
                   - "talking_character_count"
                   - "primary_voice"
+                  - "availability"
                   - "default_talking_character"
                   - "updated_at"
                   - "looks"
@@ -7701,6 +7777,24 @@ paths:
                 additionalProperties: false
                 description: "GET /v1/characters/:id (show): the summary plus looks and talking characters."
                 properties:
+                  availability:
+                    additionalProperties: false
+                    properties:
+                      missing:
+                        items:
+                          enum:
+                            - "looks.url"
+                            - "primary_voice.voice_id"
+                        type: "array"
+                      speaking:
+                        type: "boolean"
+                      visual:
+                        type: "boolean"
+                    required:
+                      - "visual"
+                      - "speaking"
+                      - "missing"
+                    type: "object"
                   character_id:
                     minimum: 1
                     type: "integer"
@@ -8009,6 +8103,7 @@ paths:
                   - "look_count"
                   - "talking_character_count"
                   - "primary_voice"
+                  - "availability"
                   - "default_talking_character"
                   - "updated_at"
                   - "looks"
