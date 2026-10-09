@@ -8910,12 +8910,6 @@
                 },
                 "project_share_token": {
                   "x-direct-read": true
-                },
-                "spreadsheet_id": {
-                  "x-direct-read": true
-                },
-                "vidsheet_id": {
-                  "x-direct-read": true
                 }
               },
               "additionalProperties": false
@@ -9007,12 +9001,6 @@
                     },
                     "project_share_token": {
                       "x-direct-read": true
-                    },
-                    "spreadsheet_id": {
-                      "x-direct-read": true
-                    },
-                    "vidsheet_id": {
-                      "x-direct-read": true
                     }
                   },
                   "additionalProperties": false
@@ -9099,12 +9087,6 @@
                       "x-direct-read": true
                     },
                     "project_share_token": {
-                      "x-direct-read": true
-                    },
-                    "spreadsheet_id": {
-                      "x-direct-read": true
-                    },
-                    "vidsheet_id": {
                       "x-direct-read": true
                     }
                   },
@@ -9168,12 +9150,6 @@
                     },
                     "project_share_token": {
                       "x-direct-read": true
-                    },
-                    "spreadsheet_id": {
-                      "x-direct-read": true
-                    },
-                    "vidsheet_id": {
-                      "x-direct-read": true
                     }
                   },
                   "additionalProperties": false
@@ -9260,12 +9236,6 @@
                       "x-direct-read": true
                     },
                     "project_share_token": {
-                      "x-direct-read": true
-                    },
-                    "spreadsheet_id": {
-                      "x-direct-read": true
-                    },
-                    "vidsheet_id": {
                       "x-direct-read": true
                     }
                   },
@@ -9432,12 +9402,6 @@
                   "x-direct-read": true
                 },
                 "project_share_token": {
-                  "x-direct-read": true
-                },
-                "spreadsheet_id": {
-                  "x-direct-read": true
-                },
-                "vidsheet_id": {
                   "x-direct-read": true
                 }
               },
