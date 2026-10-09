@@ -8012,6 +8012,24 @@
           "default": true,
           "description": "Whether the batch runs the automatic dependent-regeneration walk after its writes. False performs the writes and dispatches no dependent jobs; omitted keeps the current behaviour."
         },
+        "no_paid": {
+          "type": "boolean",
+          "default": false,
+          "description": "Refuse paid media generation for this run. Text and LLM work still bills normally."
+        },
+        "max_paid_operations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "description": "Maximum paid media reservations across all workspaces in this authenticated user/run, enforced atomically. Retries reuse their reservation."
+        },
+        "spending_run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Stable run or conversation identity required with spending controls. The authenticated run owner shares one policy across workspaces."
+        },
         "actions": {
           "type": "array",
           "description": "One action, or a compatible batch: updates, generations (at most 50), variable creates, one video-scene edit group, or a reconcile of creates, updates and deletes on one Vidsheet. A reconcile applies deletes, then creates, then updates; a create may carry a ref that later updates address.",
