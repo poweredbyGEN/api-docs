@@ -1893,7 +1893,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
         {
@@ -1904,7 +1905,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
         {
