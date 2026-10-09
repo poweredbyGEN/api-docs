@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "4c67faf",
+  "revision": "a0dc7cb",
   "tools": [
     {
       "name": "gen_agent_action",
@@ -25,7 +25,7 @@
     {
       "name": "gen_billing_action",
       "title": "Read billing and manage credit purchases",
-      "summary": "Buy GEN credits for a workspace: start a Stripe checkout (buy_credits) or create and settle an x402 crypto purchase (create_x402_credit_purchase, settle_x402_credit_purchase)."
+      "summary": "Open a Stripe payment page for a workspace plan or credit pack with open_checkout (organization_id, credit_plan_id from billing.plans)."
     },
     {
       "name": "gen_characters",
@@ -51,6 +51,11 @@
       "name": "gen_generate",
       "title": "Create images, videos, songs, and transcripts",
       "summary": "Create media with GEN: generate an image (create_image), a video clip (create_video), an original song (create_song), a DJ-style song mix (create_song_mix), or transcribe audio or video into text…"
+    },
+    {
+      "name": "gen_generate_report_ideas",
+      "title": "Generate report ideas",
+      "summary": "Compose the weekly We Believe report's source-grounded ideas through the one billed content-ideas generator (the same path gen_content_action generate_ideas uses; this tool never calls a model…"
     },
     {
       "name": "gen_platform_action",

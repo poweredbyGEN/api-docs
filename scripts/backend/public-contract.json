@@ -1860,7 +1860,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
         {
@@ -1871,7 +1872,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
         {
@@ -1882,7 +1884,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
         {
@@ -2546,7 +2549,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt"
@@ -2579,7 +2582,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt"
@@ -2612,7 +2615,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt"
@@ -3013,7 +3016,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt"
@@ -3054,7 +3057,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt",
@@ -3096,7 +3099,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt",
@@ -3466,7 +3469,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt",
@@ -3479,6 +3482,8 @@
             "ratio",
             "voiceReplace",
             "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
             "syncOutputAspectRatio",
             "images",
             "model"
@@ -3487,6 +3492,12 @@
             "prompt": {
               "type": "object",
               "x-gen-maxLengthUtf16": 4000
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -3507,7 +3518,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt",
@@ -3520,6 +3531,8 @@
             "ratio",
             "voiceReplace",
             "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
             "syncOutputAspectRatio",
             "images",
             "model"
@@ -3528,6 +3541,12 @@
             "prompt": {
               "type": "object",
               "x-gen-maxLengthUtf16": 4000
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -3548,7 +3567,7 @@
           "max_reference_images": 9,
           "max_reference_videos": 3,
           "max_reference_audio": 3,
-          "max_reference_audio_seconds": null,
+          "max_reference_audio_seconds": 15,
           "required": [
             "model",
             "prompt",
@@ -3561,6 +3580,8 @@
             "ratio",
             "voiceReplace",
             "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
             "syncOutputAspectRatio",
             "images",
             "model"
@@ -3569,6 +3590,12 @@
             "prompt": {
               "type": "object",
               "x-gen-maxLengthUtf16": 4000
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -7693,6 +7720,8 @@
         "image",
         "image_tail",
         "images",
+        "ingredientTrims",
+        "convertMp3sToVideoForLipSync",
         "metadata"
       ],
       "model": {
