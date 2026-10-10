@@ -1,6 +1,6 @@
 {
-  "source": "offline: gen-mcp-server d43c73b19371340014faa53dfa92659fbce131bb@d43c73b src/gen_mcp_server/server.py @mcp.tool registry + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
-  "generated_at": "2026-10-10T12:30:32.513Z",
+  "source": "offline: gen-mcp-server e2dd25c67e7252cc8c80a804e82358d230dd8e27@e2dd25c src/gen_mcp_server/server.py @mcp.tool registry + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
+  "generated_at": "2026-10-10T19:49:41.494Z",
   "served": [
     "gen_agent_action",
     "gen_analyze",
