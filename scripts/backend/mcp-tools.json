@@ -1,6 +1,6 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "2fb3e10",
+  "revision": "a99c2ba",
   "tools": [
     {
       "name": "gen_agent_action",
