@@ -8063,7 +8063,7 @@
         },
         "actions": {
           "type": "array",
-          "description": "One action, or a compatible batch: updates, generations (at most 50), variable creates, one video-scene edit group, or a reconcile of creates, updates and deletes on one Vidsheet. A reconcile applies deletes, then creates, then updates; a create may carry a ref that later updates address.",
+          "description": "One action, or a compatible batch. Updates, generations (at most 50), variable creates and a video-scene edit group batch as before. A mix of create, update, reorder, duplicate and delete actions applies in array order, so a later action sees the records earlier actions created and may address them by ref; editing a record an earlier action deleted is refused, and deleting a record a create made earlier in the same batch is refused.",
           "minItems": 1,
           "maxItems": 200,
           "items": {
