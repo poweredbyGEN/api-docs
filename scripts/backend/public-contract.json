@@ -8537,6 +8537,44 @@
             "message": {
               "type": "string",
               "description": "Human-readable pending detail."
+            },
+            "job_ids": {
+              "type": "array",
+              "description": "The running prerequisite jobs a generation_pending caller follows or resumes; absent on a source wait and on a preview.",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                ],
+                "description": "A persisted Rails resource identifier."
+              }
+            },
+            "dispatched_job_ids": {
+              "type": "array",
+              "description": "Final jobs earlier actions of the same generate batch already dispatched; present only when there are any, including when the pending action is a preview.",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                ],
+                "description": "A persisted Rails resource identifier."
+              }
             }
           },
           "required": [
