@@ -15,6 +15,10 @@ const REQUIRED_COLUMNS = ["record", "row_type", "pointer", "description", "title
 // before description/title. Every row must still carry the cells that identify
 // it: a row without an explicit pointer cell is truncated, not pointerless.
 const ROW_IDENTITY_COLUMNS = ["record", "row_type", "pointer"];
+// A served tool root publishes its title and description, so both cells must be
+// present on the root row; an explicitly empty cell is present, an absent one is
+// truncation. Nested field and schema rows do not carry them.
+const DISPLAY_COLUMNS = ["description", "title"];
 
 // A minimal reader for the registry's TSV shape: a comment preamble, then one
 // header row starting with `record_kind`, then one row per JSON pointer. A
@@ -51,6 +55,14 @@ export function servedTools(registry) {
     // Only an explicitly present empty pointer marks a tool root; an absent
     // pointer cell is rejected by the parser instead of reading as empty.
     .filter((row) => row.cells[row.row_type] === "tool_field" && row.cells[row.pointer] === "")
+    // A tool root carries the display cells the snapshot publishes. Non-root
+    // rows stop before them, so this requirement is scoped to the roots.
+    .filter((row) => {
+      for (const name of DISPLAY_COLUMNS) {
+        if (row.cells.length <= row[name]) throw new Error(`mcp registry: tool root missing display cell ${name}`);
+      }
+      return true;
+    })
     .map((row) => ({
       name: row.cells[row.record] ?? "",
       title: row.cells[row.title] ?? "",
