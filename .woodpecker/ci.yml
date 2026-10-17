@@ -51,6 +51,10 @@ steps:
   model-enums:
     image: node:20-slim
     commands:
+      # GEN-10512: the snapshot test builds local git fixtures; node:20-slim
+      # ships no git, so install it before npm test.
+      - apt-get update
+      - apt-get install -y --no-install-recommends git
       - npm test
 
   enums-freshness:
