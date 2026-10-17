@@ -566,6 +566,11 @@ def derive_servers(entries, mcp_src):
     families_tree = None
     parsed = []
 
+    # intent: GEN-10598 — identical source bytes must derive identical output, so
+    # parsed modules are ordered by relative path before any first-wins table is
+    # filled. That keeps the deterministic callsite a `file:line` source is
+    # expected to name (AGENTS.md, "Generated files: edit the generator, not the
+    # output") whatever order the filesystem enumerated directories in.
     for root, _dirs, names in os.walk(src_root):
         for name in sorted(names):
             if not name.endswith(".py"):
@@ -579,13 +584,17 @@ def derive_servers(entries, mcp_src):
             except SyntaxError:
                 continue
             parsed.append((relative, text, tree))
-            if name == "server.py":
-                servers_tree = tree
-            if name == "families.py":
-                families_tree = tree
-            module_tables.update(_module_route_tables(tree))
-            for function, literals in _function_route_literals(tree).items():
-                function_literals.setdefault(function, set()).update(literals)
+
+    parsed.sort(key=lambda item: item[0])
+    for relative, _text, tree in parsed:
+        name = relative.rsplit("/", 1)[-1]
+        if name == "server.py":
+            servers_tree = tree
+        if name == "families.py":
+            families_tree = tree
+        module_tables.update(_module_route_tables(tree))
+        for function, literals in _function_route_literals(tree).items():
+            function_literals.setdefault(function, set()).update(literals)
 
     route_scope = {"#table:" + name: sorted(table.values()) for name, table in module_tables.items()}
 
@@ -682,7 +691,10 @@ def derive_servers(entries, mcp_src):
         changed = False
         for function, callees in call_edges.items():
             table = function_hosts.setdefault(function, {})
-            for callee in callees:
+            # intent: GEN-10598 — call edges are a set; the inherited callsite is
+            # chosen in sorted callee-name order so the source never depends on
+            # set iteration order. Direct evidence above is never overwritten.
+            for callee in sorted(callees):
                 for server, source in (function_hosts.get(callee) or {}).items():
                     if server not in table:
                         table[server] = source
@@ -712,7 +724,9 @@ def derive_servers(entries, mcp_src):
 
     def tool_servers(tool):
         merged = {}
-        for function in tool_functions.get(tool, ()):
+        # intent: GEN-10598 — tool handlers are a set too; sort them so the
+        # unique-tool tier resolves the same callsite on every run.
+        for function in sorted(tool_functions.get(tool, ())):
             for server, source in (function_hosts.get(function) or {}).items():
                 merged.setdefault(server, source)
         return merged
