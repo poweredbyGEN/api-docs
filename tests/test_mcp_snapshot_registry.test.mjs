@@ -1,5 +1,5 @@
 import test from 'node:test';
-import assert, { AssertionError } from 'node:assert/strict';
+import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
@@ -30,25 +30,21 @@ function fixture(t, registry = tsv(names('fixture'))) {
   };
   return {dir,repo,put,git,sha,run};
 }
-// GEN-10512: strict expected failure accepts assertion failure only; unexpected pass fails.
-function broken(name, fn) { test(name, t => {
-  if(process.env.GEN10512_RAW==='1')return fn(t);
-  let failure;try {fn(t);}catch(e){failure=e;}
-  assert.ok(failure instanceof AssertionError,'strict xfail: expected product assertion failure, not an unexpected pass or harness exception');
-});}
-broken('T1 canonical roots win over decorator and retired aliases', t=>{
+// GEN-10512: ordinary regression cases preserve the independent frozen assertions.
+
+test('T1 canonical roots win over decorator and retired aliases', t=>{
   const f=fixture(t),r=f.run();assert.equal(r.status,0,r.stderr);const d=JSON.parse(readFileSync(r.out));
   assert.deepEqual(d.served,names('fixture'));assert.equal(d.retired.gen_fixture_00,undefined);assert.equal(d.retired.gen_retired,'gen_vidsheet_action');
   assert.ok(d.source.includes(REGISTRY));assert.ok(d.source.includes(f.sha.slice(0,7)));assert.deepEqual(r.calls,[]);
 });
-for(const [kind,body] of [['no header','bad'],['missing record','record_kind\trow_type\tpointer\n'],['empty',tsv([])],['nine',tsv(names('fixture').slice(0,9))]])broken(`T2 reject ${kind} before write`, t=>{
+for(const [kind,body] of [['no header','bad'],['missing record','record_kind\trow_type\tpointer\n'],['empty',tsv([])],['nine',tsv(names('fixture').slice(0,9))]])test(`T2 reject ${kind} before write`, t=>{
  const f=fixture(t,body),out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');const r=f.run(f.sha,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
 });
-broken('T3 absent pinned registry cannot borrow dirty checkout',t=>{
+test('T3 absent pinned registry cannot borrow dirty checkout',t=>{
  const f=fixture(t,null);f.put(REGISTRY,tsv(names('dirty')));const out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');const r=f.run(f.sha,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
  f.git('add',REGISTRY);f.git('commit','-qm','repair registry');const repaired=f.run(f.git('rev-parse','HEAD'),{out});assert.equal(repaired.status,0,repaired.stderr);assert.deepEqual(JSON.parse(readFileSync(out)).served,names('dirty'));assert.deepEqual(repaired.calls,[]);
 });
-broken('T4 explicit revisions remain stable and separate',t=>{
+test('T4 explicit revisions remain stable and separate',t=>{
  const f=fixture(t);f.put(REGISTRY,tsv(names('second')));f.git('add',REGISTRY);f.git('commit','-qm','fixture B');const b=f.git('rev-parse','HEAD');
  const results=[f.sha,f.sha,b].map((ref,i)=>{const r=f.run(ref,{out:path.join(f.dir,`out${i}`)});assert.equal(r.status,0,r.stderr);assert.deepEqual(r.calls,[]);const d=JSON.parse(readFileSync(r.out));delete d.generated_at;return d;});
  assert.deepEqual(results[0],results[1]);assert.deepEqual(results[0].served,names('fixture'));assert.deepEqual(results[2].served,names('second'));assert.ok(results[0].source.includes(f.sha.slice(0,7)));assert.ok(results[2].source.includes(b.slice(0,7)));assert.equal(f.git('rev-parse','HEAD'),b);
@@ -57,7 +53,7 @@ test('T5 live mode preserves two-call transport and excludes PAT',t=>{
  const f=fixture(t),r=f.run(f.sha,{live:true});assert.equal(r.status,0,r.stderr);const raw=readFileSync(r.out,'utf8'),d=JSON.parse(raw);assert.deepEqual(d.served,['gen_live']);assert.deepEqual(r.calls.map(c=>[c.method,c.rpc]),[['POST','initialize'],['POST','tools/list']]);assert.equal(raw.includes('PRIVATE_PAT_SENTINEL'),false);
 });
 test('T5 offline with PAT never makes a network request',t=>{const f=fixture(t),r=f.run();assert.equal(r.status,0,r.stderr);assert.deepEqual(r.calls,[]);assert.equal(readFileSync(r.out,'utf8').includes('PRIVATE_PAT_SENTINEL'),false);});
-broken('T6 current compatibility module replaces decoy server maps at pinned refs',t=>{
+test('T6 current compatibility module replaces decoy server maps at pinned refs',t=>{
  const f=fixture(t),compat='src/gen_mcp_server/server_parts/registry.py';
  f.put('src/gen_mcp_server/server.py','@mcp.tool()\ndef gen_decoy(): pass\n_COMPAT_EXTRA_VIEWS = {\n    "gen_old_read": "row",\n}\n');
  f.git('add','src');f.git('commit','-qm','legacy compatibility L');const legacy=f.git('rev-parse','HEAD');
