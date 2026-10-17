@@ -9,20 +9,22 @@
 // source-of-truth registry, not a hand-typed list):
 //   node scripts/update-mcp-tools-snapshot.mjs --aliases-repo ../gen-mcp-server --offline
 //
-// GEN-10512: both modes resolve the served surface from the same canonical
-// registry as scripts/sync-from-backend.mjs, read from the requested git ref.
-// Offline never falls back to the working tree, so a dirty checkout cannot
-// substitute for a registry missing at the pinned commit.
+// GEN-10512: offline mode resolves the served surface from the same canonical
+// schema-paths.tsv reader as scripts/sync-from-backend.mjs, read from the
+// requested git ref. Live mode stays authoritative from the server's
+// tools/list. Offline never falls back to the working tree, so a dirty checkout
+// cannot substitute for a registry missing at the pinned commit.
 //
 // The PAT is read from the environment only and is never written to the
 // snapshot or to stdout. Every request sets a User-Agent: the mcp.gen.pro edge
 // 403s Python-urllib (GEN-6898).
 //
 // Retired names come from gen-mcp-server: contracts/vidsheet-alias-replacements.json
-// (aliases) plus the _COMPAT_EXTRA_VIEWS and _COMPAT_RENAMED_FNS maps in
-// src/gen_mcp_server/server.py. A retired name resolves to the replacement tool
-// exactly as the server's _compat_pointer does, so the docs must name that tool
-// on the same line.
+// (aliases) plus the _COMPAT_EXTRA_VIEWS and _COMPAT_RENAMED_FNS maps. Those
+// maps live in src/gen_mcp_server/server_parts/registry.py; a commit that
+// predates that module is read from its own src/gen_mcp_server/server.py. A
+// retired name resolves to the replacement tool exactly as the server's
+// _compat_pointer does, so the docs must name that tool on the same line.
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -38,6 +40,10 @@ const ALIASES_CANDIDATES = [
   "contracts/vidsheet-alias-replacements.json",
 ];
 const SERVER_CANDIDATES = ["src/gen_mcp_server/server.py", "gen_mcp_server/server.py"];
+const COMPAT_CANDIDATES = [
+  "src/gen_mcp_server/server_parts/registry.py",
+  "gen_mcp_server/server_parts/registry.py",
+];
 // Renames the server resolves without an alias-map entry (the migration guide
 // documents them): https://api.gen.pro/changelog/2026-09-22-mcp-catalog-collapse/
 const KNOWN_RENAMES = {
@@ -122,6 +128,40 @@ function readRepoFileAtRef(repo, ref, file) {
   } catch (error) {
     throw new Error(`cannot read ${file} from ${repo}@${ref}: ${error.message.split("\n")[0]}`);
   }
+}
+
+// Read a pinned file only; null means absent at that ref. The working tree is
+// never consulted, so a checkout cannot supply a module the commit lacks.
+function readRefFile(repo, ref, candidates) {
+  for (const candidate of candidates) {
+    try {
+      return {
+        path: candidate,
+        text: execFileSync("git", ["-C", repo, "show", `${ref}:${candidate}`], {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "pipe"],
+          maxBuffer: 64 * 1024 * 1024,
+        }),
+      };
+    } catch {
+      // try the next candidate
+    }
+  }
+  return null;
+}
+
+// The compatibility maps moved out of server.py into server_parts/registry.py.
+// The current module wins at the requested ref; server.py is the fallback only
+// for a commit where that module is absent, and always from the same ref
+// (GEN-10512).
+function readCompatSource(repo, ref) {
+  const current = readRefFile(repo, ref, COMPAT_CANDIDATES);
+  if (current) return current;
+  const legacy = readRefFile(repo, ref, SERVER_CANDIDATES);
+  if (legacy) return legacy;
+  throw new Error(
+    `cannot read ${COMPAT_CANDIDATES[0]} or ${SERVER_CANDIDATES[0]} from ${repo}@${ref}`,
+  );
 }
 
 function repoRevision(repo, ref) {
@@ -232,10 +272,10 @@ async function main() {
   const ref = resolveRef(repo, options.ref);
   const pat = process.env[options.patEnv];
   const aliasesFile = readRepoFile(repo, ref, ALIASES_CANDIDATES);
-  const serverFile = readRepoFile(repo, ref, SERVER_CANDIDATES);
+  const compatFile = readCompatSource(repo, ref);
   const aliases = JSON.parse(aliasesFile.text).aliases ?? {};
-  const views = extraViews(serverFile.text);
-  const renamed = dictKeys(serverFile.text, "_COMPAT_RENAMED_FNS");
+  const views = extraViews(compatFile.text);
+  const renamed = dictKeys(compatFile.text, "_COMPAT_RENAMED_FNS");
 
   let served;
   let source;
