@@ -65,16 +65,12 @@ test('T6 current compatibility module replaces decoy server maps at pinned refs'
  }
 });
 // GEN-10512: independent strict regressions for the product-review findings.
-function reviewRed(name, fn) { test(name, t=>{
- if(process.env.GEN10512_RAW==='1')return fn(t);
- let failure;try{fn(t);}catch(e){failure=e;}
- assert.equal(failure?.name,'AssertionError','strict xfail requires a product assertion failure');
-});}
-reviewRed('T2 truncated tool roots are not empty-pointer roots',t=>{
+
+test('T2 truncated tool roots are not empty-pointer roots',t=>{
  const header=tsv([]).split('\n')[0];const malformed=header+'\n'+names('short').map(n=>`tool\t${n}\ttool_field`).join('\n')+'\n';
  const f=fixture(t,malformed),out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');const r=f.run(f.sha,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
 });
-reviewRed('T7 absent pinned aliases cannot borrow working-tree aliases',t=>{
+test('T7 absent pinned aliases cannot borrow working-tree aliases',t=>{
  const f=fixture(t),alias='src/gen_mcp_server/contracts/vidsheet-alias-replacements.json';f.git('rm',alias);f.git('commit','-qm','no aliases in pinned commit');const ref=f.git('rev-parse','HEAD');f.put(alias,JSON.stringify({aliases:{gen_dirty_alias:{actions:['write']}}}));
  const out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');const r=f.run(ref,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
 });
@@ -92,7 +88,7 @@ test('T8 actual wide roots coexist with short nested and schema rows',t=>{
  const f=fixture(t,wideRegistry()),r=f.run();assert.equal(r.status,0,r.stderr);
  const d=JSON.parse(readFileSync(r.out));assert.deepEqual(d.served,names('wide'));assert.deepEqual(r.calls,[]);
 });
-for(const width of [8,33])reviewRed(`T2 served root missing display cells at width ${width} refuses before write`,t=>{
+for(const width of [8,33])test(`T2 served root missing display cells at width ${width} refuses before write`,t=>{
  const f=fixture(t,wideRegistry(width)),out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');
  const r=f.run(f.sha,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
 });
