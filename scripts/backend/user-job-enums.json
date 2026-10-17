@@ -184,7 +184,8 @@
         "image_tail",
         "images",
         "voice_replace_data",
-        "native_audio"
+        "native_audio",
+        "remove_background"
       ],
       "model": {
         "type": "string",
@@ -243,6 +244,7 @@
         "images",
         "image_var",
         "native_audio",
+        "remove_background",
         "voice_replace_data"
       ],
       "model": {
@@ -313,6 +315,7 @@
         "aspect_ratio",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data"
       ],
       "model": {
@@ -409,6 +412,7 @@
         "images",
         "duration",
         "native_audio",
+        "remove_background",
         "kling_mode",
         "aspect_ratio",
         "kling_version",
@@ -448,6 +452,7 @@
         "image_tail",
         "duration",
         "native_audio",
+        "remove_background",
         "kling_mode",
         "aspect_ratio",
         "image_var",
@@ -501,6 +506,7 @@
         "resolution",
         "duration",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "metadata",
         "minimax_request_id",
@@ -637,6 +643,7 @@
         "input_video_duration",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "image",
         "image_tail",
@@ -679,6 +686,7 @@
         "input_video_duration",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "image",
         "image_tail",

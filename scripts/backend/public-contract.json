@@ -1694,7 +1694,8 @@
           "user_job_type": "gemini_omni_video_generation",
           "fields": {
             "model": "model",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1704,7 +1705,8 @@
           "fields": {
             "model": "model",
             "ratio": "aspect_ratio",
-            "duration": "duration"
+            "duration": "duration",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1713,7 +1715,8 @@
           "user_job_type": "kling_img2video",
           "fields": {
             "model": "model",
-            "duration": "duration"
+            "duration": "duration",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1723,7 +1726,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "nativeAudio": "native_audio"
+            "nativeAudio": "native_audio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1734,7 +1738,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1745,7 +1750,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1756,7 +1762,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1767,7 +1774,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1778,7 +1786,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1789,7 +1798,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1799,7 +1809,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1809,7 +1820,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1819,7 +1831,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1828,7 +1841,8 @@
           "user_job_type": "gemini_omni_video_generation",
           "fields": {
             "model": "model",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1838,7 +1852,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1849,7 +1864,8 @@
             "model": "model",
             "duration": "duration",
             "nativeAudio": "native_audio",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1861,6 +1877,7 @@
             "duration": "duration",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
+            "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
@@ -1873,6 +1890,7 @@
             "duration": "duration",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
+            "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
@@ -1885,6 +1903,7 @@
             "duration": "duration",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
+            "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
@@ -1897,6 +1916,7 @@
             "duration": "duration",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
+            "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
@@ -1909,6 +1929,7 @@
             "duration": "duration",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
+            "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
           }
         },
@@ -1919,7 +1940,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1928,7 +1950,8 @@
           "user_job_type": "gemini_omni_video_generation",
           "fields": {
             "model": "model",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1938,7 +1961,8 @@
           "fields": {
             "model": "model",
             "ratio": "aspect_ratio",
-            "duration": "duration"
+            "duration": "duration",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1949,7 +1973,8 @@
             "model": "model",
             "duration": "duration",
             "nativeAudio": "native_audio",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1960,7 +1985,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1971,7 +1997,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1982,7 +2009,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -1993,7 +2021,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -2004,7 +2033,8 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -2014,7 +2044,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -2024,7 +2055,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -2034,7 +2066,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "ratio": "aspect_ratio"
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
           }
         }
       ],
@@ -2462,6 +2495,7 @@
             "prompt",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2494,6 +2528,7 @@
             "ratio",
             "duration",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2527,6 +2562,7 @@
             "nativeAudio",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2560,6 +2596,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2593,6 +2630,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2626,6 +2664,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2659,6 +2698,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2692,6 +2732,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2724,6 +2765,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2756,6 +2798,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2788,6 +2831,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "model"
@@ -2821,6 +2865,7 @@
             "prompt",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -2862,6 +2907,7 @@
             "ratio",
             "duration",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -2903,6 +2949,7 @@
             "prompt",
             "duration",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -2945,6 +2992,7 @@
             "duration",
             "nativeAudio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -2987,6 +3035,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3028,6 +3077,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3070,6 +3120,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3112,6 +3163,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3153,6 +3205,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3195,6 +3248,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3237,6 +3291,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3279,6 +3334,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3320,6 +3376,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3359,6 +3416,7 @@
             "prompt",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3399,6 +3457,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3440,6 +3499,7 @@
             "nativeAudio",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -3481,6 +3541,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
@@ -3530,6 +3591,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
@@ -3579,6 +3641,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
@@ -3628,6 +3691,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
@@ -3677,6 +3741,7 @@
             "outputResolution",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
@@ -3725,6 +3790,7 @@
             "duration",
             "ratio",
             "voiceReplace",
+            "removeBackground",
             "autoGenerate",
             "syncOutputAspectRatio",
             "images",
@@ -7263,7 +7329,8 @@
         "image_tail",
         "images",
         "voice_replace_data",
-        "native_audio"
+        "native_audio",
+        "remove_background"
       ],
       "model": {
         "type": "string",
@@ -7322,6 +7389,7 @@
         "images",
         "image_var",
         "native_audio",
+        "remove_background",
         "voice_replace_data"
       ],
       "model": {
@@ -7392,6 +7460,7 @@
         "aspect_ratio",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data"
       ],
       "model": {
@@ -7488,6 +7557,7 @@
         "images",
         "duration",
         "native_audio",
+        "remove_background",
         "kling_mode",
         "aspect_ratio",
         "kling_version",
@@ -7527,6 +7597,7 @@
         "image_tail",
         "duration",
         "native_audio",
+        "remove_background",
         "kling_mode",
         "aspect_ratio",
         "image_var",
@@ -7580,6 +7651,7 @@
         "resolution",
         "duration",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "metadata",
         "minimax_request_id",
@@ -7716,6 +7788,7 @@
         "input_video_duration",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "image",
         "image_tail",
@@ -7758,6 +7831,7 @@
         "input_video_duration",
         "model",
         "native_audio",
+        "remove_background",
         "voice_replace_data",
         "image",
         "image_tail",
