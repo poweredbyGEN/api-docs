@@ -9,6 +9,11 @@
 // source-of-truth registry, not a hand-typed list):
 //   node scripts/update-mcp-tools-snapshot.mjs --aliases-repo ../gen-mcp-server --offline
 //
+// GEN-10512: both modes resolve the served surface from the same canonical
+// registry as scripts/sync-from-backend.mjs, read from the requested git ref.
+// Offline never falls back to the working tree, so a dirty checkout cannot
+// substitute for a registry missing at the pinned commit.
+//
 // The PAT is read from the environment only and is never written to the
 // snapshot or to stdout. Every request sets a User-Agent: the mcp.gen.pro edge
 // 403s Python-urllib (GEN-6898).
@@ -23,6 +28,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { MCP_REGISTRY_PATH, servedTools } from "./lib/mcp-registry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
@@ -81,6 +87,9 @@ function readRepoFile(repo, ref, candidates) {
         text: execFileSync("git", ["-C", repo, "show", `${ref}:${candidate}`], {
           encoding: "utf8",
           stdio: ["ignore", "pipe", "pipe"],
+          // server.py is ~1.6 MB at the registry commit; without a raised buffer
+          // git show fails with ENOBUFS and the disk fallback would win.
+          maxBuffer: 64 * 1024 * 1024,
         }),
       };
     } catch (error) {
@@ -97,6 +106,24 @@ function readRepoFile(repo, ref, candidates) {
   throw new Error(`cannot read ${candidates[0]} from ${repo}@${ref}: ${gitError?.message}`);
 }
 
+// The served registry is pinned to the requested ref only. Reading the working
+// tree here would let an uncommitted registry mask a commit that cannot serve
+// its own tool surface (GEN-10512).
+function readRepoFileAtRef(repo, ref, file) {
+  try {
+    return {
+      path: file,
+      text: execFileSync("git", ["-C", repo, "show", `${ref}:${file}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        maxBuffer: 64 * 1024 * 1024,
+      }),
+    };
+  } catch (error) {
+    throw new Error(`cannot read ${file} from ${repo}@${ref}: ${error.message.split("\n")[0]}`);
+  }
+}
+
 function repoRevision(repo, ref) {
   try {
     return execFileSync("git", ["-C", repo, "rev-parse", "--short", ref], {
@@ -108,11 +135,15 @@ function repoRevision(repo, ref) {
   }
 }
 
-// Lane clones fetch the repo as `upstream`, not `origin`; accept either name
-// (and a local branch) so the snapshot can still be pinned to the remote tip.
+// A requested ref resolves as given. Only a default branch name may fall back
+// to the clone's remote tip (`upstream` instead of `origin` in a lane clone, or
+// a local branch); an explicit commit is never silently replaced by main.
 function resolveRef(repo, requested) {
-  for (const ref of [requested, "upstream/main", "origin/main", "main"]) {
-    if (repoRevision(repo, ref) !== "unknown") return ref;
+  if (repoRevision(repo, requested) !== "unknown") return requested;
+  if (requested === "origin/main" || requested === "main") {
+    for (const ref of ["upstream/main", "origin/main", "main"]) {
+      if (repoRevision(repo, ref) !== "unknown") return ref;
+    }
   }
   return requested;
 }
@@ -142,17 +173,6 @@ function replacementFor(name, aliases, views) {
     return entry.read_tools?.[0] ?? "gen_discover";
   }
   return "gen_vidsheet_action";
-}
-
-function servedFromServerSource(serverSource) {
-  const names = new Set();
-  // A tool registers through @mcp.tool or the @_served_tool wrapper (gen_discover,
-  // gen_characters), so both decorators count.
-  for (const match of serverSource.matchAll(/@(?:mcp\.tool|_served_tool)\(([\s\S]*?)\)\s*\n(?:async )?def ([a-z0-9_]+)/g)) {
-    const explicit = match[1].match(/name="(gen_[a-z0-9_]+)"/);
-    names.add(explicit ? explicit[1] : match[2]);
-  }
-  return [...names].sort();
 }
 
 async function servedFromLive(mcpUrl, pat) {
@@ -223,10 +243,11 @@ async function main() {
     served = await servedFromLive(options.mcpUrl, pat);
     source = `live: ${options.mcpUrl} tools/list`;
   } else {
-    served = servedFromServerSource(serverFile.text);
+    const registryFile = readRepoFileAtRef(repo, ref, MCP_REGISTRY_PATH);
+    served = servedTools(registryFile.text).map((tool) => tool.name);
     source =
       `offline: gen-mcp-server ${ref}@${repoRevision(repo, ref)} ` +
-      `${serverFile.path} @mcp.tool registry + ${aliasesFile.path}`;
+      `${registryFile.path} served roots + ${aliasesFile.path}`;
   }
 
   const retired = {};

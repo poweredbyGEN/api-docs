@@ -40,6 +40,7 @@ import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { MCP_REGISTRY_PATH, servedTools } from "./lib/mcp-registry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
@@ -47,7 +48,6 @@ const VENDOR_DIR = path.join(HERE, "backend");
 const MCP_TOOLS_FILE = path.join(VENDOR_DIR, "mcp-tools.json");
 const MCP_SNAPSHOT_FILE = path.join(HERE, "mcp-tools-snapshot.json");
 const DEFAULT_MCP_REPO = process.env.GEN_MCP_SERVER_REPO ?? "/root/projects/gen-mcp-server";
-const MCP_REGISTRY = "src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv";
 
 // Upstream paths, in the order they are vendored.
 const UPSTREAM = {
@@ -616,7 +616,7 @@ function refreshMcpTools(mcpRepo) {
   const ref = resolveRef(mcpRepo, "origin/main");
   let registry;
   try {
-    registry = execFileSync("git", ["-C", mcpRepo, "show", `${ref}:${MCP_REGISTRY}`], {
+    registry = execFileSync("git", ["-C", mcpRepo, "show", `${ref}:${MCP_REGISTRY_PATH}`], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       maxBuffer: 64 * 1024 * 1024,
@@ -624,34 +624,26 @@ function refreshMcpTools(mcpRepo) {
   } catch (error) {
     if (existsSync(MCP_TOOLS_FILE)) {
       process.stdout.write(
-        `warning: cannot read ${MCP_REGISTRY} from ${mcpRepo} (${error.message.split("\n")[0]}); keeping the vendored mcp-tools.json\n`,
+        `warning: cannot read ${MCP_REGISTRY_PATH} from ${mcpRepo} (${error.message.split("\n")[0]}); keeping the vendored mcp-tools.json\n`,
       );
       return;
     }
-    throw new Error(`cannot read ${MCP_REGISTRY} from ${mcpRepo}: ${error.message}`);
+    throw new Error(`cannot read ${MCP_REGISTRY_PATH} from ${mcpRepo}: ${error.message}`);
   }
   writeFileSync(MCP_TOOLS_FILE, `${JSON.stringify(buildMcpTools(registry, readRevision(mcpRepo, ref)), null, 2)}\n`);
   process.stdout.write("vendored the served MCP registry into scripts/backend/mcp-tools.json\n");
 }
 
-function parseTsv(registry) {
-  const lines = registry.split("\n");
-  const headerAt = lines.findIndex((line) => line.startsWith("record_kind\t"));
-  if (headerAt < 0) throw new Error("mcp registry: no header row");
-  const header = lines[headerAt].split("\t");
-  const column = (name) => header.indexOf(name);
-  const record = column("record");
-  const rowType = column("row_type");
-  const pointer = column("pointer");
-  const description = column("description");
-  const title = column("title");
-  const rows = [];
-  for (const line of lines.slice(headerAt + 1)) {
-    if (!line.trim()) continue;
-    const cells = line.split("\t");
-    rows.push({ cells, record, rowType, pointer, description, title });
-  }
-  return rows;
+// GEN-10512: the offline snapshot generator reads the same served roots through
+// scripts/lib/mcp-registry.mjs, so the vendored tools and the docs snapshot
+// cannot disagree about the served surface.
+function buildMcpTools(registry, revision) {
+  const tools = servedTools(registry).map((tool) => ({
+    name: tool.name,
+    title: unquoteRepr(tool.title),
+    summary: firstSentence(tool.description, tool.title),
+  }));
+  return { source: `gen-mcp-server origin/main ${MCP_REGISTRY_PATH}`, revision, tools };
 }
 
 function unquoteRepr(value) {
@@ -675,21 +667,6 @@ function firstSentence(description, title) {
     sentence = `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:]$/, "")}…`;
   }
   return sentence;
-}
-
-function buildMcpTools(registry, revision) {
-  const rows = parseTsv(registry);
-  const tools = rows
-    .filter((row) => row.cells[row.rowType] === "tool_field" && (row.cells[row.pointer] ?? "") === "")
-    .map((row) => ({
-      name: row.cells[row.record],
-      title: unquoteRepr(row.cells[row.title]),
-      summary: firstSentence(row.cells[row.description], row.cells[row.title]),
-    }))
-    .filter((tool) => tool.name.startsWith("gen_"))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  if (tools.length < 10) throw new Error(`mcp registry: only ${tools.length} served tools`);
-  return { source: `gen-mcp-server origin/main ${MCP_REGISTRY}`, revision, tools };
 }
 
 function assertMcpAgreement(mcpTools) {
