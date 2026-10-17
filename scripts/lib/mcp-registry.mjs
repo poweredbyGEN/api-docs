@@ -11,6 +11,10 @@ export const MCP_REGISTRY_PATH = "src/gen_mcp_server/contracts/catalog-record/sc
 export const MIN_SERVED_TOOLS = 10;
 
 const REQUIRED_COLUMNS = ["record", "row_type", "pointer", "description", "title"];
+// The producer omits trailing cells it does not populate, so nested rows end
+// before description/title. Every row must still carry the cells that identify
+// it: a row without an explicit pointer cell is truncated, not pointerless.
+const ROW_IDENTITY_COLUMNS = ["record", "row_type", "pointer"];
 
 // A minimal reader for the registry's TSV shape: a comment preamble, then one
 // header row starting with `record_kind`, then one row per JSON pointer. A
@@ -29,7 +33,13 @@ export function parseRegistryTsv(registry) {
   const rows = [];
   for (const line of lines.slice(headerAt + 1)) {
     if (!line.trim()) continue;
-    rows.push({ cells: line.split("\t"), ...indexes });
+    const cells = line.split("\t");
+    // A required cell must exist on the row itself. A short row is a truncated
+    // record, not a row with an intentionally empty pointer.
+    for (const name of ROW_IDENTITY_COLUMNS) {
+      if (cells.length <= indexes[name]) throw new Error(`mcp registry: row missing required cell ${name}`);
+    }
+    rows.push({ cells, ...indexes });
   }
   return rows;
 }
@@ -38,7 +48,9 @@ export function parseRegistryTsv(registry) {
 // pointer is empty. A nested field row describes a property, not a tool.
 export function servedTools(registry) {
   const tools = parseRegistryTsv(registry)
-    .filter((row) => row.cells[row.row_type] === "tool_field" && (row.cells[row.pointer] ?? "") === "")
+    // Only an explicitly present empty pointer marks a tool root; an absent
+    // pointer cell is rejected by the parser instead of reading as empty.
+    .filter((row) => row.cells[row.row_type] === "tool_field" && row.cells[row.pointer] === "")
     .map((row) => ({
       name: row.cells[row.record] ?? "",
       title: row.cells[row.title] ?? "",

@@ -27,7 +27,7 @@
 // _compat_pointer does, so the docs must name that tool on the same line.
 
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { MCP_REGISTRY_PATH, servedTools } from "./lib/mcp-registry.mjs";
@@ -82,10 +82,9 @@ function parseArgs(argv) {
   return options;
 }
 
-// Read one file from a git ref when the repo is a checkout, else from disk.
-// The ref keeps the snapshot tied to gen-mcp-server main, not a dirty worktree.
-function readRepoFile(repo, ref, candidates) {
-  let gitError = null;
+// Read one file from a git ref. The ref keeps every snapshot input tied to
+// gen-mcp-server main, not a dirty worktree; null means absent at that ref.
+function readRefFile(repo, ref, candidates) {
   for (const candidate of candidates) {
     try {
       return {
@@ -98,51 +97,6 @@ function readRepoFile(repo, ref, candidates) {
           maxBuffer: 64 * 1024 * 1024,
         }),
       };
-    } catch (error) {
-      gitError = error;
-    }
-  }
-  for (const candidate of candidates) {
-    try {
-      return { path: candidate, text: readFileSync(path.join(repo, candidate), "utf8") };
-    } catch {
-      // try the next candidate
-    }
-  }
-  throw new Error(`cannot read ${candidates[0]} from ${repo}@${ref}: ${gitError?.message}`);
-}
-
-// The served registry is pinned to the requested ref only. Reading the working
-// tree here would let an uncommitted registry mask a commit that cannot serve
-// its own tool surface (GEN-10512).
-function readRepoFileAtRef(repo, ref, file) {
-  try {
-    return {
-      path: file,
-      text: execFileSync("git", ["-C", repo, "show", `${ref}:${file}`], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-        maxBuffer: 64 * 1024 * 1024,
-      }),
-    };
-  } catch (error) {
-    throw new Error(`cannot read ${file} from ${repo}@${ref}: ${error.message.split("\n")[0]}`);
-  }
-}
-
-// Read a pinned file only; null means absent at that ref. The working tree is
-// never consulted, so a checkout cannot supply a module the commit lacks.
-function readRefFile(repo, ref, candidates) {
-  for (const candidate of candidates) {
-    try {
-      return {
-        path: candidate,
-        text: execFileSync("git", ["-C", repo, "show", `${ref}:${candidate}`], {
-          encoding: "utf8",
-          stdio: ["ignore", "pipe", "pipe"],
-          maxBuffer: 64 * 1024 * 1024,
-        }),
-      };
     } catch {
       // try the next candidate
     }
@@ -150,18 +104,12 @@ function readRefFile(repo, ref, candidates) {
   return null;
 }
 
-// The compatibility maps moved out of server.py into server_parts/registry.py.
-// The current module wins at the requested ref; server.py is the fallback only
-// for a commit where that module is absent, and always from the same ref
-// (GEN-10512).
-function readCompatSource(repo, ref) {
-  const current = readRefFile(repo, ref, COMPAT_CANDIDATES);
-  if (current) return current;
-  const legacy = readRefFile(repo, ref, SERVER_CANDIDATES);
-  if (legacy) return legacy;
-  throw new Error(
-    `cannot read ${COMPAT_CANDIDATES[0]} or ${SERVER_CANDIDATES[0]} from ${repo}@${ref}`,
-  );
+// A required input in the offline contract: absent at the requested ref is a
+// hard error before any output write, even when the checkout has a copy.
+function readRequiredRefFile(repo, ref, candidates) {
+  const found = readRefFile(repo, ref, candidates);
+  if (found) return found;
+  throw new Error(`cannot read ${candidates[0]} from ${repo}@${ref}`);
 }
 
 function repoRevision(repo, ref) {
@@ -271,8 +219,12 @@ async function main() {
   const repo = options.aliasesRepo || path.resolve(ROOT, "..", "gen-mcp-server");
   const ref = resolveRef(repo, options.ref);
   const pat = process.env[options.patEnv];
-  const aliasesFile = readRepoFile(repo, ref, ALIASES_CANDIDATES);
-  const compatFile = readCompatSource(repo, ref);
+  const aliasesFile = readRequiredRefFile(repo, ref, ALIASES_CANDIDATES);
+  // The compatibility maps moved out of server.py into server_parts/registry.py.
+  // The current module wins at the requested ref; server.py is the fallback only
+  // for a commit where that module is absent, and always from the same ref
+  // (GEN-10512).
+  const compatFile = readRequiredRefFile(repo, ref, [...COMPAT_CANDIDATES, ...SERVER_CANDIDATES]);
   const aliases = JSON.parse(aliasesFile.text).aliases ?? {};
   const views = extraViews(compatFile.text);
   const renamed = dictKeys(compatFile.text, "_COMPAT_RENAMED_FNS");
@@ -283,7 +235,7 @@ async function main() {
     served = await servedFromLive(options.mcpUrl, pat);
     source = `live: ${options.mcpUrl} tools/list`;
   } else {
-    const registryFile = readRepoFileAtRef(repo, ref, MCP_REGISTRY_PATH);
+    const registryFile = readRequiredRefFile(repo, ref, [MCP_REGISTRY_PATH]);
     served = servedTools(registryFile.text).map((tool) => tool.name);
     source =
       `offline: gen-mcp-server ${ref}@${repoRevision(repo, ref)} ` +
