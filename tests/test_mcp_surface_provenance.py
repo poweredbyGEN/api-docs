@@ -202,7 +202,6 @@ T1_FILES = {
 T1_ENTRIES = [{"method": "GET", "path": "/things", "mcp_tool": "gen_avatars", "mcp_branch": "run"}]
 
 
-@pytest.mark.xfail(raises=AssertionError, strict=True, reason="GEN-10598: call-edge set order still picks z.py")
 def test_t1_hash_seeds_choose_the_same_callsite(tmp_path):
     mappings = [derive_in_subprocess(tmp_path / f"seed-{seed}", T1_FILES, T1_ENTRIES, hash_seed=seed) for seed in (1, 2, 3, 4)]
     for mapping in mappings[1:]:
@@ -222,7 +221,6 @@ T2_FILES = {
 T2_ENTRIES = [{"method": "GET", "path": "/things"}]
 
 
-@pytest.mark.xfail(raises=AssertionError, strict=True, reason="GEN-10598: os.walk dir order still decides the source")
 def test_t2_directory_enumeration_order_does_not_change_output(tmp_path):
     forward = derive_in_subprocess(tmp_path / "forward", T2_FILES, T2_ENTRIES, reverse_walk=False)
     reverse = derive_in_subprocess(tmp_path / "reverse", T2_FILES, T2_ENTRIES, reverse_walk=True)
