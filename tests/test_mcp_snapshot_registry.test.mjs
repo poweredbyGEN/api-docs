@@ -60,10 +60,11 @@ test('T5 offline with PAT never makes a network request',t=>{const f=fixture(t),
 broken('T6 current compatibility module replaces decoy server maps at pinned refs',t=>{
  const f=fixture(t),compat='src/gen_mcp_server/server_parts/registry.py';
  f.put('src/gen_mcp_server/server.py','@mcp.tool()\ndef gen_decoy(): pass\n_COMPAT_EXTRA_VIEWS = {\n    "gen_old_read": "row",\n}\n');
+ f.git('add','src');f.git('commit','-qm','legacy compatibility L');const legacy=f.git('rev-parse','HEAD');
  f.put(compat,'_COMPAT_EXTRA_VIEWS = {\n    "gen_current_read": "row",\n    "gen_fixture_00": "row",\n}\n_COMPAT_RENAMED_FNS = {\n}\n');
  f.git('add','src');f.git('commit','-qm','current compatibility A');const a=f.git('rev-parse','HEAD');
  f.put(compat,'_COMPAT_EXTRA_VIEWS = {\n    "gen_next_read": "row",\n}\n_COMPAT_RENAMED_FNS = {\n}\n');f.git('add',compat);f.git('commit','-qm','current compatibility B');const b=f.git('rev-parse','HEAD');
- for(const[ref,name,other]of[[a,'gen_current_read','gen_next_read'],[b,'gen_next_read','gen_current_read']]){
-  const r=f.run(ref);assert.equal(r.status,0,r.stderr);const d=JSON.parse(readFileSync(r.out));assert.equal(d.retired[name],'gen_discover');assert.equal(d.retired[other],undefined);assert.equal(d.retired.gen_old_read,undefined);assert.equal(d.retired.gen_fixture_00,undefined);assert.deepEqual(d.served,names('fixture'));assert.deepEqual(r.calls,[]);assert.ok(d.source.includes(ref.slice(0,7)));
+ for(const[ref,name,other]of[[a,'gen_current_read','gen_next_read'],[b,'gen_next_read','gen_current_read'],[legacy,'gen_old_read','gen_next_read']]){
+  const r=f.run(ref);assert.equal(r.status,0,r.stderr);const d=JSON.parse(readFileSync(r.out));assert.equal(d.retired[name],'gen_discover');assert.equal(d.retired[other],undefined);if(ref!==legacy)assert.equal(d.retired.gen_old_read,undefined);else assert.equal(d.retired.gen_current_read,undefined);assert.equal(d.retired.gen_fixture_00,undefined);assert.deepEqual(d.served,names('fixture'));assert.deepEqual(r.calls,[]);assert.ok(d.source.includes(ref.slice(0,7)));
  }
 });
