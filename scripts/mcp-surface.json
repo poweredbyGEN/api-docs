@@ -2690,7 +2690,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1322 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/media.py:117 (api_call)"
     },
     {
       "method": "GET",
@@ -2797,7 +2797,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1322 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1472 (api_call)"
     },
     {
       "method": "GET",
