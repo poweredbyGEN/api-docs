@@ -78,3 +78,21 @@ reviewRed('T7 absent pinned aliases cannot borrow working-tree aliases',t=>{
  const f=fixture(t),alias='src/gen_mcp_server/contracts/vidsheet-alias-replacements.json';f.git('rm',alias);f.git('commit','-qm','no aliases in pinned commit');const ref=f.git('rev-parse','HEAD');f.put(alias,JSON.stringify({aliases:{gen_dirty_alias:{actions:['write']}}}));
  const out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');const r=f.run(ref,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
 });
+
+// GEN-10512: actual producer width applies to roots, not short nested records.
+function wideRegistry(rootWidth=64) {
+ const header=Array.from({length:64},(_,i)=>`column_${i}`);
+ for(const [i,n] of [[0,'record_kind'],[1,'record'],[2,'row_type'],[3,'pointer'],[32,'description'],[63,'title']])header[i]=n;
+ const roots=names('wide').map(n=>{const c=Array(64).fill('');c[0]='tool';c[1]=n;c[2]='tool_field';c[32]='Canonical description';c[63]='Canonical title';return c.slice(0,rootWidth).join('\t');});
+ const nested=['tool','gen_nested_decoy','tool_field','/properties/value','','','',''];
+ const schema=['tool','gen_schema_decoy','schema_node','','','','',''];
+ return [header.join('\t'),...roots,nested.join('\t'),schema.join('\t')].join('\n')+'\n';
+}
+test('T8 actual wide roots coexist with short nested and schema rows',t=>{
+ const f=fixture(t,wideRegistry()),r=f.run();assert.equal(r.status,0,r.stderr);
+ const d=JSON.parse(readFileSync(r.out));assert.deepEqual(d.served,names('wide'));assert.deepEqual(r.calls,[]);
+});
+for(const width of [8,33])reviewRed(`T2 served root missing display cells at width ${width} refuses before write`,t=>{
+ const f=fixture(t,wideRegistry(width)),out=path.join(f.dir,'sentinel');writeFileSync(out,'KEEP');
+ const r=f.run(f.sha,{out});assert.equal(r.status,1);assert.equal(readFileSync(out,'utf8'),'KEEP');assert.deepEqual(r.calls,[]);
+});
