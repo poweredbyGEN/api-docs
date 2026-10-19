@@ -9048,9 +9048,6 @@
                 "impersonation_token": {
                   "x-direct-read": true
                 },
-                "organization_id": {
-                  "x-direct-read": true
-                },
                 "project_share_token": {
                   "x-direct-read": true
                 }
@@ -9139,9 +9136,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     }
@@ -9224,9 +9218,6 @@
                       "x-params-wrapper-discarded": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -9288,9 +9279,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     }
@@ -9373,9 +9361,6 @@
                       "x-params-wrapper-discarded": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -9535,13 +9520,7 @@
                     }
                   ]
                 },
-                "agent_id": {
-                  "x-direct-read": true
-                },
                 "impersonation_token": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -9887,9 +9866,6 @@
                 "include_creation_card": {
                   "x-direct-read": true
                 },
-                "organization_id": {
-                  "x-direct-read": true
-                },
                 "project_share_token": {
                   "x-direct-read": true
                 },
@@ -10048,9 +10024,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -10176,9 +10149,6 @@
                       "x-direct-read": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -10318,9 +10288,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -10448,9 +10415,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -10534,9 +10498,6 @@
                   "x-direct-read": true
                 },
                 "impersonation_token": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -10632,9 +10593,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -10710,9 +10668,6 @@
                       "x-direct-read": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -10906,9 +10861,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -10989,9 +10941,6 @@
                       "x-direct-read": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -11103,9 +11052,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -11188,9 +11134,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -11259,9 +11202,6 @@
                   "x-direct-read": true
                 },
                 "name": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -11414,9 +11354,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -11528,9 +11465,6 @@
                       "x-direct-read": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -11703,9 +11637,6 @@
                 "impersonation_token": {
                   "x-direct-read": true
                 },
-                "organization_id": {
-                  "x-direct-read": true
-                },
                 "project_share_token": {
                   "x-direct-read": true
                 },
@@ -11840,9 +11771,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -11925,9 +11853,6 @@
                       "x-direct-read": true
                     },
                     "impersonation_token": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -12036,9 +11961,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -12123,9 +12045,6 @@
                     "impersonation_token": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -12195,9 +12114,6 @@
                   "x-direct-read": true
                 },
                 "impersonation_token": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -12273,9 +12189,6 @@
                 "impersonation_token": {
                   "x-direct-read": true
                 },
-                "organization_id": {
-                  "x-direct-read": true
-                },
                 "project_share_token": {
                   "x-direct-read": true
                 },
@@ -12326,9 +12239,6 @@
                   "x-direct-read": true
                 },
                 "impersonation_token": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -12510,9 +12420,6 @@
                     "include_video_layers": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -12601,9 +12508,6 @@
                       "x-direct-read": true
                     },
                     "include_video_layers": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -12761,9 +12665,6 @@
                   "x-direct-read": true
                 },
                 "include_video_layers": {
-                  "x-direct-read": true
-                },
-                "organization_id": {
                   "x-direct-read": true
                 },
                 "project_share_token": {
@@ -12939,9 +12840,6 @@
                     "include_video_layers": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -13026,9 +12924,6 @@
                       "x-direct-read": true
                     },
                     "include_video_layers": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
@@ -13142,9 +13037,6 @@
                     "include_video_layers": {
                       "x-direct-read": true
                     },
-                    "organization_id": {
-                      "x-direct-read": true
-                    },
                     "project_share_token": {
                       "x-direct-read": true
                     },
@@ -13229,9 +13121,6 @@
                       "x-direct-read": true
                     },
                     "include_video_layers": {
-                      "x-direct-read": true
-                    },
-                    "organization_id": {
                       "x-direct-read": true
                     },
                     "project_share_token": {
