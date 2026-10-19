@@ -1385,7 +1385,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1402,7 +1402,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1419,7 +1419,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1436,7 +1436,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "GET",
@@ -1453,7 +1453,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "GET",
@@ -1470,7 +1470,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "PATCH",
@@ -1487,7 +1487,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "DELETE",
@@ -1504,7 +1504,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1521,7 +1521,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2157 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2158 (internal_agent_access_call)"
     },
     {
       "method": "GET",

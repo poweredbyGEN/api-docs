@@ -1,6 +1,6 @@
 {
-  "source": "offline: gen-mcp-server 29ee94d365d071b90981ed3cc0785cdd351fd55c@29ee94d src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv served roots + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
-  "generated_at": "2026-10-19T17:13:27.819Z",
+  "source": "offline: gen-mcp-server 73c2362f3bf5cae1c6037a90220ef888256489f9@73c2362 src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv served roots + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
+  "generated_at": "2026-10-19T22:11:57.272Z",
   "served": [
     "gen_agent_action",
     "gen_analyze",
