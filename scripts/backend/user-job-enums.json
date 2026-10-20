@@ -43,6 +43,7 @@
       ],
       "properties": [
         "audio",
+        "transcript",
         "trim",
         "video"
       ]
@@ -127,6 +128,7 @@
       ],
       "properties": [
         "audio",
+        "transcript",
         "trim",
         "video"
       ]
@@ -879,6 +881,7 @@
       ],
       "properties": [
         "audio",
+        "transcript",
         "trim",
         "video"
       ]
