@@ -1680,7 +1680,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:938 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:948 (api_call)"
     },
     {
       "method": "GET",
@@ -2007,7 +2007,7 @@
         }
       ],
       "server": "https://agent.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/ideas.py:1606 (agent_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/ideas.py:1643 (agent_api_call)"
     },
     {
       "method": "POST",
@@ -2024,7 +2024,7 @@
         }
       ],
       "server": "https://agent.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/ideas.py:1309 (agent_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/ideas.py:1346 (agent_api_call)"
     },
     {
       "method": "GET",
@@ -2376,7 +2376,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:608 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:618 (integration_api_call)"
     },
     {
       "method": "POST",
@@ -2418,7 +2418,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:580 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:590 (integration_api_call)"
     },
     {
       "method": "PUT",
@@ -2469,7 +2469,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:703 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:713 (integration_api_call)"
     },
     {
       "method": "PATCH",
@@ -2486,7 +2486,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:748 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:758 (integration_api_call)"
     },
     {
       "method": "DELETE",
@@ -2503,7 +2503,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:754 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:764 (integration_api_call)"
     },
     {
       "method": "PATCH",
@@ -2520,7 +2520,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:689 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:699 (integration_api_call)"
     },
     {
       "method": "DELETE",
@@ -2537,7 +2537,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:696 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:706 (integration_api_call)"
     },
     {
       "method": "GET",
@@ -2554,7 +2554,7 @@
         }
       ],
       "server": "https://python.gen.pro",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:620 (integration_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:630 (integration_api_call)"
     },
     {
       "method": "POST",
@@ -2690,7 +2690,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1151 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1161 (api_call)"
     },
     {
       "method": "GET",
@@ -2797,7 +2797,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1151 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/family_tools.py:1161 (api_call)"
     },
     {
       "method": "GET",
