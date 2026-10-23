@@ -538,10 +538,7 @@
         "native_audio",
         "remove_background",
         "voice_replace_data",
-        "metadata",
-        "minimax_request_id",
-        "minimax_status_url",
-        "minimax_response_url"
+        "metadata"
       ],
       "model": {
         "type": "string",
