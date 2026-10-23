@@ -429,10 +429,20 @@
                 ]
               }
             },
+            "veo-3": {
+              "family": "veo",
+              "label": "Veo 3",
+              "status": "retired"
+            },
+            "veo-3-fast": {
+              "family": "veo",
+              "label": "Veo 3 Fast",
+              "status": "retired"
+            },
             "veo-3.1": {
               "family": "veo",
               "label": "Veo 3.1",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -451,7 +461,7 @@
             "veo-3.1-fast": {
               "family": "veo",
               "label": "Veo 3.1 Fast",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -470,7 +480,7 @@
             "veo-3.1-lite": {
               "family": "veo",
               "label": "Veo 3.1 Lite",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -825,10 +835,20 @@
                 ]
               }
             },
+            "veo-3": {
+              "family": "veo",
+              "label": "Veo 3",
+              "status": "retired"
+            },
+            "veo-3-fast": {
+              "family": "veo",
+              "label": "Veo 3 Fast",
+              "status": "retired"
+            },
             "veo-3.1": {
               "family": "veo",
               "label": "Veo 3.1",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -847,7 +867,7 @@
             "veo-3.1-fast": {
               "family": "veo",
               "label": "Veo 3.1 Fast",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -866,7 +886,7 @@
             "veo-3.1-lite": {
               "family": "veo",
               "label": "Veo 3.1 Lite",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -1191,10 +1211,20 @@
                 ]
               }
             },
+            "veo-3": {
+              "family": "veo",
+              "label": "Veo 3",
+              "status": "retired"
+            },
+            "veo-3-fast": {
+              "family": "veo",
+              "label": "Veo 3 Fast",
+              "status": "retired"
+            },
             "veo-3.1": {
               "family": "veo",
               "label": "Veo 3.1",
-              "status": "active",
+              "status": "retired",
               "options": {
                 "ratio": [
                   "9:16",
@@ -1207,6 +1237,16 @@
               "defaults": {
                 "duration": 8
               }
+            },
+            "veo-3.1-fast": {
+              "family": "veo",
+              "label": "Veo 3.1 Fast",
+              "status": "retired"
+            },
+            "veo-3.1-lite": {
+              "family": "veo",
+              "label": "Veo 3.1 Lite",
+              "status": "retired"
             },
             "kling-v1-6": {
               "family": "kling",
@@ -1406,18 +1446,6 @@
           "model": "seedance-2.5-less-restriction"
         },
         {
-          "form_type": "video-from-text",
-          "model": "veo-3.1"
-        },
-        {
-          "form_type": "video-from-text",
-          "model": "veo-3.1-fast"
-        },
-        {
-          "form_type": "video-from-text",
-          "model": "veo-3.1-lite"
-        },
-        {
           "form_type": "video-from-image",
           "model": "gemini-omni-1.1-flash"
         },
@@ -1458,18 +1486,6 @@
           "model": "seedance-2.5-less-restriction"
         },
         {
-          "form_type": "video-from-image",
-          "model": "veo-3.1"
-        },
-        {
-          "form_type": "video-from-image",
-          "model": "veo-3.1-fast"
-        },
-        {
-          "form_type": "video-from-image",
-          "model": "veo-3.1-lite"
-        },
-        {
           "form_type": "video-from-ingredients",
           "model": "gemini-omni-1.1-flash"
         },
@@ -1500,10 +1516,6 @@
         {
           "form_type": "video-from-ingredients",
           "model": "seedance-2.5-less-restriction"
-        },
-        {
-          "form_type": "video-from-ingredients",
-          "model": "veo-3.1"
         },
         {
           "form_type": "song",
@@ -1803,39 +1815,6 @@
           }
         },
         {
-          "card": "video-from-image",
-          "model": "veo-3.1",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-fast",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-lite",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
           "card": "video-from-ingredients",
           "model": "gemini-omni-1.1-flash",
           "user_job_type": "gemini_omni_video_generation",
@@ -1934,17 +1913,6 @@
           }
         },
         {
-          "card": "video-from-ingredients",
-          "model": "veo-3.1",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
           "card": "video-from-text",
           "model": "gemini-omni-1.1-flash",
           "user_job_type": "gemini_omni_video_generation",
@@ -2033,39 +2001,6 @@
             "model": "model",
             "duration": "duration",
             "outputResolution": "resolution",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-fast",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
-            "ratio": "aspect_ratio",
-            "removeBackground": "remove_background"
-          }
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-lite",
-          "user_job_type": "gemini_video_generation",
-          "fields": {
-            "model": "model",
-            "duration": "duration",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
           }
@@ -2749,105 +2684,6 @@
           }
         },
         {
-          "card": "video-from-text",
-          "model": "veo-3.1",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 3,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt"
-          ],
-          "fields": [
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-fast",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 0,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt"
-          ],
-          "fields": [
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-lite",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 0,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt"
-          ],
-          "fields": [
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        },
-        {
           "card": "video-from-image",
           "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
@@ -3272,134 +3108,6 @@
           }
         },
         {
-          "card": "video-from-image",
-          "model": "veo-3.1",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 3,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt",
-            "image"
-          ],
-          "fields": [
-            "image",
-            "imageTail",
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "images",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            },
-            "images": {
-              "type": "array",
-              "items": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-fast",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 0,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt",
-            "image"
-          ],
-          "fields": [
-            "image",
-            "imageTail",
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "images",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            },
-            "images": {
-              "type": "array",
-              "items": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-lite",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 0,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt",
-            "image"
-          ],
-          "fields": [
-            "image",
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "images",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            },
-            "images": {
-              "type": "array",
-              "items": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        {
           "card": "video-from-ingredients",
           "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
@@ -3759,47 +3467,6 @@
               "items": {
                 "type": "object"
               }
-            },
-            "syncOutputAspectRatio": {
-              "type": "boolean",
-              "default": true
-            },
-            "images": {
-              "type": "array",
-              "items": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        {
-          "card": "video-from-ingredients",
-          "model": "veo-3.1",
-          "prompt_max_utf16": 3000,
-          "max_reference_images": 3,
-          "max_reference_videos": null,
-          "max_reference_audio": null,
-          "max_reference_audio_seconds": null,
-          "required": [
-            "model",
-            "prompt",
-            "images"
-          ],
-          "fields": [
-            "prompt",
-            "duration",
-            "ratio",
-            "voiceReplace",
-            "removeBackground",
-            "autoGenerate",
-            "syncOutputAspectRatio",
-            "images",
-            "model"
-          ],
-          "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
             },
             "syncOutputAspectRatio": {
               "type": "boolean",
@@ -5252,69 +4919,6 @@
           ]
         },
         {
-          "card": "video-from-text",
-          "model": "veo-3.1",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-fast",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-fast",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-lite",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-text",
-          "model": "veo-3.1-lite",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
           "card": "video-from-image",
           "model": "gemini-omni-1.1-flash",
           "field": "ratio",
@@ -5676,69 +5280,6 @@
           ]
         },
         {
-          "card": "video-from-image",
-          "model": "veo-3.1",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-fast",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-fast",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-lite",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-image",
-          "model": "veo-3.1-lite",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            4,
-            6,
-            8
-          ]
-        },
-        {
           "card": "video-from-ingredients",
           "model": "gemini-omni-1.1-flash",
           "field": "ratio",
@@ -6057,25 +5598,6 @@
             "480p",
             "720p",
             "1080p"
-          ]
-        },
-        {
-          "card": "video-from-ingredients",
-          "model": "veo-3.1",
-          "field": "ratio",
-          "default": null,
-          "allowed": [
-            "9:16",
-            "16:9"
-          ]
-        },
-        {
-          "card": "video-from-ingredients",
-          "model": "veo-3.1",
-          "field": "duration",
-          "default": 8,
-          "allowed": [
-            8
           ]
         }
       ]
@@ -6471,54 +5993,6 @@
         ]
       },
       {
-        "card": "video-from-text",
-        "model": "veo-3.1",
-        "label": "Veo 3.1",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
-        "card": "video-from-text",
-        "model": "veo-3.1-fast",
-        "label": "Veo 3.1 Fast",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
-        "card": "video-from-text",
-        "model": "veo-3.1-lite",
-        "label": "Veo 3.1 Lite",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
         "card": "video-from-image",
         "model": "gemini-omni-1.1-flash",
         "label": "Gemini Omni 1.1 Flash",
@@ -6809,54 +6283,6 @@
         ]
       },
       {
-        "card": "video-from-image",
-        "model": "veo-3.1",
-        "label": "Veo 3.1",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
-        "card": "video-from-image",
-        "model": "veo-3.1-fast",
-        "label": "Veo 3.1 Fast",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
-        "card": "video-from-image",
-        "model": "veo-3.1-lite",
-        "label": "Veo 3.1 Lite",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          4,
-          6,
-          8
-        ],
-        "outputResolution": []
-      },
-      {
         "card": "video-from-ingredients",
         "model": "gemini-omni-1.1-flash",
         "label": "Gemini Omni 1.1 Flash",
@@ -7108,20 +6534,6 @@
           "720p",
           "1080p"
         ]
-      },
-      {
-        "card": "video-from-ingredients",
-        "model": "veo-3.1",
-        "label": "Veo 3.1",
-        "status": "active",
-        "ratio": [
-          "9:16",
-          "16:9"
-        ],
-        "duration": [
-          8
-        ],
-        "outputResolution": []
       },
       {
         "card": "song",

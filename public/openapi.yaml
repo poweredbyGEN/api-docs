@@ -12718,9 +12718,6 @@ components:
         - seedance-2.0-less-restriction
         - seedance-2.5
         - seedance-2.5-less-restriction
-        - veo-3.1
-        - veo-3.1-fast
-        - veo-3.1-lite
         - kling-v2-6
         - minimax-h3-max
         - suno-v4.5plus-beta
