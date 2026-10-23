@@ -2006,6 +2006,10 @@
           }
         }
       ],
+      "timeline": {
+        "fps": 30,
+        "step_seconds": 0.01
+      },
       "song_max_duration_seconds": {
         "suno-v5-beta": 240,
         "suno-v4.5plus-beta": 480,
@@ -2418,7 +2422,7 @@
           "card": "video-from-text",
           "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
-          "max_reference_images": 1,
+          "max_reference_images": 10,
           "max_reference_videos": null,
           "max_reference_audio": null,
           "max_reference_audio_seconds": null,
@@ -2687,7 +2691,7 @@
           "card": "video-from-image",
           "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
-          "max_reference_images": 1,
+          "max_reference_images": 10,
           "max_reference_videos": null,
           "max_reference_audio": null,
           "max_reference_audio_seconds": null,
@@ -3111,7 +3115,7 @@
           "card": "video-from-ingredients",
           "model": "gemini-omni-1.1-flash",
           "prompt_max_utf16": 4000,
-          "max_reference_images": 1,
+          "max_reference_images": 10,
           "max_reference_videos": null,
           "max_reference_audio": null,
           "max_reference_audio_seconds": null,
@@ -3498,6 +3502,7 @@
             "prompt",
             "model",
             "duration",
+            "songDuration",
             "style",
             "negativeTags",
             "vocalGender",
@@ -3563,6 +3568,7 @@
             "prompt",
             "model",
             "duration",
+            "songDuration",
             "style",
             "negativeTags",
             "vocalGender",
@@ -3628,6 +3634,7 @@
             "prompt",
             "model",
             "duration",
+            "songDuration",
             "style",
             "negativeTags",
             "vocalGender",
