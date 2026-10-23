@@ -4394,6 +4394,8 @@
             "prompt",
             "prompt_var",
             "max_length",
+            "media_attachments",
+            "voice_replace_data",
             "images"
           ],
           "bounds": {
@@ -4446,6 +4448,8 @@
             "prompt",
             "prompt_var",
             "max_length",
+            "media_attachments",
+            "voice_replace_data",
             "images"
           ],
           "bounds": {
@@ -6609,13 +6613,27 @@
         ],
         [
           "video"
+        ],
+        [
+          "content_resource_id"
+        ],
+        [
+          "trending_audio_id"
+        ],
+        [
+          "recommend_audio_id"
         ]
       ],
       "properties": [
         "audio",
+        "video",
         "transcript",
         "trim",
-        "video"
+        "content_resource_id",
+        "trending_audio_id",
+        "recommend_audio_id",
+        "src",
+        "voice_replace_data"
       ]
     },
     "audio_matching": {
@@ -6694,13 +6712,27 @@
         ],
         [
           "video"
+        ],
+        [
+          "content_resource_id"
+        ],
+        [
+          "trending_audio_id"
+        ],
+        [
+          "recommend_audio_id"
         ]
       ],
       "properties": [
         "audio",
+        "video",
         "transcript",
         "trim",
-        "video"
+        "content_resource_id",
+        "trending_audio_id",
+        "recommend_audio_id",
+        "src",
+        "voice_replace_data"
       ]
     },
     "gemini_image_generation": {
@@ -7151,7 +7183,9 @@
       ],
       "one_of_required": [],
       "properties": [
-        "overlays"
+        "overlays",
+        "publish_on_complete",
+        "voice_replace_data"
       ]
     },
     "remotion_publish": {
@@ -7411,6 +7445,8 @@
         "prompt",
         "prompt_var",
         "max_length",
+        "media_attachments",
+        "voice_replace_data",
         "images"
       ],
       "model": {
@@ -7447,13 +7483,27 @@
         ],
         [
           "video"
+        ],
+        [
+          "content_resource_id"
+        ],
+        [
+          "trending_audio_id"
+        ],
+        [
+          "recommend_audio_id"
         ]
       ],
       "properties": [
         "audio",
+        "video",
         "transcript",
         "trim",
-        "video"
+        "content_resource_id",
+        "trending_audio_id",
+        "recommend_audio_id",
+        "src",
+        "voice_replace_data"
       ]
     },
     "video_from_image_and_image_from_text": {
