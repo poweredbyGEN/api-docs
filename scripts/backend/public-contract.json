@@ -9036,6 +9036,9 @@
     ]
   },
   "vidsheet_operations": {
+    "GET /v1/vidsheet/action_schema": {
+      "operationId": "vidsheet_action.schema"
+    },
     "GET /v1/vidsheet/build_quote": {
       "operationId": "vidsheet_action.build_quote",
       "requestBody": {
@@ -9066,6 +9069,9 @@
           }
         }
       }
+    },
+    "POST /v1/vidsheet/card_from_job": {
+      "operationId": "vidsheet_action.card_from_job"
     },
     "POST /v1/vidsheet/from_idea": {
       "operationId": "spreadsheet.from_idea"
@@ -9544,6 +9550,19 @@
     },
     "POST /v1/vidsheet/{id}/clone": {
       "operationId": "spreadsheet.clone",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "GET /v1/vidsheet/{id}/generations": {
+      "operationId": "vidsheet_generation.index",
       "parameters": [
         {
           "name": "id",
