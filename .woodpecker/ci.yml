@@ -38,6 +38,7 @@ when:
   - event: pull_request
   - event: push
     branch: main
+  - event: manual
 
 steps:
   # The GitHub Pages publish runs `astro build`; the same build runs here so an
