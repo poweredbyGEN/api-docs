@@ -12701,6 +12701,8 @@ components:
         A model id a creation card accepts. The card catalog pairs each id with
         its card and the ratio, duration and outputResolution values the API runs.
       enum:
+        - seedance-2.5-real-face
+        - h3-akatz-v1.5
         - gemini_2
         - gemini_2_lite
         - gemini_pro
@@ -12714,14 +12716,14 @@ components:
         - gemini-omni-1.1-flash
         - kling-v3
         - seedance-2.0
-        - seedance-2.0-fast
         - seedance-2.0-less-restriction
+        - seedance-2.0-fast
         - seedance-2.5
         - seedance-2.5-less-restriction
         - kling-v2-6
         - minimax-h3-max
-        - suno-v4.5plus-beta
         - suno-v5-beta
+        - suno-v4.5plus-beta
         - suno-v5.5-beta
     CreationCardMatrix:
       type: object
@@ -12784,6 +12786,10 @@ components:
                   type: string
               bounds:
                 type: object
+              max_source_seconds:
+                type: [integer, "null"]
+              prompt_attachment_variables:
+                type: [boolean, "null"]
               branches:
                 type: array
                 items:
@@ -12805,6 +12811,8 @@ components:
                   - ratio
                   - duration
                   - outputResolution
+                  - prompt
+                  - who_to_replace
               default:
                 oneOf:
                   - type: string

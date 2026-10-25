@@ -67,6 +67,40 @@
       "one_of_required": [],
       "properties": []
     },
+    "character_swap": {
+      "required": [
+        "model",
+        "video",
+        "images",
+        "prompt"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "model",
+        "video",
+        "images",
+        "prompt",
+        "duration",
+        "who_to_replace",
+        "prompt_var",
+        "ingredientTrims"
+      ],
+      "model": {
+        "type": "string",
+        "enum": [
+          "viggle-animate",
+          "h3-akatz-v1.5",
+          "h3-alisson-v1.1"
+        ]
+      },
+      "duration": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 149,
+        "title": "Duration",
+        "x-gen-model-input": true
+      }
+    },
     "clone_spreadsheet": {
       "required": [
         "project_id"
@@ -704,6 +738,7 @@
       "required": [],
       "one_of_required": [],
       "properties": [
+        "omni_reference_task_type",
         "prompt",
         "prompt_var",
         "images_list",
@@ -728,7 +763,8 @@
         "type": "string",
         "enum": [
           "seedance-2.5",
-          "seedance-2.5-less-restriction"
+          "seedance-2.5-less-restriction",
+          "seedance-2.5-real-face"
         ],
         "default": "seedance-2.5"
       },
