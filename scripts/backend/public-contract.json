@@ -64,7 +64,7 @@
             },
             "h3-akatz-v1.5": {
               "family": "h3",
-              "label": "H3 Character Swap V1.5",
+              "label": "H3",
               "status": "active",
               "active": true,
               "defaults": {
@@ -1541,7 +1541,7 @@
         {
           "form_type": "video-edit",
           "model": "h3-akatz-v1.5",
-          "label": "H3 Character Swap V1.5"
+          "label": "H3"
         },
         {
           "form_type": "image-from-text",
@@ -7306,7 +7306,7 @@
       {
         "card": "video-edit",
         "model": "h3-akatz-v1.5",
-        "label": "H3 Character Swap V1.5",
+        "label": "H3",
         "status": "active",
         "ratio": [],
         "duration": [
