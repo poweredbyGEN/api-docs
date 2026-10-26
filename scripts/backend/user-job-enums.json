@@ -91,7 +91,8 @@
           "viggle-animate",
           "h3-akatz-v1.5",
           "h3-alisson-v1.1"
-        ]
+        ],
+        "default": "h3-akatz-v1.5"
       },
       "duration": {
         "type": "integer",

@@ -4,6 +4,11 @@
       "version": 1,
       "cards": {
         "video-motion-control": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ],
           "label": "Video Motion Control",
           "status": "active",
           "default_model": "seedance-2.5-real-face",
@@ -39,6 +44,11 @@
           }
         },
         "video-edit": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ],
           "label": "Video Edit",
           "status": "active",
           "default_model": "h3-akatz-v1.5",
@@ -73,21 +83,37 @@
           }
         },
         "text": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ],
           "label": "Text",
           "status": "active",
           "models": {}
         },
         "text-overlay": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ],
           "label": "Text Overlay",
           "status": "active",
           "models": {}
         },
         "raw-text": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ],
           "label": "Text",
           "status": "active",
           "models": {}
         },
         "image-from-text": {
+          "produces": "image",
+          "container_types": [
+            "SpreadsheetCell"
+          ],
           "label": "Image from text",
           "status": "active",
           "default_model": "seedream-4.0",
@@ -221,6 +247,10 @@
           }
         },
         "video-from-text": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Video from text",
           "status": "active",
           "default_model": "seedance-2.0-fast",
@@ -588,6 +618,10 @@
           }
         },
         "video-from-image": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Video from image",
           "status": "active",
           "default_model": "seedance-2.0-fast",
@@ -1005,6 +1039,10 @@
           }
         },
         "video-from-ingredients": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Video from ingredients",
           "status": "active",
           "default_model": "seedance-2.0-fast",
@@ -1332,11 +1370,19 @@
           }
         },
         "video-from-image-from-text": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Video from image from text",
           "status": "active",
           "models": {}
         },
         "video-from-talking-avatar": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Video from Talking Character",
           "status": "active",
           "models": {},
@@ -1374,31 +1420,56 @@
           }
         },
         "captions": {
+          "produces": "caption",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Captions",
           "status": "active",
           "models": {}
         },
         "speech-from-text": {
+          "produces": "audio",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Speech from text",
           "status": "active",
           "models": {}
         },
         "lip-sync": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Lipsync",
           "status": "active",
           "models": {}
         },
         "lip-sync-trim": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ],
           "label": "Lipsync with trim",
           "status": "active",
           "models": {}
         },
         "media": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell"
+          ],
           "label": "Media",
           "status": "active",
           "models": {}
         },
         "song": {
+          "produces": "audio",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ],
           "label": "Song",
           "status": "active",
           "default_model": "suno-v5-beta",
@@ -2177,6 +2248,113 @@
           }
         }
       ],
+      "outputs": {
+        "video-motion-control": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ]
+        },
+        "video-edit": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ]
+        },
+        "text": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ]
+        },
+        "text-overlay": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ]
+        },
+        "raw-text": {
+          "produces": "text",
+          "container_types": [
+            "SpreadsheetCell"
+          ]
+        },
+        "image-from-text": {
+          "produces": "image",
+          "container_types": [
+            "SpreadsheetCell"
+          ]
+        },
+        "video-from-text": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "video-from-image": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "video-from-ingredients": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "video-from-image-from-text": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "video-from-talking-avatar": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "captions": {
+          "produces": "caption",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "speech-from-text": {
+          "produces": "audio",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "lip-sync": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "lip-sync-trim": {
+          "produces": "video",
+          "container_types": [
+            "VideoLayer"
+          ]
+        },
+        "media": {
+          "produces": "video",
+          "container_types": [
+            "SpreadsheetCell"
+          ]
+        },
+        "song": {
+          "produces": "audio",
+          "container_types": [
+            "SpreadsheetCell",
+            "VideoLayer"
+          ]
+        }
+      },
       "timeline": {
         "fps": 30,
         "step_seconds": 0.01
@@ -2242,7 +2420,8 @@
             "outputResolution",
             "ingredientTrims",
             "autoGenerate",
-            "model"
+            "model",
+            "automaticDuration"
           ],
           "bounds": {
             "prompt": {
@@ -2290,6 +2469,10 @@
               "items": {
                 "type": "object"
               }
+            },
+            "automaticDuration": {
+              "type": "boolean",
+              "x-gen-ui-hidden": true
             }
           },
           "max_source_seconds": 30
@@ -2316,7 +2499,8 @@
             "who_to_replace",
             "autoGenerate",
             "ingredientTrims",
-            "model"
+            "model",
+            "automaticDuration"
           ],
           "bounds": {
             "prompt": {
@@ -2348,6 +2532,10 @@
               "items": {
                 "type": "object"
               }
+            },
+            "automaticDuration": {
+              "type": "boolean",
+              "x-gen-ui-hidden": true
             }
           },
           "max_source_seconds": 149,
@@ -8327,7 +8515,8 @@
           "viggle-animate",
           "h3-akatz-v1.5",
           "h3-alisson-v1.1"
-        ]
+        ],
+        "default": "h3-akatz-v1.5"
       },
       "duration": {
         "type": "integer",
