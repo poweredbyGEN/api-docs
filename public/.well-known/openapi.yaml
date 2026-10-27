@@ -12722,6 +12722,7 @@ components:
         - seedance-2.5-less-restriction
         - kling-v2-6
         - minimax-h3-max
+        - gen
         - suno-v5-beta
         - suno-v4.5plus-beta
         - suno-v5.5-beta

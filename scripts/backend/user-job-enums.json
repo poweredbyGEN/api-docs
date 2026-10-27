@@ -138,12 +138,22 @@
       "required": [],
       "one_of_required": [],
       "properties": [
+        "model",
         "talking_avatar_data",
         "talking_avatar_combine_data",
         "infinite_voice_lip_sync_data",
         "previous_user_job_id",
-        "avatar_data"
-      ]
+        "avatar_data",
+        "metadata"
+      ],
+      "model": {
+        "type": "string",
+        "enum": [
+          "gen",
+          "seedance-2.5-less-restriction"
+        ],
+        "default": "gen"
+      }
     },
     "design_voice": {
       "required": [
