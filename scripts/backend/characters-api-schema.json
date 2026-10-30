@@ -193,6 +193,10 @@
           "additionalProperties": false,
           "description": "An character look with the ready talking characters made from it.",
           "properties": {
+            "content_resource_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
             "from_agent_core": {
               "type": "boolean"
             },
@@ -321,6 +325,7 @@
           },
           "required": [
             "look_id",
+            "content_resource_id",
             "name",
             "origin",
             "from_agent_core",
@@ -335,6 +340,15 @@
       "name": {
         "type": "string"
       },
+      "permissions": {
+        "items": {
+          "enum": [
+            "read",
+            "use"
+          ]
+        },
+        "type": "array"
+      },
       "preview_url": {
         "type": [
           "string",
@@ -347,11 +361,51 @@
           "null"
         ]
       },
+      "profile": {
+        "additionalProperties": false,
+        "description": "What the cover image shows (description and tags) and the prompt that made it; {} until described.",
+        "properties": {
+          "age": {
+            "type": "string"
+          },
+          "art_style": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ethnicity": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "realism": {
+            "type": "string"
+          },
+          "source_prompt": {
+            "type": "string"
+          },
+          "species": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "read_only": {
+        "description": "True when source is shared.",
+        "type": "boolean"
+      },
       "source": {
         "enum": [
           "my",
-          "library"
+          "library",
+          "shared"
         ]
+      },
+      "source_agent_id": {
+        "description": "The owning agent when source is shared.",
+        "type": "string"
       },
       "talking_character_count": {
         "minimum": 0,
@@ -491,6 +545,7 @@
       "character_id",
       "character_public_id",
       "name",
+      "profile",
       "source",
       "is_agent_character",
       "cover_url",
@@ -702,6 +757,10 @@
           "additionalProperties": false,
           "description": "An character look with the ready talking characters made from it.",
           "properties": {
+            "content_resource_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
             "from_agent_core": {
               "type": "boolean"
             },
@@ -830,6 +889,7 @@
           },
           "required": [
             "look_id",
+            "content_resource_id",
             "name",
             "origin",
             "from_agent_core",
@@ -844,6 +904,15 @@
       "name": {
         "type": "string"
       },
+      "permissions": {
+        "items": {
+          "enum": [
+            "read",
+            "use"
+          ]
+        },
+        "type": "array"
+      },
       "preview_url": {
         "type": [
           "string",
@@ -856,11 +925,51 @@
           "null"
         ]
       },
+      "profile": {
+        "additionalProperties": false,
+        "description": "What the cover image shows (description and tags) and the prompt that made it; {} until described.",
+        "properties": {
+          "age": {
+            "type": "string"
+          },
+          "art_style": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ethnicity": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "realism": {
+            "type": "string"
+          },
+          "source_prompt": {
+            "type": "string"
+          },
+          "species": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "read_only": {
+        "description": "True when source is shared.",
+        "type": "boolean"
+      },
       "source": {
         "enum": [
           "my",
-          "library"
+          "library",
+          "shared"
         ]
+      },
+      "source_agent_id": {
+        "description": "The owning agent when source is shared.",
+        "type": "string"
       },
       "talking_character_count": {
         "minimum": 0,
@@ -967,6 +1076,7 @@
       "character_id",
       "character_public_id",
       "name",
+      "profile",
       "source",
       "is_agent_character",
       "cover_url",
@@ -1016,6 +1126,10 @@
     "additionalProperties": false,
     "description": "An character look with the ready talking characters made from it.",
     "properties": {
+      "content_resource_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
       "from_agent_core": {
         "type": "boolean"
       },
@@ -1144,6 +1258,7 @@
     },
     "required": [
       "look_id",
+      "content_resource_id",
       "name",
       "origin",
       "from_agent_core",
@@ -1211,6 +1326,21 @@
         "type": "object"
       }
     },
+    "DELETE /v1/characters/{id}/shares/{organization_id}": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
     "GET /v1/characters": {
       "in": "query",
       "schema": {
@@ -1230,7 +1360,7 @@
           },
           "source": {
             "default": "my",
-            "description": "my lists the agent's own characters, library the shared character library, all both (own first).",
+            "description": "my lists the agent's own and workspace-granted characters, library the shared character library, all all three (own first).",
             "enum": [
               "my",
               "library",
@@ -1375,6 +1505,60 @@
               "object",
               "null"
             ]
+          },
+          "profile": {
+            "description": "What the character's cover image shows, read by planners choosing a character: a one-line description, its tags and the prompt that made the image (when it was generated). Sent keys replace saved ones.",
+            "properties": {
+              "age": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "art_style": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ethnicity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "realism": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_prompt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "species": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
           }
         },
         "required": [
@@ -1403,6 +1587,60 @@
           "name": {
             "description": "Character name. Defaults to the file name, else \"New character\".",
             "type": "string"
+          },
+          "profile": {
+            "description": "What the character's cover image shows, read by planners choosing a character: a one-line description, its tags and the prompt that made the image (when it was generated). Sent keys replace saved ones.",
+            "properties": {
+              "age": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "art_style": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ethnicity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "realism": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_prompt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "species": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
           },
           "voice_gender": {
             "default": "female",
@@ -1494,6 +1732,21 @@
       }
     },
     "POST /v1/characters/{id}/copy": {
+      "in": "body",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "description": "The agent whose characters these are.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
+    "PUT /v1/characters/{id}/shares/{organization_id}": {
       "in": "body",
       "schema": {
         "properties": {
@@ -1663,6 +1916,15 @@
       "name": {
         "type": "string"
       },
+      "permissions": {
+        "items": {
+          "enum": [
+            "read",
+            "use"
+          ]
+        },
+        "type": "array"
+      },
       "preview_url": {
         "type": [
           "string",
@@ -1675,11 +1937,51 @@
           "null"
         ]
       },
+      "profile": {
+        "additionalProperties": false,
+        "description": "What the cover image shows (description and tags) and the prompt that made it; {} until described.",
+        "properties": {
+          "age": {
+            "type": "string"
+          },
+          "art_style": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ethnicity": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "realism": {
+            "type": "string"
+          },
+          "source_prompt": {
+            "type": "string"
+          },
+          "species": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "read_only": {
+        "description": "True when source is shared.",
+        "type": "boolean"
+      },
       "source": {
         "enum": [
           "my",
-          "library"
+          "library",
+          "shared"
         ]
+      },
+      "source_agent_id": {
+        "description": "The owning agent when source is shared.",
+        "type": "string"
       },
       "talking_character_count": {
         "minimum": 0,
@@ -1693,6 +1995,7 @@
       "character_id",
       "character_public_id",
       "name",
+      "profile",
       "source",
       "is_agent_character",
       "cover_url",

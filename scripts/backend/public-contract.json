@@ -59,7 +59,7 @@
               "status": "active",
               "active": false,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             },
             "h3-akatz-v1.5": {
@@ -68,7 +68,7 @@
               "status": "active",
               "active": true,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             },
             "h3-alisson-v1.1": {
@@ -77,7 +77,7 @@
               "status": "active",
               "active": false,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             }
           }
@@ -120,7 +120,7 @@
           "models": {
             "gemini_2": {
               "family": "gemini",
-              "label": "Nano Banana 2",
+              "label": "Nano Banana 2.1",
               "status": "active",
               "options": {
                 "ratio": [
@@ -241,6 +241,23 @@
                   "1:1",
                   "9:16",
                   "16:9"
+                ]
+              }
+            },
+            "seedream-5.0-pro-less-restriction": {
+              "family": "seedream",
+              "label": "Seedream 5.0 Pro — Less Restricted",
+              "status": "active",
+              "options": {
+                "ratio": [
+                  "1:1",
+                  "9:16",
+                  "16:9",
+                  "4:3",
+                  "3:4",
+                  "3:2",
+                  "2:3",
+                  "21:9"
                 ]
               }
             }
@@ -1050,6 +1067,114 @@
             "seedance": "seedance-2.0-fast"
           },
           "models": {
+            "wan-3.0-less-restriction": {
+              "family": "wan",
+              "label": "Wan 3.0 — Less Restricted",
+              "status": "active",
+              "options": {
+                "ratio": [
+                  "16:9",
+                  "9:16",
+                  "1:1",
+                  "4:3",
+                  "3:4",
+                  "adaptive"
+                ],
+                "duration": [
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30
+                ],
+                "outputResolution": [
+                  "480p",
+                  "720p",
+                  "1080p"
+                ]
+              },
+              "defaults": {
+                "nativeAudio": true
+              }
+            },
+            "wan-3.0-prime-less-restriction": {
+              "family": "wan",
+              "label": "Wan 3.0 Prime — Less Restricted",
+              "status": "active",
+              "options": {
+                "ratio": [
+                  "16:9",
+                  "9:16",
+                  "1:1",
+                  "4:3",
+                  "3:4",
+                  "adaptive"
+                ],
+                "duration": [
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30
+                ],
+                "outputResolution": [
+                  "480p",
+                  "720p",
+                  "1080p"
+                ]
+              },
+              "defaults": {
+                "nativeAudio": true
+              }
+            },
             "gemini-omni-1.1-flash": {
               "family": "gemini",
               "label": "Gemini Omni 1.1 Flash",
@@ -1610,7 +1735,7 @@
         {
           "form_type": "image-from-text",
           "model": "gemini_2",
-          "label": "Nano Banana 2"
+          "label": "Nano Banana 2.1"
         },
         {
           "form_type": "image-from-text",
@@ -1656,6 +1781,11 @@
           "form_type": "image-from-text",
           "model": "seedream-4.5",
           "label": "Seedream 4.5"
+        },
+        {
+          "form_type": "image-from-text",
+          "model": "seedream-5.0-pro-less-restriction",
+          "label": "Seedream 5.0 Pro — Less Restricted"
         },
         {
           "form_type": "video-from-text",
@@ -1746,6 +1876,16 @@
           "form_type": "video-from-image",
           "model": "seedance-2.5-less-restriction",
           "label": "Seedance 2.5 - less restricted"
+        },
+        {
+          "form_type": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "label": "Wan 3.0 — Less Restricted"
+        },
+        {
+          "form_type": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "label": "Wan 3.0 Prime — Less Restricted"
         },
         {
           "form_type": "video-from-ingredients",
@@ -1939,16 +2079,26 @@
           }
         },
         {
+          "card": "image-from-text",
+          "model": "seedream-5.0-pro-less-restriction",
+          "user_job_type": "seedream_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          }
+        },
+        {
           "card": "song",
           "model": "suno-v4.5plus-beta",
           "user_job_type": "song_generation",
           "fields": {
             "model": "model",
+            "duration": "duration",
             "style": "style",
-            "instrumental": "instrumental",
+            "title": "title",
             "negativeTags": "negative_tags",
             "vocalGender": "vocal_gender",
-            "duration": "duration"
+            "instrumental": "instrumental"
           }
         },
         {
@@ -1957,11 +2107,12 @@
           "user_job_type": "song_generation",
           "fields": {
             "model": "model",
+            "duration": "duration",
             "style": "style",
-            "instrumental": "instrumental",
+            "title": "title",
             "negativeTags": "negative_tags",
             "vocalGender": "vocal_gender",
-            "duration": "duration"
+            "instrumental": "instrumental"
           }
         },
         {
@@ -1970,11 +2121,12 @@
           "user_job_type": "song_generation",
           "fields": {
             "model": "model",
+            "duration": "duration",
             "style": "style",
-            "instrumental": "instrumental",
+            "title": "title",
             "negativeTags": "negative_tags",
             "vocalGender": "vocal_gender",
-            "duration": "duration"
+            "instrumental": "instrumental"
           }
         },
         {
@@ -2004,7 +2156,8 @@
           "fields": {
             "model": "model",
             "duration": "duration",
-            "who_to_replace": "who_to_replace"
+            "who_to_replace": "who_to_replace",
+            "subjects": "subjects"
           }
         },
         {
@@ -2217,6 +2370,32 @@
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
             "convertMp3sToVideoForLipSync": "convertMp3sToVideoForLipSync"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "user_job_type": "wan_3_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio",
+            "nativeAudio": "native_audio",
+            "removeBackground": "remove_background"
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "user_job_type": "wan_3_0_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "outputResolution": "resolution",
+            "ratio": "aspect_ratio",
+            "nativeAudio": "native_audio",
+            "removeBackground": "remove_background"
           }
         },
         {
@@ -2452,7 +2631,10 @@
       },
       "timeline": {
         "fps": 30,
-        "step_seconds": 0.01
+        "step_seconds": 0.01,
+        "fine_step_frames": 1,
+        "drag_snap_seconds": 0.1,
+        "snap_tolerance_seconds": 0.05
       },
       "song_max_duration_seconds": {
         "suno-v5-beta": 240,
@@ -2528,7 +2710,49 @@
               "minItems": 1,
               "maxItems": 30,
               "items": {
-                "type": "object"
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {},
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             },
             "ratio": {
@@ -2587,28 +2811,75 @@
             "images"
           ],
           "fields": [
+            "model",
             "video",
-            "prompt",
             "images",
+            "prompt",
             "duration",
             "who_to_replace",
+            "subjects",
             "autoGenerate",
             "ingredientTrims",
-            "model",
             "automaticDuration"
           ],
           "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 3000
-            },
             "images": {
               "type": "array",
               "minItems": 1,
               "maxItems": 9,
               "items": {
-                "type": "object"
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
+            },
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 3000
             },
             "duration": {
               "title": "Duration",
@@ -2621,6 +2892,34 @@
               "type": "string",
               "maxLength": 200,
               "default": "person"
+            },
+            "subjects": {
+              "title": "Subjects",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "who_to_replace"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "who_to_replace": {
+                    "title": "Person to replace",
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "image_index": {
+                    "title": "Reference image",
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  }
+                }
+              }
             },
             "ingredientTrims": {
               "type": "array",
@@ -2677,7 +2976,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2723,7 +3067,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2769,7 +3158,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2815,7 +3249,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2861,7 +3340,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2907,7 +3431,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -2957,7 +3526,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3003,7 +3617,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3051,7 +3710,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3097,7 +3801,148 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "seedream-5.0-pro-less-restriction",
+          "prompt_max_utf16": 4000,
+          "max_reference_images": 10,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt"
+          ],
+          "fields": [
+            "prompt",
+            "ratio",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 4000
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "1:1",
+                "9:16",
+                "16:9",
+                "4:3",
+                "3:4",
+                "3:2",
+                "2:3",
+                "21:9"
+              ],
+              "default": "9:16"
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3682,7 +4527,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3780,7 +4670,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3834,7 +4769,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3904,7 +4884,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -3978,7 +5003,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4051,7 +5121,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4125,7 +5240,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4198,7 +5358,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4272,7 +5477,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4347,7 +5597,308 @@
             "images": {
               "type": "array",
               "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "prompt_max_utf16": 3000,
+          "max_reference_images": 20,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt",
+            "images"
+          ],
+          "fields": [
+            "prompt",
+            "duration",
+            "outputResolution",
+            "ratio",
+            "nativeAudio",
+            "voiceReplace",
+            "removeBackground",
+            "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 3000
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 30
+            },
+            "outputResolution": {
+              "type": "string",
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ]
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4",
+                "adaptive"
+              ]
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "removeBackground": {
+              "type": "boolean",
+              "default": false
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
                 "type": "object"
+              }
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "prompt_max_utf16": 3000,
+          "max_reference_images": 20,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt",
+            "images"
+          ],
+          "fields": [
+            "prompt",
+            "duration",
+            "outputResolution",
+            "ratio",
+            "nativeAudio",
+            "voiceReplace",
+            "removeBackground",
+            "autoGenerate",
+            "ingredientTrims",
+            "convertMp3sToVideoForLipSync",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 3000
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 30
+            },
+            "outputResolution": {
+              "type": "string",
+              "enum": [
+                "480p",
+                "720p",
+                "1080p"
+              ]
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "16:9",
+                "9:16",
+                "1:1",
+                "4:3",
+                "3:4",
+                "adaptive"
+              ]
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
+            },
+            "removeBackground": {
+              "type": "boolean",
+              "default": false
+            },
+            "ingredientTrims": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4399,7 +5950,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4496,7 +6092,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4577,7 +6218,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4658,7 +6344,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4739,7 +6470,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4819,7 +6595,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4901,7 +6722,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -4983,7 +6849,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -5197,7 +7108,32 @@
                   "minItems": 3,
                   "maxItems": 10,
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "duration": {
+                        "type": "string",
+                        "enum": [
+                          "5",
+                          "10"
+                        ]
+                      },
+                      "videoUrl": {
+                        "type": "string"
+                      },
+                      "masterKlingId": {
+                        "type": "number"
+                      },
+                      "replaceMasterKlingJobId": {
+                        "type": "number"
+                      },
+                      "isGenerating": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 },
                 "lipSyncModel": {
@@ -5265,7 +7201,32 @@
                   "minItems": 3,
                   "maxItems": 10,
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "duration": {
+                        "type": "string",
+                        "enum": [
+                          "5",
+                          "10"
+                        ]
+                      },
+                      "videoUrl": {
+                        "type": "string"
+                      },
+                      "masterKlingId": {
+                        "type": "number"
+                      },
+                      "replaceMasterKlingJobId": {
+                        "type": "number"
+                      },
+                      "isGenerating": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 },
                 "voiceModelProvider": {
@@ -5341,7 +7302,32 @@
                   "minItems": 3,
                   "maxItems": 10,
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "duration": {
+                        "type": "string",
+                        "enum": [
+                          "5",
+                          "10"
+                        ]
+                      },
+                      "videoUrl": {
+                        "type": "string"
+                      },
+                      "masterKlingId": {
+                        "type": "number"
+                      },
+                      "replaceMasterKlingJobId": {
+                        "type": "number"
+                      },
+                      "isGenerating": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 },
                 "voiceModelProvider": {
@@ -5498,7 +7484,52 @@
             "images": {
               "type": "array",
               "items": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
               }
             }
           }
@@ -5523,6 +7554,7 @@
             "duration",
             "songDuration",
             "style",
+            "title",
             "negativeTags",
             "vocalGender",
             "instrumental",
@@ -5551,6 +7583,10 @@
             "style": {
               "type": "string",
               "maxLength": 1000
+            },
+            "title": {
+              "type": "string",
+              "x-gen-ui-hidden": true
             },
             "negativeTags": {
               "type": "string",
@@ -5589,6 +7625,7 @@
             "duration",
             "songDuration",
             "style",
+            "title",
             "negativeTags",
             "vocalGender",
             "instrumental",
@@ -5617,6 +7654,10 @@
             "style": {
               "type": "string",
               "maxLength": 1000
+            },
+            "title": {
+              "type": "string",
+              "x-gen-ui-hidden": true
             },
             "negativeTags": {
               "type": "string",
@@ -5655,6 +7696,7 @@
             "duration",
             "songDuration",
             "style",
+            "title",
             "negativeTags",
             "vocalGender",
             "instrumental",
@@ -5683,6 +7725,10 @@
             "style": {
               "type": "string",
               "maxLength": 1000
+            },
+            "title": {
+              "type": "string",
+              "x-gen-ui-hidden": true
             },
             "negativeTags": {
               "type": "string",
@@ -6105,7 +8151,22 @@
               "minItems": 0,
               "maxItems": 10,
               "items": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "raw_url",
+                      "image_var"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "object",
+                      "string"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -6159,7 +8220,22 @@
               "minItems": 0,
               "maxItems": 10,
               "items": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "raw_url",
+                      "image_var"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "object",
+                      "string"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -6495,6 +8571,22 @@
             "1:1",
             "9:16",
             "16:9"
+          ]
+        },
+        {
+          "card": "image-from-text",
+          "model": "seedream-5.0-pro-less-restriction",
+          "field": "ratio",
+          "default": null,
+          "allowed": [
+            "1:1",
+            "9:16",
+            "16:9",
+            "4:3",
+            "3:4",
+            "3:2",
+            "2:3",
+            "21:9"
           ]
         },
         {
@@ -7501,6 +9593,130 @@
           ]
         },
         {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "field": "ratio",
+          "default": null,
+          "allowed": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4",
+            "adaptive"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "field": "duration",
+          "default": null,
+          "allowed": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "field": "outputResolution",
+          "default": null,
+          "allowed": [
+            "480p",
+            "720p",
+            "1080p"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "field": "ratio",
+          "default": null,
+          "allowed": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4",
+            "adaptive"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "field": "duration",
+          "default": null,
+          "allowed": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "field": "outputResolution",
+          "default": null,
+          "allowed": [
+            "480p",
+            "720p",
+            "1080p"
+          ]
+        },
+        {
           "card": "video-from-talking-avatar",
           "model": "seedance-2.5-less-restriction",
           "field": "ratio",
@@ -7569,7 +9785,7 @@
           "card": "video-edit",
           "model": "h3-akatz-v1.5",
           "field": "prompt",
-          "default": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing.",
+          "default": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing.",
           "allowed": []
         },
         {
@@ -7577,6 +9793,20 @@
           "model": "h3-akatz-v1.5",
           "field": "who_to_replace",
           "default": "person",
+          "allowed": []
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-less-restriction",
+          "field": "nativeAudio",
+          "default": true,
+          "allowed": []
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "wan-3.0-prime-less-restriction",
+          "field": "nativeAudio",
+          "default": true,
           "allowed": []
         }
       ]
@@ -7788,7 +10018,7 @@
       {
         "card": "image-from-text",
         "model": "gemini_2",
-        "label": "Nano Banana 2",
+        "label": "Nano Banana 2.1",
         "status": "active",
         "ratio": [
           "1:1",
@@ -7917,6 +10147,24 @@
           "1:1",
           "9:16",
           "16:9"
+        ],
+        "duration": [],
+        "outputResolution": []
+      },
+      {
+        "card": "image-from-text",
+        "model": "seedream-5.0-pro-less-restriction",
+        "label": "Seedream 5.0 Pro — Less Restricted",
+        "status": "active",
+        "ratio": [
+          "1:1",
+          "9:16",
+          "16:9",
+          "4:3",
+          "3:4",
+          "3:2",
+          "2:3",
+          "21:9"
         ],
         "duration": [],
         "outputResolution": []
@@ -8466,6 +10714,106 @@
       },
       {
         "card": "video-from-ingredients",
+        "model": "wan-3.0-less-restriction",
+        "label": "Wan 3.0 — Less Restricted",
+        "status": "active",
+        "ratio": [
+          "16:9",
+          "9:16",
+          "1:1",
+          "4:3",
+          "3:4",
+          "adaptive"
+        ],
+        "duration": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30
+        ],
+        "outputResolution": [
+          "480p",
+          "720p",
+          "1080p"
+        ]
+      },
+      {
+        "card": "video-from-ingredients",
+        "model": "wan-3.0-prime-less-restriction",
+        "label": "Wan 3.0 Prime — Less Restricted",
+        "status": "active",
+        "ratio": [
+          "16:9",
+          "9:16",
+          "1:1",
+          "4:3",
+          "3:4",
+          "adaptive"
+        ],
+        "duration": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30
+        ],
+        "outputResolution": [
+          "480p",
+          "720p",
+          "1080p"
+        ]
+      },
+      {
+        "card": "video-from-ingredients",
         "model": "gemini-omni-1.1-flash",
         "label": "Gemini Omni 1.1 Flash",
         "status": "active",
@@ -8805,7 +11153,8 @@
       "duration",
       "outputResolution",
       "prompt",
-      "who_to_replace"
+      "who_to_replace",
+      "nativeAudio"
     ]
   },
   "user_jobs": {
@@ -8883,6 +11232,7 @@
         "images",
         "prompt",
         "duration",
+        "subjects",
         "who_to_replace",
         "prompt_var",
         "ingredientTrims"
@@ -9600,7 +11950,11 @@
       "required": [
         "prompt"
       ],
-      "one_of_required": [],
+      "one_of_required": [
+        [
+          "model"
+        ]
+      ],
       "properties": [
         "prompt",
         "prompt_var",
@@ -9614,7 +11968,8 @@
         "type": "string",
         "enum": [
           "seedream-4.0",
-          "seedream-4.5"
+          "seedream-4.5",
+          "seedream-5.0-pro-less-restriction"
         ],
         "default": "seedream-4.0"
       }
@@ -9826,6 +12181,44 @@
         "source_content_resource_id",
         "voice_replace_data"
       ]
+    },
+    "wan_3_0_video_generation": {
+      "required": [
+        "model",
+        "prompt",
+        "images",
+        "duration",
+        "resolution",
+        "aspect_ratio"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "model",
+        "prompt",
+        "prompt_var",
+        "images",
+        "duration",
+        "resolution",
+        "aspect_ratio",
+        "native_audio",
+        "remove_background",
+        "input_video_duration",
+        "ingredientTrims",
+        "metadata"
+      ],
+      "model": {
+        "type": "string",
+        "enum": [
+          "wan-3.0-less-restriction",
+          "wan-3.0-prime-less-restriction"
+        ],
+        "default": "wan-3.0-less-restriction"
+      },
+      "duration": {
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 30
+      }
     }
   },
   "actions": {
@@ -10738,6 +13131,11 @@
         ]
       },
       {
+        "action": "close_gap",
+        "kind": "layer",
+        "extras": []
+      },
+      {
         "action": "undo",
         "kind": "vidsheet",
         "extras": []
@@ -10819,6 +13217,55 @@
     },
     "GET /v1/vidsheet/global_variables_template": {
       "operationId": "spreadsheet.global_variables_template"
+    },
+    "POST /v1/vidsheet/validate_card": {
+      "operationId": "vidsheet_action.validate_card",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agent_id": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  ]
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "draft",
+                    "generate"
+                  ]
+                },
+                "draftForm": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "agent_id",
+                "mode",
+                "draftForm"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
     },
     "DELETE /v1/vidsheet/{id}": {
       "operationId": "project.destroy",
@@ -11908,6 +14355,9 @@
                     "spreadsheet_row_id": {
                       "x-params-wrapper-discarded": true
                     },
+                    "timeline_magnetic": {
+                      "x-params-wrapper-discarded": true
+                    },
                     "updated_at": {
                       "x-params-wrapper-discarded": true
                     },
@@ -12172,6 +14622,9 @@
                     "spreadsheet_row_id": {
                       "x-params-wrapper-discarded": true
                     },
+                    "timeline_magnetic": {
+                      "x-params-wrapper-discarded": true
+                    },
                     "updated_at": {
                       "x-params-wrapper-discarded": true
                     },
@@ -12346,6 +14799,9 @@
                           "propertyNames": {
                             "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
                           }
+                        },
+                        "new_track": {
+                          "x-no-db-column": true
                         }
                       },
                       "additionalProperties": false,
@@ -12405,6 +14861,9 @@
                       "propertyNames": {
                         "pattern": "^[A-Za-z0-9_.\\-]{1,64}$"
                       }
+                    },
+                    "new_track": {
+                      "x-no-db-column": true
                     },
                     "created_at": {
                       "x-params-wrapper-discarded": true
@@ -12617,6 +15076,9 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "new_track": {
+                          "x-no-db-column": true
                         }
                       },
                       "additionalProperties": false
@@ -12681,6 +15143,9 @@
                         "string",
                         "null"
                       ]
+                    },
+                    "new_track": {
+                      "x-no-db-column": true
                     },
                     "created_at": {
                       "x-params-wrapper-discarded": true
@@ -12808,6 +15273,9 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "new_track": {
+                          "x-no-db-column": true
                         }
                       },
                       "additionalProperties": false
@@ -12872,6 +15340,9 @@
                         "string",
                         "null"
                       ]
+                    },
+                    "new_track": {
+                      "x-no-db-column": true
                     },
                     "created_at": {
                       "x-params-wrapper-discarded": true

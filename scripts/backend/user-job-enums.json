@@ -81,6 +81,7 @@
         "images",
         "prompt",
         "duration",
+        "subjects",
         "who_to_replace",
         "prompt_var",
         "ingredientTrims"
@@ -798,7 +799,11 @@
       "required": [
         "prompt"
       ],
-      "one_of_required": [],
+      "one_of_required": [
+        [
+          "model"
+        ]
+      ],
       "properties": [
         "prompt",
         "prompt_var",
@@ -812,7 +817,8 @@
         "type": "string",
         "enum": [
           "seedream-4.0",
-          "seedream-4.5"
+          "seedream-4.5",
+          "seedream-5.0-pro-less-restriction"
         ],
         "default": "seedream-4.0"
       }
@@ -1024,6 +1030,44 @@
         "source_content_resource_id",
         "voice_replace_data"
       ]
+    },
+    "wan_3_0_video_generation": {
+      "required": [
+        "model",
+        "prompt",
+        "images",
+        "duration",
+        "resolution",
+        "aspect_ratio"
+      ],
+      "one_of_required": [],
+      "properties": [
+        "model",
+        "prompt",
+        "prompt_var",
+        "images",
+        "duration",
+        "resolution",
+        "aspect_ratio",
+        "native_audio",
+        "remove_background",
+        "input_video_duration",
+        "ingredientTrims",
+        "metadata"
+      ],
+      "model": {
+        "type": "string",
+        "enum": [
+          "wan-3.0-less-restriction",
+          "wan-3.0-prime-less-restriction"
+        ],
+        "default": "wan-3.0-less-restriction"
+      },
+      "duration": {
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 30
+      }
     }
   }
 }
