@@ -59,7 +59,7 @@
               "status": "active",
               "active": false,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             },
             "h3-akatz-v1.5": {
@@ -68,7 +68,7 @@
               "status": "active",
               "active": true,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             },
             "h3-alisson-v1.1": {
@@ -77,7 +77,7 @@
               "status": "active",
               "active": false,
               "defaults": {
-                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
+                "prompt": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing."
               }
             }
           }
@@ -7569,7 +7569,7 @@
           "card": "video-edit",
           "model": "h3-akatz-v1.5",
           "field": "prompt",
-          "default": "Replace the selected person in {{video_1}} with the reference character shown in the reference images (every image shows the same person: use them for face, hair, body and clothing only). In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing.",
+          "default": "Replace the selected person in {{video_1}} with the reference character shown in the reference images, in every frame from the very first frame to the last. Replace the whole head and face, not only the clothing. Every reference image shows the same person: use them for identity only (face, head, hair, body and clothing), never for expression. Copy the mouth, lips, jaw and facial expression of the person in {{video_1}} in every frame: open, close and shape the mouth exactly when they do, so the lips stay in sync with the original audio. In every frame, face exactly the same direction as the person in {{video_1}}: front view when they face the camera, profile when they turn sideways, back view when they face away. Never change the direction they are facing. Preserve source performance, scene and audio timing.",
           "allowed": []
         },
         {
