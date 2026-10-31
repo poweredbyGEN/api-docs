@@ -36,6 +36,16 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 
 Use canonical `generation_type: "text"` for new integrations.
 
+## Models
+
+{/* gen:backend-model-enums:start */}
+
+Model ids the API accepts:
+
+- `text`: `openai`, `gemini`
+
+{/* gen:backend-model-enums:end */}
+
 ---
 
 ## Request body
@@ -44,7 +54,7 @@ Use canonical `generation_type: "text"` for new integrations.
 |-------|------|----------|-------------|
 | `generation_type` | string | Yes | `"text"`. |
 | `data.prompt` | string | Yes | The text prompt. Supports `{{variable_name}}` template syntax. |
-| `data.model` | string | No | `openai`, `gemini`. Default `gemini`. |
+| `data.model` | string | No | Model variant. See [Models](#models). Default `gemini`. |
 | `data.temperature` | float | No | Controls randomness. Default `0.2`. Range `0.0` - `1.0`. |
 | `data.max_length` | integer | No | Maximum output length in tokens. |
 | `data.prompt_var` | string | No | Variable name to map the prompt value from a column. |

@@ -44,7 +44,7 @@ const jobs = parse(remote, `gen-backend-v2@${sha}: user-job-enums.json`).user_jo
 if (!jobs || Object.keys(jobs).length < 40) fail(`gen-backend-v2@${sha}: only ${Object.keys(jobs ?? {}).length} job types (< 40); refusing to trust it`);
 
 const local = readFileSync(new URL("./backend/user-job-enums.json", import.meta.url));
-if (!local.equals(remote)) fail(`scripts/backend/user-job-enums.json differs from gen-backend-v2@${sha} (${ref}) (local ${local.length} bytes, remote ${remote.length} bytes); re-vendor with scripts/sync-from-backend.mjs and commit`);
+if (!local.equals(remote)) fail(`scripts/backend/user-job-enums.json differs from gen-backend-v2@${sha} (${ref}) (local ${local.length} bytes, remote ${remote.length} bytes); re-vendor with scripts/sync-from-backend.mjs --backend <gen-backend-v2> and commit`);
 console.log(`PASS: scripts/backend/user-job-enums.json is byte-identical to gen-backend-v2@${sha} (${ref}) docs/generated/user-job-enums.json`);
 
 function fail(msg) {

@@ -11,7 +11,7 @@
 // `gen:backend-creation-card-schemas` region in components and the
 // `gen:backend-model-enums` regions in the card reference pages.
 //
-// Vendor (default): copy the upstream artifacts into scripts/backend/, then
+// Vendor (--backend): copy the upstream artifacts into scripts/backend/, then
 // regenerate. Sources, all relative to the --backend directory:
 //   config/creation_cards.yml                        card, model, label, options
 //   config/model_capabilities.yml                    model id cross-check
@@ -29,8 +29,8 @@
 // Usage:
 //   node scripts/sync-from-backend.mjs --backend ../gen-backend-v2
 //   node scripts/sync-from-backend.mjs --check                 # CI: vendored copy
-//   node scripts/sync-from-backend.mjs --check --backend <dir> # CI: an upstream checkout
 //
+// Without --backend, regeneration reads only the vendored artifacts.
 // --check reads the artifacts and re-renders in memory; it writes nothing and
 // exits 1 when a rendering differs from the committed file. Without --backend it
 // reads the vendored scripts/backend/ copy, so CI needs no gen-backend-v2
@@ -84,6 +84,7 @@ const MODEL_TYPES = {
     "seedance_2_0_video_generation",
     "seedance_2_5_video_generation",
   ],
+  lipsync: ["infinite_voice_lip_sync"],
 };
 
 function parseArgs(argv) {
@@ -436,10 +437,38 @@ function openapiSchemaRegion(catalog) {
   return lines;
 }
 
-function markdownModelEnums(userJobs, types) {
-  const lines = ["Model ids the API accepts, read from the Rails job enums:", ""];
+function markdownModelEnums(userJobs, types, matrix) {
+  const lines = ["Model ids the API accepts:", ""];
   for (const type of types) {
-    const values = [...new Set((MODEL_TYPES[type] ?? []).flatMap((job) => jobEnum(userJobs, job)))];
+    const field = type === "lipsync" ? "lip_sync_model" : "model";
+    const values = [...new Set(MODEL_TYPES[type].flatMap((job) => jobEnum(userJobs, job, field)))];
+    const card = type === "lipsync" ? "lip-sync" : type.replaceAll("_", "-");
+    // The FE matrix owns display labels; Rails enums own accepted ids. Legacy
+    // ids absent from the matrix stay in the enum text, without invented labels.
+    const rows = matrix === null ? [] : matrix.models.filter((entry) => entry.form_type === card && values.includes(entry.model));
+    if (rows.length) {
+      const video = type === "video_from_text" || type === "video_from_image";
+      lines.push(
+        `| Model | \`generation_type\` | \`data.${field}\` |${video ? " Duration (s) |" : ""}`,
+        `|-------|-------------------|--------------|${video ? "--------------|" : ""}`,
+      );
+      for (const entry of rows) {
+        if (typeof entry.label !== "string" || !entry.label.trim()) {
+          throw new Error(`${card}: model ${entry.model} has no FE-visible matrix label`);
+        }
+        // Duration rules must carry their values; malformed rules cannot publish blank cells.
+        const durations = video ? [...new Set(matrix.rules
+          .filter((rule) => rule.card === card && rule.model === entry.model && rule.field === "duration")
+          .flatMap((rule) => {
+            if (!Array.isArray(rule.allowed)) {
+              throw new Error(`${card}: model ${entry.model} duration rule has no allowed array`);
+            }
+            return rule.allowed;
+          }))] : [];
+        lines.push(`| ${scrub(entry.label)} | \`${type}\` | \`"${entry.model}"\` |${video ? ` ${durations.length ? durations.join(", ") : "Not enumerated"} |` : ""}`);
+      }
+      lines.push("");
+    }
     lines.push(`- \`${type}\`: ${values.map((v) => `\`${v}\``).join(", ")}`);
   }
   return lines;
@@ -702,16 +731,10 @@ function run() {
     return 0;
   }
 
-  // Without --backend, a regeneration vendors from the sibling gen-backend-v2
-  // checkout when one exists, while --check always reads the vendored copy: CI
-  // has no such checkout, and the committed output must be reproducible from
-  // the committed artifacts.
-  // A regeneration reads the backend (--backend, else the sibling checkout) and
-  // rewrites the public contract; --check only re-renders from the committed
-  // contract, because CI has no backend checkout.
-  const fallback = path.resolve(ROOT, "..", "gen-backend-v2");
-  const backendDir = options.backend ? path.resolve(options.backend) : fallback;
-  if (!options.check) {
+  // Rendering and checking use the same vendored inputs. Only an explicit
+  // --backend refreshes them, so local regeneration cannot silently change sources.
+  if (!options.check && options.backend) {
+    const backendDir = path.resolve(options.backend);
     if (!existsSync(backendDir)) throw new Error(`--backend ${backendDir}: no such directory`);
     vendor(backendDir);
     refreshMcpTools(options.mcpRepo);
@@ -721,7 +744,13 @@ function run() {
 
   const contract = JSON.parse(readFileSync(PUBLIC_CONTRACT, "utf8"));
   const catalog = contract.catalog;
-  const userJobs = contract.user_jobs;
+  // Every card renderer requires the FE matrix, even when that card has no
+  // model rows; a missing artifact must fail rather than erase its tables.
+  if (!Array.isArray(catalog?.matrix?.models) || !Array.isArray(catalog?.matrix?.rules)) {
+    throw new Error("scripts/backend/public-contract.json: catalog.matrix.models/rules missing");
+  }
+  // Model membership comes from the same Rails enum artifact the docs gate reads.
+  const userJobs = JSON.parse(readFileSync(path.join(VENDOR_DIR, "user-job-enums.json"), "utf8")).user_jobs;
   const mcpTools = JSON.parse(readFileSync(MCP_TOOLS_FILE, "utf8"));
   assertMcpAgreement(mcpTools);
   if ((mcpTools.tools ?? []).length < 10) throw new Error("scripts/backend/mcp-tools.json lists too few served tools");
@@ -729,20 +758,34 @@ function run() {
   const openapiSchemas = openapiSchemaRegion(catalog);
   const openapiRegions = [["backend-creation-card-schemas", openapiSchemas]];
 
+  // A card page's model list is generated so a backend model reaches the docs
+  // with no hand edit; add each model-list surface to this shared renderer.
   const targets = [
     { file: "public/openapi.yaml", regions: openapiRegions },
     { file: "public/.well-known/openapi.yaml", regions: openapiRegions },
     {
+      file: "src/content/docs/reference/cards/text.mdx",
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["text"], catalog.matrix)]],
+    },
+    {
+      file: "src/content/docs/reference/cards/image-from-text.mdx",
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["image_from_text"], catalog.matrix)]],
+    },
+    {
       file: "src/content/docs/reference/generation-types.mdx",
-      regions: [["backend-model-enums", markdownModelEnums(userJobs, Object.keys(MODEL_TYPES))]],
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, Object.keys(MODEL_TYPES), null)]],
     },
     {
       file: "src/content/docs/reference/cards/video-from-text.mdx",
-      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["video_from_text"])]],
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["video_from_text"], catalog.matrix)]],
     },
     {
       file: "src/content/docs/reference/cards/video-from-image.mdx",
-      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["video_from_image"])]],
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["video_from_image"], catalog.matrix)]],
+    },
+    {
+      file: "src/content/docs/reference/cards/lipsync.mdx",
+      regions: [["backend-model-enums", markdownModelEnums(userJobs, ["lipsync"], catalog.matrix)]],
     },
   ];
 
@@ -758,12 +801,12 @@ function run() {
 
   if (options.check) {
     if (changed.length) {
-      process.stderr.write(`FAIL: ${changed.length} file(s) would change from scripts/backend/public-contract.json:\n`);
+      process.stderr.write(`FAIL: ${changed.length} file(s) would change from scripts/backend/:\n`);
       for (const file of changed) process.stderr.write(`  ${file}\n`);
-      process.stderr.write("run: node scripts/sync-from-backend.mjs --backend <gen-backend-v2>  and commit the result\n");
+      process.stderr.write("run: node scripts/sync-from-backend.mjs  and commit the result\n");
       return 1;
     }
-    process.stdout.write(`PASS: generated doc regions match scripts/backend/public-contract.json\n`);
+    process.stdout.write(`PASS: generated doc regions match scripts/backend/\n`);
     return 0;
   }
   process.stdout.write(changed.length ? `regenerated ${changed.join(", ")}\n` : "regenerated: no change\n");

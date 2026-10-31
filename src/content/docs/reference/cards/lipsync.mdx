@@ -13,10 +13,15 @@ The Lipsync card takes a talking-head video and a speech track, then re-renders 
 
 ## Models
 
-| `data.lip_sync_model` | Notes |
-|-----------------------|-------|
-| `"gen"` | Default. Faster, good quality. |
-| `"sync.so"` | Higher quality, slower processing. |
+{/* gen:backend-model-enums:start */}
+
+Model ids the API accepts:
+
+- `lipsync`: `sync.so`, `gen`
+
+{/* gen:backend-model-enums:end */}
+
+`"gen"` is faster with good quality. `"sync.so"` prioritizes quality with slower processing.
 
 ---
 
@@ -34,7 +39,7 @@ POST /v1/vidsheet/{id}/cells/{cell_id}/generate?agent_id={agent_id}
 | `data.talking_avatar_video_data.video.value` | string (URI) | Yes | Public URL of the source video. |
 | `data.talking_avatar_video_data.audio.value` | string (URI) | One of | Public URL of the speech audio. |
 | `data.voice_generation_data` | object | One of | Synthesize the speech in this job — same shape as [Speech from Text](/reference/cards/speech-from-text/) `data` (`text`, `voice_id`, …). |
-| `data.lip_sync_model` | string | No | `"gen"` (default) or `"sync.so"`. |
+| `data.lip_sync_model` | string | No | See [Models](#models). Default `"gen"`. |
 | `data.remove_background` | boolean | No | Remove the video background. Default `false`. |
 | `data.remove_silence` | boolean | No | Trim silence from synthesized speech. Default `false`. |
 
