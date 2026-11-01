@@ -2219,6 +2219,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2231,6 +2232,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2243,6 +2245,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2255,6 +2258,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2267,6 +2271,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2312,6 +2317,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
@@ -2325,6 +2331,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
@@ -2338,6 +2345,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
@@ -2351,6 +2359,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
@@ -2364,6 +2373,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background",
@@ -2452,6 +2462,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2464,6 +2475,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2476,6 +2488,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2488,6 +2501,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2500,6 +2514,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "nativeAudio": "native_audio",
             "outputResolution": "resolution",
             "ratio": "aspect_ratio",
             "removeBackground": "remove_background"
@@ -2513,7 +2528,8 @@
             "model": "model",
             "ratio": "aspect_ratio",
             "duration": "duration",
-            "outputResolution": "resolution"
+            "outputResolution": "resolution",
+            "nativeAudio": "native_audio"
           },
           "fixed_data": {
             "omni_reference_task_type": "reference"
@@ -2683,6 +2699,7 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "video",
             "images"
           ],
@@ -2695,6 +2712,7 @@
             "outputResolution",
             "ingredientTrims",
             "autoGenerate",
+            "nativeAudio",
             "model",
             "automaticDuration"
           ],
@@ -2786,6 +2804,10 @@
               "items": {
                 "type": "object"
               }
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "automaticDuration": {
               "type": "boolean",
@@ -4125,11 +4147,13 @@
           "max_reference_audio_seconds": 15,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -4151,6 +4175,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -4190,11 +4218,13 @@
           "max_reference_audio_seconds": 15,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -4216,6 +4246,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -4255,11 +4289,13 @@
           "max_reference_audio_seconds": 15,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -4281,6 +4317,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -4319,11 +4359,13 @@
           "max_reference_audio_seconds": 30,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -4345,6 +4387,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -4385,11 +4431,13 @@
           "max_reference_audio_seconds": null,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -4411,6 +4459,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5025,12 +5077,14 @@
           "max_reference_audio_seconds": 15,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "image",
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -5053,6 +5107,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5144,12 +5202,14 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "image"
           ],
           "fields": [
             "image",
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -5172,6 +5232,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5263,12 +5327,14 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "image"
           ],
           "fields": [
             "image",
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -5291,6 +5357,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5380,12 +5450,14 @@
           "max_reference_audio_seconds": 30,
           "required": [
             "model",
-            "prompt"
+            "prompt",
+            "nativeAudio"
           ],
           "fields": [
             "image",
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -5408,6 +5480,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5500,12 +5576,14 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "image"
           ],
           "fields": [
             "image",
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -5528,6 +5606,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -5620,6 +5702,9 @@
           "required": [
             "model",
             "prompt",
+            "ratio",
+            "duration",
+            "outputResolution",
             "images"
           ],
           "fields": [
@@ -5748,6 +5833,9 @@
           "required": [
             "model",
             "prompt",
+            "ratio",
+            "duration",
+            "outputResolution",
             "images"
           ],
           "fields": [
@@ -6241,11 +6329,13 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "images"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -6270,6 +6360,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -6367,11 +6461,13 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "images"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -6396,6 +6492,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -6493,11 +6593,13 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "images"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -6522,6 +6624,10 @@
               "minimum": 4,
               "maximum": 15,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -6618,11 +6724,13 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "images"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -6647,6 +6755,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -6745,11 +6857,13 @@
           "required": [
             "model",
             "prompt",
+            "nativeAudio",
             "images"
           ],
           "fields": [
             "prompt",
             "duration",
+            "nativeAudio",
             "outputResolution",
             "ratio",
             "voiceReplace",
@@ -6774,6 +6888,10 @@
               "minimum": 4,
               "maximum": 30,
               "default": 5
+            },
+            "nativeAudio": {
+              "type": "boolean",
+              "default": true
             },
             "outputResolution": {
               "type": "string",
@@ -7494,7 +7612,8 @@
                 }
               }
             }
-          }
+          },
+          "speech_words_per_minute": 150
         },
         {
           "card": "song",
@@ -11807,7 +11926,9 @@
       }
     },
     "seedance_2_0_video_generation": {
-      "required": [],
+      "required": [
+        "native_audio"
+      ],
       "one_of_required": [],
       "properties": [
         "prompt",
@@ -11850,7 +11971,9 @@
       }
     },
     "seedance_2_5_video_generation": {
-      "required": [],
+      "required": [
+        "native_audio"
+      ],
       "one_of_required": [],
       "properties": [
         "omni_reference_task_type",

@@ -13065,6 +13065,8 @@ components:
                 type: array
                 items:
                   type: object
+              speech_words_per_minute:
+                type: [integer, "null"]
         rules:
           type: array
           description: The values the API runs for each option field of a card and model.

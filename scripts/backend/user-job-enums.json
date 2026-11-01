@@ -702,7 +702,9 @@
       }
     },
     "seedance_2_0_video_generation": {
-      "required": [],
+      "required": [
+        "native_audio"
+      ],
       "one_of_required": [],
       "properties": [
         "prompt",
@@ -745,7 +747,9 @@
       }
     },
     "seedance_2_5_video_generation": {
-      "required": [],
+      "required": [
+        "native_audio"
+      ],
       "one_of_required": [],
       "properties": [
         "omni_reference_task_type",
