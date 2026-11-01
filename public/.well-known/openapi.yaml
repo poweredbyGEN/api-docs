@@ -9132,8 +9132,6 @@ paths:
   /ideas/recreate:
     post:
       operationId: postIdeasRecreate
-      servers:
-        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — recreate video"
       tags: [Agent Chat]
@@ -9169,15 +9167,13 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
-          $ref: '#/components/responses/AgentValidationError'
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "recreate_video"
       x-schema-status: missing
   /ideas/reimagine:
     post:
       operationId: postIdeasReimagine
-      servers:
-        - url: https://agent.gen.pro/v1
       x-phase: ideas
       summary: "Manage content resources and content ideas — reimagine video"
       tags: [Agent Chat]
@@ -9226,7 +9222,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
-          $ref: '#/components/responses/AgentValidationError'
+          $ref: '#/components/responses/ApiValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "reimagine_video"
       x-schema-status: missing
