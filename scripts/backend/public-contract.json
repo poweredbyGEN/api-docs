@@ -7458,21 +7458,12 @@
             "ingredientTrims",
             "convertMp3sToVideoForLipSync",
             "talkingAvatar",
-            "voice",
             "script",
             "removeBackground",
             "removeSilence",
-            "enhanceVoice",
             "autoGenerate",
             "lipSyncModel",
             "useVideoVoice",
-            "nameVoice",
-            "voiceModelProvider",
-            "language",
-            "gender",
-            "description",
-            "voicePrompt",
-            "voiceSample",
             "talkingAvatarName",
             "media",
             "mediaSource",
@@ -7531,14 +7522,6 @@
                 "gen"
               ]
             },
-            "voiceModelProvider": {
-              "type": "string",
-              "enum": [
-                "supertonic_3",
-                "qwen3_voice_design",
-                "voxcpm2"
-              ]
-            },
             "mediaSource": {
               "type": "string",
               "enum": [
@@ -7551,14 +7534,6 @@
               "enum": [
                 "myAvatars",
                 "createNew"
-              ]
-            },
-            "voiceMethod": {
-              "type": "string",
-              "enum": [
-                "myVoices",
-                "designVoice",
-                "cloneVoice"
               ]
             },
             "images": {
@@ -7613,6 +7588,488 @@
               }
             }
           },
+          "branches": [
+            {
+              "when": {
+                "voiceMethod": "myVoices",
+                "model": "seedance-2.5-less-restriction"
+              },
+              "required": [
+                "voiceMethod",
+                "script",
+                "avatarMethod",
+                "model"
+              ],
+              "fields": [
+                "prompt",
+                "duration",
+                "outputResolution",
+                "ratio",
+                "ingredientTrims",
+                "convertMp3sToVideoForLipSync",
+                "talkingAvatar",
+                "voice",
+                "script",
+                "removeBackground",
+                "removeSilence",
+                "enhanceVoice",
+                "autoGenerate",
+                "lipSyncModel",
+                "useVideoVoice",
+                "talkingAvatarName",
+                "media",
+                "mediaSource",
+                "avatarMethod",
+                "voiceMethod",
+                "model",
+                "images"
+              ],
+              "bounds": {
+                "prompt": {
+                  "type": "object",
+                  "x-gen-maxLengthUtf16": 4000
+                },
+                "duration": {
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "minimum": 4,
+                  "maximum": 30,
+                  "default": 5
+                },
+                "outputResolution": {
+                  "type": "string",
+                  "enum": [
+                    "480p",
+                    "720p",
+                    "1080p"
+                  ],
+                  "default": "720p"
+                },
+                "ratio": {
+                  "type": "string",
+                  "enum": [
+                    "16:9",
+                    "9:16",
+                    "4:3",
+                    "3:4"
+                  ],
+                  "default": "9:16"
+                },
+                "ingredientTrims": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "removeBackground": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "lipSyncModel": {
+                  "type": "string",
+                  "enum": [
+                    "sync.so",
+                    "gen"
+                  ]
+                },
+                "mediaSource": {
+                  "type": "string",
+                  "enum": [
+                    "media",
+                    "link"
+                  ]
+                },
+                "avatarMethod": {
+                  "type": "string",
+                  "enum": [
+                    "myAvatars",
+                    "createNew"
+                  ]
+                },
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "enum": [
+                          "text",
+                          "image",
+                          "video",
+                          "audio",
+                          "var"
+                        ]
+                      },
+                      "value": {},
+                      "name": {
+                        "type": "string"
+                      },
+                      "thumbnailUrl": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "thumbnail_error": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "mediaType": {
+                        "enum": [
+                          "image",
+                          "video",
+                          "audio"
+                        ]
+                      },
+                      "duration": {
+                        "type": "number"
+                      },
+                      "library_reference": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "references": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "when": {
+                "voiceMethod": "designVoice",
+                "model": "seedance-2.5-less-restriction"
+              },
+              "required": [
+                "voiceMethod",
+                "script",
+                "avatarMethod",
+                "model"
+              ],
+              "fields": [
+                "prompt",
+                "duration",
+                "outputResolution",
+                "ratio",
+                "ingredientTrims",
+                "convertMp3sToVideoForLipSync",
+                "talkingAvatar",
+                "nameVoice",
+                "voiceModelProvider",
+                "language",
+                "gender",
+                "description",
+                "voicePrompt",
+                "script",
+                "removeBackground",
+                "removeSilence",
+                "autoGenerate",
+                "lipSyncModel",
+                "useVideoVoice",
+                "talkingAvatarName",
+                "media",
+                "mediaSource",
+                "avatarMethod",
+                "voiceMethod",
+                "model",
+                "images"
+              ],
+              "bounds": {
+                "prompt": {
+                  "type": "object",
+                  "x-gen-maxLengthUtf16": 4000
+                },
+                "duration": {
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "minimum": 4,
+                  "maximum": 30,
+                  "default": 5
+                },
+                "outputResolution": {
+                  "type": "string",
+                  "enum": [
+                    "480p",
+                    "720p",
+                    "1080p"
+                  ],
+                  "default": "720p"
+                },
+                "ratio": {
+                  "type": "string",
+                  "enum": [
+                    "16:9",
+                    "9:16",
+                    "4:3",
+                    "3:4"
+                  ],
+                  "default": "9:16"
+                },
+                "ingredientTrims": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "voiceModelProvider": {
+                  "type": "string",
+                  "enum": [
+                    "supertonic_3",
+                    "qwen3_voice_design",
+                    "voxcpm2"
+                  ]
+                },
+                "removeBackground": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "lipSyncModel": {
+                  "type": "string",
+                  "enum": [
+                    "sync.so",
+                    "gen"
+                  ]
+                },
+                "mediaSource": {
+                  "type": "string",
+                  "enum": [
+                    "media",
+                    "link"
+                  ]
+                },
+                "avatarMethod": {
+                  "type": "string",
+                  "enum": [
+                    "myAvatars",
+                    "createNew"
+                  ]
+                },
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "enum": [
+                          "text",
+                          "image",
+                          "video",
+                          "audio",
+                          "var"
+                        ]
+                      },
+                      "value": {},
+                      "name": {
+                        "type": "string"
+                      },
+                      "thumbnailUrl": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "thumbnail_error": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "mediaType": {
+                        "enum": [
+                          "image",
+                          "video",
+                          "audio"
+                        ]
+                      },
+                      "duration": {
+                        "type": "number"
+                      },
+                      "library_reference": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "references": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "when": {
+                "voiceMethod": "cloneVoice",
+                "model": "seedance-2.5-less-restriction"
+              },
+              "required": [
+                "voiceMethod",
+                "script",
+                "avatarMethod",
+                "model"
+              ],
+              "fields": [
+                "prompt",
+                "duration",
+                "outputResolution",
+                "ratio",
+                "ingredientTrims",
+                "convertMp3sToVideoForLipSync",
+                "talkingAvatar",
+                "nameVoice",
+                "voiceModelProvider",
+                "voiceSample",
+                "language",
+                "gender",
+                "description",
+                "script",
+                "removeBackground",
+                "removeSilence",
+                "autoGenerate",
+                "lipSyncModel",
+                "useVideoVoice",
+                "talkingAvatarName",
+                "media",
+                "mediaSource",
+                "avatarMethod",
+                "voiceMethod",
+                "model",
+                "images"
+              ],
+              "bounds": {
+                "prompt": {
+                  "type": "object",
+                  "x-gen-maxLengthUtf16": 4000
+                },
+                "duration": {
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "minimum": 4,
+                  "maximum": 30,
+                  "default": 5
+                },
+                "outputResolution": {
+                  "type": "string",
+                  "enum": [
+                    "480p",
+                    "720p",
+                    "1080p"
+                  ],
+                  "default": "720p"
+                },
+                "ratio": {
+                  "type": "string",
+                  "enum": [
+                    "16:9",
+                    "9:16",
+                    "4:3",
+                    "3:4"
+                  ],
+                  "default": "9:16"
+                },
+                "ingredientTrims": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "voiceModelProvider": {
+                  "type": "string",
+                  "enum": [
+                    "supertonic_3",
+                    "qwen3_voice_design",
+                    "voxcpm2"
+                  ]
+                },
+                "removeBackground": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "lipSyncModel": {
+                  "type": "string",
+                  "enum": [
+                    "sync.so",
+                    "gen"
+                  ]
+                },
+                "mediaSource": {
+                  "type": "string",
+                  "enum": [
+                    "media",
+                    "link"
+                  ]
+                },
+                "avatarMethod": {
+                  "type": "string",
+                  "enum": [
+                    "myAvatars",
+                    "createNew"
+                  ]
+                },
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "enum": [
+                          "text",
+                          "image",
+                          "video",
+                          "audio",
+                          "var"
+                        ]
+                      },
+                      "value": {},
+                      "name": {
+                        "type": "string"
+                      },
+                      "thumbnailUrl": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "thumbnail_error": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "mediaType": {
+                        "enum": [
+                          "image",
+                          "video",
+                          "audio"
+                        ]
+                      },
+                      "duration": {
+                        "type": "number"
+                      },
+                      "library_reference": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "references": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
           "speech_words_per_minute": 150
         },
         {
