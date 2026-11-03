@@ -1714,7 +1714,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/watchlists.py:1191 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/watchlists.py:1195 (api_call)"
     },
     {
       "method": "POST",
@@ -2274,7 +2274,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/watchlists.py:1349 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/watchlists.py:1353 (api_call)"
     },
     {
       "method": "GET",
