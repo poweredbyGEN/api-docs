@@ -2094,6 +2094,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "songDuration": "duration",
             "style": "style",
             "title": "title",
             "negativeTags": "negative_tags",
@@ -2108,6 +2109,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "songDuration": "duration",
             "style": "style",
             "title": "title",
             "negativeTags": "negative_tags",
@@ -2122,6 +2124,7 @@
           "fields": {
             "model": "model",
             "duration": "duration",
+            "songDuration": "duration",
             "style": "style",
             "title": "title",
             "negativeTags": "negative_tags",
@@ -2705,23 +2708,21 @@
           ],
           "fields": [
             "video",
-            "prompt",
             "images",
+            "locationImage",
+            "prompt",
+            "model",
             "ratio",
             "duration",
             "outputResolution",
             "ingredientTrims",
             "autoGenerate",
             "nativeAudio",
-            "model",
             "automaticDuration"
           ],
           "bounds": {
-            "prompt": {
-              "type": "object",
-              "x-gen-maxLengthUtf16": 4000
-            },
             "images": {
+              "title": "Character pictures",
               "type": "array",
               "minItems": 1,
               "maxItems": 30,
@@ -2770,6 +2771,15 @@
                   }
                 }
               }
+            },
+            "locationImage": {
+              "type": "object",
+              "title": "Location picture"
+            },
+            "prompt": {
+              "title": "Prompt",
+              "type": "object",
+              "x-gen-maxLengthUtf16": 4000
             },
             "ratio": {
               "type": "string",
