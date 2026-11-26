@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseYamlSubset } from "../sync-from-backend.mjs";
+import { parseYamlSubset } from "../lib/yaml-subset.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const REFERENCE = "src/content/docs/reference/";
@@ -213,4 +213,23 @@ test("creation_cards reader reads same-indent sequences and block-mapping items"
     { selectors: { model: "gen", voice: "design" }, fields: {} },
   ]);
   assert.equal(cards.label, "Card A");
+});
+
+// intent: loosening the reader must not let it swallow lines it does not understand;
+// a sibling at an indent no open block owns stays a loud error (GEN-13143).
+test("creation_cards reader still fails loudly on YAML it does not understand", () => {
+  assert.throws(() => parseYamlSubset("a:\n- b: 1\n      c: 2\n"), /unread line: c: 2/);
+  assert.throws(() => parseYamlSubset("a:\n  b:\n  - x\n   - y\n"), /unread line/);
+});
+
+// intent: the sync runs when started through a symlinked path (host checkouts sit
+// behind ~/projects -> ~/mnt-data/projects); it never exits 0 without doing anything.
+test("sync script runs when started through a symlinked directory", (t) => {
+  const dir = mkdtempSync(path.join(tmpdir(), "sync-symlink-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const link = path.join(dir, "checkout");
+  symlinkSync(ROOT, link);
+  const result = spawnSync(process.execPath, [path.join(link, "scripts/sync-from-backend.mjs"), "--bogus"], { encoding: "utf8" });
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /unknown option --bogus/);
 });
