@@ -1,101 +1,101 @@
 {
   "source": "gen-mcp-server origin/main src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv",
-  "revision": "6a455a5",
+  "revision": "c9de5ce",
   "tools": [
     {
       "name": "gen_agent_action",
       "title": "Create, update, or remove assistants and their profiles",
-      "summary": "Use only to manage an agent's profile, settings or appearance."
+      "summary": "Create, update, or remove assistants and their profiles"
     },
     {
       "name": "gen_analyze",
       "title": "Analyze social trends, comments, hooks, and creators",
-      "summary": "Use only to collect sources or analyze videos, trends and research."
+      "summary": "Only collect sources/analyze videos/trends/research."
     },
     {
       "name": "gen_ask",
       "title": "Ask GEN anything, or chat about a build goal",
-      "summary": "Use only to run a durable or scheduled multi-step goal that is not content work (content: gen_content_action)."
+      "summary": "Only chat run_id: workflow; omit: one user wait, several ask which, zero hub; message = the person's whole message, copied exactly, every word (including a leading 'no'/'ok' and any request at the…"
     },
     {
       "name": "gen_asset_action",
       "title": "Analyze, upload, import, and delete assets",
-      "summary": "Use only to manage or analyze owned media assets and files."
+      "summary": "Only owned media/files: manage/analyze."
     },
     {
       "name": "gen_billing_action",
       "title": "Read billing and manage credit purchases",
-      "summary": "Use only to manage subscriptions, funding or billing settings."
+      "summary": "Read billing and manage credit purchases"
     },
     {
       "name": "gen_characters",
       "title": "Manage characters, looks, and talking characters",
-      "summary": "Use only to manage standalone characters from an owned image or video; a video or series's characters: gen_content_action."
+      "summary": "Only characters; video/series: gen_content_action."
     },
     {
       "name": "gen_content_action",
       "title": "Manage content resources and content ideas",
-      "summary": "Use only to do any content work, the default for ideas, characters, a series arc, a storyline, a storyboard or script edit, or making a video; other tools only when the user asks for something else."
+      "summary": "Only plan videos (topic/goal/product/story/script); edits: other tools."
     },
     {
       "name": "gen_discover",
       "title": "Discover",
-      "summary": "Use only to read records, options, job results or inspect an action."
+      "summary": "Discover"
     },
     {
       "name": "gen_feedback",
       "title": "Send feedback about GEN",
-      "summary": "Use only to report a problem or send product feedback to GEN."
+      "summary": "Only feedback to GEN."
     },
     {
       "name": "gen_generate",
       "title": "Create images, videos, songs, and transcripts",
-      "summary": "Use only to generate one standalone image, video, song or transcript (content work: gen_content_action)."
+      "summary": "Only specified media in one generation; planned videos: gen_content_action."
     },
     {
       "name": "gen_generate_report_ideas",
       "title": "Generate report ideas",
-      "summary": "Use only to prepare report ideas from supplied research data."
+      "summary": "Only report ideas from supplied research."
     },
     {
       "name": "gen_platform_action",
       "title": "Manage workspaces, API keys, preferences, and backups",
-      "summary": "Use only to manage workspace members, preferences or API access."
+      "summary": "Only workspace members/preferences/API access."
     },
     {
       "name": "gen_publish_action",
       "title": "Schedule, publish, or remove posts",
-      "summary": "Use only to connect social accounts, publish or schedule posts."
+      "summary": "Schedule, publish, or remove posts"
     },
     {
       "name": "gen_sign_in_link",
       "title": "Create a GEN sign-in link",
-      "summary": "Use only to obtain the sign-in link for this MCP connection."
+      "summary": "Create a GEN sign-in link"
     },
     {
       "name": "gen_task_action",
       "title": "Manage recurring jobs and monitoring tasks",
-      "summary": "Use only to schedule work or wait for and read accepted tasks."
+      "summary": "Only schedule/wait/read accepted tasks."
     },
     {
       "name": "gen_upload_asset",
       "title": "Upload a file into an asset library",
-      "summary": "Use only to upload a local file into the caller's owned assets."
+      "summary": "Upload a file into an asset library"
     },
     {
       "name": "gen_vidsheet_action",
       "title": "Vidsheet action",
-      "summary": "Use only to edit or generate editable video workspace rows."
+      "summary": "Only edit/generate Vidsheet rows."
     },
     {
       "name": "gen_voice_action",
       "title": "Clone, design, preview, and delete voices",
-      "summary": "Use only to create, preview or manage voices and voice scripts."
+      "summary": "Clone, design, preview, and delete voices"
     },
     {
       "name": "gen_watchlist_action",
       "title": "Manage monitoring watchlists and their sources",
-      "summary": "Use only to manage watched sources or query their findings."
+      "summary": "Only watch sources/query findings."
     }
   ]
 }

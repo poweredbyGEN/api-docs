@@ -9190,7 +9190,7 @@ paths:
     post:
       operationId: postIdeasGenerate
       servers:
-        - url: https://agent.gen.pro/v1
+        - url: https://python.gen.pro
       x-phase: ideas
       summary: "Manage content resources and content ideas — generate ideas"
       tags: [Agent Chat]
@@ -9395,7 +9395,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
-          $ref: '#/components/responses/AgentValidationError'
+          $ref: '#/components/responses/PythonValidationError'
       x-mcp-tool: gen_content_action
       x-mcp-branch: "generate_ideas"
       x-schema-status: missing

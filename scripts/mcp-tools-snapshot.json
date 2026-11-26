@@ -1,6 +1,6 @@
 {
-  "source": "offline: gen-mcp-server 6a455a576c44a1a068783ea019a374bfb4a3efd7@6a455a5 src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv served roots + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
-  "generated_at": "2026-11-03T20:23:00.889Z",
+  "source": "offline: gen-mcp-server c9de5cee23de2171b363c043269eda78ccddda45@c9de5ce src/gen_mcp_server/contracts/catalog-record/schema-paths.tsv served roots + src/gen_mcp_server/contracts/vidsheet-alias-replacements.json",
+  "generated_at": "2026-11-26T03:00:25.578Z",
   "served": [
     "gen_agent_action",
     "gen_analyze",
@@ -140,6 +140,7 @@
     "gen_list_content_resources": "gen_discover",
     "gen_list_conversations": "gen_discover",
     "gen_list_credit_plans": "gen_discover",
+    "gen_list_grants": "gen_discover",
     "gen_list_layers": "gen_discover",
     "gen_list_my_voices": "gen_discover",
     "gen_list_operations": "gen_discover",
