@@ -131,8 +131,9 @@ test("missing matrix label fails with its card and model", (t) => {
   const file = "scripts/backend/public-contract.json";
   const contract = json(dir, file);
   const card = "image-from-text";
-  const model = "gemini_2";
-  const entry = contract.catalog.matrix.models.find((entry) => entry.form_type === card && entry.model === model);
+  // The served catalog changes as Rails retires models, so the case takes any labelled model of the card rather than a pinned id.
+  const entry = contract.catalog.matrix.models.find((entry) => entry.form_type === card && entry.label);
+  const model = entry.model;
   assert.ok(entry.label);
   assert.ok(contract.catalog.models.find((entry) => entry.card === card && entry.model === model).label);
   delete entry.label;
