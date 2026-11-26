@@ -12966,9 +12966,8 @@ components:
       enum:
         - seedance-2.5-real-face
         - h3-akatz-v1.5
-        - gemini_2
-        - gemini_2_lite
-        - gemini_pro
+        - gemini
+        - openai
         - gpt-image-2
         - gpt-image-2.5-flare
         - gpt-image-2.5-sunburst
@@ -12977,7 +12976,7 @@ components:
         - seedream-4.0
         - seedream-4.5
         - seedream-5.0-pro-less-restriction
-        - gemini-omni-1.1-flash
+        - minimax-h3-max
         - kling-v3
         - seedance-2.0
         - seedance-2.0-less-restriction
@@ -12985,7 +12984,6 @@ components:
         - seedance-2.5
         - seedance-2.5-less-restriction
         - kling-v2-6
-        - minimax-h3-max
         - wan-3.0-less-restriction
         - wan-3.0-prime-less-restriction
         - gen
@@ -13082,6 +13080,11 @@ components:
                   - outputResolution
                   - prompt
                   - nativeAudio
+                  - mediaSource
+                  - lipSyncModel
+                  - language
+                  - gender
+                  - voiceModelProvider
               default:
                 oneOf:
                   - type: string

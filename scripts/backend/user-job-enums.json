@@ -6,6 +6,90 @@
     "duration",
     "lip_sync_model"
   ],
+  "labels": {
+    "analyze_viral_moment": "Clip analysis",
+    "assemblyai_audio_caption_generation": "Caption generation",
+    "clone_voice": "Voice cloning",
+    "create_avatar": "Avatar generation",
+    "create_detailed_skin_avatar": "Avatar generation",
+    "create_person_ear_product_avatar": "Avatar generation",
+    "create_person_product_avatar": "Avatar generation",
+    "create_talking_avatar_and_lip_sync": "Talking character",
+    "design_voice": "Voice design",
+    "eleven_labs": "Voice generation",
+    "fal": "Generation",
+    "gemini_caption_generation": "Caption generation",
+    "gemini_image_generation": "Image generation",
+    "gemini_video_generation": "Video generation",
+    "generate_pika_video": "Video generation",
+    "grok_image_generation": "Image generation",
+    "grok_video_generation": "Video generation",
+    "hume_ai": "Voice generation",
+    "image_caption_generation": "Image captioning",
+    "infinite_voice_lip_sync": "Talking character",
+    "kling": "Video generation",
+    "kling_img2video": "Video generation",
+    "midjourney": "Image generation",
+    "midjourney_variant": "Image variation",
+    "openai_image_generation_2": "Image generation",
+    "pika": "Video generation",
+    "publish_content": "Publish content",
+    "remotion": "Video render",
+    "remotion_publish": "Publish video",
+    "replace_master_kling": "Video replacement",
+    "seedance_2_0_video_generation": "Video generation",
+    "seedance_video_generation": "Video generation",
+    "sora2_video_generation": "Video generation",
+    "talking_avatar_video": "Talking character",
+    "text_generation": "Text generation",
+    "train_avatar": "Avatar training",
+    "train_social": "Social training",
+    "train_tiktok": "Automation setup",
+    "voice_design_runpod": "Voice design",
+    "voice_generation": "Voice generation"
+  },
+  "purpose_contract": {
+    "version": 1,
+    "purposes": [
+      "character_look",
+      "character_voice"
+    ],
+    "tiers": {
+      "character_look": "credits",
+      "character_voice": "paid_media"
+    },
+    "job_types": {
+      "character_look": [
+        "gemini_image_generation",
+        "grok_image_generation",
+        "midjourney",
+        "openai_image_generation_2",
+        "seedream_image_generation"
+      ]
+    },
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "version"
+      ],
+      "description": "Optional versioned workflow purpose handoff (GenerationPurposeV1).",
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "character_look",
+            "character_voice"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "const": 1
+        }
+      }
+    }
+  },
   "user_jobs": {
     "analyze_viral_moment": {
       "required": [
@@ -264,10 +348,10 @@
       "model": {
         "type": "string",
         "enum": [
-          "gemini-omni-1.1-flash",
+          "gemini-omni-1.2-flash",
           "gemini-omni-flash-preview"
         ],
-        "default": "gemini-omni-1.1-flash"
+        "default": "gemini-omni-1.2-flash"
       },
       "duration": {
         "type": [
@@ -275,8 +359,6 @@
           "string"
         ],
         "enum": [
-          1,
-          2,
           3,
           4,
           5,
@@ -285,8 +367,11 @@
           8,
           9,
           10,
-          "1",
-          "2",
+          11,
+          12,
+          13,
+          14,
+          15,
           "3",
           "4",
           "5",
@@ -294,7 +379,12 @@
           "7",
           "8",
           "9",
-          "10"
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15"
         ],
         "default": 10
       }
@@ -826,7 +916,9 @@
       }
     },
     "song_generation": {
-      "required": [],
+      "required": [
+        "style"
+      ],
       "one_of_required": [],
       "properties": [
         "prompt",

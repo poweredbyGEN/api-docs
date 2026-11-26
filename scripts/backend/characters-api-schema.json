@@ -1,5 +1,519 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "approved_look_save": {
+    "errors": {
+      "403": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "LIBRARY_READ_ONLY"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "library_read_only"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "SHARED_CHARACTER_READ_ONLY"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "shared_character_read_only"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "404": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "CHARACTER_NOT_FOUND"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "character_not_found"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "CONTENT_RESOURCE_NOT_FOUND"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "content_resource_not_found"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "LOOK_SAVE_NOT_FOUND"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "look_save_not_found"
+                ]
+              },
+              "field": {
+                "enum": [
+                  "idempotency_key"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  false
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "field",
+              "retryable"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "409": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "IDEMPOTENCY_CONFLICT"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "idempotency_conflict"
+                ]
+              },
+              "field": {
+                "enum": [
+                  "idempotency_key"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  false
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "field",
+              "retryable"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "IDEMPOTENCY_IN_PROGRESS"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "idempotency_in_progress"
+                ]
+              },
+              "field": {
+                "enum": [
+                  "idempotency_key"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  true
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "field",
+              "retryable"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "LOOK_SELECTION_CONFLICT"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "look_selection_conflict"
+                ]
+              },
+              "field": {
+                "enum": [
+                  "expected_primary_look_id"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  false
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "field",
+              "retryable"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "422": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "INVALID_FIELD"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "invalid_field"
+                ]
+              },
+              "field": {
+                "enum": [
+                  "select_primary",
+                  "expected_primary_look_id",
+                  "content_resource_id",
+                  "prompt",
+                  "visual_style",
+                  "idempotency_key",
+                  "name"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  false
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "field",
+              "retryable"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "MEDIA_KIND_MISMATCH"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "media_kind_mismatch"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "VALIDATION_ERROR"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "validation_error"
+                ]
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "500": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "LOOK_SAVE_FAILED"
+                ]
+              },
+              "error": {
+                "type": "string"
+              },
+              "error_code": {
+                "enum": [
+                  "look_save_failed"
+                ]
+              },
+              "retryable": {
+                "enum": [
+                  false
+                ],
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "error",
+              "error_code",
+              "code",
+              "retryable"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "receipt": {
+      "additionalProperties": false,
+      "description": "The look committed by the original approval. Read character detail for the current primary.",
+      "properties": {
+        "character_id": {
+          "maximum": 9223372036854775807,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "content_resource_id": {
+          "maximum": 9223372036854775807,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "look_id": {
+          "maximum": 9223372036854775807,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "character_id",
+        "look_id",
+        "content_resource_id"
+      ],
+      "type": "object"
+    },
+    "routes": {
+      "GET /v1/characters/{character_id}/looks/receipt": {
+        "headers": {
+          "additionalProperties": false,
+          "properties": {
+            "Idempotency-Key": {
+              "maxLength": 255,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "required": [
+            "Idempotency-Key"
+          ],
+          "type": "object"
+        },
+        "query": {
+          "additionalProperties": false,
+          "properties": {
+            "agent_id": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "agent_id"
+          ],
+          "type": "object"
+        },
+        "response_status": 200
+      },
+      "POST /v1/characters/{character_id}/looks": {
+        "body": {
+          "additionalProperties": true,
+          "properties": {
+            "agent_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "content_resource_id": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "expected_primary_look_id": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "prompt": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "select_primary": {
+              "enum": [
+                true
+              ],
+              "type": "boolean"
+            },
+            "visual_style": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "required": [
+            "agent_id",
+            "select_primary",
+            "expected_primary_look_id",
+            "content_resource_id",
+            "prompt",
+            "visual_style"
+          ],
+          "type": "object"
+        },
+        "headers": {
+          "additionalProperties": false,
+          "properties": {
+            "Idempotency-Key": {
+              "maxLength": 255,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "required": [
+            "Idempotency-Key"
+          ],
+          "type": "object"
+        },
+        "response_status": 201
+      }
+    },
+    "version": 1
+  },
   "create": {
     "additionalProperties": false,
     "description": "POST /v1/characters (create): the detail plus the look, talking character and voice-clone job it made. A video also gets a cloned voice unless clone_voice is false; voice_id is null until the clone job finishes, after which the voice is the character's primary_voice.",
@@ -217,6 +731,12 @@
                 "generated"
               ]
             },
+            "prompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "talking_characters": {
               "items": {
                 "additionalProperties": false,
@@ -321,10 +841,18 @@
                 "string",
                 "null"
               ]
+            },
+            "visual_style": {
+              "type": [
+                "string",
+                "null"
+              ]
             }
           },
           "required": [
             "look_id",
+            "prompt",
+            "visual_style",
             "content_resource_id",
             "name",
             "origin",
@@ -355,10 +883,98 @@
           "null"
         ]
       },
-      "primary_voice": {
+      "primary_look_id": {
+        "description": "Current primary look. Null when the character has no look.",
         "type": [
-          "object",
+          "integer",
           "null"
+        ]
+      },
+      "primary_voice": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "prompt"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "source",
+              "description"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "billing_source": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "ownership": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "source": {
+                "not": {
+                  "enum": [
+                    "prompt"
+                  ]
+                },
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          }
         ]
       },
       "profile": {
@@ -552,12 +1168,13 @@
       "preview_url",
       "latest_generated_video_url",
       "look_count",
+      "looks",
       "talking_character_count",
       "primary_voice",
       "availability",
       "default_talking_character",
       "updated_at",
-      "looks",
+      "primary_look_id",
       "uploaded_talking_characters",
       "generating_talking_characters",
       "look_id",
@@ -781,6 +1398,12 @@
                 "generated"
               ]
             },
+            "prompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "talking_characters": {
               "items": {
                 "additionalProperties": false,
@@ -885,10 +1508,18 @@
                 "string",
                 "null"
               ]
+            },
+            "visual_style": {
+              "type": [
+                "string",
+                "null"
+              ]
             }
           },
           "required": [
             "look_id",
+            "prompt",
+            "visual_style",
             "content_resource_id",
             "name",
             "origin",
@@ -919,10 +1550,98 @@
           "null"
         ]
       },
-      "primary_voice": {
+      "primary_look_id": {
+        "description": "Current primary look. Null when the character has no look.",
         "type": [
-          "object",
+          "integer",
           "null"
+        ]
+      },
+      "primary_voice": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "prompt"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "source",
+              "description"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "billing_source": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "ownership": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "source": {
+                "not": {
+                  "enum": [
+                    "prompt"
+                  ]
+                },
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          }
         ]
       },
       "profile": {
@@ -1083,12 +1802,13 @@
       "preview_url",
       "latest_generated_video_url",
       "look_count",
+      "looks",
       "talking_character_count",
       "primary_voice",
       "availability",
       "default_talking_character",
       "updated_at",
-      "looks",
+      "primary_look_id",
       "uploaded_talking_characters",
       "generating_talking_characters"
     ],
@@ -1148,6 +1868,12 @@
           "original",
           "uploaded",
           "generated"
+        ]
+      },
+      "prompt": {
+        "type": [
+          "string",
+          "null"
         ]
       },
       "talking_characters": {
@@ -1254,10 +1980,18 @@
           "string",
           "null"
         ]
+      },
+      "visual_style": {
+        "type": [
+          "string",
+          "null"
+        ]
       }
     },
     "required": [
       "look_id",
+      "prompt",
+      "visual_style",
       "content_resource_id",
       "name",
       "origin",
@@ -1375,6 +2109,21 @@
         "type": "object"
       }
     },
+    "GET /v1/characters/{character_id}/looks/receipt": {
+      "in": "query",
+      "schema": {
+        "properties": {
+          "agent_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      }
+    },
     "GET /v1/characters/{character_id}/talking_characters/{id}": {
       "in": "query",
       "schema": {
@@ -1462,48 +2211,74 @@
             "type": "string"
           },
           "primary_voice": {
-            "description": "Sets the character's primary voice, the voice its talking characters speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it.",
-            "properties": {
-              "billing_source": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+            "description": "Sets the character's primary voice: either an audio voice (one of the agent's voices or a library voice, as listed by the voices endpoints), a typed prompt voice ({source: \"prompt\", description: \"...\"}), or null/{} to clear it.",
+            "oneOf": [
+              {
+                "type": "null"
               },
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "minLength": 1,
+                    "pattern": "\\S",
+                    "type": "string"
+                  },
+                  "source": {
+                    "enum": [
+                      "prompt"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source",
+                  "description"
+                ],
+                "type": "object"
               },
-              "name": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "ownership": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "provider": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "voice_id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "billing_source": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "ownership": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "provider": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "voice_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                },
+                "type": "object"
               }
-            },
-            "type": [
-              "object",
-              "null"
             ]
           },
           "profile": {
@@ -1578,7 +2353,8 @@
           "clone_voice": {
             "default": true,
             "description": "Videos only. Clones the person's voice from the video into the character's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-min-sample-duration-seconds": 30
           },
           "content_resource_id": {
             "description": "An uploaded image or video of a person. An image becomes the character's original look. A video becomes its first talking character, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely.",
@@ -1642,6 +2418,28 @@
             },
             "type": "object"
           },
+          "purpose": {
+            "additionalProperties": false,
+            "description": "Optional versioned workflow purpose handoff (GenerationPurposeV1).",
+            "properties": {
+              "purpose": {
+                "enum": [
+                  "character_look",
+                  "character_voice"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "const": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "purpose",
+              "version"
+            ],
+            "type": "object"
+          },
           "voice_gender": {
             "default": "female",
             "description": "Gender of the cloned voice.",
@@ -1676,8 +2474,29 @@
             "description": "An uploaded image of the person.",
             "type": "integer"
           },
+          "expected_primary_look_id": {
+            "maximum": 9223372036854775807,
+            "minimum": 1,
+            "type": "integer"
+          },
           "name": {
             "description": "Look name.",
+            "type": "string"
+          },
+          "prompt": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "select_primary": {
+            "enum": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "visual_style": {
+            "minLength": 1,
+            "pattern": "\\S",
             "type": "string"
           }
         },
@@ -1699,7 +2518,8 @@
           "clone_voice": {
             "default": false,
             "description": "Also clones the person's voice from the video; it becomes the character's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-min-sample-duration-seconds": 30
           },
           "content_resource_id": {
             "description": "An uploaded video of the person speaking.",
@@ -1708,6 +2528,28 @@
           "name": {
             "description": "Talking character name. Defaults to the character's name.",
             "type": "string"
+          },
+          "purpose": {
+            "additionalProperties": false,
+            "description": "Optional versioned workflow purpose handoff (GenerationPurposeV1).",
+            "properties": {
+              "purpose": {
+                "enum": [
+                  "character_look",
+                  "character_voice"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "const": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "purpose",
+              "version"
+            ],
+            "type": "object"
           },
           "voice_gender": {
             "default": "female",
@@ -1913,6 +2755,36 @@
         "minimum": 0,
         "type": "integer"
       },
+      "looks": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "look_id": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "prompt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "visual_style": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "look_id",
+            "prompt",
+            "visual_style"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
       "name": {
         "type": "string"
       },
@@ -1932,9 +2804,90 @@
         ]
       },
       "primary_voice": {
-        "type": [
-          "object",
-          "null"
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "prompt"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "source",
+              "description"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "billing_source": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "ownership": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "provider": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              },
+              "source": {
+                "not": {
+                  "enum": [
+                    "prompt"
+                  ]
+                },
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "voice_id": {
+                "type": [
+                  "string",
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          }
         ]
       },
       "profile": {
@@ -2002,6 +2955,7 @@
       "preview_url",
       "latest_generated_video_url",
       "look_count",
+      "looks",
       "talking_character_count",
       "primary_voice",
       "availability",
