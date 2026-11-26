@@ -129,6 +129,10 @@ function parseYamlSubset(text) {
       i += 1;
       if (rest !== "") out[key] = parseScalar(rest);
       else if (i < tokens.length && tokens[i].indent > indent) out[key] = parseBlock(tokens[i].indent);
+      // YAML lets a block sequence sit at the same indent as its key (`job_types:` then
+      // `- x` one level in the file's own style); the backend writes cards that way, so
+      // read it as that key's value instead of stopping and leaving the items unread.
+      else if (i < tokens.length && tokens[i].indent === indent && tokens[i].content.startsWith("- ")) out[key] = parseSeq(indent);
       else out[key] = null;
     }
     return out;
@@ -137,7 +141,14 @@ function parseYamlSubset(text) {
     const out = [];
     while (i < tokens.length && tokens[i].indent === indent && tokens[i].content.startsWith("- ")) {
       const item = tokens[i].content.slice(2).trim();
-      if (!item.startsWith("{") && splitKey(item) !== null) throw new Error(`creation_cards.yml: unsupported block-sequence mapping: ${item}`);
+      if (!item.startsWith("{") && splitKey(item) !== null) {
+        // `- key: v` opens a block mapping whose remaining keys sit under the first key,
+        // two columns past the dash; re-read the item line as that mapping's first entry.
+        const column = indent + 2 + (tokens[i].content.slice(2).length - tokens[i].content.slice(2).trimStart().length);
+        tokens[i] = { indent: column, content: item };
+        out.push(parseMap(column));
+        continue;
+      }
       out.push(parseScalar(item));
       i += 1;
     }
@@ -813,4 +824,7 @@ function run() {
   return 0;
 }
 
-process.exitCode = main();
+// Importable by tests (parseYamlSubset) without running the sync; a direct
+// `node scripts/sync-from-backend.mjs` still runs it.
+export { parseYamlSubset };
+if (path.resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) process.exitCode = main();

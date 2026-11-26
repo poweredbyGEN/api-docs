@@ -5,6 +5,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } f
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseYamlSubset } from "../sync-from-backend.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const REFERENCE = "src/content/docs/reference/";
@@ -179,4 +180,37 @@ test("video duration cell matches matrix values and rejects missing allowed", (t
   assert.notEqual(result.status, 0, "generator accepts a duration rule without allowed values");
   assert.ok((result.stdout + result.stderr).includes(card), result.stdout + result.stderr);
   assert.ok((result.stdout + result.stderr).includes(model), result.stdout + result.stderr);
+});
+
+// intent: the backend writes creation_cards.yml with block sequences at their key's indent
+// and as lists of block mappings (`branches:`); the reader returns both as data. A leftover
+// line stalls the contract-sync timer for every consumer (GEN-13143).
+test("creation_cards reader reads same-indent sequences and block-mapping items", () => {
+  const cards = parseYamlSubset([
+    "cards:",
+    "  card-a:",
+    "    job_types:",
+    "    - job_one",
+    "    - job_two",
+    "    selector_job_types: {}",
+    "    branches:",
+    "    - selectors:",
+    "        model: gen",
+    "        voice: mine",
+    "      fields:",
+    "        talking:",
+    "          dynamicSetting: false",
+    "    - selectors:",
+    "        model: gen",
+    "        voice: design",
+    "      fields: {}",
+    "    label: Card A",
+  ].join("\n")).cards["card-a"];
+  assert.deepEqual(cards.job_types, ["job_one", "job_two"]);
+  assert.deepEqual(cards.selector_job_types, {});
+  assert.deepEqual(cards.branches, [
+    { selectors: { model: "gen", voice: "mine" }, fields: { talking: { dynamicSetting: false } } },
+    { selectors: { model: "gen", voice: "design" }, fields: {} },
+  ]);
+  assert.equal(cards.label, "Card A");
 });
