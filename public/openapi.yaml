@@ -6082,6 +6082,27 @@ paths:
                     look_count:
                       minimum: 0
                       type: "integer"
+                    looks:
+                      items:
+                        additionalProperties: false
+                        properties:
+                          look_id:
+                            minimum: 1
+                            type: "integer"
+                          prompt:
+                            type:
+                              - "string"
+                              - "null"
+                          visual_style:
+                            type:
+                              - "string"
+                              - "null"
+                        required:
+                          - "look_id"
+                          - "prompt"
+                          - "visual_style"
+                        type: "object"
+                      type: "array"
                     name:
                       type: "string"
                     permissions:
@@ -6095,9 +6116,62 @@ paths:
                         - "string"
                         - "null"
                     primary_voice:
-                      type:
-                        - "object"
-                        - "null"
+                      oneOf:
+                        - type: "null"
+                        - additionalProperties: False
+                          properties:
+                            description:
+                              minLength: 1
+                              pattern: "\\S"
+                              type: "string"
+                            source:
+                              enum:
+                                - "prompt"
+                              type: "string"
+                          required:
+                            - "source"
+                            - "description"
+                          type: "object"
+                        - additionalProperties: False
+                          properties:
+                            billing_source:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                            id:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                            name:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                            ownership:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                            provider:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                            source:
+                              not:
+                                enum:
+                                  - "prompt"
+                              type:
+                                - "string"
+                                - "null"
+                            voice_id:
+                              type:
+                                - "string"
+                                - "integer"
+                                - "null"
+                          type: "object"
                     profile:
                       additionalProperties: false
                       description: "What the cover image shows (description and tags) and the prompt that made it; {} until described."
@@ -6146,6 +6220,7 @@ paths:
                     - "preview_url"
                     - "latest_generated_video_url"
                     - "look_count"
+                    - "looks"
                     - "talking_character_count"
                     - "primary_voice"
                     - "availability"
@@ -6177,6 +6252,7 @@ paths:
                   default: true
                   description: "Videos only. Clones the person's voice from the video into the character's primary voice; this uses credits. Left out, a video that cannot be cloned is still uploaded, without a voice, and voice_clone_message says why. false skips the clone. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
                   type: "boolean"
+                  x-min-sample-duration-seconds: 30
                 content_resource_id:
                   description: "An uploaded image or video of a person. An image becomes the character's original look. A video becomes its first talking character, its first frame the first look (the cover), and its audio a cloned voice unless clone_voice is false. Send an Idempotency-Key header to retry safely."
                   type: "integer"
@@ -6218,6 +6294,22 @@ paths:
                       type:
                         - "string"
                         - "null"
+                  type: "object"
+                purpose:
+                  additionalProperties: false
+                  description: "Optional versioned workflow purpose handoff (GenerationPurposeV1)."
+                  properties:
+                    purpose:
+                      enum:
+                        - "character_look"
+                        - "character_voice"
+                      type: "string"
+                    version:
+                      const: 1
+                      type: "integer"
+                  required:
+                    - "purpose"
+                    - "version"
                   type: "object"
                 voice_gender:
                   default: "female"
@@ -6395,6 +6487,10 @@ paths:
                             - "original"
                             - "uploaded"
                             - "generated"
+                        prompt:
+                          type:
+                            - "string"
+                            - "null"
                         talking_characters:
                           items:
                             additionalProperties: false
@@ -6469,8 +6565,14 @@ paths:
                           type:
                             - "string"
                             - "null"
+                        visual_style:
+                          type:
+                            - "string"
+                            - "null"
                       required:
                         - "look_id"
+                        - "prompt"
+                        - "visual_style"
                         - "content_resource_id"
                         - "name"
                         - "origin"
@@ -6492,10 +6594,68 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  primary_voice:
+                  primary_look_id:
+                    description: "Current primary look. Null when the character has no look."
                     type:
-                      - "object"
+                      - "integer"
                       - "null"
+                  primary_voice:
+                    oneOf:
+                      - type: "null"
+                      - additionalProperties: False
+                        properties:
+                          description:
+                            minLength: 1
+                            pattern: "\\S"
+                            type: "string"
+                          source:
+                            enum:
+                              - "prompt"
+                            type: "string"
+                        required:
+                          - "source"
+                          - "description"
+                        type: "object"
+                      - additionalProperties: False
+                        properties:
+                          billing_source:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          name:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          ownership:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          provider:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          source:
+                            not:
+                              enum:
+                                - "prompt"
+                            type:
+                              - "string"
+                              - "null"
+                          voice_id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                        type: "object"
                   profile:
                     additionalProperties: false
                     description: "What the cover image shows (description and tags) and the prompt that made it; {} until described."
@@ -6633,12 +6793,13 @@ paths:
                   - "preview_url"
                   - "latest_generated_video_url"
                   - "look_count"
+                  - "looks"
                   - "talking_character_count"
                   - "primary_voice"
                   - "availability"
                   - "default_talking_character"
                   - "updated_at"
-                  - "looks"
+                  - "primary_look_id"
                   - "uploaded_talking_characters"
                   - "generating_talking_characters"
                   - "look_id"
@@ -6679,8 +6840,24 @@ paths:
                 content_resource_id:
                   description: "An uploaded image of the person."
                   type: "integer"
+                expected_primary_look_id:
+                  maximum: 9223372036854775807
+                  minimum: 1
+                  type: "integer"
                 name:
                   description: "Look name."
+                  type: "string"
+                prompt:
+                  minLength: 1
+                  pattern: "\\S"
+                  type: "string"
+                select_primary:
+                  enum:
+                    - True
+                  type: "boolean"
+                visual_style:
+                  minLength: 1
+                  pattern: "\\S"
                   type: "string"
               required:
                 - "agent_id"
@@ -6712,6 +6889,10 @@ paths:
                       - "original"
                       - "uploaded"
                       - "generated"
+                  prompt:
+                    type:
+                      - "string"
+                      - "null"
                   talking_characters:
                     items:
                       additionalProperties: false
@@ -6786,8 +6967,14 @@ paths:
                     type:
                       - "string"
                       - "null"
+                  visual_style:
+                    type:
+                      - "string"
+                      - "null"
                 required:
                   - "look_id"
+                  - "prompt"
+                  - "visual_style"
                   - "content_resource_id"
                   - "name"
                   - "origin"
@@ -6830,12 +7017,29 @@ paths:
                   default: false
                   description: "Also clones the person's voice from the video; it becomes the character's primary voice once the clone finishes. This uses credits. true refuses a video without audio, with unreadable audio or shorter than 30 seconds (422, param content_resource_id) instead of uploading it without a voice."
                   type: "boolean"
+                  x-min-sample-duration-seconds: 30
                 content_resource_id:
                   description: "An uploaded video of the person speaking."
                   type: "integer"
                 name:
                   description: "Talking character name. Defaults to the character's name."
                   type: "string"
+                purpose:
+                  additionalProperties: false
+                  description: "Optional versioned workflow purpose handoff (GenerationPurposeV1)."
+                  properties:
+                    purpose:
+                      enum:
+                        - "character_look"
+                        - "character_voice"
+                      type: "string"
+                    version:
+                      const: 1
+                      type: "integer"
+                  required:
+                    - "purpose"
+                    - "version"
+                  type: "object"
                 voice_gender:
                   default: "female"
                   description: "Gender of the cloned voice."
@@ -7223,6 +7427,10 @@ paths:
                             - "original"
                             - "uploaded"
                             - "generated"
+                        prompt:
+                          type:
+                            - "string"
+                            - "null"
                         talking_characters:
                           items:
                             additionalProperties: false
@@ -7297,8 +7505,14 @@ paths:
                           type:
                             - "string"
                             - "null"
+                        visual_style:
+                          type:
+                            - "string"
+                            - "null"
                       required:
                         - "look_id"
+                        - "prompt"
+                        - "visual_style"
                         - "content_resource_id"
                         - "name"
                         - "origin"
@@ -7320,10 +7534,68 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  primary_voice:
+                  primary_look_id:
+                    description: "Current primary look. Null when the character has no look."
                     type:
-                      - "object"
+                      - "integer"
                       - "null"
+                  primary_voice:
+                    oneOf:
+                      - type: "null"
+                      - additionalProperties: False
+                        properties:
+                          description:
+                            minLength: 1
+                            pattern: "\\S"
+                            type: "string"
+                          source:
+                            enum:
+                              - "prompt"
+                            type: "string"
+                        required:
+                          - "source"
+                          - "description"
+                        type: "object"
+                      - additionalProperties: False
+                        properties:
+                          billing_source:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          name:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          ownership:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          provider:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          source:
+                            not:
+                              enum:
+                                - "prompt"
+                            type:
+                              - "string"
+                              - "null"
+                          voice_id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                        type: "object"
                   profile:
                     additionalProperties: false
                     description: "What the cover image shows (description and tags) and the prompt that made it; {} until described."
@@ -7438,12 +7710,13 @@ paths:
                   - "preview_url"
                   - "latest_generated_video_url"
                   - "look_count"
+                  - "looks"
                   - "talking_character_count"
                   - "primary_voice"
                   - "availability"
                   - "default_talking_character"
                   - "updated_at"
-                  - "looks"
+                  - "primary_look_id"
                   - "uploaded_talking_characters"
                   - "generating_talking_characters"
                 type: "object"
@@ -7480,35 +7753,50 @@ paths:
                   description: "Renames the character. Renaming the agent's own character also renames the agent."
                   type: "string"
                 primary_voice:
-                  description: "Sets the character's primary voice, the voice its talking characters speak with by default: one of the agent's voices or a library voice, as listed by the voices endpoints. null or {} clears it."
-                  properties:
-                    billing_source:
-                      type:
-                        - "string"
-                        - "integer"
-                    id:
-                      type:
-                        - "string"
-                        - "integer"
-                    name:
-                      type:
-                        - "string"
-                        - "integer"
-                    ownership:
-                      type:
-                        - "string"
-                        - "integer"
-                    provider:
-                      type:
-                        - "string"
-                        - "integer"
-                    voice_id:
-                      type:
-                        - "string"
-                        - "integer"
-                  type:
-                    - "object"
-                    - "null"
+                  description: "Sets the character's primary voice: either an audio voice (one of the agent's voices or a library voice, as listed by the voices endpoints), a typed prompt voice ({source: \"prompt\", description: \"...\"}), or null/{} to clear it."
+                  oneOf:
+                    - type: "null"
+                    - additionalProperties: False
+                      properties:
+                        description:
+                          minLength: 1
+                          pattern: "\\S"
+                          type: "string"
+                        source:
+                          enum:
+                            - "prompt"
+                          type: "string"
+                      required:
+                        - "source"
+                        - "description"
+                      type: "object"
+                    - additionalProperties: False
+                      properties:
+                        billing_source:
+                          type:
+                            - "string"
+                            - "integer"
+                        id:
+                          type:
+                            - "string"
+                            - "integer"
+                        name:
+                          type:
+                            - "string"
+                            - "integer"
+                        ownership:
+                          type:
+                            - "string"
+                            - "integer"
+                        provider:
+                          type:
+                            - "string"
+                            - "integer"
+                        voice_id:
+                          type:
+                            - "string"
+                            - "integer"
+                      type: "object"
                 profile:
                   description: "What the character's cover image shows, read by planners choosing a character: a one-line description, its tags and the prompt that made the image (when it was generated). Sent keys replace saved ones."
                   properties:
@@ -7705,6 +7993,10 @@ paths:
                             - "original"
                             - "uploaded"
                             - "generated"
+                        prompt:
+                          type:
+                            - "string"
+                            - "null"
                         talking_characters:
                           items:
                             additionalProperties: false
@@ -7779,8 +8071,14 @@ paths:
                           type:
                             - "string"
                             - "null"
+                        visual_style:
+                          type:
+                            - "string"
+                            - "null"
                       required:
                         - "look_id"
+                        - "prompt"
+                        - "visual_style"
                         - "content_resource_id"
                         - "name"
                         - "origin"
@@ -7802,10 +8100,68 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  primary_voice:
+                  primary_look_id:
+                    description: "Current primary look. Null when the character has no look."
                     type:
-                      - "object"
+                      - "integer"
                       - "null"
+                  primary_voice:
+                    oneOf:
+                      - type: "null"
+                      - additionalProperties: False
+                        properties:
+                          description:
+                            minLength: 1
+                            pattern: "\\S"
+                            type: "string"
+                          source:
+                            enum:
+                              - "prompt"
+                            type: "string"
+                        required:
+                          - "source"
+                          - "description"
+                        type: "object"
+                      - additionalProperties: False
+                        properties:
+                          billing_source:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          name:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          ownership:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          provider:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          source:
+                            not:
+                              enum:
+                                - "prompt"
+                            type:
+                              - "string"
+                              - "null"
+                          voice_id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                        type: "object"
                   profile:
                     additionalProperties: false
                     description: "What the cover image shows (description and tags) and the prompt that made it; {} until described."
@@ -7920,12 +8276,13 @@ paths:
                   - "preview_url"
                   - "latest_generated_video_url"
                   - "look_count"
+                  - "looks"
                   - "talking_character_count"
                   - "primary_voice"
                   - "availability"
                   - "default_talking_character"
                   - "updated_at"
-                  - "looks"
+                  - "primary_look_id"
                   - "uploaded_talking_characters"
                   - "generating_talking_characters"
                 type: "object"
@@ -8153,6 +8510,10 @@ paths:
                             - "original"
                             - "uploaded"
                             - "generated"
+                        prompt:
+                          type:
+                            - "string"
+                            - "null"
                         talking_characters:
                           items:
                             additionalProperties: false
@@ -8227,8 +8588,14 @@ paths:
                           type:
                             - "string"
                             - "null"
+                        visual_style:
+                          type:
+                            - "string"
+                            - "null"
                       required:
                         - "look_id"
+                        - "prompt"
+                        - "visual_style"
                         - "content_resource_id"
                         - "name"
                         - "origin"
@@ -8250,10 +8617,68 @@ paths:
                     type:
                       - "string"
                       - "null"
-                  primary_voice:
+                  primary_look_id:
+                    description: "Current primary look. Null when the character has no look."
                     type:
-                      - "object"
+                      - "integer"
                       - "null"
+                  primary_voice:
+                    oneOf:
+                      - type: "null"
+                      - additionalProperties: False
+                        properties:
+                          description:
+                            minLength: 1
+                            pattern: "\\S"
+                            type: "string"
+                          source:
+                            enum:
+                              - "prompt"
+                            type: "string"
+                        required:
+                          - "source"
+                          - "description"
+                        type: "object"
+                      - additionalProperties: False
+                        properties:
+                          billing_source:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          name:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          ownership:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          provider:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                          source:
+                            not:
+                              enum:
+                                - "prompt"
+                            type:
+                              - "string"
+                              - "null"
+                          voice_id:
+                            type:
+                              - "string"
+                              - "integer"
+                              - "null"
+                        type: "object"
                   profile:
                     additionalProperties: false
                     description: "What the cover image shows (description and tags) and the prompt that made it; {} until described."
@@ -8368,12 +8793,13 @@ paths:
                   - "preview_url"
                   - "latest_generated_video_url"
                   - "look_count"
+                  - "looks"
                   - "talking_character_count"
                   - "primary_voice"
                   - "availability"
                   - "default_talking_character"
                   - "updated_at"
-                  - "looks"
+                  - "primary_look_id"
                   - "uploaded_talking_characters"
                   - "generating_talking_characters"
                 type: "object"
@@ -10608,6 +11034,10 @@ paths:
                           - "queued"
                           - "generating"
                         description: "The prerequisite or source is not ready yet."
+                      code:
+                        enum:
+                          - "SOURCE_NOT_READY"
+                          - "GENERATION_PENDING"
                       error_code:
                         enum:
                           - "source_not_ready"
@@ -10659,6 +11089,8 @@ paths:
                       error:
                         type: "string"
                         description: "Human-readable confirmation instructions."
+                      code:
+                        const: "CONFIRMATION_REQUIRED"
                       error_code:
                         const: "confirmation_required"
                         description: "The destructive action needs explicit confirmation."
@@ -10696,6 +11128,9 @@ paths:
                       error:
                         type: "string"
                         description: "Human-readable failure detail."
+                      code:
+                        type: "string"
+                        minLength: 1
                       error_code:
                         type: "string"
                         minLength: 1
@@ -10711,6 +11146,9 @@ paths:
                                 - "string"
                                 - "array"
                               description: "The invalid request path."
+                            pointer:
+                              type: "string"
+                              description: "RFC 6901 card location for form issues; absent for protocol and action-envelope issues."
                             code:
                               type: "string"
                               description: "The field failure code."
