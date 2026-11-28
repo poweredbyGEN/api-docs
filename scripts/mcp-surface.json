@@ -479,7 +479,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/discover.py:3706 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/discover.py:3726 (api_call)"
     },
     {
       "method": "PATCH",
@@ -1160,7 +1160,7 @@
         }
       ],
       "server": "https://agent.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/discover.py:2726 (agent_api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/discover.py:2746 (agent_api_call)"
     },
     {
       "method": "POST",
@@ -1334,7 +1334,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -1385,7 +1385,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1402,7 +1402,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1419,7 +1419,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1436,7 +1436,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "GET",
@@ -1453,7 +1453,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "GET",
@@ -1470,7 +1470,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "PATCH",
@@ -1487,7 +1487,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "DELETE",
@@ -1504,7 +1504,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "POST",
@@ -1521,7 +1521,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/client.py:2719 (internal_agent_access_call)"
+      "server_source": "src/gen_mcp_server/client.py:2769 (internal_agent_access_call)"
     },
     {
       "method": "GET",
@@ -1588,7 +1588,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/media.py:245 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/media.py:247 (api_call)"
     },
     {
       "method": "GET",
@@ -1820,7 +1820,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -1837,7 +1837,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -1990,7 +1990,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3822 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3838 (api_call)"
     },
     {
       "method": "POST",
@@ -2211,7 +2211,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/discover.py:4159 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/discover.py:4186 (api_call)"
     },
     {
       "method": "POST",
@@ -2605,7 +2605,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/discover.py:3303 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/discover.py:3323 (api_call)"
     },
     {
       "method": "POST",
@@ -2673,7 +2673,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3016,7 +3016,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3033,7 +3033,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3050,7 +3050,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3067,7 +3067,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3160,7 +3160,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3193,7 +3193,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "PATCH",
@@ -3210,7 +3210,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3227,7 +3227,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "POST",
@@ -3244,7 +3244,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3261,7 +3261,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "PUT",
@@ -3278,7 +3278,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3295,7 +3295,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "PATCH",
@@ -3312,7 +3312,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "DELETE",
@@ -3329,7 +3329,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3346,7 +3346,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3363,7 +3363,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3380,7 +3380,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "PATCH",
@@ -3397,7 +3397,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3414,7 +3414,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3435,7 +3435,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "POST",
@@ -3452,7 +3452,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "PATCH",
@@ -3469,7 +3469,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3486,7 +3486,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3507,7 +3507,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3528,7 +3528,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3549,7 +3549,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3582,7 +3582,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "POST",
@@ -3599,7 +3599,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "PUT",
@@ -3616,7 +3616,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "GET",
@@ -3649,7 +3649,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "POST",
@@ -3666,7 +3666,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3300 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:3302 (api_call)"
     },
     {
       "method": "POST",
@@ -3683,7 +3683,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4097 (wire spreadsheet.generations)"
+      "server_source": "src/gen_mcp_server/server_parts/vidsheet.py:4126 (wire spreadsheet.generations)"
     },
     {
       "method": "GET",
@@ -3738,7 +3738,7 @@
         }
       ],
       "server": "https://api.gen.pro/v1",
-      "server_source": "src/gen_mcp_server/server_parts/discover.py:4137 (api_call)"
+      "server_source": "src/gen_mcp_server/server_parts/discover.py:4164 (api_call)"
     },
     {
       "method": "POST",
