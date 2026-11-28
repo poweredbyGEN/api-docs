@@ -366,11 +366,7 @@
               },
               "family": "gemini",
               "label": "Nano Banana 2.1",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini image generation is temporarily unavailable. Select another supported image model such as Seedream 4.0."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "1:1",
@@ -404,11 +400,7 @@
               },
               "family": "gemini",
               "label": "Nano Banana 2 Lite",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini image generation is temporarily unavailable. Select another supported image model such as Seedream 4.0."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "1:1",
@@ -442,11 +434,7 @@
               },
               "family": "gemini",
               "label": "Nano Banana Pro",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini image generation is temporarily unavailable. Select another supported image model such as Seedream 4.0."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "1:1",
@@ -825,11 +813,7 @@
               },
               "family": "gemini",
               "label": "Gemini Omni 1.2 Flash",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini Omni Flash video generation is temporarily unavailable. Select another supported video model such as Seedance 2.0 Fast."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "9:16",
@@ -1868,11 +1852,7 @@
               },
               "family": "gemini",
               "label": "Gemini Omni 1.2 Flash",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini Omni Flash video generation is temporarily unavailable. Select another supported video model such as Seedance 2.0 Fast."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "9:16",
@@ -3245,11 +3225,7 @@
               },
               "family": "gemini",
               "label": "Gemini Omni 1.2 Flash",
-              "status": "retired",
-              "unavailable": {
-                "owner_ticket": "P0-gemini-outage",
-                "reason": "Gemini Omni Flash video generation is temporarily unavailable. Select another supported video model such as Seedance 2.0 Fast."
-              },
+              "status": "active",
               "options": {
                 "ratio": [
                   "9:16",
@@ -5679,6 +5655,30 @@
         },
         {
           "form_type": "image-from-text",
+          "model": "gemini_2",
+          "label": "Nano Banana 2.1",
+          "status": "active",
+          "card_status": "active",
+          "description": "Balanced quality and speed for everyday image generation."
+        },
+        {
+          "form_type": "image-from-text",
+          "model": "gemini_2_lite",
+          "label": "Nano Banana 2 Lite",
+          "status": "active",
+          "card_status": "active",
+          "description": "Fastest, lowest-cost option — good for quick drafts and simple concepts."
+        },
+        {
+          "form_type": "image-from-text",
+          "model": "gemini_pro",
+          "label": "Nano Banana Pro",
+          "status": "active",
+          "card_status": "active",
+          "description": "Highest-quality Gemini image model — best for complex scenes, composition, and fine detail."
+        },
+        {
+          "form_type": "image-from-text",
           "model": "gpt-image-2",
           "label": "GPT Image 2",
           "status": "active",
@@ -5743,6 +5743,14 @@
         },
         {
           "form_type": "video-from-text",
+          "model": "gemini-omni-1.2-flash",
+          "label": "Gemini Omni 1.2 Flash",
+          "status": "active",
+          "card_status": "active",
+          "description": "Fastest, lowest-cost video option — good for quick drafts and simple motion."
+        },
+        {
+          "form_type": "video-from-text",
           "model": "grok",
           "label": "Grok Imagine",
           "status": "active",
@@ -5804,6 +5812,14 @@
           "status": "active",
           "card_status": "active",
           "description": "Seedance 2.5 with fewer content restrictions, with image, video and audio references. 480p, 720p or 1080p, 4–30 seconds."
+        },
+        {
+          "form_type": "video-from-image",
+          "model": "gemini-omni-1.2-flash",
+          "label": "Gemini Omni 1.2 Flash",
+          "status": "active",
+          "card_status": "active",
+          "description": "Fastest, lowest-cost video option — good for quick drafts and simple motion."
         },
         {
           "form_type": "video-from-image",
@@ -5892,6 +5908,14 @@
           "status": "active",
           "card_status": "active",
           "description": "Wan 3.0 Prime video from a prompt and image, video or audio references. Fewer content restrictions and native audio. 480p, 720p or 1080p, 2–30 seconds."
+        },
+        {
+          "form_type": "video-from-ingredients",
+          "model": "gemini-omni-1.2-flash",
+          "label": "Gemini Omni 1.2 Flash",
+          "status": "active",
+          "card_status": "active",
+          "description": "Fastest, lowest-cost video option — good for quick drafts and simple motion."
         },
         {
           "form_type": "video-from-ingredients",
@@ -6048,6 +6072,57 @@
         "song": "suno-v5-beta"
       },
       "jobs": [
+        {
+          "card": "image-from-text",
+          "model": "gemini_2",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          },
+          "price_inputs": [
+            "content_resource_ids",
+            "images",
+            "model",
+            "number_of_images",
+            "prompt",
+            "version"
+          ]
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_2_lite",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          },
+          "price_inputs": [
+            "content_resource_ids",
+            "images",
+            "model",
+            "number_of_images",
+            "prompt",
+            "version"
+          ]
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_pro",
+          "user_job_type": "gemini_image_generation",
+          "fields": {
+            "model": "model",
+            "ratio": "aspect_ratio"
+          },
+          "price_inputs": [
+            "content_resource_ids",
+            "images",
+            "model",
+            "number_of_images",
+            "prompt",
+            "version"
+          ]
+        },
         {
           "card": "image-from-text",
           "model": "gpt-image-2",
@@ -6281,6 +6356,25 @@
         },
         {
           "card": "video-from-image",
+          "model": "gemini-omni-1.2-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
+          },
+          "price_inputs": [
+            "duration",
+            "image",
+            "image_tail",
+            "images",
+            "prompt",
+            "voice_replace_data"
+          ]
+        },
+        {
+          "card": "video-from-image",
           "model": "grok",
           "user_job_type": "grok_video_generation",
           "fields": {
@@ -6490,6 +6584,25 @@
             "model",
             "resolution",
             "video_files",
+            "voice_replace_data"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "gemini-omni-1.2-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
+          },
+          "price_inputs": [
+            "duration",
+            "image",
+            "image_tail",
+            "images",
+            "prompt",
             "voice_replace_data"
           ]
         },
@@ -6745,6 +6858,25 @@
             "infinite_voice_lip_sync_data",
             "model",
             "talking_avatar_data"
+          ]
+        },
+        {
+          "card": "video-from-text",
+          "model": "gemini-omni-1.2-flash",
+          "user_job_type": "gemini_omni_video_generation",
+          "fields": {
+            "model": "model",
+            "duration": "duration",
+            "ratio": "aspect_ratio",
+            "removeBackground": "remove_background"
+          },
+          "price_inputs": [
+            "duration",
+            "image",
+            "image_tail",
+            "images",
+            "prompt",
+            "voice_replace_data"
           ]
         },
         {
@@ -11433,6 +11565,276 @@
         },
         {
           "card": "image-from-text",
+          "model": "gemini_2",
+          "prompt_max_utf16": 10000,
+          "max_reference_images": 10,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt"
+          ],
+          "fields": [
+            "prompt",
+            "ratio",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 10000
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "1:1",
+                "9:16",
+                "16:9"
+              ],
+              "default": "9:16"
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_2_lite",
+          "prompt_max_utf16": 10000,
+          "max_reference_images": 10,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt"
+          ],
+          "fields": [
+            "prompt",
+            "ratio",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 10000
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "1:1",
+                "9:16",
+                "16:9"
+              ],
+              "default": "9:16"
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_pro",
+          "prompt_max_utf16": 10000,
+          "max_reference_images": 10,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt"
+          ],
+          "fields": [
+            "prompt",
+            "ratio",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 10000
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "1:1",
+                "9:16",
+                "16:9"
+              ],
+              "default": "9:16"
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "image-from-text",
           "model": "gpt-image-2",
           "prompt_max_utf16": 4000,
           "max_reference_images": 10,
@@ -12164,6 +12566,86 @@
         },
         {
           "card": "video-from-text",
+          "model": "gemini-omni-1.2-flash",
+          "prompt_max_utf16": 4000,
+          "max_reference_images": 6,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt"
+          ],
+          "fields": [
+            "prompt",
+            "duration",
+            "ratio",
+            "voiceReplace",
+            "removeBackground",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 4000
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "enum": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+              ],
+              "default": 10
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "16:9",
+                "9:16"
+              ],
+              "default": "9:16"
+            },
+            "removeBackground": {
+              "type": "boolean",
+              "default": false
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        {
+          "card": "video-from-text",
           "model": "grok",
           "prompt_max_utf16": 4000,
           "max_reference_images": 14,
@@ -12742,6 +13224,139 @@
             }
           },
           "prompt_attachment_variables": true
+        },
+        {
+          "card": "video-from-image",
+          "model": "gemini-omni-1.2-flash",
+          "prompt_max_utf16": 4000,
+          "max_reference_images": 6,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt",
+            "image"
+          ],
+          "fields": [
+            "image",
+            "prompt",
+            "duration",
+            "ratio",
+            "voiceReplace",
+            "removeBackground",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 4000
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "enum": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+              ],
+              "default": 10
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "16:9",
+                "9:16"
+              ],
+              "default": "9:16"
+            },
+            "removeBackground": {
+              "type": "boolean",
+              "default": false
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
         },
         {
           "card": "video-from-image",
@@ -14088,6 +14703,139 @@
                       "image",
                       "video",
                       "audio"
+                    ]
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "library_reference": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "references": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "gemini-omni-1.2-flash",
+          "prompt_max_utf16": 4000,
+          "max_reference_images": 6,
+          "max_reference_videos": null,
+          "max_reference_audio": null,
+          "max_reference_audio_seconds": null,
+          "required": [
+            "model",
+            "prompt",
+            "images"
+          ],
+          "fields": [
+            "prompt",
+            "duration",
+            "ratio",
+            "voiceReplace",
+            "removeBackground",
+            "autoGenerate",
+            "syncOutputAspectRatio",
+            "images",
+            "model"
+          ],
+          "bounds": {
+            "prompt": {
+              "type": "object",
+              "x-gen-maxLengthUtf16": 4000
+            },
+            "duration": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "enum": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+              ],
+              "default": 10
+            },
+            "ratio": {
+              "type": "string",
+              "enum": [
+                "16:9",
+                "9:16"
+              ],
+              "default": "9:16"
+            },
+            "removeBackground": {
+              "type": "boolean",
+              "default": false
+            },
+            "syncOutputAspectRatio": {
+              "type": "boolean",
+              "default": true
+            },
+            "images": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "enum": [
+                      "text",
+                      "image",
+                      "video",
+                      "audio",
+                      "var"
+                    ]
+                  },
+                  "value": {},
+                  "name": {
+                    "type": "string"
+                  },
+                  "thumbnailUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "thumbnail_error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image"
                     ]
                   },
                   "duration": {
@@ -17051,6 +17799,39 @@
         },
         {
           "card": "image-from-text",
+          "model": "gemini_2",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "1:1",
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_2_lite",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "1:1",
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "image-from-text",
+          "model": "gemini_pro",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "1:1",
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "image-from-text",
           "model": "gpt-image-2",
           "field": "ratio",
           "default": "9:16",
@@ -17146,6 +17927,37 @@
             "3:2",
             "2:3",
             "21:9"
+          ]
+        },
+        {
+          "card": "video-from-text",
+          "model": "gemini-omni-1.2-flash",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "video-from-text",
+          "model": "gemini-omni-1.2-flash",
+          "field": "duration",
+          "default": 10,
+          "allowed": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
           ]
         },
         {
@@ -17500,6 +18312,37 @@
         },
         {
           "card": "video-from-image",
+          "model": "gemini-omni-1.2-flash",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "video-from-image",
+          "model": "gemini-omni-1.2-flash",
+          "field": "duration",
+          "default": 10,
+          "allowed": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "card": "video-from-image",
           "model": "grok",
           "field": "ratio",
           "default": "9:16",
@@ -17847,6 +18690,37 @@
             "480p",
             "720p",
             "1080p"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "gemini-omni-1.2-flash",
+          "field": "ratio",
+          "default": "9:16",
+          "allowed": [
+            "9:16",
+            "16:9"
+          ]
+        },
+        {
+          "card": "video-from-ingredients",
+          "model": "gemini-omni-1.2-flash",
+          "field": "duration",
+          "default": 10,
+          "allowed": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
           ]
         },
         {
@@ -18464,6 +19338,9 @@
               "card": "image-from-text",
               "default_model": "seedream-4.0",
               "models": [
+                "gemini_2",
+                "gemini_2_lite",
+                "gemini_pro",
                 "gpt-image-2",
                 "gpt-image-2.5-flare",
                 "gpt-image-2.5-sunburst",
@@ -18715,6 +19592,45 @@
       },
       {
         "card": "image-from-text",
+        "model": "gemini_2",
+        "label": "Nano Banana 2.1",
+        "status": "active",
+        "ratio": [
+          "1:1",
+          "9:16",
+          "16:9"
+        ],
+        "duration": [],
+        "outputResolution": []
+      },
+      {
+        "card": "image-from-text",
+        "model": "gemini_2_lite",
+        "label": "Nano Banana 2 Lite",
+        "status": "active",
+        "ratio": [
+          "1:1",
+          "9:16",
+          "16:9"
+        ],
+        "duration": [],
+        "outputResolution": []
+      },
+      {
+        "card": "image-from-text",
+        "model": "gemini_pro",
+        "label": "Nano Banana Pro",
+        "status": "active",
+        "ratio": [
+          "1:1",
+          "9:16",
+          "16:9"
+        ],
+        "duration": [],
+        "outputResolution": []
+      },
+      {
+        "card": "image-from-text",
         "model": "gpt-image-2",
         "label": "GPT Image 2",
         "status": "active",
@@ -18826,6 +19742,32 @@
           "21:9"
         ],
         "duration": [],
+        "outputResolution": []
+      },
+      {
+        "card": "video-from-text",
+        "model": "gemini-omni-1.2-flash",
+        "label": "Gemini Omni 1.2 Flash",
+        "status": "active",
+        "ratio": [
+          "9:16",
+          "16:9"
+        ],
+        "duration": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
         "outputResolution": []
       },
       {
@@ -19095,6 +20037,32 @@
           "720p",
           "1080p"
         ]
+      },
+      {
+        "card": "video-from-image",
+        "model": "gemini-omni-1.2-flash",
+        "label": "Gemini Omni 1.2 Flash",
+        "status": "active",
+        "ratio": [
+          "9:16",
+          "16:9"
+        ],
+        "duration": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "outputResolution": []
       },
       {
         "card": "video-from-image",
@@ -19473,6 +20441,32 @@
           "720p",
           "1080p"
         ]
+      },
+      {
+        "card": "video-from-ingredients",
+        "model": "gemini-omni-1.2-flash",
+        "label": "Gemini Omni 1.2 Flash",
+        "status": "active",
+        "ratio": [
+          "9:16",
+          "16:9"
+        ],
+        "duration": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "outputResolution": []
       },
       {
         "card": "video-from-ingredients",

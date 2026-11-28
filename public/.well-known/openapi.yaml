@@ -13406,6 +13406,9 @@ components:
         - h3-akatz-v1.5
         - gemini
         - openai
+        - gemini_2
+        - gemini_2_lite
+        - gemini_pro
         - gpt-image-2
         - gpt-image-2.5-flare
         - gpt-image-2.5-sunburst
@@ -13414,6 +13417,7 @@ components:
         - seedream-4.0
         - seedream-4.5
         - seedream-5.0-pro-less-restriction
+        - gemini-omni-1.2-flash
         - minimax-h3-max
         - kling-v3
         - seedance-2.0
